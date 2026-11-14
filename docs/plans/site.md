@@ -1,6 +1,6 @@
 # Plan: the website, to `site-v0.1.0`
 
-**Status:** in progress (2026-11-14). The decisions are in [ADR 0001](../adr/0001-what-this-repo-is.md) (this repo), [ADR 0002](../adr/0002-site-build.md) (the site build) and [ADR 0003](../adr/0003-design-system.md) (the design system). This plan only says what's left, in what order, and who does it.
+**Status:** done (2026-11-14, `basic-v0.1.0` and `site-v0.1.0`). The decisions are in [ADR 0001](../adr/0001-what-this-repo-is.md) (this repo), [ADR 0002](../adr/0002-site-build.md) (the site build) and [ADR 0003](../adr/0003-design-system.md) (the design system). This plan only says what's left, in what order, and who does it.
 
 **Done when:** `site-v0.1.0` is deployed and `isoloop.dev` serves the approved design: the landing page, `/features/`, `/how-it-works/` and the examples hub.
 
@@ -8,7 +8,7 @@
 - **Markets figures:** they come back with [M3f](https://github.com/isoloop/isoloop/blob/main/docs/plans/README.md), markets parity, which is due before M4.
 - **The M4 docs.**
 
-## Done so far
+## Done: the first pass
 
 | What | Where |
 | --- | --- |
@@ -21,24 +21,21 @@
 | The core diagrams with a drift test | isoloop#184 |
 | four-loops out of the library repo; `/isoloop/` redirect | isoloop#185 |
 
-## What's left
+## Done: the approved design and launch
 
-**The approved design** is concept A from the second design round:
-- a landing page that opens with a short introduction, then a live recording of basic's loops
-- a "What it's for" section
-- a features strip, plus a `/features/` page with nine sections
+| Task | Where |
+| --- | --- |
+| ADR amendments: 0002 (pages, landing order, live demos on basic's real data) and 0003 (Archivo, palette, gutter layout, sticky header, switch, logo) | #87, #88, #89 |
+| Fact check: a restarted subscription starts where its `from` says | #87, isoloop#186 |
+| The brand: two marks, drawn from geometry, social cards | #89, #90 |
+| basic's demo protocol (`isoloop-demo@1`) | #91 |
+| The approved design, `/features/`, the copy, the logo wired in | #92 |
+| Launch: `basic-v0.1.0`, `site-v0.1.0` | release runs, 2026-11-14 |
 
-The prototype is local to the maintainer's machine; the decisions it carries go into the ADR amendments below.
+## Follow-ups
 
-| # | Task | Who | Done when |
-| --- | --- | --- | --- |
-| 1 | **ADR amendments.** 0002: the pages and the landing page's order, `/features/`, and how basic's real heartbeats and records reach the landing recording and the feature demos. 0003: Archivo as one self-hosted font, motion limited to the live demos, concept A's palette, the sun/moon switch, the sticky header. | session writes, maintainer reviews | Both accepted |
-| 2 | **Fact checks.** Whether a restarted isolate reads on from its last commit or from `earliest` (the bus code against the pools guide); the code samples on `/features/` compile. | session | Copy and demos match the code |
-| 3 | **Build the design** into `packages/ui` and `apps/site`, including the link-preview images. | fork, merges on green | The site job passes, with axe, on every page and the specimens |
-| 4 | **Copy.** #85 brought in line with the approved wording: the headline "Event-loop isolation for web apps", "What it's for", the pool-accurate containment text, markets without figures. | session drafts, maintainer reviews | Merged |
-| 5 | **Logo.** Starting from "Isol∞p" in Archivo: a Higgsfield quote first, candidates for the ∞ mark, the maintainer picks one, then the files in `packages/ui/brand/`, the favicon and the preview images. | maintainer picks, session builds | Files committed |
-| 6 | **Launch.** `basic-v0.1.0` (any time); `site-v0.1.0` after tasks 3–5; then merge isoloop#183. | maintainer | Live on `isoloop.dev` |
+- **Lockup spacing:** the gap between the mark and "isoloop" is about one mark wide; `docs/brand.md` says half.
+- **`--ui-rule`:** the build added a token for decorative rules, because `--ui-border` at `#d5dae2` is 1.31:1 and decision 8 asks 3:1 for borders. ADR 0003's amendment should mention it.
+- **Markets figures** come back with M3f (markets parity), before M4.
+- **Two deploy tags on one commit:** Pages names a deployment after its commit, so the second deploy of the same commit doesn't replace the first. `basic-v0.1.0` and `site-v0.1.0` both pointed at `2f03806`, and the site only went live after a later commit was deployed by hand. Tag a new commit for each deploy, or deploy `main` afterwards.
 
-Order: 1 and 2, then 3; 4 and 5 can run alongside 3; then 6.
-
-A fork stops and hands over on an ADR change, a decision not covered here or in the ADRs, or CI breaking outside its change.
