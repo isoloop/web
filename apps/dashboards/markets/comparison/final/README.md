@@ -2,11 +2,88 @@
 
 The figures that ship with `markets-v0.3.0`: the M3f head-to-head, run on the bench server on 2026-11-15. The full tables are in [`results/summary.md`](results/summary.md) and the raw figures in `results/<engine>/*.json`. They replace the [M3b and M3c recording](../README.md), which compared native on one thread with Isoloop on a worker per isolate.
 
+## TL;DR
+
+- **What Isoloop gains:** a free main thread, 21–23% busy against 83–100%. At Heavy that's the difference between dropping a third of the frames and dropping none. Typing improves by 12–115 ms at Heavy; at Normal on Chromium it's 4–7 ms slower.
+- **What it costs, every time:**
+  - CPU across threads: +4 to +29 points.
+  - Memory after GC: +33 to +52 MB.
+  - First data: 125–506 ms later.
+  - Every widget filled: 52–426 ms later.
+- **Native + workers doesn't help native's main thread.** It's at 86% against 83%, and still 100% at Heavy, because the widgets stay on the main thread.
+- **Recovery after a block is a tie, within about 130 ms on Chromium.** Every build waits out the full 3 s block, so this figure doesn't separate them. The one exception is Firefox `one` at Heavy, which is noisy.
+- **`own` is the expensive placement:**
+  - Memory: 87–132 MB more than `matched`.
+  - CPU at Heavy: 185% against 143%.
+  - First data: 0.8–1.7 s.
+
+  That's the price of every widget in its own worker. It's what lets a blocked chart stall only itself.
+
 ## The pairs
 
 - **native** (everything on the main thread) against **Isoloop `one`** (every isolate in one pool): 0 workers against 1 + bus.
 - **native + workers** (the replay, the aggregator, alerts and the three engines in a worker each, the widgets on the main thread) against **Isoloop `matched`** (those six as their own workers, plus one visual pool for every widget): 6 workers against 7 + bus.
 - **Isoloop `own`** (a worker per isolate, the live page's default) measured alongside: 22 + bus at Normal, 30 + bus at Heavy.
+
+## The figures, side by side
+
+- Lower is better for every figure.
+- Each Δ is B − A: the median, over the 5 rounds, of that round's gap. So it can differ by a few units from subtracting the two columns. For example, typing at Chromium Normal shows 38 − 32 = 6 ms in the columns, but the Δ is +4 ms.
+- The other columns are medians of the runs.
+- Late frames are out of about 600. Memory is after GC, at 16 s.
+- The spread of each Δ is in the [gap tables](#gaps-and-their-spread-chromium) below.
+
+### Chromium, Normal
+
+| Figure | native | Isoloop `one` | **Δ** | native + workers | Isoloop `matched` | **Δ** | Isoloop `own` |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Workers (bus excluded) | 0 | 1 | +1 | 6 | 7 | +1 | 22 |
+| Late frames | 0 | 0 | **0** | 0 | 0 | **0** | 0 |
+| Typing | 32 ms | 38 ms | **+4 ms** | 35 ms | 41 ms | **+7 ms** | 42 ms |
+| Main-thread CPU | 83% | 22% | **−61 pp** | 86% | 21% | **−65 pp** | 21% |
+| CPU, all threads | 95% | 107% | **+13 pp** | 103% | 108% | **+4 pp** | 113% |
+| Memory | 166 MB | 203 MB | **+34 MB** | 188 MB | 222 MB | **+33 MB** | 309 MB |
+| First data | 166 ms | 358 ms | **+184 ms** | 249 ms | 383 ms | **+125 ms** | 799 ms |
+| All widgets with data | 4178 ms | 4416 ms | **+241 ms** | 4275 ms | 4339 ms | **+64 ms** | 4395 ms |
+| Recovery after a 3 s block | 3075 ms | 3162 ms | **+75 ms** | 3143 ms | 3090 ms | **−62 ms** | 3044 ms |
+
+### Chromium, Heavy
+
+| Figure | native | Isoloop `one` | **Δ** | native + workers | Isoloop `matched` | **Δ** | Isoloop `own` |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Workers (bus excluded) | 0 | 1 | +1 | 6 | 7 | +1 | 30 |
+| Late frames | 172 | 0 | **−172** | 205 | 0 | **−205** | 0 |
+| Typing | 52 ms | 41 ms | **−12 ms** | 156 ms | 41 ms | **−115 ms** | 41 ms |
+| Main-thread CPU | 100% | 22% | **−78 pp** | 100% | 23% | **−77 pp** | 35% |
+| CPU, all threads | 111% | 122% | **+12 pp** | 114% | 143% | **+29 pp** | 185% |
+| Memory | 220 MB | 271 MB | **+51 MB** | 246 MB | 301 MB | **+52 MB** | 433 MB |
+| First data | 174 ms | 350 ms | **+175 ms** | 362 ms | 527 ms | **+212 ms** | 963 ms |
+| All widgets with data | 4228 ms | 4434 ms | **+210 ms** | 4335 ms | 4443 ms | **+52 ms** | 4450 ms |
+| Recovery after a 3 s block | 3166 ms | 3312 ms | **+127 ms** | 3256 ms | 3143 ms | **−112 ms** | 3059 ms |
+
+### Firefox, Normal
+
+Firefox gives no CPU or memory figures.
+
+| Figure | native | Isoloop `one` | **Δ** | native + workers | Isoloop `matched` | **Δ** | Isoloop `own` |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Late frames | 5 | 0 | **−5** | 10 | 1 | **−10** | 5 |
+| Typing | 120 ms | 79 ms | **−44 ms** | 103 ms | 82 ms | **−16 ms** | 67 ms |
+| First data | 236 ms | 645 ms | **+376 ms** | 386 ms | 767 ms | **+384 ms** | 1226 ms |
+| All widgets with data | 4235 ms | 4535 ms | **+300 ms** | 4464 ms | 4611 ms | **+127 ms** | 5007 ms |
+| Recovery after a 3 s block | 3111 ms | 3143 ms | **+76 ms** | 3179 ms | 3107 ms | **−75 ms** | 3104 ms |
+
+### Firefox, Heavy
+
+| Figure | native | Isoloop `one` | **Δ** | native + workers | Isoloop `matched` | **Δ** | Isoloop `own` |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Late frames | 206 | 0 | **−206** | 231 | 1 | **−229** | 106 |
+| Typing | 176 ms | 81 ms | **−98 ms** | 150 ms | 129 ms | **−25 ms** | 127 ms |
+| First data | 237 ms | 700 ms | **+408 ms** | 386 ms | 915 ms | **+506 ms** | 1725 ms |
+| All widgets with data | 4257 ms | 4668 ms | **+426 ms** | 4455 ms | 4706 ms | **+253 ms** | 4913 ms |
+| Recovery after a 3 s block | 3245 ms | 4434 ms | **+1189 ms**¹ | 3266 ms | 3148 ms | **−123 ms** | 3248 ms |
+
+¹ This one is noisy: across the 5 rounds the gap ran from −149 ms to +2037 ms. Every other Δ here has a narrow spread.
 
 ## What the numbers show
 
@@ -21,7 +98,7 @@ On this machine (four cores at 2.0 GHz), Chromium and Firefox:
   - First data: +125 to +212 ms on Chromium, +376 to +506 ms on Firefox.
   - All widgets with data: +52 to +426 ms.
 - **Recovery after a 3 s block** is within ±130 ms of native on Chromium. Markets sets no kill timeout, so every build waits the block out. Firefox's spreads are wide: up to +2 s in single rounds.
-- **"All widgets with data" takes 4.2–4.7 s on every build.** It's the slowest widget's first update. Only the gaps between builds carry information.
+- **"All widgets with data" takes 4.2–5.0 s on every build.** It's the slowest widget's first update. Only the gaps between builds carry information.
 - **`own`, a worker per isolate (the live page's default),** costs more than `matched`, for the containment of each widget:
   - Workers: 22 and 30, against 7.
   - Memory after GC: 309 and 433 MB, against 222 and 301 MB.
@@ -31,7 +108,7 @@ On this machine (four cores at 2.0 GHz), Chromium and Firefox:
 
 How these compare with the M3c recording: on GitHub's 4-core runner, native's main thread was 42–59% busy at Normal and Heavy and kept every frame. Here, with the cores fixed at 2.0 GHz, the same Heavy workload fills it. Whether native drops frames at Heavy depends on the machine.
 
-## Chromium
+## Gaps and their spread: Chromium
 
 Gap B − A, median of 5 rounds, spread in brackets.
 
@@ -47,7 +124,7 @@ Gap B − A, median of 5 rounds, spread in brackets.
 | All widgets with data | +241 ms (+230 to +252) | +64 ms (+53 to +75) | +210 ms (+206 to +247) | +52 ms (+28 to +112) |
 | Recovery after a 3 s block | +75 ms (+39 to +94) | −62 ms (−87 to −53) | +127 ms (+117 to +201) | −112 ms (−151 to −94) |
 
-## Firefox
+## Gaps and their spread: Firefox
 
 No CPU or memory figures on Firefox.
 
