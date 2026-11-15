@@ -46,6 +46,8 @@ pnpm --filter ./apps/dashboards/plant compare:pairs \
 
 Arguments are in the header of [`run.ts`](run.ts). `--summary-only` rebuilds `summary.md` from the JSON already in `--out`.
 
+The runner itself is shared with the markets dashboard: [`packages/compare`](../../../../packages/compare/README.md). `run.ts` gives it the plant's projects, its load knob (`--rates`) and its figures; `run.test.ts` checks that it rebuilds the recorded summaries unchanged. The spec's CPU, memory and GC readings come from the same package (`compare/probes`).
+
 Durations: each run takes about 1 minute plus the hold. The command above has 5 configurations × 2 rates × 5 rounds × 2 engines = 100 runs, at about 11 minutes each, so roughly 18 hours. `--hold 0` skips the 10-minute reading, at about 1 minute a run.
 
 Memory figures (renderer PSS from `/proc`) are Chromium on Linux only. Firefox runs report frames, typing, start-up and the fault figures.

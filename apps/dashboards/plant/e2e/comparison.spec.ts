@@ -1,5 +1,6 @@
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { expect, test, type Browser, type CDPSession, type Page } from '@playwright/test';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { expect, test, type Page } from '@playwright/test';
+import { cpuDelta, cpuOf, memory, pageMetrics, processes, pssMb } from 'compare/probes';
 
 // The recorded comparison (M3d task 11): the two native builds and each
 // Isoloop placement, at each rate, one page at a time, on the engine of the
@@ -83,96 +84,6 @@ const median = (xs: number[]): number =>
 const quantile = (xs: number[], q: number): number =>
   xs.toSorted((a, b) => a - b)[Math.min(xs.length - 1, Math.floor(xs.length * q))] ?? 0;
 const r1 = (x: number): number => Math.round(x * 10) / 10;
-
-type PageMetrics = Record<string, number>;
-async function pageMetrics(cdp: CDPSession): Promise<PageMetrics> {
-  const { metrics } = await cdp.send('Performance.getMetrics');
-  return Object.fromEntries(metrics.map((m) => [m.name, m.value]));
-}
-type Proc = { type: string; id: number; cpuTime: number };
-async function processes(browser: Browser): Promise<Proc[]> {
-  const cdp = await browser.newBrowserCDPSession();
-  try {
-    const { processInfo }: { processInfo: Proc[] } = await cdp.send('SystemInfo.getProcessInfo');
-    return processInfo;
-  } finally {
-    await cdp.detach();
-  }
-}
-const cpuOf = (ps: Proc[], type: string): Map<number, number> =>
-  new Map(ps.filter((p) => p.type === type).map((p) => [p.id, p.cpuTime]));
-function cpuDelta(before: Proc[], after: Proc[], type: string): number {
-  const b = cpuOf(before, type);
-  let s = 0;
-  for (const [id, t] of cpuOf(after, type)) s += t - (b.get(id) ?? t);
-  return s;
-}
-function pssMb(pids: number[]): number | null {
-  let kb = 0;
-  for (const pid of pids) {
-    const f = `/proc/${pid}/smaps_rollup`;
-    if (!existsSync(f)) return null;
-    const m = /^Pss:\s+(\d+) kB/m.exec(readFileSync(f, 'utf8'));
-    kb += Number(m?.[1] ?? 0);
-  }
-  return Math.round(kb / 1024);
-}
-
-/**
- * Forces a GC in the page and in every worker, twice (a worker's first
- * collection can leave garbage the second frees), over non-flattened target
- * sessions, as the plant memory investigation's probes do.
- */
-async function gcAll(browser: Browser): Promise<void> {
-  const b = await browser.newBrowserCDPSession();
-  const pending = new Map<number, () => void>();
-  let next = 1;
-  b.on('Target.receivedMessageFromTarget', (e: { message: string }) => {
-    const m: unknown = JSON.parse(e.message);
-    const id: unknown = typeof m === 'object' && m !== null ? Reflect.get(m, 'id') : undefined;
-    if (typeof id !== 'number') return;
-    pending.get(id)?.();
-    pending.delete(id);
-  });
-  try {
-    for (let round = 0; round < 2; round++) {
-      // oxlint-disable-next-line no-await-in-loop -- rounds in order
-      const { targetInfos } = (await b.send('Target.getTargets')) as {
-        targetInfos: { targetId: string; type: string }[];
-      };
-      for (const t of targetInfos.filter((x) => x.type === 'worker' || x.type === 'page')) {
-        // oxlint-disable-next-line no-await-in-loop -- one target at a time
-        const { sessionId } = await b.send('Target.attachToTarget', {
-          targetId: t.targetId,
-          flatten: false,
-        });
-        const id = next++;
-        const done = new Promise<void>((resolve) => pending.set(id, resolve));
-        // oxlint-disable-next-line no-await-in-loop -- one target at a time
-        await b.send('Target.sendMessageToTarget', {
-          sessionId,
-          message: JSON.stringify({ id, method: 'HeapProfiler.collectGarbage', params: {} }),
-        });
-        // oxlint-disable-next-line no-await-in-loop -- one target at a time
-        await Promise.race([done, new Promise((r) => setTimeout(r, 5_000))]);
-        // oxlint-disable-next-line no-await-in-loop -- one target at a time
-        await b.send('Target.detachFromTarget', { sessionId }).catch(() => {});
-      }
-    }
-  } finally {
-    await b.detach();
-  }
-}
-
-/** Renderer PSS now and after a forced GC, MB (Chromium on Linux). */
-async function memory(browser: Browser): Promise<{ pss: number | null; pssGc: number | null }> {
-  const pids = (): Promise<number[]> =>
-    processes(browser).then((ps) => [...cpuOf(ps, 'renderer').keys()]);
-  const pss = pssMb(await pids());
-  await gcAll(browser);
-  await new Promise((r) => setTimeout(r, 1_000));
-  return { pss, pssGc: pssMb(await pids()) };
-}
 
 const filter = (page: Page) => page.locator('[data-slot="T1-events"] input[name="event-text"]');
 const rendered = (page: Page) => page.locator('[data-slot="T1-events"] .events');
