@@ -32,7 +32,8 @@ The site's landing recording and its feature demos draw what basic really does (
   - A counts every 0.6 s.
   - C counts primes below 200,000 every 2.5 s.
   - D sends a note every 2.4 s, plus an empty one every 11 s, which the bus rejects, since the schema needs at least one character.
-- **Each isolate reports its work** to the memory topic `activity.v1`: how long each task took, and, for a read, the topic and offset. A blocked isolate publishes nothing, which is the gap the recording shows.
+- **Each isolate reports its work** to the memory topic `activity.v1`: how long each task took, and, for a read, the topic, offset and `from` (the isolate that published the record it handled). A blocked isolate publishes nothing, which is the gap the recording shows.
+- **C and D read A's count,** so they react each time A publishes. While A is down, their panes say "no count from A": they aren't stuck, they have no input. Their own timed work carries on.
 - **The host forwards to the parent page** what it sees through the public API: those reports, the records of `count.v1`, `note.v1` and `primes.v1`, the kernel's `isolate:state`, `isolate:crash` and `isolate:failed` events, and the main thread's frame times. Standalone, none of this happens: the isolates wait for clicks and nothing is published to `activity.v1`.
 
 Every message is an object with `v: 'isoloop-demo@1'` and a `type`. Times (`at`, `times`) are absolute milliseconds (`performance.timeOrigin + performance.now()`, or the record's `ts`).
@@ -40,8 +41,8 @@ Every message is an object with `v: 'isoloop-demo@1'` and a `type`. Times (`at`,
 | `type` | Fields | When |
 | --- | --- | --- |
 | `ready` | `isolates: { id, pool }[]` | once, at start |
-| `activity` | `id`, `at`, `ms`, and optional `kind` (`task`, `read`, `rejected`), `topic`, `offset` | each task an isolate reports |
-| `record` | `topic`, `offset`, `producer`, `value`, `at` | each record on `count.v1`, `note.v1`, `primes.v1` |
+| `activity` | `id`, `at`, `ms`, and optional `kind` (`task`, `read`, `rejected`), `topic`, `offset`, `from` | each task an isolate reports. A `read` names the record it handled (`topic`, `offset`) and who published it (`from`); added after the first release, older parents ignore it |
+| `record` | `topic`, `offset`, `producer`, `value`, `at` | each record on `count.v1`, `note.v1`, `primes.v1`. A read's `topic` and `offset` match a record's, which gives the publish side of the link: an isolate's `publish` resolves without an offset, so the record carries it |
 | `state` | `id`, `state`, `prev`, `at` | each `isolate:state` |
 | `crash` | `id`, `reason`, `pool`, `at` | each `isolate:crash` |
 | `failed` | `id`, `reason`, `pool`, `at` | each `isolate:failed`: the isolate crashed past the restart limit (3 within 60 s by default), so the kernel's crash-loop guard stopped restarting it |

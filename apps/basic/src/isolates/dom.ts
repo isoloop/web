@@ -71,7 +71,13 @@ export function faults(ctx: IsolateContext<HTMLElement>, name: string): HTMLElem
 }
 
 /** What a report says besides how long the task took. */
-export type ReportExtra = { kind?: 'task' | 'read' | 'rejected'; topic?: string; offset?: number };
+export type ReportExtra = {
+  kind?: 'task' | 'read' | 'rejected';
+  topic?: string;
+  offset?: number;
+  /** For a read: who published the record it handled, so the recording can link the two. */
+  from?: string;
+};
 
 /**
  * Whether basic is embedded in the site's demo (the host passes

@@ -87,6 +87,30 @@ test.describe('embedded in a same-origin parent', () => {
       .toBe(true);
   });
 
+  test('a read names its cause: the record it handled and who published it', async ({ page }) => {
+    // C and D react to A's count: each read carries count.v1, the record's
+    // offset and from: 'A', and a record with that topic and offset came from A.
+    await expect
+      .poll(
+        async () => {
+          const records = await ofType(page, 'record');
+          return (await ofType(page, 'activity')).some(
+            (a) =>
+              (a['id'] === 'C' || a['id'] === 'D') &&
+              a['kind'] === 'read' &&
+              a['topic'] === 'count.v1' &&
+              a['from'] === 'A' &&
+              records.some(
+                (r) =>
+                  r['topic'] === 'count.v1' && r['offset'] === a['offset'] && r['producer'] === 'A',
+              ),
+          );
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(true);
+  });
+
   test('block-c blocks C and D, which restart together; A and B carry on', async ({ page }) => {
     await expect
       .poll(async () => new Set((await ofType(page, 'activity')).map((a) => a['id'])).size, {

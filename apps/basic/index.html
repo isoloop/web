@@ -34,6 +34,10 @@
             behind them keep running.
           </li>
         </ul>
+        <p class="reads">
+          C and D read A's count, so they tick when A does. When A is down they wait for its next
+          record; their own work carries on.
+        </p>
         <div class="main-thread">
           <span class="chip mono" id="fps">main thread: -- fps</span>
           <button type="button" class="ui-button" id="block-main">Block the main thread 1 s</button>

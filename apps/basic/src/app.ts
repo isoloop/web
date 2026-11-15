@@ -69,6 +69,7 @@ const isolates = [
     where: `pool "${POOL}"`,
     parent: 'pooled',
     pool: POOL,
+    upstream: 'A',
     src: primes,
     grants: {
       publish: ['primes.v1', 'activity.v1'],
@@ -81,6 +82,7 @@ const isolates = [
     where: `pool "${POOL}"`,
     parent: 'pooled',
     pool: POOL,
+    upstream: 'A',
     src: messages,
     grants: {
       publish: ['note.v1', 'activity.v1'],
@@ -92,8 +94,12 @@ const isolates = [
 // Embedded in the site's demo, the isolates report their work and run on their
 // own (src/demo.ts, isoloop-demo@1); standalone, they wait for clicks.
 const config = embedded() ? { report: true } : undefined;
-const panes = isolates.map(({ id, name, where, parent, pool, src, grants }) => {
-  const pane = createPane($(parent), { id, name, where }, kernel);
+const panes = isolates.map(({ id, name, where, parent, pool, upstream, src, grants }) => {
+  const pane = createPane(
+    $(parent),
+    { id, name, where, ...(upstream ? { upstream } : {}) },
+    kernel,
+  );
   kernel.spawn({
     id,
     src,
@@ -112,7 +118,11 @@ startDemo(kernel, isolates, budget);
 
 setInterval(() => {
   const byId = new Map(kernel.isolates().map((s) => [s.id, s]));
-  for (const pane of panes) pane.paint(byId.get(pane.id));
+  const ups = new Map(isolates.map((i) => [i.id, i.upstream]));
+  for (const pane of panes) {
+    const up = ups.get(pane.id);
+    pane.paint(byId.get(pane.id), up ? byId.get(up) : undefined);
+  }
 }, 100);
 
 startFps($('fps'));

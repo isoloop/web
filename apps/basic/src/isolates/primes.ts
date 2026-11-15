@@ -43,7 +43,7 @@ export default defineIsolate<HTMLElement>({
         () => {
           last.textContent = `Last count from A: ${r.value}`;
         },
-        { kind: 'read', topic: 'count.v1', offset: r.offset },
+        { kind: 'read', topic: 'count.v1', offset: r.offset, from: r.producer },
       );
     });
     if (reporting(ctx)) setInterval(() => count10m(SMALL), 2_500);
