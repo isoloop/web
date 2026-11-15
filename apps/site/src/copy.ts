@@ -94,7 +94,11 @@ export const recording = {
     task: 'A bar is work running on that thread; time moves to the left.',
     stuck: 'Hatched: the thread is stuck, so nothing else on it can run.',
     restart: 'A line across a track: that isolate was stopped and started again.',
+    reaction: 'A hollow tick is a reaction to a record; the line points to who sent it.',
+    bus: 'The demo’s own measurement records aren’t drawn.',
   },
+  /** On C's and D's rows while A is down: no input, not stuck. */
+  waiting: 'no count from A',
   controls: {
     group: 'Try it',
     blockC: 'Block C for 3 s',
@@ -139,7 +143,7 @@ export const home = {
     primary: 'See the features',
     secondary: 'Examples',
   },
-  try: 'Try it. Four isolates on three event loops: A and B have a worker each, C and D share a pool. Block or crash one, or block the main thread, and watch what keeps running. This is basic, the smallest example, running in this page on Isoloop.',
+  try: 'Try it. Four isolates on three event loops: A and B have a worker each, C and D share a pool. Block or crash one, or block the main thread, and watch what keeps running. This is basic, the smallest example, running in this page on Isoloop. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
   uses: {
     heading: 'What it’s for',
     items: [
@@ -275,7 +279,7 @@ export const featuresPage = {
   containment: {
     text: 'Each isolate runs on an event loop in a worker: its own, or one it shares in a pool. When a loop blocks, the kernel stops it and starts it again. When an isolate reports an error, only that isolate restarts, even in a pool. The main thread and the other loops don’t wait for either.',
     caption:
-      'A bar is work on that loop, and time moves to the left. Hatched means the loop is stuck. A line across a track means that isolate was stopped and started again. C and D share one loop; placement decides that.',
+      'A bar is work on that loop, and time moves to the left. Hatched means the loop is stuck. A line across a track means that isolate was stopped and started again. C and D share one loop; placement decides that. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
   },
   restart: {
     text: [

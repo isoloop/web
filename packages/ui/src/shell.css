@@ -378,6 +378,17 @@
     background: repeating-linear-gradient(135deg, var(--ui-part-pool) 0 3px, transparent 3px 6px);
     outline: 1px solid var(--ui-part-pool);
   }
+  .ui-legend [data-mark='reaction']::before {
+    height: 0.6rem;
+    width: 0.7rem;
+    margin: 0 0.45rem;
+    border: 1.5px solid var(--ui-part-pool);
+    background: transparent;
+  }
+  .ui-legend [data-mark='note']::before {
+    width: 0;
+    margin: 0 0.8rem 0 0;
+  }
   .ui-legend [data-mark='restart']::before {
     width: 2px;
     height: 1.1rem;

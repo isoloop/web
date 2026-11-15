@@ -55,6 +55,8 @@ export function Recording({
         <li data-mark="task">{recording.legend.task}</li>
         <li data-mark="stuck">{recording.legend.stuck}</li>
         <li data-mark="restart">{recording.legend.restart}</li>
+        <li data-mark="reaction">{recording.legend.reaction}</li>
+        <li data-mark="note">{recording.legend.bus}</li>
       </ul>
       <div class="ui-controls" role="group" aria-label={recording.controls.group}>
         {controls.map((c, i) => (

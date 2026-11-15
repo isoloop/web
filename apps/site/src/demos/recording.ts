@@ -4,7 +4,14 @@
 // - A, B and the pool's C and D: a bar for each task an isolate reports
 //   (activity.v1), as long as the task took. A blocked isolate reports
 //   nothing: that's the gap.
-// - The bus: a tick for each record that passed through it.
+// - The bus: a tick for each record of the app's topics (count, primes, note),
+//   and a red one for a publish the bus rejected. The demo's own measurement
+//   records (activity, budget, control) aren't drawn: they'd echo every task.
+// - A hollow tick is a reaction: a task that handled another isolate's record
+//   (C and D reading A's count). A thin line points back to the record's
+//   publisher. Work an isolate does on its own timer is a solid bar.
+// - While A is down (from the kernel's isolate:state), C's and D's rows say
+//   "no count from A": they aren't stuck, they have no input.
 // - The main thread: a tick per frame. The page shares this thread with basic,
 //   so when it's blocked nothing draws, and the gap is hatched afterwards.
 // - Hatching while the kernel says an isolate is `blocked`; a line where it
@@ -19,9 +26,19 @@ import { type Channel, type Message, num, reducedMotion, str, whileVisible } fro
 
 const TRACKS = ['main', 'bus', 'A', 'B', 'pool'] as const;
 type Track = (typeof TRACKS)[number];
-type Kind = 'task' | 'stuck' | 'stalled' | 'failed';
+type Kind = 'task' | 'reaction' | 'rejected' | 'stuck' | 'stalled' | 'failed';
 type Bar = { track: Track; row: number; start: number; end: number; kind: Kind; label?: string };
 type Mark = { t: number; track: Track; text: string };
+/** A reaction's link: from the record's publisher, when it published, to the task that read it. */
+type Link = { from: [Track, number]; t0: number; to: [Track, number]; t1: number };
+/** States in which A publishes nothing. */
+const DOWN: ReadonlySet<string> = new Set([
+  'loading',
+  'restarting',
+  'crashed',
+  'failed',
+  'stopped',
+]);
 
 /** Where each isolate draws: its track and row. */
 const PLACE: Record<string, [Track, number]> = {
@@ -44,6 +61,15 @@ export class Recording {
   #rows = new Map<Track, [number, number]>();
   #bars: Bar[] = [];
   #marks: Mark[] = [];
+  #links: Link[] = [];
+  /** Records seen, by topic and offset: who published them, and when. */
+  #records = new Map<string, { producer: string; t: number }>();
+  /** Reads whose record hasn't arrived yet. */
+  #pending = new Map<string, { to: [Track, number]; t1: number }>();
+  /** Since when A has been down, while it is. */
+  #upDown: number | undefined;
+  /** Counts for the smoke test, on the root's dataset. */
+  #counts = { bus: 0, links: 0 };
   #open = new Map<string, Bar>();
   /** Failed isolates, in the order they failed, and their spans. */
   #down = new Map<string, Bar>();
@@ -218,21 +244,43 @@ export class Recording {
       case 'activity': {
         const place = id ? PLACE[id] : undefined;
         const ms = num(m, 'ms') ?? 0;
-        if (place)
+        const kind = str(m, 'kind');
+        if (kind === 'rejected') {
+          // The publish reached the bus and failed its schema: a red bus tick.
+          this.#tick('bus', m.t, 'rejected');
+        } else if (place) {
+          const reaction = kind === 'read';
           this.#bars.push({
             track: place[0],
             row: place[1],
             start: m.t - ms,
             end: m.t,
-            kind: 'task',
+            kind: reaction ? 'reaction' : 'task',
           });
-        this.#tick('bus', m.t);
+          const topic = str(m, 'topic');
+          const offset = num(m, 'offset');
+          if (reaction && topic !== undefined && offset !== undefined)
+            this.#link(`${topic}:${offset}`, place, m.t - ms);
+        }
         this.#enable();
         break;
       }
-      case 'record':
+      case 'record': {
         this.#tick('bus', m.t);
+        const topic = str(m, 'topic');
+        const offset = num(m, 'offset');
+        const producer = str(m, 'producer');
+        if (topic !== undefined && offset !== undefined && producer !== undefined) {
+          const key = `${topic}:${offset}`;
+          this.#records.set(key, { producer, t: m.t });
+          const waiting = this.#pending.get(key);
+          if (waiting) {
+            this.#pending.delete(key);
+            this.#link(key, waiting.to, waiting.t1);
+          }
+        }
         break;
+      }
       case 'frames': {
         const times = Array.isArray(m['times']) ? (m['times'] as unknown[]) : [];
         for (const at of times) {
@@ -261,6 +309,11 @@ export class Recording {
         const place = id ? PLACE[id] : undefined;
         if (!id || !place) break;
         const state = str(m, 'state');
+        if (id === 'A' && state !== undefined) {
+          if (DOWN.has(state)) this.#upDown ??= m.t;
+          else this.#upDown = undefined;
+          this.#markWaiting();
+        }
         if (state === 'blocked' && !this.#open.has(id)) {
           const sharedWithC = id === 'D' && this.#open.has('C');
           const bar: Bar = {
@@ -306,6 +359,10 @@ export class Recording {
         if (open) {
           open.end = m.t;
           this.#open.delete(id);
+        }
+        if (id === 'A') {
+          this.#upDown ??= m.t;
+          this.#markWaiting();
         }
         const bar: Bar = {
           track: place[0],
@@ -361,8 +418,38 @@ export class Recording {
     }
   }
 
-  #tick(track: Track, t: number): void {
-    this.#bars.push({ track, row: 0, start: t, end: t + 1.5, kind: 'task' });
+  #tick(track: Track, t: number, kind: Kind = 'task'): void {
+    this.#bars.push({ track, row: 0, start: t, end: t + 1.5, kind });
+    if (track === 'bus') {
+      this.#counts.bus++;
+      this.#root.dataset['busTicks'] = String(this.#counts.bus);
+    }
+  }
+
+  /** For the smoke test: whether C's and D's rows say they wait for A. */
+  #markWaiting(): void {
+    if (this.#upDown === undefined) delete this.#root.dataset['waiting'];
+    else this.#root.dataset['waiting'] = 'A';
+  }
+
+  /** Links a reaction to the record it read, once that record has been seen. */
+  #link(key: string, to: [Track, number], t1: number): void {
+    const rec = this.#records.get(key);
+    const from = rec ? PLACE[rec.producer] : undefined;
+    if (!rec || !from) {
+      if (!rec) this.#pending.set(key, { to, t1 });
+      return;
+    }
+    this.#links.push({ from, t0: rec.t, to, t1 });
+    this.#counts.links++;
+    this.#root.dataset['links'] = String(this.#counts.links);
+  }
+
+  /** The vertical middle of a track's row (the pool has two). */
+  #mid(track: Track, row: number): number | undefined {
+    const r = this.#rows.get(track);
+    if (!r) return undefined;
+    return track === 'pool' ? r[0] + (row + 0.5) * (r[1] / 2) : r[0] + r[1] / 2;
   }
 
   #loop(): void {
@@ -422,6 +509,10 @@ export class Recording {
     for (const bar of this.#down.values())
       bar.start = Math.max(bar.start, now - this.#window - 100);
     this.#marks = this.#marks.filter((m) => m.t > now - this.#window - 200);
+    this.#links = this.#links.filter((l) => l.t1 > now - this.#window - 200);
+    for (const [k, r] of this.#records)
+      if (r.t < now - this.#window - 2000) this.#records.delete(k);
+    for (const [k, p] of this.#pending) if (p.t1 < now - this.#window) this.#pending.delete(k);
     ctx.clearRect(0, 0, W, H);
 
     ctx.strokeStyle = colors['rule'] ?? '#ccc';
@@ -457,10 +548,25 @@ export class Recording {
       const x1 = Math.min(x(b.end), W);
       if (x1 < 0) continue;
       const width = Math.max(b.track === 'main' || b.track === 'bus' ? 1.2 : 2.5, x1 - x0);
-      const c = (b.kind === 'failed' ? colors['bad'] : colors[b.track]) ?? '#888';
-      if (b.kind === 'task') {
+      const bad = b.kind === 'failed' || b.kind === 'rejected';
+      const c = (bad ? colors['bad'] : colors[b.track]) ?? '#888';
+      if (b.kind === 'task' || b.kind === 'rejected') {
         ctx.fillStyle = c;
-        ctx.fillRect(x0, y, width, h);
+        ctx.fillRect(x0, y, b.kind === 'rejected' ? 2.5 : width, h);
+        continue;
+      }
+      if (b.kind === 'reaction') {
+        // Hollow and lighter: work caused by another isolate's record.
+        const rw = Math.max(5, width);
+        const ry = y + h * 0.18;
+        const rh = h * 0.64;
+        ctx.globalAlpha = 0.18;
+        ctx.fillStyle = c;
+        ctx.fillRect(x0, ry, rw, rh);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = c;
+        ctx.lineWidth = 1.25;
+        ctx.strokeRect(x0 + 0.5, ry + 0.5, rw - 1, rh - 1);
         continue;
       }
       const pattern = this.#hatch(c, b.kind !== 'stalled');
@@ -477,6 +583,40 @@ export class Recording {
         ctx.fillRect(tx - 4, y + h / 2 - 9, tw + 8, 18);
         ctx.fillStyle = colors['ink'] ?? '#000';
         ctx.fillText(b.label, tx, y + h / 2 + 4);
+      }
+    }
+
+    // Each reaction's link back to who published the record it read.
+    ctx.strokeStyle = colors['muted'] ?? '#666';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.55;
+    for (const l of this.#links) {
+      const y0 = this.#mid(l.from[0], l.from[1]);
+      const y1 = this.#mid(l.to[0], l.to[1]);
+      if (y0 === undefined || y1 === undefined) continue;
+      const x0 = x(l.t0);
+      const x1 = x(l.t1);
+      if (Math.max(x0, x1) < 0) continue;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // While A is down: C and D aren't stuck, they have no count to read.
+    if (this.#upDown !== undefined && pool) {
+      ctx.font = 'italic 500 11.5px Archivo, system-ui';
+      const text = copy.waiting;
+      const tw = ctx.measureText(text).width;
+      for (const row of [0, 1]) {
+        const ym = this.#mid('pool', row);
+        if (ym === undefined) continue;
+        const tx = Math.min(Math.max(x(this.#upDown) + 8, 24), W - tw - 10);
+        ctx.fillStyle = colors['panel'] ?? '#fff';
+        ctx.fillRect(tx - 4, ym - 8, tw + 8, 16);
+        ctx.fillStyle = colors['muted'] ?? '#555';
+        ctx.fillText(text, tx, ym + 4);
       }
     }
 
