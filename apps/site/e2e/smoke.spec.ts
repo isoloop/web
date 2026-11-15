@@ -98,6 +98,50 @@ test('the landing recording draws what basic reports, and its controls reach bas
   expect((await problems()).filter((e) => !/crash|unresponsive/i.test(e))).toEqual([]);
 });
 
+test('past the crash-loop guard the recording shows A failed, and Restart A brings it back', async ({
+  page,
+}) => {
+  const problems = await watch(page);
+  await page.goto('/');
+  const rec = page.locator('[data-demo="recording"]');
+  await rec.scrollIntoViewIfNeeded();
+  const status = rec.locator('.ui-status');
+  await expect(status).toHaveText('Recording. Everything is running.', { timeout: 15_000 });
+  const crashA = rec.getByRole('button', { name: 'Crash A' });
+  const basic = page.frameLocator(OFFSTAGE);
+  const aStatus = basic.locator('section[data-isolate="A"] .status');
+  // One crash after another: each waits for A to run again.
+  const crash = async (n: number): Promise<void> => {
+    await expect(crashA).toBeEnabled({ timeout: 15_000 });
+    if (n > 1) await expect(aStatus).toContainText('loop ok', { timeout: 10_000 });
+    await crashA.click();
+    if (n === 4) return;
+    await expect(basic.locator('section[data-isolate="A"] .restarts')).toHaveText(
+      `restarts: ${n}`,
+      { timeout: 8_000 },
+    );
+    // The button counts the restarts used this minute, in its name too.
+    await expect(crashA).toHaveText(`Crash A · ${n}/3`, { timeout: 3_000 });
+    if (n === 2) {
+      await expect(crashA).toHaveAccessibleName('Crash A · 2/3 restarts used this minute');
+      await expect(status).toContainText('2 of 3 restarts used this minute');
+    }
+    await crash(n + 1);
+  };
+  await crash(1);
+  await expect(status).toContainText('crash-loop guard', { timeout: 5_000 });
+  // The same button is now Restart A.
+  const restart = rec.getByRole('button', { name: 'Restart A' });
+  await expect(restart).toBeVisible();
+  await expect(rec.locator('.ui-note')).toContainText('more than 3 times within a minute');
+  await restart.click();
+  await expect(status).toContainText('restarted with kernel.restart()', { timeout: 5_000 });
+  await expect(restart).toBeHidden();
+  await expect(crashA).toHaveText('Crash A · 0/3', { timeout: 5_000 });
+  await expect(aStatus).toContainText('loop ok', { timeout: 10_000 });
+  expect((await problems()).filter((e) => !/crash|failed/i.test(e))).toEqual([]);
+});
+
 test('the recording ignores a message that is not from its own basic', async ({ page }) => {
   await page.goto('/');
   const rec = page.locator('[data-demo="recording"]');

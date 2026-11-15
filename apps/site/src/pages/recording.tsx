@@ -73,6 +73,7 @@ export function Recording({
           {recording.status.waiting}
         </p>
       </div>
+      <p class="ui-note">{recording.guard}</p>
       {caption ? <figcaption>{caption}</figcaption> : null}
       <p class="ui-open">
         <a href="/examples/basic/">{recording.open}</a>

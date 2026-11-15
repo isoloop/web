@@ -8,6 +8,7 @@ import counter from './isolates/counter?isolate';
 import messages from './isolates/messages?isolate';
 import primes from './isolates/primes?isolate';
 import ticker from './isolates/ticker?isolate';
+import { Budget } from './budget';
 import { embedded, startDemo } from './demo';
 import { blockMain, createPane, startFps } from './panes';
 import surfaceCss from './surface.css?inline';
@@ -49,7 +50,10 @@ const isolates = [
     where: 'own worker',
     parent: 'own',
     src: counter,
-    grants: { publish: ['count.v1', 'activity.v1'], subscribe: ['count.v1', 'control.v1'] },
+    grants: {
+      publish: ['count.v1', 'activity.v1'],
+      subscribe: ['count.v1', 'control.v1', 'budget.v1'],
+    },
   },
   {
     id: 'B',
@@ -57,7 +61,7 @@ const isolates = [
     where: 'own worker',
     parent: 'own',
     src: ticker,
-    grants: { publish: ['activity.v1'], subscribe: ['control.v1'] },
+    grants: { publish: ['activity.v1'], subscribe: ['control.v1', 'budget.v1'] },
   },
   {
     id: 'C',
@@ -66,7 +70,10 @@ const isolates = [
     parent: 'pooled',
     pool: POOL,
     src: primes,
-    grants: { publish: ['primes.v1', 'activity.v1'], subscribe: ['count.v1', 'control.v1'] },
+    grants: {
+      publish: ['primes.v1', 'activity.v1'],
+      subscribe: ['count.v1', 'control.v1', 'budget.v1'],
+    },
   },
   {
     id: 'D',
@@ -77,7 +84,7 @@ const isolates = [
     src: messages,
     grants: {
       publish: ['note.v1', 'activity.v1'],
-      subscribe: ['count.v1', 'note.v1', 'primes.v1', 'control.v1'],
+      subscribe: ['count.v1', 'note.v1', 'primes.v1', 'control.v1', 'budget.v1'],
     },
   },
 ];
@@ -97,7 +104,11 @@ const panes = isolates.map(({ id, name, where, parent, pool, src, grants }) => {
   });
   return pane;
 });
-startDemo(kernel, isolates);
+const budget = new Budget(
+  kernel,
+  isolates.map((i) => i.id),
+);
+startDemo(kernel, isolates, budget);
 
 setInterval(() => {
   const byId = new Map(kernel.isolates().map((s) => [s.id, s]));

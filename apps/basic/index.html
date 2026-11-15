@@ -38,6 +38,10 @@
           <span class="chip mono" id="fps">main thread: -- fps</span>
           <button type="button" class="ui-button" id="block-main">Block the main thread 1 s</button>
         </div>
+        <p class="guard-note">
+          An isolate that crashes more than 3 times within a minute is marked failed, and the kernel
+          stops restarting it.
+        </p>
       </section>
       <div class="loops">
         <section class="group" aria-labelledby="own-title">

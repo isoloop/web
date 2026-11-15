@@ -97,6 +97,19 @@
 .pane-foot {
   padding: 0 var(--ui-space-3) var(--ui-space-2);
 }
+.guard-note {
+  margin: var(--ui-space-2) 0 0;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+}
+.guard {
+  margin: 0 0 var(--ui-space-2);
+  color: var(--ui-bad);
+  font-size: var(--ui-text-xs);
+}
+.pane[data-state='failed'] {
+  border-color: var(--ui-bad);
+}
 .small {
   font-size: var(--ui-text-xs);
 }

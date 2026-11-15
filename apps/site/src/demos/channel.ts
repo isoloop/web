@@ -8,7 +8,7 @@
 export const PROTOCOL = 'isoloop-demo@1';
 const SRC = '/examples/basic/?embed=1';
 
-export type Act = 'block-c' | 'crash-a' | 'crash-d' | 'block-main';
+export type Act = 'block-c' | 'crash-a' | 'crash-d' | 'block-main' | 'restart';
 
 /** A message from basic, its fields as sent; `t` is `at` on this page's clock. */
 export type Message = { type: string; t: number } & Record<string, unknown>;
@@ -76,8 +76,10 @@ export class Channel {
     this.#frame = frame;
   }
 
-  send(act: Act): void {
-    this.#frame?.contentWindow?.postMessage({ v: PROTOCOL, type: 'command', act }, location.origin);
+  /** Sends a command; `restart` names the isolate in `id`. */
+  send(act: Act, id?: string): void {
+    const msg = { v: PROTOCOL, type: 'command', act, ...(id === undefined ? {} : { id }) };
+    this.#frame?.contentWindow?.postMessage(msg, location.origin);
   }
 }
 

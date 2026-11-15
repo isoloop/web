@@ -9,12 +9,17 @@
 //   so when it's blocked nothing draws, and the gap is hatched afterwards.
 // - Hatching while the kernel says an isolate is `blocked`; a line where it
 //   crashed and was started again (isolate:crash).
+// - A red span while it's `failed`: more than 3 crashes within a minute, and
+//   the kernel's crash-loop guard stopped restarting it (isolate:failed).
+// - Each control shows the restarts its isolate has used this minute, as basic
+//   counts them (`budget`); once it's failed, the control becomes Restart,
+//   which sends basic `restart` (kernel.restart(id)).
 import { recording as copy } from '../copy.ts';
 import { type Channel, type Message, num, reducedMotion, str, whileVisible } from './channel.ts';
 
 const TRACKS = ['main', 'bus', 'A', 'B', 'pool'] as const;
 type Track = (typeof TRACKS)[number];
-type Kind = 'task' | 'stuck' | 'stalled';
+type Kind = 'task' | 'stuck' | 'stalled' | 'failed';
 type Bar = { track: Track; row: number; start: number; end: number; kind: Kind; label?: string };
 type Mark = { t: number; track: Track; text: string };
 
@@ -25,6 +30,8 @@ const PLACE: Record<string, [Track, number]> = {
   C: ['pool', 0],
   D: ['pool', 1],
 };
+/** The isolates each control acts on. */
+const TARGETS: Record<string, string[]> = { 'crash-a': ['A'], 'block-c': ['C', 'D'] };
 /** A gap between frames this long is a stuck main thread. */
 const MAIN_STUCK_MS = 250;
 
@@ -38,6 +45,12 @@ export class Recording {
   #bars: Bar[] = [];
   #marks: Mark[] = [];
   #open = new Map<string, Bar>();
+  /** Failed isolates, in the order they failed, and their spans. */
+  #down = new Map<string, Bar>();
+  /** Restarts each isolate has used this minute, as basic counts them. */
+  #used = new Map<string, number>();
+  /** The last crash status said, to add the count to when it arrives. */
+  #crashSaid: { ids: string[]; text: string } | undefined;
   #lastFrame: number | undefined;
   #colors: Record<string, string> = {};
   #patterns = new Map<string, CanvasPattern | null>();
@@ -72,8 +85,10 @@ export class Recording {
       this.#draw();
     });
     for (const button of root.querySelectorAll<HTMLButtonElement>('button[data-act]')) {
+      button.dataset['base'] = button.textContent ?? '';
       button.addEventListener('click', () => this.#act(button));
     }
+    this.#label();
     channel.on((m) => this.#receive(m));
     whileVisible(root, (v) => {
       this.#visible = v;
@@ -103,6 +118,7 @@ export class Recording {
       muted: '--ui-text-muted',
       rule: '--ui-rule',
       panel: '--ui-surface',
+      bad: '--ui-bad',
     }))
       this.#colors[k] = cs.getPropertyValue(v).trim();
     this.#patterns.clear();
@@ -129,7 +145,9 @@ export class Recording {
     for (const b of this.#root.querySelectorAll<HTMLButtonElement>('button[data-act]')) {
       const act = b.dataset['act'];
       const needs = act === 'block-c' ? 'C' : act === 'crash-a' ? 'A' : null;
-      if (b.dataset['hold'] === undefined && (needs === null || ready.has(needs)))
+      // A failed isolate's control is its Restart button.
+      const down = TARGETS[act ?? '']?.some((id) => this.#down.has(id)) ?? false;
+      if (b.dataset['hold'] === undefined && (down || needs === null || ready.has(needs)))
         b.disabled = false;
     }
   }
@@ -143,8 +161,39 @@ export class Recording {
     }, ms);
   }
 
+  /**
+   * Each control's label: its restarts used this minute (`Crash A · 2/3`), or
+   * Restart once its isolate has failed. The count is in the accessible name;
+   * changes are announced through the status line, not on every tick.
+   */
+  #label(): void {
+    for (const b of this.#root.querySelectorAll<HTMLButtonElement>('button[data-act]')) {
+      const ids = TARGETS[b.dataset['act'] ?? ''];
+      if (!ids) continue;
+      const base = b.dataset['base'] ?? '';
+      const down = ids.filter((id) => this.#down.has(id));
+      if (down.length > 0) {
+        b.dataset['mode'] = 'restart';
+        b.textContent = copy.controls.restart(down);
+        b.removeAttribute('aria-label');
+        continue;
+      }
+      delete b.dataset['mode'];
+      const used = Math.max(...ids.map((id) => this.#used.get(id) ?? 0));
+      b.textContent = copy.controls.used(base, used);
+      b.setAttribute('aria-label', copy.controls.usedName(base, used));
+    }
+  }
+
   #act(button: HTMLButtonElement): void {
     const act = button.dataset['act'];
+    if (button.dataset['mode'] === 'restart') {
+      for (const id of TARGETS[act ?? ''] ?? []) {
+        if (this.#down.has(id)) this.#channel.send('restart', id);
+      }
+      this.#hold(button, 1500);
+      return;
+    }
     if (act === 'block-c') {
       this.#channel.send('block-c');
       this.#hold(button, 4500);
@@ -233,6 +282,45 @@ export class Recording {
             this.#open.delete(id);
           }
         }
+        // Restarted by hand after the crash-loop guard: the red span ends.
+        if (str(m, 'prev') === 'failed' && state !== 'failed') {
+          const down = this.#down.get(id);
+          if (down) {
+            down.end = m.t;
+            this.#down.delete(id);
+            this.#marks.push({ t: m.t, track: place[0], text: `${id} restarted by hand` });
+            this.#say(copy.status.restarted(id));
+            this.#label();
+            this.#enable();
+          }
+        }
+        break;
+      }
+      case 'failed': {
+        const place = id ? PLACE[id] : undefined;
+        if (!id || !place || this.#down.has(id)) break;
+        // The crash just before it was the last one: no restart follows.
+        const last = this.#marks.findLast((k) => k.track === place[0] && m.t - k.t < 500);
+        if (last) last.text = last.text.replace(', restarted', '');
+        const open = this.#open.get(id);
+        if (open) {
+          open.end = m.t;
+          this.#open.delete(id);
+        }
+        const bar: Bar = {
+          track: place[0],
+          row: place[1],
+          start: m.t,
+          end: m.t,
+          kind: 'failed',
+          label: `${id} failed: crash-loop guard`,
+        };
+        this.#down.set(id, bar);
+        this.#bars.push(bar);
+        this.#say(copy.status.failed(id));
+        this.#crashSaid = undefined;
+        this.#label();
+        this.#enable();
         break;
       }
       case 'crash': {
@@ -242,10 +330,29 @@ export class Recording {
         const recent = this.#marks.some((k) => k.track === place[0] && m.t - k.t < 500);
         if (pool && !recent) {
           this.#marks.push({ t: m.t, track: place[0], text: 'pool stopped and started again' });
-          if (str(m, 'reason') === 'unresponsive') this.#say(copy.status.poolRestarted);
+          if (str(m, 'reason') === 'unresponsive') {
+            this.#say(copy.status.poolRestarted);
+            this.#crashSaid = { ids: ['C', 'D'], text: copy.status.poolRestarted };
+          }
         } else if (!pool) {
           this.#marks.push({ t: m.t, track: place[0], text: `${id} crashed, restarted` });
-          if (id === 'A') this.#say(copy.status.aCrashed);
+          if (id === 'A') {
+            this.#say(copy.status.aCrashed);
+            this.#crashSaid = { ids: ['A'], text: copy.status.aCrashed };
+          }
+        }
+        break;
+      }
+      case 'budget': {
+        const used = num(m, 'used');
+        if (!id || used === undefined) break;
+        this.#used.set(id, used);
+        this.#label();
+        // Announced once, after the crash that used it; not when it counts down.
+        const said = this.#crashSaid;
+        if (str(m, 'cause') === 'crash' && said?.ids.includes(id) && !this.#down.has(id)) {
+          this.#say(`${said.text} ${copy.status.budget(used)}`);
+          this.#crashSaid = undefined;
         }
         break;
       }
@@ -309,7 +416,11 @@ export class Recording {
     const x = (t: number): number => W - (now - t) * px;
     // Open spans grow until the kernel says otherwise.
     for (const bar of this.#open.values()) bar.end = now;
+    for (const bar of this.#down.values()) bar.end = now;
     this.#bars = this.#bars.filter((b) => b.end > now - this.#window - 200);
+    // A failed span stays on screen, clipped to the window, until restarted.
+    for (const bar of this.#down.values())
+      bar.start = Math.max(bar.start, now - this.#window - 100);
     this.#marks = this.#marks.filter((m) => m.t > now - this.#window - 200);
     ctx.clearRect(0, 0, W, H);
 
@@ -346,17 +457,17 @@ export class Recording {
       const x1 = Math.min(x(b.end), W);
       if (x1 < 0) continue;
       const width = Math.max(b.track === 'main' || b.track === 'bus' ? 1.2 : 2.5, x1 - x0);
-      const c = colors[b.track] ?? '#888';
+      const c = (b.kind === 'failed' ? colors['bad'] : colors[b.track]) ?? '#888';
       if (b.kind === 'task') {
         ctx.fillStyle = c;
         ctx.fillRect(x0, y, width, h);
         continue;
       }
-      const pattern = this.#hatch(c, b.kind === 'stuck');
+      const pattern = this.#hatch(c, b.kind !== 'stalled');
       if (pattern) ctx.fillStyle = pattern;
       ctx.fillRect(x0, y, width, h);
       ctx.strokeStyle = c;
-      ctx.lineWidth = b.kind === 'stuck' ? 2 : 1;
+      ctx.lineWidth = b.kind === 'stalled' ? 1 : 2;
       ctx.strokeRect(x0 + 0.5, y + 0.5, width - 1, h - 1);
       if (b.label && width > 120) {
         ctx.font = '650 12px Archivo, system-ui';

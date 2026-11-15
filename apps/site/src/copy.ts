@@ -100,7 +100,14 @@ export const recording = {
     blockC: 'Block C for 3 s',
     crashA: 'Crash A',
     blockMain: 'Block the main thread',
+    restart: (ids: string[]): string => `Restart ${ids.join(' and ')}`,
+    used: (label: string, used: number): string => `${label} · ${used}/3`,
+    // Starts with the visible text, so the two match (WCAG 2.5.3).
+    usedName: (label: string, used: number): string =>
+      `${label} · ${used}/3 restarts used this minute`,
   },
+  guard:
+    'An isolate that crashes more than 3 times within a minute is marked failed, and the kernel stops restarting it.',
   status: {
     waiting: 'Starting basic…',
     running: 'Recording. Everything is running.',
@@ -115,6 +122,11 @@ export const recording = {
       'The main thread is stuck for 3 s, so this page can’t paint, the recording included. The isolates keep running in their workers.',
     mainFree:
       'The main thread is free again. The hatched gap is where it was stuck; the isolates’ tracks kept going.',
+    failed: (id: string): string =>
+      `${id} crashed 3 times within a minute, so the kernel’s crash-loop guard stopped restarting it. It stays down until it’s restarted.`,
+    restarted: (id: string): string =>
+      `${id} was restarted with kernel.restart(), and its restart count starts over.`,
+    budget: (used: number): string => `${used} of 3 restarts used this minute.`,
   },
   open: 'Open basic on its own page',
 };
@@ -267,7 +279,7 @@ export const featuresPage = {
   },
   restart: {
     text: [
-      'The kernel expects a heartbeat from every loop. After 400 ms without one, an isolate is marked blocked. After `killAfterMs` (10 s by default; basic uses 2 s) its worker is stopped and started again. Three restarts within a minute and it’s marked failed, and stays down.',
+      'The kernel expects a heartbeat from every loop. After 400 ms without one, an isolate is marked blocked. After `killAfterMs` (10 s by default; basic uses 2 s) its worker is stopped and started again. Three restarts within a minute and it’s marked failed, and stays down: that’s the crash-loop guard, so an isolate that keeps crashing stops costing restarts. `kernel.restart(id)` brings it back.',
       'Restarted, each subscription starts where its `from` says. `committed` reads on after its last commit; commits go out every 100 ms, so the few records it had read but not committed come again: at least once, none lost. `earliest` reads everything the topic still retains. `latest`, the default, starts with new records.',
     ],
     rows: { loop: 'Loop', reads: 'Reads' },
@@ -297,12 +309,15 @@ export const featuresPage = {
     text: 'A topic keeps its records under a retention policy: the last n, a time window, or the latest record per key. Where a restarted reader starts is its own choice: `earliest` reads every retained record again, `committed` reads on after its last commit, `latest` takes only new records. D subscribes from `earliest`, which is how it rebuilds its list of notes.',
     tape: 'note.v1, as D reads it',
     crashD: 'Crash D',
+    restartD: 'Restart D',
     status: {
       reading: 'D reads each note as it arrives.',
       crashed:
         'D crashed and was started again. It subscribes from earliest, so it reads the retained notes again.',
       again: (n: number): string =>
         `D read ${n} note${n === 1 ? '' : 's'} again, from the start of what note.v1 retains. None were lost.`,
+      failed:
+        'D crashed 3 times within a minute, so the kernel’s crash-loop guard stopped restarting it. Restart D to bring it back.',
     },
     caption:
       'Each cell is a note and its offset. Shaded cells are notes D had read before the crash and read again after it.',
