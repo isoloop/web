@@ -22,8 +22,8 @@
         <ul class="rules">
           <li>
             <strong>Block</strong> keeps an isolate's loop busy for 3 s. The kernel kills a loop
-            that stays busy for 2 s and restarts it, and the isolate reads the bus again from where
-            it was.
+            that stays busy for 2 s and restarts it, and the isolate rebuilds its state from the
+            records its topics still hold.
           </li>
           <li>
             <strong>Crash</strong> reports an error as the isolate's own. Only that isolate
