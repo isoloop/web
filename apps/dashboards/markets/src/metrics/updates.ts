@@ -23,8 +23,10 @@ export const STALE_MS = 1_500;
 const WINDOW_MS = 1_000;
 
 const draws = new Map<string, { draws: number; at: number }>();
+const resumed = new Map<string, number>();
 buildMetrics.timings((t) => {
   if (t.draws !== undefined) draws.set(t.slot, { draws: t.draws, at: performance.now() });
+  if (t.resumedAt !== undefined) resumed.set(t.slot, t.resumedAt);
 });
 
 /** Per DOM-widget slot: whether its DOM changed since the last frame, and the frames it did. */
@@ -106,3 +108,41 @@ export function useUpdatesPerSec(slot: string): number | null {
   }, [slot]);
   return n;
 }
+
+// Hooks for the comparison (e2e/comparison.spec.ts), the same in every build.
+
+/** The slot's elements, in the page and in any shadow root inside it (an Isoloop surface's). */
+function deepAll(root: Element | ShadowRoot, selector: string): Element[] {
+  const out = [...root.querySelectorAll(selector)];
+  if (root instanceof Element && root.shadowRoot) out.push(...deepAll(root.shadowRoot, selector));
+  for (const el of root.querySelectorAll('*'))
+    if (el.shadowRoot) out.push(...deepAll(el.shadowRoot, selector));
+  return out;
+}
+
+/**
+ * True once the slot's widget shows data: a canvas with `data-drawn`, a table
+ * or tile list with rows, the trades table with a row; a widget with none of
+ * these (the filters, the alerts panel) once it has rendered.
+ */
+function hasData(slot: Element): boolean {
+  const body = slot.querySelector('.widget-body');
+  if (!body) return false;
+  const canvas = deepAll(body, 'canvas');
+  if (canvas.length > 0) return canvas.some((c) => c.hasAttribute('data-drawn'));
+  const rows = deepAll(body, '[data-rows]');
+  if (rows.length > 0) return rows.some((r) => Number(r.getAttribute('data-rows')) > 0);
+  if (slot.getAttribute('data-widget') === 'trades') return deepAll(body, '[data-row]').length > 0;
+  return deepAll(body, '*').some((el) => !el.shadowRoot);
+}
+
+declare global {
+  interface Window {
+    /** How many slots show data so far, for the comparison's start-up figure. */
+    slotsWithData: () => number;
+    /** The slot's last `resumedAt` (a canvas widget's first draw after a pause), epoch ms. */
+    resumedAt: (slot: string) => number | null;
+  }
+}
+window.slotsWithData = () => [...document.querySelectorAll('[data-slot]')].filter(hasData).length;
+window.resumedAt = (slot) => resumed.get(slot) ?? null;

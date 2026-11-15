@@ -1,10 +1,12 @@
 name: Comparison
 
-# The recorded comparison: the size matrix (M3c task 12), each size on each
-# build, and the one-chart-blocked scenario (M3b task 18), native and Isoloop,
-# React and Preact, on Chromium, one test at a time. It runs on demand, after a
-# `markets-v*` deploy (release.yml) and weekly (weekly.yml); its numbers and
-# the side-by-side videos are uploaded as an artifact.
+# The markets dashboard's head-to-head comparison (M3f): native against
+# Isoloop `one`, native + workers against Isoloop `matched`, and Isoloop `own`
+# alongside, at Normal and Heavy, one page at a time, one round, on each engine
+# in its own job (comparison/run.ts). Runs on demand, after a `markets-v*`
+# deploy (release.yml) and weekly (weekly.yml). The numbers are uploaded as an
+# artifact, with summary.md in the run's summary; nothing is asserted. The
+# shipped figures come from the bench server (comparison/final/).
 on:
   workflow_dispatch:
   workflow_call:
@@ -12,14 +14,21 @@ on:
 permissions:
   contents: read
 
+env:
+  PAIRS: --pair native=isoloop:one --pair native-workers=isoloop:matched --extra isoloop:own
+
 jobs:
-  compare:
+  engine:
     runs-on: ubuntu-latest
     # In the job, not the workflow: this one is also called from others.
     concurrency:
-      group: comparison
+      group: comparison-${{ matrix.browser }}
       cancel-in-progress: false
-    timeout-minutes: 30
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
@@ -30,10 +39,34 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - uses: ./.github/actions/install-browsers
         with:
-          browsers: chromium
-      # For the side-by-side video; without it, compare.ts writes the table only.
-      - run: command -v ffmpeg || sudo apt-get install -y --no-install-recommends ffmpeg
-      - run: pnpm --filter ./apps/dashboards/markets compare
+          browsers: ${{ matrix.browser }}
+      - run: node comparison/run.ts $PAIRS --sizes normal,heavy --rounds 1 --hold 0 --engines ${{ matrix.browser }} --out comparison-results
+        working-directory: apps/dashboards/markets
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: comparison-${{ matrix.browser }}
+          path: apps/dashboards/markets/comparison-results
+          retention-days: 90
+
+  summary:
+    needs: engine
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: comparison-*
+          path: apps/dashboards/markets/comparison-results
+          merge-multiple: true
+      - run: node comparison/run.ts $PAIRS --summary-only --out comparison-results
+        working-directory: apps/dashboards/markets
       - run: cat apps/dashboards/markets/comparison-results/summary.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
