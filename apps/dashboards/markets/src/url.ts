@@ -56,10 +56,40 @@ export function replayPosition(): number | undefined {
   return clock && clock.from + (performance.now() - clock.started) * clock.speed;
 }
 
-/** The other build's URL: the same settings and filters, at the replay's position now. */
-export function switchHref(other: string): string {
+/**
+ * The other build's URL: the same settings and filters, at the replay's
+ * position now; with `placement`, in that placement (an Isoloop build's).
+ */
+export function switchHref(other: string, placement?: PlacementName): string {
   const p = new URLSearchParams(location.search);
   const at = replayPosition();
   if (at !== undefined) p.set('at', String(Math.round(at)));
+  if (placement !== undefined) {
+    if (placement === DEFAULT_PLACEMENT) p.delete('placement');
+    else p.set('placement', placement);
+  }
   return `../${other}/?${p.toString()}`;
+}
+
+/**
+ * Where the Isoloop builds run each isolate (M3f decision 3):
+ * `?placement=own|matched|one`. `own`, a worker per isolate, is the default:
+ * markets is the containment example, and in a pool a block stalls every
+ * member. The native builds ignore it.
+ */
+export const PLACEMENTS = ['own', 'matched', 'one'] as const;
+export type PlacementName = (typeof PLACEMENTS)[number];
+export const DEFAULT_PLACEMENT: PlacementName = 'own';
+
+export const placementFrom = (params: URLSearchParams): PlacementName =>
+  PLACEMENTS.find((p) => p === params.get('placement')) ?? DEFAULT_PLACEMENT;
+
+/** The current page's URL in another placement: the same settings, a fresh replay. */
+export function placementHref(p: PlacementName, search: string): string {
+  const q = new URLSearchParams(search);
+  if (p === DEFAULT_PLACEMENT) q.delete('placement');
+  else q.set('placement', p);
+  q.delete('at');
+  const s = q.toString();
+  return s === '' ? '?' : `?${s}`;
 }

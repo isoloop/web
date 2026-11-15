@@ -2,37 +2,13 @@
 // the Isoloop build turns them into topics (src/isoloop/contracts.ts) and the
 // native build uses the same types for its store.
 import { z } from 'zod';
+import { EXCHANGES, SYMBOLS } from './symbols';
 
 // No `new Function` fast path: the app's CSP has no 'unsafe-eval', and Zod
 // would otherwise probe for it and log a CSP violation in every worker.
 z.config({ jitless: true });
 
-export const EXCHANGES = ['coinbase', 'kraken', 'bitstamp', 'okx'] as const;
-/** Every symbol the replay can synthesize (M3c decision 5: 20 at Normal and Heavy). */
-export const SYMBOLS = [
-  'BTC-USD',
-  'ETH-USD',
-  'SOL-USD',
-  'XRP-USD',
-  'ADA-USD',
-  'DOGE-USD',
-  'AVAX-USD',
-  'DOT-USD',
-  'LINK-USD',
-  'LTC-USD',
-  'BCH-USD',
-  'UNI-USD',
-  'ATOM-USD',
-  'XLM-USD',
-  'NEAR-USD',
-  'APT-USD',
-  'ARB-USD',
-  'OP-USD',
-  'FIL-USD',
-  'AAVE-USD',
-] as const;
-/** The symbols the live feeds subscribe to, and the replay's first `n` at Lite. */
-export const LIVE_SYMBOLS = ['BTC-USD', 'ETH-USD', 'SOL-USD'] as const;
+export { EXCHANGES, LIVE_SYMBOLS, SYMBOLS } from './symbols';
 
 export const exchange = z.enum(EXCHANGES);
 export const symbol = z.enum(SYMBOLS);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filtersFrom, replayConfig } from './url';
+import { filtersFrom, placementFrom, placementHref, replayConfig } from './url';
 
 describe('replayConfig', () => {
   it('reads the replay settings, with defaults', () => {
@@ -30,5 +30,20 @@ describe('filtersFrom', () => {
   it('is undefined without filters, or with nothing valid', () => {
     expect(filtersFrom(new URLSearchParams('speed=10'))).toBeUndefined();
     expect(filtersFrom(new URLSearchParams('symbol=DOGE&ex=okx'))).toBeUndefined();
+  });
+});
+
+describe('placementFrom', () => {
+  it('reads the placement, own by default', () => {
+    expect(placementFrom(new URLSearchParams(''))).toBe('own');
+    expect(placementFrom(new URLSearchParams('placement=matched'))).toBe('matched');
+    expect(placementFrom(new URLSearchParams('placement=one'))).toBe('one');
+    expect(placementFrom(new URLSearchParams('placement=split'))).toBe('own');
+  });
+
+  it("builds another placement's URL, without the replay position", () => {
+    expect(placementHref('one', '?size=heavy&at=1234')).toBe('?size=heavy&placement=one');
+    expect(placementHref('own', '?placement=one&size=heavy')).toBe('?size=heavy');
+    expect(placementHref('own', '?placement=one')).toBe('?');
   });
 });

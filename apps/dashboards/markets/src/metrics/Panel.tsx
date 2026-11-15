@@ -48,6 +48,7 @@ export function MetricsPanel() {
       'Bus throughput',
       build.busRecordsPerSec === null ? 'n/a' : `${Math.round(build.busRecordsPerSec)} rec/s`,
     ],
+    ['workers', 'Workers', String(build.workers)],
     ['memory', 'Memory', typeof main.memory === 'number' ? kb(main.memory) : main.memory],
     ['first-data', 'Time to first data', ms(main.firstDataMs, 'waiting')],
     [

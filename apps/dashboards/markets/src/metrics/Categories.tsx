@@ -3,6 +3,7 @@
 // changes, in milliseconds per second over the last 5 s. On native all of it
 // is main-thread time; on Isoloop the work is on each isolate's own thread.
 import { buildMetrics } from '#metrics';
+import { CURRENT } from '../builds';
 import { useEffect, useState } from 'react';
 import { CATEGORY, DATA_KINDS, OUTPUTS } from '../sizes/categories';
 import type { WidgetName } from '../widgets';
@@ -118,7 +119,13 @@ export function CategoryPanel({ widgets }: { widgets: readonly WidgetName[] }) {
             <th>Category</th>
             <th>Slots</th>
             <th>Updates/s</th>
-            <th>{native ? 'Render and draw (main thread)' : 'Render and draw (own threads)'}</th>
+            <th>
+              {CURRENT === 'native-workers'
+                ? 'Render and draw (main thread; engines on their workers)'
+                : native
+                  ? 'Render and draw (main thread)'
+                  : 'Render and draw (own threads)'}
+            </th>
             <th>DOM apply (main thread)</th>
           </tr>
         </thead>

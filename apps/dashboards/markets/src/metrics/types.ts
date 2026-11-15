@@ -6,6 +6,8 @@ export type BuildMetrics = {
   workerLagMs: number | null;
   /** Records per second across the bus; `null` where there is no bus. */
   busRecordsPerSec: number | null;
+  /** Workers the page runs: isolates' own workers and pools, or the data workers; 0 on native. The bus's worker is left out. */
+  workers: number;
 };
 
 export interface BuildMetricsSource {

@@ -23,17 +23,24 @@ body {
   color: #8ab4f8;
 }
 .page .builds,
-.page .sizes {
+.page .sizes,
+.page .placements {
   display: flex;
   gap: 8px;
   white-space: nowrap;
 }
 .page .builds a,
-.page .sizes a {
+.page .sizes a,
+.page .placements a {
   color: #8ab4f8;
 }
-.page .sizes [aria-current] {
+.page .sizes [aria-current],
+.page .placements [aria-current] {
   font-weight: 600;
+}
+.page .placement-note {
+  color: #999;
+  font-size: 12px;
 }
 .page > .slot {
   position: relative;

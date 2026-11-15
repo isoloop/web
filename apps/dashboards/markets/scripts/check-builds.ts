@@ -24,6 +24,7 @@ const scan = (dir: string, markers: string[]): string[] =>
 
 const rules: [dir: string, what: string, markers: string[]][] = [
   ['dist/native', 'Isoloop code', ISOLOOP],
+  ['dist/native-workers', 'Isoloop code', ISOLOOP],
   ['dist/native-preact', 'Isoloop code', ISOLOOP],
   ['dist/native-preact', 'React DOM', REACT_DOM],
   ['dist/isoloop-preact', 'React DOM', REACT_DOM],

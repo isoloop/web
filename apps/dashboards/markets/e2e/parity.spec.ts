@@ -55,12 +55,27 @@ async function settledTable(
   return { total, oldest, newest };
 }
 
-// Every build renders what native React renders (M3b tasks 15 and 16b).
-for (const build of inScope(['isoloop', 'isoloop-preact', 'native-preact', 'mixed'] as const)) {
-  test(`${build} renders the same data as native from the replay source`, async ({ browser }) => {
+// Every build and placement renders what native React renders (M3b tasks 15
+// and 16b, M3f decisions 2 and 3).
+const OTHERS = [
+  ...inScope([
+    'isoloop',
+    'native-workers',
+    'isoloop-preact',
+    'native-preact',
+    'mixed',
+  ] as const).map((build) => [build, ''] as const),
+  ['isoloop', '&placement=matched'],
+  ['isoloop', '&placement=one'],
+] as const;
+
+for (const [build, extra] of OTHERS) {
+  test(`${build}${extra} renders the same data as native from the replay source`, async ({
+    browser,
+  }) => {
     const [native, other] = await Promise.all([browser.newPage(), browser.newPage()]);
     const q = `?size=lite&speed=10&seed=7&for=${FOR_MS}`;
-    await Promise.all([native.goto(`/native/${q}`), other.goto(`/${build}/${q}`)]);
+    await Promise.all([native.goto(`/native/${q}`), other.goto(`/${build}/${q}${extra}`)]);
     const [a, b] = await Promise.all([settledTable(native), settledTable(other)]);
     expect(a.total).toBeGreaterThan(50);
     expect(b).toEqual(a);
