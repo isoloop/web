@@ -4,6 +4,7 @@
 import type { IsolateSnapshot, PoolSnapshot } from '@isoloop/host';
 import { timings } from '../isoloop/contracts';
 import { kernel } from '../isoloop/kernel';
+import { applyTotals, type ApplySeen } from './apply';
 import type { BuildMetricsSource } from './types';
 
 let busRecordsPerSec = 0;
@@ -11,23 +12,14 @@ kernel.on('bus:metrics', (m) => {
   busRecordsPerSec = m.topics.reduce((n, t) => n + t.recordsPerSec, 0);
 });
 
-// Main-thread time applying each surface's DOM changes: the compositor
-// reports the last frame's apply time per surface; a frame that applied a
-// batch adds it.
+// Main-thread time applying each surface's DOM changes, sampled once a
+// second (`./apply`), as the plant does. Sampling every frame built a
+// snapshot of every isolate 60 times a second, main-thread time that only
+// this build paid for (isoloop#165, docs/investigations/plant-cpu.md).
+export const SAMPLE_MS = 1_000;
 const applied = new Map<string, number>();
-const seen = new Map<string, number>();
-const sample = (): void => {
-  for (const i of kernel.isolates()) {
-    const s = i.surface;
-    if (!s) continue;
-    if (s.applied !== seen.get(i.id)) {
-      seen.set(i.id, s.applied);
-      applied.set(i.id, (applied.get(i.id) ?? 0) + s.lastFrameMs);
-    }
-  }
-  requestAnimationFrame(sample);
-};
-requestAnimationFrame(sample);
+const seen = new Map<string, ApplySeen>();
+setInterval(() => applyTotals(kernel.isolates(), seen, applied), SAMPLE_MS);
 
 /** Workers running now: each pool once, each isolate outside a pool once. */
 export function workerCount(

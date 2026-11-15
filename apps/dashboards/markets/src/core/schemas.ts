@@ -123,6 +123,12 @@ export const timing = z.object({
   updates: z.number().int().nonnegative().optional(),
   /** Times a canvas widget drew in that second (its header's updates/s); others leave it out. */
   draws: z.number().int().nonnegative().optional(),
+  /**
+   * When a canvas widget drew again after a pause of over a second (epoch
+   * ms): its first draw after a block, a crash or a stall. The comparison's
+   * recovery figure reads it. Left out when it didn't happen in that second.
+   */
+  resumedAt: z.number().nonnegative().optional(),
   ts,
 });
 

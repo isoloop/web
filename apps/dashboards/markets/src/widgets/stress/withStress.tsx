@@ -16,6 +16,8 @@ export const BLOCK_MS = 3_000;
 /** The flood: records a second, and for how long. */
 export const FLOOD_PER_S = 1_000;
 export const FLOOD_MS = 5_000;
+/** A draw after a pause longer than this counts as the widget resuming (`resumedAt`). */
+export const RESUME_AFTER_MS = 1_000;
 
 /** Busy-waits, as a long synchronous computation would. */
 export function busy(ms: number): void {
@@ -98,8 +100,13 @@ export function withStress(
       renders.current++;
     }, []);
     const draws = useRef(0);
+    const lastDraw = useRef(0);
+    const resumedAt = useRef<number | undefined>(undefined);
     const drew = useCallback(() => {
       draws.current++;
+      const now = Date.now();
+      if (lastDraw.current > 0 && now - lastDraw.current > RESUME_AFTER_MS) resumedAt.current = now;
+      lastDraw.current = now;
     }, []);
     const record = useCallback((ms: number) => {
       spent.current += ms;
@@ -112,11 +119,13 @@ export function withStress(
           ms: spent.current,
           updates: renders.current,
           ...(draws.current > 0 ? { draws: draws.current } : {}),
+          ...(resumedAt.current === undefined ? {} : { resumedAt: resumedAt.current }),
           ts: Date.now(),
         });
         spent.current = 0;
         renders.current = 0;
         draws.current = 0;
+        resumedAt.current = undefined;
       }, 1_000);
       return () => {
         clearInterval(id);

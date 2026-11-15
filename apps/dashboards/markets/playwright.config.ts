@@ -34,14 +34,20 @@ export default defineConfig({
   // timing under load (input latency within the 200 ms budget, the table at
   // 3,000 trades/s). CI runs it alone with --workers=1 after the rest, so those
   // tests don't share the runner's cores with other pages.
-  // `comparison` is the recorded comparison (M3b task 18): Chromium, alone,
-  // on demand (.github/workflows/comparison.yml), never in the default run.
+  // `comparison` and `comparison-firefox` are the head-to-head comparison
+  // (M3f, comparison/run.ts): one page at a time, on demand
+  // (.github/workflows/comparison.yml), never in the default run.
   projects: [
     ...ENGINES.flatMap(([name, device]) => [
       { name, use: { ...devices[device] }, testIgnore: [LOAD, COMPARISON] },
       { name: `${name}-load`, use: { ...devices[device] }, testMatch: LOAD },
     ]),
     { name: 'comparison', use: { ...devices['Desktop Chrome'] }, testMatch: COMPARISON },
+    {
+      name: 'comparison-firefox',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: COMPARISON,
+    },
     { name: 'live', use: { ...devices['Desktop Chrome'] }, testMatch: /smoke\.spec\.ts$/ },
   ],
 });

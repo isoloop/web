@@ -1,12 +1,18 @@
-# The recorded comparison
+# The recorded comparison (M3b and M3c, history)
+
+**Kept as history.** These figures compare native on one thread with Isoloop on
+a worker per isolate (`own`: 22 workers at Normal, 30 at Heavy). M3f replaced
+them with matched pairs (native against Isoloop `one`, native + workers
+against Isoloop `matched`), run with `comparison/run.ts`; that run is in
+[`final/`](final/). The specs and script that produced the files below were
+replaced in M3f; they're in the tree at
+[`markets-v0.2.0`](https://github.com/isoloop/web/tree/markets-v0.2.0/apps/dashboards/markets).
 
 The markets dashboard, native and on Isoloop, in React and in Preact. Recorded
 by [this CI run](https://github.com/isoloop/examples/actions/runs/42464452395)
 on a GitHub-hosted `ubuntu-latest` runner (4 cores, no GPU), Chromium, one page
-at a time. Rerun it with the *Comparison* workflow
-(`.github/workflows/comparison.yml`), or locally with
-`pnpm --filter ./apps/dashboards/markets compare`. The raw numbers are in the `*.json`
-files and [`summary.md`](summary.md).
+at a time. The raw numbers are in the `*.json` files and
+[`summary.md`](summary.md).
 
 Two scenarios:
 
