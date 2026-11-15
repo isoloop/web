@@ -26,16 +26,24 @@ const PAIRS: (readonly [isoloop: string, native: string])[] = [
 // with the ×2 scale:
 // - Heavy: both Isoloop builds over budget or timed out in every run. Marked
 //   expected to fail, not skipped: they still run, report their numbers, and
-//   turn red if WebKit gets within budget.
+//   turn red if WebKit gets within budget. The same for `matched` (M3f
+//   decision 5): it timed out on both attempts in the markets-v0.3.0 release
+//   run, with every widget drawing from one pool. `matched` at Normal is
+//   reported only, like the others (246–384 ms, and one timeout).
 // - Normal: the medians fall either side of the budget from run to run
 //   (isoloop 170–588 ms, isoloop-preact 228–642 ms), so neither asserting nor
 //   expecting a failure is stable. They're reported only: measured, annotated
 //   and attached, not asserted.
 // See https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md
-const WEBKIT_EXPECTED_FAIL = new Set(['isoloop@heavy', 'isoloop-preact@heavy']);
+const WEBKIT_EXPECTED_FAIL = new Set([
+  'isoloop@heavy',
+  'isoloop-preact@heavy',
+  'isoloop?placement=matched@heavy',
+]);
 const WEBKIT_REPORT_ONLY = new Map([
   ['isoloop@normal', '170–588 ms'],
   ['isoloop-preact@normal', '228–642 ms'],
+  ['isoloop?placement=matched@normal', '246–384 ms, and one timeout'],
 ]);
 const ENGINE_CONSTRAINTS =
   'https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md';
