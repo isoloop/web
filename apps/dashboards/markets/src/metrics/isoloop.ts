@@ -1,5 +1,7 @@
 // The Isoloop-only figures: loop lag per worker from the isolates' heartbeats,
-// and bus throughput from `bus:metrics`.
+// bus throughput from `bus:metrics`, and the workers running (an own worker or
+// a pool each count once).
+import type { IsolateSnapshot, PoolSnapshot } from '@isoloop/host';
 import { timings } from '../isoloop/contracts';
 import { kernel } from '../isoloop/kernel';
 import type { BuildMetricsSource } from './types';
@@ -27,11 +29,24 @@ const sample = (): void => {
 };
 requestAnimationFrame(sample);
 
+/** Workers running now: each pool once, each isolate outside a pool once. */
+export function workerCount(
+  isolates: readonly IsolateSnapshot[] = kernel.isolates(),
+  pools: readonly PoolSnapshot[] = kernel.pools(),
+): number {
+  const own = isolates.filter((i) => i.pool === undefined && i.state !== 'stopped').length;
+  return own + pools.filter((p) => p.running).length;
+}
+
 export const buildMetrics: BuildMetricsSource = {
-  read: () => ({
-    workerLagMs: Math.max(0, ...kernel.isolates().map((i) => i.lagMs)),
-    busRecordsPerSec,
-  }),
+  read: () => {
+    const isolates = kernel.isolates();
+    return {
+      workerLagMs: Math.max(0, ...isolates.map((i) => i.lagMs)),
+      busRecordsPerSec,
+      workers: workerCount(isolates),
+    };
+  },
   states: () => Object.fromEntries(kernel.isolates().map((i) => [i.id, i.state])),
   timings: (fn) =>
     kernel.subscribe(

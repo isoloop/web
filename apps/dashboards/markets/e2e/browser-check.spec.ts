@@ -6,7 +6,14 @@ import { inScope } from './scope';
 // instead of getting a blank page (seen on Safari 15, iPad Air 2).
 const notice = '#browser-notice';
 
-const BUILDS = ['isoloop', 'native', 'isoloop-preact', 'native-preact', 'mixed'] as const;
+const BUILDS = [
+  'isoloop',
+  'native',
+  'native-workers',
+  'isoloop-preact',
+  'native-preact',
+  'mixed',
+] as const;
 const native = (b: string): boolean => b.startsWith('native');
 
 for (const build of inScope(BUILDS)) {

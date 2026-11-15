@@ -3,7 +3,8 @@
 // 500 ms per exchange and symbol. Deterministic for a seed, and endless, so the
 // demo and CI need no recordings (exchanges' terms rarely allow publishing
 // recorded market data; M3b task 7).
-import { EXCHANGES, SYMBOLS, type Book, type Exchange, type Sym, type Trade } from '../schemas';
+import { EXCHANGES, SYMBOLS } from '../symbols';
+import type { Book, Exchange, Sym, Trade } from '../schemas';
 import type { Tick } from './tick';
 
 /** mulberry32: a small, fast, seeded PRNG. */

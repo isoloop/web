@@ -7,7 +7,13 @@ import { inScope } from './scope';
 const metric = (page: Page, key: string) => page.locator(`[data-metric="${key}"] dd`);
 
 const ISOLOOP = ['isoloop', 'isoloop-preact', 'mixed'] as const;
-const NATIVE = ['native', 'native-preact'] as const;
+const NATIVE = ['native', 'native-workers', 'native-preact'] as const;
+/** Workers at Lite: none on native; the replay, the aggregator and the alerts on native + workers. */
+const WORKERS: Record<string, RegExp> = {
+  native: /^0$/,
+  'native-preact': /^0$/,
+  'native-workers': /^3$/,
+};
 
 for (const build of inScope([...ISOLOOP, ...NATIVE])) {
   test(`${build}: every metric shows a value within 2 s of start`, async ({ page }) => {
@@ -21,6 +27,7 @@ for (const build of inScope([...ISOLOOP, ...NATIVE])) {
     await expect(metric(page, 'input')).toHaveText(/^\d+ ms$/, within);
     await expect(metric(page, 'worker-lag')).toHaveText(native ? 'n/a' : /^\d+ ms$/, within);
     await expect(metric(page, 'bus')).toHaveText(native ? 'n/a' : /^\d+ rec\/s$/, within);
+    await expect(metric(page, 'workers')).toHaveText(WORKERS[build] ?? /^[1-9]\d*$/, within);
     await expect(metric(page, 'memory')).toHaveText('unavailable', within);
     await expect(metric(page, 'first-data')).toHaveText(/^\d+ ms$/, within);
     await expect(metric(page, 'bundle')).toHaveText(/^\d+ KB$/, within);

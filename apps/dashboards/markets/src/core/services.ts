@@ -8,7 +8,8 @@ import { runFeed } from './feeds/run';
 import { play } from './replay/player';
 import { synth } from './replay/synth';
 import { restamp } from './replay/tick';
-import { LIVE_SYMBOLS, SYMBOLS, type Sym } from './schemas';
+import { LIVE_SYMBOLS, SYMBOLS } from './symbols';
+import type { Sym } from './schemas';
 import type { Source } from './streams';
 
 export interface Stoppable {

@@ -1,19 +1,23 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// Native + workers pairs with Isoloop's `matched` placement (M3f), both ways.
 const builds = [
-  ['isoloop', 'native'],
-  ['native', 'isoloop'],
+  ['isoloop', 'native', ''],
+  ['native', 'isoloop', ''],
+  ['native-workers', 'isoloop', 'matched'],
+  ['isoloop', 'native-workers', 'matched'],
 ] as const;
 
 /** The replay position in the URL, in recording ms. */
 const at = (page: Page): number => Number(new URL(page.url()).searchParams.get('at'));
 
-for (const [from, to] of builds) {
-  test(`${from} → ${to}: the toggle lands on the other build with the same filters and replay position`, async ({
+for (const [from, to, placement] of builds) {
+  const extra = from === 'isoloop' && placement !== '' ? `&placement=${placement}` : '';
+  test(`${from}${extra} → ${to}: the toggle lands on the other build with the same filters and replay position`, async ({
     page,
   }) => {
     const started = Date.now();
-    await page.goto(`/${from}/?size=lite&speed=10&seed=3`);
+    await page.goto(`/${from}/?size=lite&speed=10&seed=3${extra}`);
     const filters = page.locator('[data-slot="filters"]');
     await filters.locator('select[name="symbol"]').selectOption('ETH-USD');
     await filters.locator('input[name="exchange-okx"]').click();
@@ -27,6 +31,9 @@ for (const [from, to] of builds) {
     await page.waitForTimeout(2_000);
     await page.getByRole('link', { name: `Switch to ${to}` }).click();
     await page.waitForURL(`**/${to}/**`);
+    if (to === 'isoloop') {
+      expect(new URL(page.url()).searchParams.get('placement')).toBe(placement || null);
+    }
     // At least the 2 s wait at 10× (20 s of recording), and no more than the
     // whole test so far at 10×: a slow runner takes longer to get here, and the
     // replay plays on meanwhile.

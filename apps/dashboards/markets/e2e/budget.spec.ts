@@ -12,9 +12,14 @@ const SCALE = Number(process.env.PERF_BUDGET_SCALE ?? '1');
 const SAMPLES = 5;
 const HEAVY = process.env['E2E_HEAVY'] === '1' || !process.env['CI'];
 const SIZES = ['lite', 'normal', ...(HEAVY ? (['heavy'] as const) : [])] as const;
-const PAIRS = inScope(['isoloop', 'isoloop-preact'] as const).map(
-  (isoloop) => [isoloop, isoloop === 'isoloop' ? 'native' : 'native-preact'] as const,
-);
+/** Isoloop's build (and placement, as a query) against its native counterpart, reported. */
+const PAIRS: (readonly [isoloop: string, native: string])[] = [
+  ...inScope(['isoloop', 'isoloop-preact'] as const).map(
+    (isoloop) => [isoloop, isoloop === 'isoloop' ? 'native' : 'native-preact'] as const,
+  ),
+  // M3f: the matched pair, Isoloop's widgets in one pool against native + workers.
+  ['isoloop?placement=matched', 'native-workers'],
+];
 
 // Playwright's WebKit (Linux, no GPU) presents the canvases workers draw on the
 // main thread, so typing waits. Measured on the 4-core CI runner, budget 400 ms
@@ -59,7 +64,8 @@ async function latency(page: Page, text: string): Promise<number> {
 
 /** The median of SAMPLES keystrokes on a build at a size, after the page has data and a warm-up. */
 async function measure(page: Page, build: string, size: string): Promise<number> {
-  await page.goto(`/${build}/?size=${size}&speed=1&seed=7`);
+  const [path, extra] = build.split('?');
+  await page.goto(`/${path}/?size=${size}&speed=1&seed=7${extra ? `&${extra}` : ''}`);
   await expect(page.locator('[data-metric="first-data"] dd')).toHaveText(/ms$/, {
     timeout: 30_000,
   });

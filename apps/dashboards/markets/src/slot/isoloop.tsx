@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import { kernel } from '../isoloop/kernel';
+import { poolOf, whereOf } from '../placement';
 import { FRAMEWORK, ISOLATES, srcOf } from '#widgets';
 import type { Placement } from '../sizes/sizes';
+import { placementFrom } from '../url';
 import { Head } from './Head';
 
-/** Workers numbered in the order the page starts them, for the headers. */
+/** Own workers numbered in the order the page starts them, for the headers. */
 let started = 0;
+/** The placement's pool for widgets, if it pools them (M3f decision 3). */
+const pool = poolOf(placementFrom(new URLSearchParams(location.search)), 'widget');
 const LABEL = { react: 'React', preact: 'Preact' } as const;
 
 /** A slot in the Isoloop build: a surface the widget's isolate renders into. */
 export function Slot({ placement }: { placement: Placement }) {
   const ref = useRef<HTMLDivElement>(null);
   const { id, widget, config } = placement;
-  const [worker] = useState(() => ++started);
+  const [worker] = useState(() => (pool === undefined ? ++started : 0));
   const framework = FRAMEWORK?.[widget];
-  const where = `worker ${worker}${framework ? ` · ${LABEL[framework]}` : ''}`;
+  const where = `${whereOf(pool, worker)}${framework ? ` · ${LABEL[framework]}` : ''}`;
   useEffect(() => {
     const surface = ref.current;
     if (!surface) return undefined;
@@ -29,6 +33,7 @@ export function Slot({ placement }: { placement: Placement }) {
         surface,
         grants,
         ...(config === undefined ? {} : { config }),
+        ...(pool === undefined ? {} : { pool }),
       });
       stop = () => handle.stop();
     });
@@ -38,7 +43,7 @@ export function Slot({ placement }: { placement: Placement }) {
     };
   }, [id, widget, config]);
   return (
-    <div className="slot" data-slot={id} data-widget={widget}>
+    <div className="slot" data-slot={id} data-widget={widget} data-pool={pool}>
       <Head slot={id} where={where} />
       <div ref={ref} className="widget-body" />
     </div>

@@ -3,10 +3,18 @@ import { inScope } from './scope';
 
 // M3c task 9b: each widget's header shows where it runs and its updates/s,
 // and its stress controls sit in that row.
-const BUILDS = ['isoloop', 'native', 'isoloop-preact', 'native-preact', 'mixed'] as const;
+const BUILDS = [
+  'isoloop',
+  'native',
+  'native-workers',
+  'isoloop-preact',
+  'native-preact',
+  'mixed',
+] as const;
 const WHERE: Record<(typeof BUILDS)[number], RegExp> = {
   isoloop: /^worker \d+$/,
   native: /^main thread$/,
+  'native-workers': /^main thread$/,
   'isoloop-preact': /^worker \d+$/,
   'native-preact': /^main thread$/,
   mixed: /^worker \d+ · (React|Preact)$/,
@@ -63,5 +71,24 @@ for (const build of inScope(['isoloop', 'isoloop-preact', 'mixed'] as const)) {
     expect(await count(updates(page, 'trades'))).toBeGreaterThan(0);
     // It counts again once its loop is free.
     await expect.poll(() => count(updates(page, 'price')), { timeout: 10_000 }).toBeGreaterThan(0);
+  });
+}
+
+// M3f decision 4: a pooled widget's header names its pool.
+for (const [placement, where] of [
+  ['matched', 'pool widgets'],
+  ['one', 'pool all'],
+] as const) {
+  test(`isoloop, ${placement}: every widget's header names its pool`, async ({ page }) => {
+    await page.goto(`/isoloop/?size=lite&speed=1&placement=${placement}`);
+    const slots = await page
+      .locator('[data-slot]')
+      .evaluateAll((els) => els.map((e) => e.getAttribute('data-slot') ?? ''));
+    expect(slots.length).toBeGreaterThan(0);
+    await Promise.all(
+      slots.map((slot) =>
+        expect(head(page, slot).locator('[data-head="where"]')).toHaveText(where),
+      ),
+    );
   });
 }

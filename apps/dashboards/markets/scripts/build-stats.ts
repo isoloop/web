@@ -9,7 +9,14 @@ const files = (dir: string): string[] =>
     e.isDirectory() ? files(join(dir, e.name)) : [join(dir, e.name)],
   );
 
-for (const build of ['isoloop', 'native', 'isoloop-preact', 'native-preact', 'mixed']) {
+for (const build of [
+  'isoloop',
+  'native',
+  'native-workers',
+  'isoloop-preact',
+  'native-preact',
+  'mixed',
+]) {
   const dir = join('dist', build);
   // `/mixed` counts its Preact isolates too; the React isolates it doesn't run stay out.
   const js = files(dir).filter((f) => f.endsWith('.js'));

@@ -1,6 +1,10 @@
 // "About this demo" (M3b task 19): what runs where, drawn with each isolate's
-// live state on Isoloop, and what a backend-less app can't do.
+// live state on Isoloop (and each data worker on native + workers), and what
+// a backend-less app can't do.
+import { BUILD } from '#env';
 import { buildMetrics } from '#metrics';
+import { CURRENT } from '../builds';
+import { placementFrom } from '../url';
 import { useEffect, useState } from 'react';
 
 type Node = { id: string; label: string };
@@ -53,7 +57,11 @@ function Column({
         {nodes
           .filter((n) => states === null || n.id in states || !n.id.startsWith('feed-'))
           .map((n) => {
-            const state = states === null ? 'main thread' : (states[n.id] ?? 'not started');
+            // On native + workers, what isn't in a worker is on the main thread.
+            const state =
+              states === null
+                ? 'main thread'
+                : (states[n.id] ?? (BUILD === 'native' ? 'main thread' : 'not started'));
             return (
               <li key={n.id} data-node={n.id}>
                 {n.label}{' '}
@@ -68,6 +76,20 @@ function Column({
   );
 }
 
+const placement = placementFrom(new URLSearchParams(location.search));
+
+/** What this build runs where, in a sentence. */
+const INTRO =
+  CURRENT === 'native-workers'
+    ? 'In this build the sources, the services and the engines each run in a worker of their own, and the widgets on the main thread; they talk through the page.'
+    : BUILD === 'native'
+      ? 'In this build everything shares the main thread.'
+      : placement === 'own'
+        ? 'In this build each box below is an isolate with its own event loop, talking over topics.'
+        : placement === 'matched'
+          ? 'In this build each box below is an isolate talking over topics; the sources, services and engines each have a worker of their own, and the widgets share one pool’s event loop.'
+          : 'In this build each box below is an isolate talking over topics; all of them share one pool’s event loop.';
+
 export function About() {
   const [states, setStates] = useState(() => buildMetrics.states());
   useEffect(() => {
@@ -80,10 +102,7 @@ export function About() {
       <p>
         Everything runs in your tab, served as static files: no backend. The feeds are public
         exchange WebSockets (or a recording, by default), and the aggregates and alerts are computed
-        here.{' '}
-        {states === null
-          ? 'In this build everything shares the main thread.'
-          : 'In this build each box below is an isolate with its own event loop, talking over topics.'}
+        here. {INTRO}
       </p>
       <div className="about-pipeline">
         <Column title="Sources" nodes={SOURCES} states={states} />
@@ -116,8 +135,9 @@ export function About() {
             : ''}
         </li>
         <li>
-          Heavy runs 30 isolates, within the soft budget of 32 workers (ADR 0001). Apps that need
-          more share workers through named pools (M2c).
+          Heavy runs 30 isolates. On a worker each (<code>?placement=own</code>) that is within the
+          soft budget of 32 workers (ADR 0001); <code>?placement=matched</code> pools the widgets
+          into one worker, and <code>?placement=one</code> puts every isolate in one.
         </li>
       </ul>
     </details>

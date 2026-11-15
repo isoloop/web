@@ -1,7 +1,7 @@
 // The shared engines (M3c decision 6): derived data several widgets use,
 // written once against a `Source`. On Isoloop each runs as a headless isolate
 // publishing its result topic; on native, as a main-thread service.
-import { SYMBOLS } from '../schemas';
+import { SYMBOLS } from '../symbols';
 import type { Stoppable } from '../services';
 import type { Source } from '../streams';
 import { CorrelationEngine, HORIZONS } from './correlations';

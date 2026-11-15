@@ -45,3 +45,30 @@ test('the native build runs the same pipeline on its store', async ({ page }) =>
   );
   expect(symbols).toEqual(['BTC-USD', 'ETH-USD', 'SOL-USD']);
 });
+
+test('the native + workers build runs the same pipeline from its workers', async ({ page }) => {
+  await page.goto('./native-workers/?size=normal&speed=10');
+  await expect(page.locator('.build')).toHaveAttribute('data-build', 'native');
+  await expect(page.locator('.build')).toContainText('Native + workers');
+  // The replay, the aggregator, the alerts and the three engines, a worker each.
+  await expect(page.locator('[data-metric="workers"] dd')).toHaveText('6', { timeout: 15_000 });
+  const seen = await page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const streams = new Set<string>();
+        const done = (s: string) => () => {
+          streams.add(s);
+          if (streams.size === 4) resolve([...streams].toSorted());
+        };
+        // Records published in four different workers reach the page's store.
+        window.store.subscribe('trades', done('trades'), 'latest');
+        window.store.subscribe('aggregates', done('aggregates'), 'latest');
+        window.store.subscribe('stats', done('stats'), 'latest');
+        window.store.subscribe('depth', done('depth'), 'latest');
+      }),
+  );
+  expect(seen).toEqual(['aggregates', 'depth', 'stats', 'trades']);
+  await page.getByText('About this demo').click();
+  await expect(page.locator('.about [data-node="aggregator"] .state')).toHaveText('worker');
+  await expect(page.locator('.about [data-node="price"] .state')).toHaveText('main thread');
+});
