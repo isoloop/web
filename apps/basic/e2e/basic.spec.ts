@@ -127,6 +127,24 @@ test('past the crash-loop guard A stays failed until it is restarted', async ({ 
   await expect(pane(page, 'A').locator('.guard')).toBeHidden();
 });
 
+test("while A is down, C and D say they have no count from A, and aren't stuck", async ({
+  page,
+}) => {
+  const waiting = (id: string) => pane(page, id).locator('.waiting');
+  await Promise.all(['C', 'D'].map((id) => expect(waiting(id)).toBeHidden()));
+  // A blocked for 3 s is killed at 2 s and restarted: down for a while.
+  await fault(page, 'A', 'Block 3 s').click();
+  await Promise.all(
+    ['C', 'D'].map((id) => expect(waiting(id)).toHaveText('no count from A', { timeout: 8_000 })),
+  );
+  // Their own loops are fine.
+  await Promise.all(['C', 'D'].map((id) => expect(status(page, id)).toContainText('loop ok')));
+  await ready(page, ['A']);
+  await Promise.all(['C', 'D'].map((id) => expect(waiting(id)).toBeHidden()));
+  // A and B have no upstream, so they never show it.
+  await Promise.all(['A', 'B'].map((id) => expect(waiting(id)).toBeHidden()));
+});
+
 test('a note sent from D reaches its log through the bus', async ({ page }) => {
   const input = surface(page, 'D').getByRole('textbox', { name: 'Note' });
   await input.fill('hello');
@@ -142,7 +160,9 @@ test('?embed=1 shows the demo without the header and footer', async ({ page }) =
   await expect(page.locator('.ui-header')).toBeHidden();
   await expect(page.locator('.ui-footer')).toBeHidden();
   // The landing page explains the demo above the iframe, so basic's intro is hidden.
-  await expect(page.locator('.intro > p:not(.guard-note)')).toBeHidden();
+  await expect(page.locator('.intro > p:not(.guard-note):not(.reads)')).toBeHidden();
+  // So is the sentence about C and D reading A: the landing page has its own.
+  await expect(page.locator('.intro .reads')).toBeHidden();
   await expect(page.locator('.intro .rules')).toBeHidden();
   // The controls and the pool's caption stay.
   await expect(page.locator('#block-main')).toBeVisible();
@@ -152,7 +172,8 @@ test('?embed=1 shows the demo without the header and footer', async ({ page }) =
 test('without ?embed=1 the intro is shown', async ({ page }) => {
   await page.goto('./');
   await ready(page);
-  await expect(page.locator('.intro > p:not(.guard-note)')).toBeVisible();
+  await expect(page.locator('.intro > p:not(.guard-note):not(.reads)')).toBeVisible();
+  await expect(page.locator('.intro .reads')).toContainText("C and D read A's count");
   await expect(page.locator('.intro .rules')).toBeVisible();
 });
 

@@ -38,6 +38,8 @@ export const activity = topic('activity.v1', {
     kind: z.enum(['task', 'read', 'rejected']).optional(),
     topic: z.string().max(40).optional(),
     offset: z.number().int().nonnegative().optional(),
+    /** For a read: the isolate that published the record it handled. */
+    from: z.string().max(20).optional(),
   }),
   retention: { kind: 'last-n', n: 200 },
 });

@@ -107,6 +107,13 @@
   color: var(--ui-bad);
   font-size: var(--ui-text-xs);
 }
+/* Waiting for input, not stuck: no hatching, just a quiet note. */
+.waiting {
+  margin: 0 0 var(--ui-space-2);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-xs);
+  font-style: italic;
+}
 .pane[data-state='failed'] {
   border-color: var(--ui-bad);
 }

@@ -6,7 +6,20 @@ import type { IsolateSnapshot, Kernel } from '@isoloop/host';
 export const GUARD =
   'Stopped after 3 restarts within a minute: the kernel’s crash-loop guard. Restart it to try again.';
 
-export type Pane = { id: string; body: HTMLElement; paint(s: IsolateSnapshot | undefined): void };
+export type Pane = {
+  id: string;
+  body: HTMLElement;
+  paint(s: IsolateSnapshot | undefined, upstream?: IsolateSnapshot): void;
+};
+
+/** States in which an upstream isolate publishes nothing: it's down or coming back. */
+const DOWN: ReadonlySet<string> = new Set([
+  'loading',
+  'restarting',
+  'crashed',
+  'failed',
+  'stopped',
+]);
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -21,7 +34,7 @@ function el<K extends keyof HTMLElementTagNameMap>(
 
 export function createPane(
   parent: HTMLElement,
-  spec: { id: string; name: string; where: string },
+  spec: { id: string; name: string; where: string; upstream?: string },
   kernel: Kernel,
 ): Pane {
   const pane = el('section', 'pane');
@@ -35,21 +48,25 @@ export function createPane(
   // Shown when the kernel's crash-loop guard has stopped restarting it.
   const guard = el('p', 'guard', GUARD);
   guard.hidden = true;
+  // While the isolate it reads from is down: it isn't stuck, it has no input.
+  const waiting = el('p', 'waiting', spec.upstream ? `no count from ${spec.upstream}` : '');
+  waiting.hidden = true;
   restart.addEventListener('click', () => {
     void kernel.restart(spec.id);
   });
   head.append(el('h3', 'pane-name', spec.name), el('span', 'where', spec.where), status, restarts);
   const body = el('div', 'pane-body');
   const foot = el('div', 'pane-foot');
-  foot.append(guard, restart);
+  foot.append(waiting, guard, restart);
   pane.append(head, body, foot);
   parent.append(pane);
 
   return {
     id: spec.id,
     body,
-    paint(s) {
+    paint(s, upstream) {
       if (!s) return;
+      waiting.hidden = !(spec.upstream && upstream && DOWN.has(upstream.state));
       restarts.textContent = `restarts: ${s.restarts}`;
       // Between a crash and the respawn, the supervisor is `restarting` with the error kept.
       const crashed = s.state === 'crashed' || (s.state === 'restarting' && s.error !== undefined);

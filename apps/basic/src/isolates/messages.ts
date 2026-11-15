@@ -33,6 +33,7 @@ export default defineIsolate<HTMLElement>({
           kind: 'read',
           topic: 'count.v1',
           offset: r.offset,
+          from: r.producer,
         });
       },
       from,
@@ -44,6 +45,7 @@ export default defineIsolate<HTMLElement>({
           kind: 'read',
           topic: 'note.v1',
           offset: r.offset,
+          from: r.producer,
         });
       },
       from,
@@ -55,6 +57,7 @@ export default defineIsolate<HTMLElement>({
           kind: 'read',
           topic: 'primes.v1',
           offset: r.offset,
+          from: r.producer,
         });
       },
       from,
