@@ -9,8 +9,12 @@ const pane = (page: Page, id: string) => page.locator(`section[data-isolate="${i
 const status = (page: Page, id: string) => pane(page, id).locator('.status');
 const restarts = (page: Page, id: string) => pane(page, id).locator('.restarts');
 const surface = (page: Page, id: string) => pane(page, id).locator('.pane-body');
+// Crash carries the restarts used this minute in its name ("Crash · 2/3").
 const fault = (page: Page, id: string, name: 'Block 3 s' | 'Crash') =>
-  surface(page, id).getByRole('button', { name, exact: true });
+  surface(page, id).getByRole(
+    'button',
+    name === 'Crash' ? { name: /^Crash/ } : { name, exact: true },
+  );
 
 const ALL = ['A', 'B', 'C', 'D'];
 
@@ -83,6 +87,46 @@ test('blocking A restarts only A, which reads its count back from the bus', asyn
   );
 });
 
+test('Crash counts the restarts used this minute', async ({ page }) => {
+  await expect(fault(page, 'A', 'Crash')).toHaveText('Crash · 0/3', { timeout: 5_000 });
+  const crashAndRecover = async (n: number): Promise<void> => {
+    await fault(page, 'A', 'Crash').click();
+    await expect(restarts(page, 'A')).toHaveText(`restarts: ${n}`, { timeout: 8_000 });
+    await ready(page, ['A']);
+    if (n < 2) await crashAndRecover(n + 1);
+  };
+  await crashAndRecover(1);
+  await expect(fault(page, 'A', 'Crash')).toHaveText('Crash · 2/3', { timeout: 3_000 });
+  await expect(fault(page, 'A', 'Crash')).toHaveAccessibleName(
+    'Crash · 2/3 restarts used this minute',
+  );
+  // B's count is its own.
+  await expect(fault(page, 'B', 'Crash')).toHaveText('Crash · 0/3');
+});
+
+test('past the crash-loop guard A stays failed until it is restarted', async ({ page }) => {
+  // 3 restarts within a minute are allowed; the 4th crash leaves it failed.
+  // One crash after another: each waits for A to run again.
+  const crashAndRecover = async (n: number): Promise<void> => {
+    await fault(page, 'A', 'Crash').click();
+    await expect(restarts(page, 'A')).toHaveText(`restarts: ${n}`, { timeout: 8_000 });
+    await ready(page, ['A']);
+    if (n < 3) await crashAndRecover(n + 1);
+  };
+  await crashAndRecover(1);
+  // The Crash button counts the restarts used this minute.
+  await expect(fault(page, 'A', 'Crash')).toHaveText('Crash · 3/3', { timeout: 3_000 });
+  await fault(page, 'A', 'Crash').click();
+  await expect(status(page, 'A')).toHaveText('failed: stopped restarting', { timeout: 5_000 });
+  await expect(pane(page, 'A').locator('.guard')).toBeVisible();
+  await expect(pane(page, 'A').locator('.guard')).toContainText('crash-loop guard');
+  // Nothing else noticed.
+  await Promise.all(['B', 'C', 'D'].map((id) => expect(status(page, id)).toContainText('loop ok')));
+  await pane(page, 'A').getByRole('button', { name: 'Restart A' }).click();
+  await ready(page, ['A']);
+  await expect(pane(page, 'A').locator('.guard')).toBeHidden();
+});
+
 test('a note sent from D reaches its log through the bus', async ({ page }) => {
   const input = surface(page, 'D').getByRole('textbox', { name: 'Note' });
   await input.fill('hello');
@@ -98,7 +142,7 @@ test('?embed=1 shows the demo without the header and footer', async ({ page }) =
   await expect(page.locator('.ui-header')).toBeHidden();
   await expect(page.locator('.ui-footer')).toBeHidden();
   // The landing page explains the demo above the iframe, so basic's intro is hidden.
-  await expect(page.locator('.intro > p')).toBeHidden();
+  await expect(page.locator('.intro > p:not(.guard-note)')).toBeHidden();
   await expect(page.locator('.intro .rules')).toBeHidden();
   // The controls and the pool's caption stay.
   await expect(page.locator('#block-main')).toBeVisible();
@@ -108,7 +152,7 @@ test('?embed=1 shows the demo without the header and footer', async ({ page }) =
 test('without ?embed=1 the intro is shown', async ({ page }) => {
   await page.goto('./');
   await ready(page);
-  await expect(page.locator('.intro > p')).toBeVisible();
+  await expect(page.locator('.intro > p:not(.guard-note)')).toBeVisible();
   await expect(page.locator('.intro .rules')).toBeVisible();
 });
 

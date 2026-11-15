@@ -132,6 +132,46 @@ test.describe('embedded in a same-origin parent', () => {
     expect((await ofType(page, 'crash'))[0]?.['reason']).toBe('error');
   });
 
+  test('reports failed past the crash-loop guard, and restart brings it back', async ({ page }) => {
+    const aReports = async (): Promise<number> =>
+      (await ofType(page, 'activity')).filter((a) => a['id'] === 'A').length;
+    await expect.poll(aReports, { timeout: 15_000 }).toBeGreaterThan(0);
+    // One crash after another: A takes commands again once it reports.
+    const crash = async (n: number): Promise<void> => {
+      const seen = await aReports();
+      if (n > 1) await expect.poll(aReports, { timeout: 10_000 }).toBeGreaterThan(seen);
+      await command(page, { v: PROTOCOL, type: 'command', act: 'crash-a' });
+      await expect
+        .poll(async () => (await ofType(page, 'crash')).length, { timeout: 5_000 })
+        .toBe(n);
+      if (n < 4) await crash(n + 1);
+    };
+    await crash(1);
+    await expect
+      .poll(async () => (await ofType(page, 'failed')).map((f) => f['id']), { timeout: 5_000 })
+      .toEqual(['A']);
+    // The count went up with each restart: 1, 2, 3 of 3.
+    const budgets = (await ofType(page, 'budget')).filter(
+      (b) => b['id'] === 'A' && b['cause'] === 'crash',
+    );
+    expect(budgets.map((b) => b['used'])).toEqual([1, 2, 3]);
+    // A restart naming an unknown isolate is ignored; one naming A brings it back.
+    await command(page, { v: PROTOCOL, type: 'command', act: 'restart', id: 'Z' });
+    await command(page, { v: PROTOCOL, type: 'command', act: 'restart' });
+    const before = await aReports();
+    await command(page, { v: PROTOCOL, type: 'command', act: 'restart', id: 'A' });
+    await expect
+      .poll(
+        async () =>
+          (await ofType(page, 'state')).some(
+            (s) => s['id'] === 'A' && s['prev'] === 'failed' && s['state'] === 'restarting',
+          ),
+        { timeout: 5_000 },
+      )
+      .toBe(true);
+    await expect.poll(aReports, { timeout: 10_000 }).toBeGreaterThan(before);
+  });
+
   test('ignores commands in another shape', async ({ page }) => {
     await expect
       .poll(async () => (await ofType(page, 'activity')).some((a) => a['id'] === 'A'), {

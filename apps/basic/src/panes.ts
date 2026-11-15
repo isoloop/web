@@ -2,6 +2,10 @@
 // runs, its loop's state and its restarts, painted from kernel.isolates().
 import type { IsolateSnapshot, Kernel } from '@isoloop/host';
 
+/** What a failed pane says: the kernel's restart limit (3 within 60 s by default). */
+export const GUARD =
+  'Stopped after 3 restarts within a minute: the kernel’s crash-loop guard. Restart it to try again.';
+
 export type Pane = { id: string; body: HTMLElement; paint(s: IsolateSnapshot | undefined): void };
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -26,14 +30,18 @@ export function createPane(
   const head = el('div', 'pane-head');
   const status = el('span', 'status', 'starting');
   const restarts = el('span', 'restarts');
-  const restart = el('button', 'ui-button small', 'Restart');
+  const restart = el('button', 'ui-button small', `Restart ${spec.id}`);
+  restart.dataset['restart'] = spec.id;
+  // Shown when the kernel's crash-loop guard has stopped restarting it.
+  const guard = el('p', 'guard', GUARD);
+  guard.hidden = true;
   restart.addEventListener('click', () => {
     void kernel.restart(spec.id);
   });
   head.append(el('h3', 'pane-name', spec.name), el('span', 'where', spec.where), status, restarts);
   const body = el('div', 'pane-body');
   const foot = el('div', 'pane-foot');
-  foot.append(restart);
+  foot.append(guard, restart);
   pane.append(head, body, foot);
   parent.append(pane);
 
@@ -51,8 +59,11 @@ export function createPane(
         status.textContent = `blocked ${((performance.now() - s.lastBeatAt) / 1000).toFixed(1)} s`;
       else if (s.state === 'running')
         status.textContent = `loop ok · lag ${Math.round(s.lagMs)} ms`;
-      else if (s.state === 'failed') status.textContent = 'failed';
+      else if (s.state === 'failed') status.textContent = 'failed: stopped restarting';
       else status.textContent = 'starting';
+      guard.hidden = s.state !== 'failed';
+      if (s.state === 'failed') restart.dataset['strong'] = '';
+      else delete restart.dataset['strong'];
     },
   };
 }

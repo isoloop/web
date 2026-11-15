@@ -53,4 +53,15 @@ export const control = topic('control.v1', {
   retention: { kind: 'last-n', n: 10 },
 });
 
-export default contracts(count, note, primes, activity, control);
+/**
+ * How many of its 3 restarts this minute each isolate has used, keyed by its
+ * id, published by the host (src/budget.ts) for the Crash buttons' labels.
+ * Compacted, and read from `earliest`, so a restarted isolate gets its count
+ * at once, whichever reaches the bus first, its subscription or the record.
+ */
+export const budget = topic('budget.v1', {
+  schema: z.object({ used: z.number().int().min(0).max(3) }),
+  retention: { kind: 'compacted' },
+});
+
+export default contracts(count, note, primes, activity, control, budget);

@@ -1,7 +1,7 @@
 // Small helpers for the vanilla isolates: elements built with the DOM calls the
 // isoloop-dom subset provides, and the Block and Crash buttons every isolate has.
 import type { IsolateContext } from '@isoloop/runtime';
-import { activity, control } from '../topics';
+import { activity, budget, control } from '../topics';
 
 type Child = Node | string | null | undefined | false;
 
@@ -15,6 +15,9 @@ export function el<K extends keyof HTMLElementTagNameMap>(
   for (const c of children) if (c) e.append(c);
   return e;
 }
+
+/** Restarts the kernel allows within a minute (its default, src/budget.ts). */
+const MAX_RESTARTS = 3;
 
 /** How long Block keeps the loop busy: past the kernel's 2 s kill limit (main.ts). */
 export const BLOCK_MS = 3_000;
@@ -42,6 +45,20 @@ export function faults(ctx: IsolateContext<HTMLElement>, name: string): HTMLElem
   blockButton.addEventListener('click', blockLoop);
   const crashButton = el('button', { 'data-fault': 'crash' }, 'Crash');
   crashButton.addEventListener('click', crash);
+  // The restarts this isolate has used this minute (src/budget.ts).
+  ctx.bus.subscribe(
+    budget,
+    (r) => {
+      if (r.key !== name) return;
+      const { used } = r.value;
+      crashButton.textContent = `Crash · ${used}/${MAX_RESTARTS}`;
+      crashButton.setAttribute(
+        'aria-label',
+        `Crash · ${used}/${MAX_RESTARTS} restarts used this minute`,
+      );
+    },
+    { from: 'earliest' },
+  );
   // Embedded, the site's controls arrive on control.v1 and do the same.
   if (reporting(ctx)) {
     ctx.bus.subscribe(control, (r) => {
