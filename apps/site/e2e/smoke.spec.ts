@@ -98,6 +98,63 @@ test('the landing recording draws what basic reports, and its controls reach bas
   expect((await problems()).filter((e) => !/crash|unresponsive/i.test(e))).toEqual([]);
 });
 
+test('the bus track draws only the app’s records, and reactions link to their sender', async ({
+  page,
+}) => {
+  const problems = await watch(page);
+  // Count what basic sends this page: records of the app's topics, and rejected publishes.
+  await page.addInitScript(() => {
+    const seen = { records: 0, rejected: 0, activity: 0 };
+    Reflect.set(window, 'seen', seen);
+    addEventListener('message', (e) => {
+      const d: unknown = e.data;
+      if (typeof d !== 'object' || d === null || Reflect.get(d, 'v') !== 'isoloop-demo@1') return;
+      const type: unknown = Reflect.get(d, 'type');
+      if (type === 'record') seen.records++;
+      if (type === 'activity') {
+        seen.activity++;
+        if (Reflect.get(d, 'kind') === 'rejected') seen.rejected++;
+      }
+    });
+  });
+  await page.goto('/');
+  const rec = page.locator('[data-demo="recording"]');
+  await rec.scrollIntoViewIfNeeded();
+  await expect(rec.locator('.ui-status')).toHaveText('Recording. Everything is running.', {
+    timeout: 15_000,
+  });
+  // A reaction (C or D reading A's count) gets a link back to A.
+  await expect
+    .poll(async () => Number((await rec.getAttribute('data-links')) ?? '0'), { timeout: 10_000 })
+    .toBeGreaterThan(0);
+  // Every bus tick is an app record or a rejected publish; the activity reports draw none.
+  const counts = await page.evaluate(() => {
+    const seen: unknown = Reflect.get(window, 'seen');
+    const n = (k: string): number => {
+      const v: unknown = typeof seen === 'object' && seen !== null ? Reflect.get(seen, k) : 0;
+      return typeof v === 'number' ? v : 0;
+    };
+    const root = document.querySelector<HTMLElement>('[data-demo="recording"]');
+    return {
+      records: n('records'),
+      rejected: n('rejected'),
+      activity: n('activity'),
+      bus: Number(root?.dataset['busTicks'] ?? '0'),
+    };
+  });
+  expect(counts.activity).toBeGreaterThan(counts.records);
+  expect(counts.bus).toBe(counts.records + counts.rejected);
+  await expect(rec.locator('.ui-legend')).toContainText('A hollow tick is a reaction to a record');
+  await expect(rec.locator('.ui-legend')).toContainText('measurement records aren’t drawn');
+  // While A is down, C's and D's rows say they wait for its count; then they don't.
+  const crashA = rec.getByRole('button', { name: /^Crash A/ });
+  await expect(crashA).toBeEnabled({ timeout: 15_000 });
+  await crashA.click();
+  await expect(rec).toHaveAttribute('data-waiting', 'A', { timeout: 5_000 });
+  await expect(rec).not.toHaveAttribute('data-waiting', 'A', { timeout: 10_000 });
+  expect((await problems()).filter((e) => !/crash/i.test(e))).toEqual([]);
+});
+
 test('past the crash-loop guard the recording shows A failed, and Restart A brings it back', async ({
   page,
 }) => {
