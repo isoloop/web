@@ -4,7 +4,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
-import { stoppedLabel } from '../src/comparison/stopped.ts';
+import { stoppedLabel } from 'compare/stopped';
 
 const DIR = process.env['COMPARE_OUT'] ?? 'comparison-results';
 const Result = z.object({

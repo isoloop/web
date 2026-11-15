@@ -397,6 +397,9 @@ importers:
       '@types/react-dom':
         specifier: catalog:react
         version: 19.3.0(@types/react@19.3.0)
+      compare:
+        specifier: workspace:*
+        version: link:../../../packages/compare
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -472,6 +475,25 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.6.7
+
+  packages/compare:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
+    devDependencies:
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.64.1
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@26.6.6)(vite@8.3.5(@types/node@26.6.6))
 
   packages/ui:
     dependencies:

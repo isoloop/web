@@ -5,6 +5,7 @@ The [Isoloop](https://github.com/isoloop/isoloop) website, its examples and its 
 - **Decisions** about this repo are in [`docs/adr`](docs/adr): what the repo is (0001), how the site is built (0002), the design system (0003).
 - **Plans** are in [`docs/plans`](docs/plans), starting with the [website plan](docs/plans/site.md).
 - **Apps** are packages under `apps/`, grouped by kind (`apps/dashboards/<name>`). The live examples are at [isoloop.dev/examples](https://isoloop.dev/examples/).
+- **Shared packages** are under `packages/`: [`ui`](packages/ui), the design system, and [`compare`](packages/compare), the head-to-head comparison runner the dashboards share. Both are private.
 
 Until the site's first tag (`site-v0.1.0`), [isoloop.dev](https://isoloop.dev/) shows a placeholder that links to the examples.
 
