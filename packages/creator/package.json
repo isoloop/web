@@ -2,7 +2,7 @@
   "name": "creator",
   "private": true,
   "type": "module",
-  "description": "The interactive pages' widget creator (M3e): the isoloop-spec@1 widget format, its validator, the topic catalog type, the filter, window and aggregate operators a widget's pipeline runs, the five views that draw its output, and the widget isolate that runs it.",
+  "description": "The interactive pages' widget creator (M3e): the isoloop-spec@1 widget format, its validator, the topic catalog type, the filter, window and aggregate operators a widget's pipeline runs, the five views that draw its output, the widget isolate that runs it, and the interactive board: the drawer that adds and edits widgets, and the controller that runs them.",
   "exports": {
     ".": "./src/index.ts",
     "./outputs": "./src/outputs.ts",
@@ -11,7 +11,11 @@
     "./view-kinds": "./src/views/kinds.ts",
     "./widget": "./src/widget/index.ts",
     "./widget-isolate": "./src/widget/isolate.tsx",
-    "./topics": "./src/topics.ts"
+    "./topics": "./src/topics.ts",
+    "./board": "./src/board/index.ts",
+    "./drawer": "./src/drawer/index.ts",
+    "./drawer-isolate": "./src/drawer/isolate.tsx",
+    "./styles.css": "./src/styles.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

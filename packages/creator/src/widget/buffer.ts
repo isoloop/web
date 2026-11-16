@@ -33,6 +33,12 @@ export class RawBuffer {
     this.#compact();
   }
 
+  /** Forgets every record (the source topic was lost in a bus restart). */
+  clear(): void {
+    this.#recs = [];
+    this.#head = 0;
+  }
+
   get size(): number {
     return this.#recs.length - this.#head;
   }

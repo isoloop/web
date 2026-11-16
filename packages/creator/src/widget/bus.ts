@@ -10,7 +10,7 @@ export interface BusLike {
   subscribe(
     topic: Ref,
     fn: (r: { key?: string | undefined; value: unknown }) => void,
-    opts: { from: 'earliest' },
+    opts: { from: 'earliest'; onReset?: () => void },
   ): () => void;
 }
 
@@ -21,6 +21,10 @@ function ref(name: string): Ref {
 
 export function isolateBus(bus: BusLike): WidgetBus {
   return {
-    subscribe: (topic, fn) => bus.subscribe(ref(topic), (r) => fn(r), { from: 'earliest' }),
+    subscribe: (topic, fn, opts) =>
+      bus.subscribe(ref(topic), (r) => fn(r), {
+        from: 'earliest',
+        ...(opts?.onReset ? { onReset: opts.onReset } : {}),
+      }),
   };
 }

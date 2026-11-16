@@ -47,7 +47,10 @@ export function spawnWidget(
     throw new Error(`spawnWidget: topic "${o.topic.name}" isn't the spec's "${spec.source.topic}"`);
   }
   const id = mode === 'draft' ? (o.draftId ?? spec.id) : spec.id;
-  const config: WidgetConfig = { id, mode, topic: o.topic };
+  const config: WidgetConfig =
+    mode === 'spec'
+      ? { id, mode, topic: o.topic, pool: spec.placement.pool }
+      : { id, mode, topic: o.topic };
   return kernel.spawn({
     id: isolateIdOf(mode, id),
     src: o.src,

@@ -19,8 +19,17 @@ export interface WidgetBus {
   subscribe(
     topic: string,
     fn: (r: { readonly key?: string | undefined; readonly value: unknown }) => void,
+    opts?: SubscribeHooks,
   ): () => void;
 }
+
+export type SubscribeHooks = {
+  /**
+   * A bus restart lost this memory topic (isoloop ADR 0007): clear what was
+   * built from it; records from the new bus follow.
+   */
+  readonly onReset?: () => void;
+};
 
 /** What a widget is told when it starts: `manifest.config` in an isolate. */
 export type WidgetConfig = {
@@ -29,6 +38,13 @@ export type WidgetConfig = {
   readonly mode: WidgetMode;
   /** The source topic's catalog entry. Its name is the one topic the widget may read. */
   readonly topic: CatalogTopic;
+  /**
+   * On the grid, the `placement.pool` it was spawned in. A spec naming
+   * another pool needs a new isolate. Replay delivers a key's older records
+   * first, so the widget compares each with where it runs, not with the
+   * record before it.
+   */
+  readonly pool?: string;
 };
 
 /**
@@ -92,12 +108,16 @@ export class WidgetRunner {
   start(): void {
     const { topic, mode, id } = this.#config;
     this.#unsubscribe.push(
-      this.#bus.subscribe(topic.name, (r) => {
-        if (!isRecord(r.value)) return;
-        const rec = toRec(topic, { key: r.key, value: r.value }, this.#now());
-        this.#buffer.push(rec);
-        this.#pipeline?.push(rec);
-      }),
+      this.#bus.subscribe(
+        topic.name,
+        (r) => {
+          if (!isRecord(r.value)) return;
+          const rec = toRec(topic, { key: r.key, value: r.value }, this.#now());
+          this.#buffer.push(rec);
+          this.#pipeline?.push(rec);
+        },
+        { onReset: () => this.#onSourceReset() },
+      ),
       this.#bus.subscribe(specTopicOf(mode), (r) => {
         if (r.key === id) this.#onSpec(specOf(r.value));
       }),
@@ -133,16 +153,24 @@ export class WidgetRunner {
       this.#set({ status: 'deleted' });
       return;
     }
-    const { mode, topic } = this.#config;
+    const { mode, topic, pool } = this.#config;
+    // Grants and placement are fixed at spawn: a spec for another source
+    // topic, or (on the grid) another pool, waits for the host to respawn.
+    const elsewhere =
+      spec.source.topic !== topic.name ||
+      (mode === 'spec' && pool !== undefined && spec.placement.pool !== pool);
+    if (elsewhere) {
+      this.#set({ status: 'respawn', spec: this.#applied, output: this.#output });
+      return;
+    }
     const old = this.#applied;
     if (old === undefined) {
-      if (spec.source.topic !== topic.name) {
-        this.#set({ status: 'respawn', spec: undefined, output: undefined });
-      } else this.#apply(spec);
+      this.#apply(spec);
       return;
     }
     const kind = applyKind(old, spec, mode);
     if (kind === 'respawn') {
+      // Without a pool in the config: a placement change, as applyKind says.
       this.#set({ status: 'respawn', spec: old, output: this.#output });
     } else if (kind === 'reconfigure') {
       if (mode === 'draft') this.#pending = setTimeout(() => this.#apply(spec), DRAFT_DELAY_MS);
@@ -151,6 +179,20 @@ export class WidgetRunner {
       // Back to the spec it runs: nothing to respawn after all.
       this.#set({ status: 'live', spec: old, output: this.#output });
     }
+  }
+
+  /**
+   * The bus restarted and lost the source topic: what the widget kept came
+   * from it, so it starts again empty, on the spec it runs. A lost draft
+   * keeps the preview on its last spec until the drawer publishes it again.
+   */
+  #onSourceReset(): void {
+    this.#buffer.clear();
+    if (this.#applied === undefined) return;
+    this.#pipeline = pipeline(this.#applied, this.#config.topic);
+    this.#output = undefined;
+    const s = this.#state;
+    if (s.status === 'live' || s.status === 'respawn') this.#set({ ...s, output: undefined });
   }
 
   #apply(spec: WidgetSpec): void {
