@@ -7,7 +7,10 @@ import { SIZE, type ViewSize } from './size';
 /**
  * What a canvas view draws: given a context and its size, draws and returns a
  * short description of what it drew, or null while it waits for data. The
- * description is kept on the canvas as `data-drawn`, for tests.
+ * description is kept on the canvas as `data-drawn`, for tests, and the time
+ * of each draw (epoch ms, the drawing thread's clock) as `data-drawn-at`, for
+ * the comparison's draw gaps (M3e decision 22). The time is set on the element
+ * directly, so a draw doesn't re-render the view.
  */
 export type Draw = (ctx: Ctx2D, width: number, height: number) => string | null;
 
@@ -21,7 +24,10 @@ export function CanvasView({ draw, size, view }: { draw: Draw; size: ViewSize; v
   const [frame] = useState(() =>
     perFrame(() => {
       const l = latest.current;
-      if (l.ctx) setDrawn(l.draw(l.ctx, l.width, l.height));
+      if (!l.ctx) return;
+      const what = l.draw(l.ctx, l.width, l.height);
+      setDrawn(what);
+      if (what !== null) ref.current?.setAttribute('data-drawn-at', String(Date.now()));
     }),
   );
   useEffect(() => {

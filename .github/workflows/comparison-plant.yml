@@ -5,6 +5,8 @@ name: Comparison (plant)
 # on each engine in its own job. Runs on demand, after a `plant-v*` deploy
 # (release.yml) and weekly (weekly.yml). The numbers are uploaded as an
 # artifact, with summary.md in the run's summary; nothing is asserted.
+# The `interactive` job runs the interactive page's head-to-head (M3e
+# decision 22): native against Isoloop at 5 kHz, 3 rounds, report-only.
 on:
   workflow_dispatch:
   workflow_call:
@@ -47,6 +49,36 @@ jobs:
         with:
           name: plant-comparison-${{ matrix.browser }}
           path: apps/dashboards/plant/comparison-results
+          retention-days: 90
+
+  interactive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/install-browsers
+        with:
+          browsers: ${{ matrix.browser }}
+      # A stopped run is written as a result, so this step doesn't fail on one.
+      - run: >-
+          pnpm --filter ./apps/dashboards/plant compare:interactive
+          --pair native=isoloop --rates 5 --rounds 3 --hold 0
+          --engines ${{ matrix.browser }} --out comparison-results/interactive
+      - run: cat apps/dashboards/plant/comparison-results/interactive/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: plant-interactive-comparison-${{ matrix.browser }}
+          path: apps/dashboards/plant/comparison-results/interactive
           retention-days: 90
 
   summary:
