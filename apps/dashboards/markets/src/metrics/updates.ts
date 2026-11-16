@@ -25,12 +25,12 @@ const WINDOW_MS = 1_000;
 const draws = new Map<string, { draws: number; at: number }>();
 const resumed = new Map<string, number>();
 /** The last minute of widget reports, for the comparison's fault figures (M3g decision 10). */
-const reports: { slot: string; n: number; ts: number }[] = [];
+const reports: { slot: string; n: number; since: number | undefined; ts: number }[] = [];
 const KEEP_REPORTS_MS = 60_000;
 buildMetrics.timings((t) => {
   if (t.draws !== undefined) draws.set(t.slot, { draws: t.draws, at: performance.now() });
   if (t.resumedAt !== undefined) resumed.set(t.slot, t.resumedAt);
-  reports.push({ slot: t.slot, n: (t.updates ?? 0) + (t.draws ?? 0), ts: t.ts });
+  reports.push({ slot: t.slot, n: (t.updates ?? 0) + (t.draws ?? 0), since: t.since, ts: t.ts });
   while ((reports[0]?.ts ?? Infinity) < t.ts - KEEP_REPORTS_MS) reports.shift();
 });
 
@@ -158,7 +158,10 @@ declare global {
      * running, longer for one whose thread stalled.
      */
     longestSilence: (slots: readonly string[], from: number, to: number) => number | null;
-    /** The time of the slot's first report after `after`, epoch ms, if there is one. */
+    /**
+     * The time of the slot's first report from a run of its code that
+     * started after `after` (a restart), epoch ms, if there is one.
+     */
     firstReport: (slot: string, after: number) => number | null;
   }
 }
@@ -182,4 +185,4 @@ window.longestSilence = (slots, from, to) => {
   return longest;
 };
 window.firstReport = (slot, after) =>
-  reports.find((r) => r.slot === slot && r.ts > after)?.ts ?? null;
+  reports.find((r) => r.slot === slot && (r.since ?? 0) > after)?.ts ?? null;

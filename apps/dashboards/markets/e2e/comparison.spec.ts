@@ -150,15 +150,14 @@ async function alertsFaults(page: Page): Promise<Record<string, number | null>> 
   await page.waitForTimeout(2_000);
   const crashAt = Date.now();
   await panelSlot.locator('button[name="stress-crash"]').click();
-  // Back: the panel reports again, from its code restarted. A report already
-  // on its way as the click landed is left out.
+  // Back: the panel reports again from a run of its code that started after
+  // the click, so a report its crashed run sent late isn't counted.
   let backMs: number | null = null;
   while (Date.now() < crashAt + 10_000) {
     // oxlint-disable-next-line no-await-in-loop -- polling
-    const report = await page.evaluate(
-      ([since]) => window.firstReport('alerts-panel', since + 250),
-      [crashAt] as const,
-    );
+    const report = await page.evaluate(([since]) => window.firstReport('alerts-panel', since), [
+      crashAt,
+    ] as const);
     if (report !== null) {
       backMs = report - crashAt;
       break;
