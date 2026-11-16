@@ -2,7 +2,7 @@
 # image, at the repo's Playwright version, with the browsers it ships, plus
 # Node 26 (the repo's engines field, which pnpm enforces) and pnpm, installed
 # with npm at the repo's packageManager version: Node 25+ no longer ships corepack.
-FROM mcr.microsoft.com/playwright:v1.64.1-noble
+FROM mcr.microsoft.com/playwright:v1.65.0-noble
 RUN set -eux; \
   apt-get update; apt-get install -y --no-install-recommends curl ca-certificates xz-utils; \
   rm -rf /var/lib/apt/lists/*; \

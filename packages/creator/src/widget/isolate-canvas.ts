@@ -12,13 +12,18 @@ export const useIsolateCanvas: UseCanvas = (ref) => {
     const el = ref.current;
     if (!el) return undefined;
     let off: OffscreenCanvas | undefined;
+    // Fetched once: Firefox 159 throws on a second getContext() after the
+    // OffscreenCanvas was resized ("Cannot update created context to
+    // different thread"). Resizing resets the context's state, so the
+    // transform is set again on each resize.
+    let ctx: OffscreenCanvasRenderingContext2D | null = null;
     let size = { width: 0, height: 0 };
     const apply = (): void => {
       if (!off || size.width === 0) return;
       const dpr = 2;
       off.width = Math.round(size.width * dpr);
       off.height = Math.round(size.height * dpr);
-      const ctx = off.getContext('2d');
+      ctx ??= off.getContext('2d');
       ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
       setState({ ctx, ...size });
     };
