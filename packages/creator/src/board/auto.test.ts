@@ -116,6 +116,9 @@ describe('balancer labels and badges', () => {
     expect(moveText({ from: 'Auto 1', to: 'Auto 2', reason: 'sustained' })).toBe(
       'moved: Auto 1 was over budget',
     );
+    expect(moveText({ from: 'Auto 1', to: 'Auto 2', reason: 'full' })).toBe(
+      'moved: Auto 1 was full',
+    );
     expect(moveText({ from: 'Auto 1', to: 'Quarantine', reason: 'spike' })).toMatch(/Quarantine/);
     expect(moveText({ from: 'Quarantine', to: 'Auto 1', reason: 'steady' })).toBe(
       'back in Auto 1: steady',

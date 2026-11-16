@@ -28,8 +28,13 @@ export interface BalancerLike {
   ): () => void;
 }
 
-/** Why the balancer moved a widget (ADR 0017). */
-export type MoveReason = 'spike' | 'sustained' | 'crash' | 'bisect' | 'steady';
+/**
+ * Why the balancer moved a widget (ADR 0017): one long task (`spike`), the
+ * pool's lag stayed high (`sustained`), its members' busy time reached 80 %
+ * of a core (`full`), a crash, a search for an unnamed culprit (`bisect`),
+ * or back out of quarantine (`steady`).
+ */
+export type MoveReason = 'spike' | 'sustained' | 'full' | 'crash' | 'bisect' | 'steady';
 
 /** A move, by widget id, with its pools as the page shows them. */
 export type AutoMove = {
@@ -64,6 +69,7 @@ export function balancerLabel(pool: string): string {
 export function moveText(m: Pick<AutoMove, 'from' | 'to' | 'reason'>): string {
   const text: Record<MoveReason, string> = {
     sustained: `moved: ${m.from} was over budget`,
+    full: `moved: ${m.from} was full`,
     spike: `moved to ${m.to}: it blocked ${m.from}`,
     crash: `moved to ${m.to}: it crashed ${m.from}`,
     bisect: `moved to ${m.to}: finding what blocked ${m.from}`,

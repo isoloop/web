@@ -42,7 +42,7 @@ test.describe('isoloop', () => {
     test.skip(stopsOn(browserName, 'isoloop'), WEBKIT_STOPS);
   });
 
-  test('without ?chaos the drawer has no burn, and validateSpec refuses one', async ({ page }) => {
+  test('without ?chaos the drawer offers no burn', async ({ page }) => {
     await page.goto('./interactive/isoloop/');
     await expect(page.locator('.creator-board[data-ready]')).toBeAttached();
     await page.locator('.creator-toolbar [data-action="add"]').click();
@@ -50,7 +50,7 @@ test.describe('isoloop', () => {
     await expect(form(page).locator('[data-chaos]')).toHaveCount(0);
   });
 
-  test('a light widget stays pooled; a blocking one goes to the quarantine, with a badge and a log entry', async ({
+  test('a light widget stays pooled; a blocking one goes to the quarantine, with a log entry', async ({
     page,
   }) => {
     test.setTimeout(120_000);
