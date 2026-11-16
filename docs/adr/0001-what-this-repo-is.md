@@ -45,6 +45,7 @@ The rename keeps the history, shas, tags, PRs and the `github-pages` environment
 | `apps/dashboards/<name>` | The markets and plant dashboards, as today |
 | `packages/ui` | The design system: tokens, shell CSS, header and footer partials ([ADR 0003](0003-design-system.md)). Not published. |
 | `packages/compare` | The head-to-head runner the dashboards' comparisons share: interleaved pairs, rounds, memory readings and `summary.md` (added in M3f, #98). Not published. |
+| `packages/creator` | The interactive pages' widget creator ([M3e](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3e-live-widget-creator.md)): the `isoloop-spec@1` widget format, its validator, the topic catalog type and the operators; the views, the drawer and the widget isolate follow. Not published. |
 
 ### 4. Address: `isoloop.dev`
 
