@@ -39,6 +39,14 @@ describe('loadExamples', () => {
     ]);
   });
 
+  it('validates a draft but leaves it off the hub', () => {
+    const root = repo({ basic: valid, processor: { ...valid, title: 'Processor', draft: true } });
+    expect(loadExamples(root).map((e) => e.id)).toEqual(['basic']);
+    expect(() => loadExamples(repo({ processor: { draft: true } }))).toThrow(
+      /apps\/processor\/example.json is invalid/,
+    );
+  });
+
   it('names the file when example.json is missing', () => {
     expect(() => loadExamples(repo({ basic: undefined }))).toThrow(
       /apps\/basic\/example.json is missing/,
