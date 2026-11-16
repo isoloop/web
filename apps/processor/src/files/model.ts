@@ -117,7 +117,8 @@ const order = (a: string, b: string): number => {
 
 export class FileProcessor {
   readonly #kernel: Kernel;
-  readonly #balancer: Balancer;
+  /** Absent with `?placement=one-off`: the comparison's baseline for the balancer's own cost. */
+  readonly #balancer: Balancer | undefined;
   readonly #src: string;
   readonly #maxWorkers: number;
   /** Each processor's id and kind: `csv-1`, `csv-2`, `image-1`… */
@@ -135,6 +136,8 @@ export class FileProcessor {
   readonly #finishedAt: number[] = [];
   readonly #latencies: { kind: Kind; ms: number }[] = [];
   readonly #recent: Result[] = [];
+  /** Every first result this run, when it arrived: for `since`, the comparison's window. */
+  readonly #timeline: { at: number; latency: number; corrupt: boolean }[] = [];
   #corrupt = 0;
   readonly #producedBy = new Map<Kind, number>();
   readonly #doneOf = new Map<Kind, number>();
@@ -145,16 +148,24 @@ export class FileProcessor {
   readonly #lags = new Map<string, { last: number; lags: number[] }>();
   readonly #moved = new Map<string, { reason: string; from: string; at: number }>();
   readonly #log: LogEntry[] = [];
+  readonly #movesAt: number[] = [];
 
   constructor(opts: {
     kernel: Kernel;
-    balancer: Balancer;
+    balancer?: Balancer | undefined;
+    /** Where the processors start: the balancer, a worker each, or one pool. */
+    mode?: Mode;
+    dials?: Partial<Omit<Dials, 'run'>>;
     processorSrc: string;
     generatorSrc: string;
     maxWorkers: number;
   }) {
     this.#kernel = opts.kernel;
     this.#balancer = opts.balancer;
+    this.#mode = opts.mode ?? (opts.balancer ? 'balancer' : 'one');
+    if (this.#mode === 'balancer' && !opts.balancer)
+      throw new Error('balancer placement needs a balancer');
+    this.#dials = { ...this.#dials, ...opts.dials };
     this.#src = opts.processorSrc;
     this.#maxWorkers = opts.maxWorkers;
 
@@ -196,6 +207,8 @@ export class FileProcessor {
         this.#doneBy.set(v.by, (this.#doneBy.get(v.by) ?? 0) + 1);
         const latency = v.done - v.created;
         this.#finishedAt.push(performance.now());
+        this.#timeline.push({ at: performance.now(), latency, corrupt: v.status === 'corrupt' });
+        if (this.#timeline.length > 50_000) this.#timeline.shift();
         if (v.status === 'corrupt') this.#corrupt++;
         else {
           this.#latencies.push({ kind: v.kind, ms: latency });
@@ -230,8 +243,9 @@ export class FileProcessor {
       }
       this.#lags.set(key, l);
     });
-    this.#balancer.on('move', (e) => {
+    this.#balancer?.on('move', (e) => {
       this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
+      this.#movesAt.push(performance.now());
       this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`);
     });
     this.#kernel.on('isolate:crash', (e) => {
@@ -258,6 +272,7 @@ export class FileProcessor {
     this.#finishedAt.length = 0;
     this.#latencies.length = 0;
     this.#recent.length = 0;
+    this.#timeline.length = 0;
     this.#corrupt = 0;
     this.#producedBy.clear();
     this.#doneOf.clear();
@@ -267,14 +282,17 @@ export class FileProcessor {
   }
 
   async setMode(mode: Mode): Promise<void> {
-    if (mode === this.#mode) return;
+    if (mode === this.#mode || (mode === 'balancer' && !this.#balancer)) return;
     const prev = this.#mode;
     this.#mode = mode;
     // The balancer's `stop` throws for one it's in the middle of moving (it
     // already stopped it, and drops the move): it's stopped either way.
     await Promise.all(
       this.#ids.map((id) =>
-        (prev === 'balancer' ? this.#balancer.stop(id) : this.#kernel.stop(id)).catch(() => {}),
+        (prev === 'balancer' && this.#balancer
+          ? this.#balancer.stop(id)
+          : this.#kernel.stop(id)
+        ).catch(() => {}),
       ),
     );
     this.#beats.clear();
@@ -295,6 +313,23 @@ export class FileProcessor {
     }
   }
 
+  /**
+   * The files done since `t` (`performance.now()`), for the comparison: how
+   * many, and their latency from being made to their result, p50 and p95.
+   * Corrupt files count as done but have no latency.
+   */
+  since(t: number): {
+    done: number;
+    p50: number | undefined;
+    p95: number | undefined;
+    moves: number;
+  } {
+    const done = this.#timeline.filter((r) => r.at >= t);
+    const lat = done.filter((r) => !r.corrupt).map((r) => r.latency);
+    const moves = this.#movesAt.filter((at) => at >= t).length;
+    return { done: done.length, p50: percentile(lat, 50), p95: percentile(lat, 95), moves };
+  }
+
   /** This run's file ids that have no result yet. */
   outstanding(): string[] {
     return [...this.#produced.keys()].filter((id) => !this.#done.has(id));
@@ -304,7 +339,7 @@ export class FileProcessor {
     const now = performance.now();
     while ((this.#finishedAt[0] ?? Infinity) < now - RATE_WINDOW_MS) this.#finishedAt.shift();
     const isolates = new Map(this.#kernel.isolates().map((i) => [i.id, i]));
-    const placements = new Map(this.#balancer.placements().map((p) => [p.id, p]));
+    const placements = new Map((this.#balancer?.placements() ?? []).map((p) => [p.id, p]));
 
     const workers = new Map<string, WorkerView>();
     for (const id of this.#ids) {
@@ -402,7 +437,7 @@ export class FileProcessor {
         subscribe: [TOPICS[kind].name],
       },
     };
-    if (this.#mode === 'balancer') this.#balancer.spawn(manifest);
+    if (this.#mode === 'balancer' && this.#balancer) this.#balancer.spawn(manifest);
     else if (this.#mode === 'one') this.#kernel.spawn({ ...manifest, pool: ONE });
     else this.#kernel.spawn(manifest);
   }

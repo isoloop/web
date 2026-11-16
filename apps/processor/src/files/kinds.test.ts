@@ -9,10 +9,12 @@ const drain = <T>(g: Generator<void, T>): T => {
   }
 };
 
-const time = (f: () => void): number => {
-  const t = performance.now();
-  f();
-  return performance.now() - t;
+/** How many slices (yields) a job's work takes. */
+const slices = (job: Parameters<typeof work>[0]): number => {
+  let n = 0;
+  const steps = work(job);
+  while (!steps.next().done) n++;
+  return n;
 };
 
 describe('the File processor kinds', () => {
@@ -45,12 +47,11 @@ describe('the File processor kinds', () => {
   });
 
   it('a heavy file is about ten times the work, and size scales it', () => {
+    // Counted in slices, not timed: a shared CI runner's timing is too noisy.
     for (const kind of KINDS) {
-      runAll({ id: 'w', kind, size: 2, seed: 3 }); // warm up
-      const one = time(() => runAll({ id: 'a', kind, size: 1, seed: 3 }));
-      const heavy = time(() => runAll({ id: 'b', kind, size: 1, seed: 3, heavy: true }));
-      console.log(`${kind}: size 1 ${one.toFixed(1)} ms, heavy ${heavy.toFixed(1)} ms`);
-      expect(heavy).toBeGreaterThan(one * 4);
+      const one = slices({ id: 'a', kind, size: 1, seed: 3 });
+      expect(slices({ id: 'b', kind, size: 1, seed: 3, heavy: true })).toBeGreaterThan(one * 6);
+      expect(slices({ id: 'c', kind, size: 4, seed: 3 })).toBeGreaterThan(one * 2.5);
     }
   });
 });

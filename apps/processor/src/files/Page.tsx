@@ -266,7 +266,8 @@ function Recent({ results }: { results: Result[] }): ReactElement {
           onChange={(e) => setFilter(e.currentTarget.value)}
         />
       </header>
-      <table>
+      {/* `data-filter`: the filter this table was drawn with, for the comparison's typing latency. */}
+      <table data-filter={f}>
         <thead>
           <tr>
             <th scope="col">File</th>
