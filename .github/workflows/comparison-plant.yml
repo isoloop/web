@@ -6,7 +6,8 @@ name: Comparison (plant)
 # (release.yml) and weekly (weekly.yml). The numbers are uploaded as an
 # artifact, with summary.md in the run's summary; nothing is asserted.
 # The `interactive` job runs the interactive page's head-to-head (M3e
-# decision 22): native against Isoloop at 5 kHz, 3 rounds, report-only.
+# decision 22): native against Isoloop at 5 kHz, 3 rounds, report-only, with a
+# typical preview and a heavy one (every raw vibration sample).
 on:
   workflow_dispatch:
   workflow_call:

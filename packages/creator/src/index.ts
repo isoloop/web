@@ -3,10 +3,13 @@
 export {
   KEY_FIELD,
   fieldOf,
+  samplesOf,
   toRec,
   topicOf,
   type Catalog,
   type CatalogField,
+  type CatalogPreset,
+  type CatalogSamples,
   type CatalogTopic,
   type FieldType,
   type Rec,
@@ -37,4 +40,4 @@ export {
   type SpecError,
   type SpecResult,
 } from './spec/validate';
-export { aggregate, compileWhere, percentile } from './operators';
+export { aggregate, aggregateSamples, compileWhere, percentile } from './operators';

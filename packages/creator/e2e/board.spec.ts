@@ -8,6 +8,7 @@ import type { WidgetSpec } from '../src/spec/types';
 
 type BoardApi = {
   publishSpecs(specs: WidgetSpec[]): Promise<void>;
+  flushSpecs(): Promise<void>;
   restart(id: string): Promise<void>;
   crashBus(): void;
   busReady: number;
@@ -45,6 +46,16 @@ async function isolates(page: Page): Promise<Snapshot[]> {
 }
 
 /** Builds "avg of temp every second, by machine" in the open form, as a line. */
+/**
+ * Waits until the creator's specs are on disk. The grid follows delivery, but
+ * a persistent topic acknowledges a publish once its batch is on disk
+ * (ADR 0007), and a later publish to the same topic is flushed after the
+ * earlier ones: wait for one, so a reload doesn't race the last write.
+ */
+async function flushSpecs(page: Page): Promise<void> {
+  await page.evaluate(() => window.board.flushSpecs());
+}
+
 async function buildLine(page: Page): Promise<void> {
   await field(page, 'fn').selectOption('avg');
   // An aggregate needs a window: the form says so on the window field, and Add is off.
@@ -128,6 +139,7 @@ for (const [kind, url] of PAGES) {
       await action(page, 'save').click();
       await slot(page, 's2').locator('[data-action="delete"]').click();
       await expect(slots(page)).toHaveCount(1);
+      if (kind === 'isoloop') await flushSpecs(page);
       await page.reload();
       await expect(page.locator('.creator-board[data-ready]')).toBeAttached();
       await expect(slots(page)).toHaveCount(1);

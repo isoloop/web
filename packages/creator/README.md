@@ -4,7 +4,7 @@ The widget creator behind the dashboards' interactive pages ([M3e](https://githu
 
 | Export | What it is |
 | --- | --- |
-| `creator` | `validateSpec(spec, catalog)`, `pipeline(spec, topic)`, `outputKind(operators)`, the `isoloop-spec@1` types (`WidgetSpec`, `Operator`, `Where`…), the catalog types with `topicOf`, `fieldOf` and `toRec`, and everything in `creator/outputs` |
+| `creator` | `validateSpec(spec, catalog)`, `pipeline(spec, topic)`, `outputKind(operators)`, the `isoloop-spec@1` types (`WidgetSpec`, `Operator`, `Where`…), the catalog types (with sample topics and presets) with `topicOf`, `fieldOf`, `samplesOf` and `toRec`, and everything in `creator/outputs` |
 | `creator/outputs` | What a pipeline hands its view: the `rows`, `scalar`, `series` and `grid` shapes, their limits, and `VIEW_INPUTS`, the outputs each view draws |
 | `creator/views` | The five views (React): `View` renders any of them by type with the spec's `view.options`; `ViewEnv` gives canvas views their draw target |
 | `creator/view-kinds` | Without React: `VIEW_TYPES`, `VIEW_LABELS`, `viewAccepts`, and `VIEW_OPTIONS` with `checkViewOptions`, the options each view reads |
@@ -70,6 +70,14 @@ else {
 ```
 
 A pipeline with `every` takes its ticks on `read`, so the first read after a replay fills the history at once.
+
+### Topics that carry samples
+
+A raw signal arrives as chunks: one record with an array of samples (plant's vibration, 50 to 250 samples per 50 ms). A catalog entry says so with `samples: { field, value }`. `field` is the record property holding the array (an array or typed array of numbers), and `value` is the number field the samples are offered as, listed in `fields`. The widget keeps the chunks as they arrive, bounded like any topic's records, and an aggregate over `value` reads every sample straight from the arrays: one `Float64Array` copy to sort for `percentile`, no object per sample. `count` counts samples. Such a topic needs an aggregate and a time window, and a filter tests a whole record, so it can't test `value`; `validateSpec` says so.
+
+### Presets
+
+`catalog.presets` lists ready widgets, each `{ id, label, spec }` without an id or placement. The drawer shows one button per preset (plant's "Try a heavy widget") that fills the form with its spec. A test in each dashboard checks every preset passes `validateSpec`.
 
 ## The views
 

@@ -49,6 +49,22 @@ async function isolates(page: Page): Promise<Snapshot[]> {
   );
 }
 
+/**
+ * Waits until the creator's specs are on disk. The grid follows delivery, but
+ * a persistent topic acknowledges a publish once its batch is on disk
+ * (ADR 0007), and a later publish to the same topic is flushed after the
+ * earlier ones: wait for one, so a reload doesn't race the last write.
+ */
+async function flushSpecs(page: Page): Promise<void> {
+  await page.evaluate(() =>
+    window.kernel.publish(
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the kernel reads only `name`; the broker validates
+      { name: 'creator.specs.v1', schema: { '~standard': {} } } as never,
+      { key: '$sync', value: { sync: 'flushed' } },
+    ),
+  );
+}
+
 /** Every starter shows its data: the canvases drew, the stat has a value, the tables have rows. */
 async function startersDraw(page: Page): Promise<void> {
   await expect(slots(page)).toHaveCount(6);
@@ -120,6 +136,28 @@ for (const kind of KINDS) {
       await drawn(added, 'line');
     });
 
+    test('"Try a heavy widget" fills the form, and the preview draws every sample', async ({
+      page,
+      browserName,
+    }) => {
+      needsFrames(browserName, kind);
+      await open(page, kind);
+      await page.locator('.creator-toolbar [data-action="add"]').click();
+      await expect(drawer(page)).toBeVisible();
+      await form(page).locator('[data-action="preset"][data-preset="heavy-vib-p99"]').click();
+      await expect(field(page, 'topic')).toHaveValue('plant.vib');
+      await expect(field(page, 'fn')).toHaveValue('percentile');
+      await expect(field(page, 'p')).toHaveValue('99');
+      await expect(field(page, 'title')).toHaveValue(
+        'Vibration p99 by machine (30 s, every sample)',
+      );
+      await expect(form(page)).toHaveAttribute('data-valid', 'true');
+      // A line per machine: the p99 of each one's raw vibration samples.
+      await expect(
+        page.locator('.creator-drawer-preview canvas[data-view="line"]'),
+      ).toHaveAttribute('data-drawn', /^line:8x/, { timeout: FIRST_DRAW });
+    });
+
     test('edit in place, delete, then reset to the starters', async ({ page, browserName }) => {
       needsFrames(browserName, kind);
       await open(page, kind);
@@ -158,6 +196,7 @@ for (const kind of KINDS) {
       await action(page, 'save').click();
       await slot(page, 'active-alarms').locator('[data-action="delete"]').click();
       await expect(slots(page)).toHaveCount(5);
+      if (kind === 'isoloop') await flushSpecs(page);
       await page.reload();
       await expect(page.locator('.creator-board[data-ready]')).toBeAttached();
       await expect(slots(page)).toHaveCount(5);
