@@ -2,6 +2,7 @@
 import type { VNode } from 'preact';
 import type { Example } from '../../build/examples.ts';
 import { examplesPage } from '../copy.ts';
+import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
 
 /** An example's links: live first, then source, results and architecture. */
@@ -86,10 +87,9 @@ export function ExampleList({
 function Examples({ examples }: SiteData): VNode {
   return (
     <main class="ui-shell">
-      <section class="ui-intro" aria-labelledby="title">
-        <h1 id="title">{examplesPage.heading}</h1>
+      <PageIntro title={examplesPage.heading}>
         <p class="ui-lede">{examplesPage.intro}</p>
-      </section>
+      </PageIntro>
       <section class="ui-gutter" aria-label={examplesPage.heading}>
         <div class="ui-gutter-empty" aria-hidden="true" />
         <div class="ui-body">

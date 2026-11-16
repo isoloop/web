@@ -4,6 +4,7 @@ import { Table } from 'ui/components';
 import { features, featuresPage as f, home } from '../copy.ts';
 import { Recording } from './recording.tsx';
 import { rich } from './rich.tsx';
+import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison';
@@ -35,21 +36,24 @@ function Code({ children }: { children: string }): VNode {
 function Features({ samples }: SiteData): VNode {
   return (
     <main class="ui-shell">
-      <section class="ui-intro" aria-labelledby="title">
-        <h1 id="title">{f.heading}</h1>
+      <PageIntro
+        title={f.heading}
+        after={
+          <nav class="ui-strip" aria-label="Features">
+            <ul>
+              {features.map((x) => (
+                <li key={x.id} data-part={x.part}>
+                  <a href={`#${x.id}`}>
+                    <b>{x.name}</b> {x.line}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        }
+      >
         <p class="ui-lede">{f.lede}</p>
-        <nav class="ui-strip" aria-label="Features">
-          <ul>
-            {features.map((x) => (
-              <li key={x.id} data-part={x.part}>
-                <a href={`#${x.id}`}>
-                  <b>{x.name}</b> {x.line}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </section>
+      </PageIntro>
 
       <Feature id="containment">
         <p>{f.containment.text}</p>

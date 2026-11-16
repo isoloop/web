@@ -4,6 +4,7 @@ import { Table } from 'ui/components';
 import { features, home, site } from '../copy.ts';
 import { ExampleList } from './examples.tsx';
 import { Recording } from './recording.tsx';
+import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
@@ -12,8 +13,7 @@ const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/p
 function Home({ examples }: SiteData): VNode {
   return (
     <main class="ui-shell">
-      <section class="ui-intro" aria-labelledby="intro">
-        <h1 id="intro">{home.intro.heading}</h1>
+      <PageIntro title={home.intro.heading} id="intro">
         <p class="ui-lede">{home.intro.text}</p>
         <p class="ui-actions">
           <a class="ui-button" data-primary href="/features/">
@@ -21,7 +21,7 @@ function Home({ examples }: SiteData): VNode {
           </a>
           <a href="#examples">{home.intro.secondary}</a>
         </p>
-      </section>
+      </PageIntro>
 
       <section class="ui-try-section" aria-label="Try it">
         <p class="ui-try">{home.try}</p>
