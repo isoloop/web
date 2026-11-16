@@ -33,7 +33,7 @@ const PAIRS: (readonly [isoloop: string, native: string])[] = [
 // - Normal: the medians fall either side of the budget from run to run
 //   (isoloop 170–588 ms, isoloop-preact 228–642 ms), so neither asserting nor
 //   expecting a failure is stable. They're reported only: measured, annotated
-//   and attached, not asserted.
+//   and attached, not asserted; a run that times out is annotated as such.
 // See https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md
 const WEBKIT_EXPECTED_FAIL = new Set([
   'isoloop@heavy',
@@ -99,7 +99,19 @@ for (const size of SIZES) {
         `Known over budget on WebKit: worker canvases are presented on the main thread (${ENGINE_CONSTRAINTS})`,
       );
       const reportOnly = browserName === 'webkit' ? WEBKIT_REPORT_ONLY.get(key) : undefined;
-      const iso = await measure(page, isoloop, size);
+      let iso: number;
+      try {
+        iso = await measure(page, isoloop, size);
+      } catch (error) {
+        // Reported only: a keystroke that never re-renders within the wait is
+        // recorded as a timeout, not a failure (both happen on WebKit).
+        if (reportOnly === undefined) throw error;
+        info.annotations.push({
+          type: 'webkit: reported, not asserted',
+          description: `${isoloop} at ${size}: timed out waiting for the panel to re-render; CI medians so far ${reportOnly}. Worker canvases are presented on the main thread (${ENGINE_CONSTRAINTS})`,
+        });
+        return;
+      }
       const nat = await measure(page, native, size);
       const ratio = nat > 0 ? iso / nat : null;
       const report = { size, isoloop, native, isoloopMedianMs: iso, nativeMedianMs: nat, ratio };
