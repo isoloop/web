@@ -4,6 +4,7 @@ A backend-less markets dashboard. Public exchange feeds, or a seeded replay of t
 
 - **native:** everything on the main thread.
 - **native + workers:** the replay, the aggregator, alerts and the three engines in a worker each (and the four feeds, in live mode), with the widgets on the main thread.
+- **native + workers, React and Preact** (`/native-mixed/`): native + workers, with the filters and the alerts panel as Preact parts built and shipped apart (`vite build --mode native-mixed-parts`) and loaded at run time with `import()` from their own `parts/parts-manifest.json`. Each part exports `mount(el, host)`, where `host` is the page's store; nothing else is shared (`src/parts/contract.ts`). The native counterpart of `/mixed`.
 - **Isoloop:** in React, in Preact, or both mixed.
 
 The Isoloop builds place their isolates with `?placement=`:

@@ -13,12 +13,14 @@ for (const build of [
   'isoloop',
   'native',
   'native-workers',
+  'native-mixed',
   'isoloop-preact',
   'native-preact',
   'mixed',
 ]) {
   const dir = join('dist', build);
-  // `/mixed` counts its Preact isolates too; the React isolates it doesn't run stay out.
+  // `/mixed` counts its Preact isolates too, and `/native-mixed` its parts; the
+  // React isolates `/mixed` doesn't run stay out.
   const js = files(dir).filter((f) => f.endsWith('.js'));
   const jsGzipBytes = js.reduce((n, f) => n + gzipSync(readFileSync(f)).length, 0);
   writeFileSync(join(dir, 'build-stats.json'), `${JSON.stringify({ jsGzipBytes })}\n`);

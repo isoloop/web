@@ -20,6 +20,8 @@ export const LIBRARY: Record<BuildName, string> = {
     'Every widget renders with Preact on the main thread, beside the data pipeline. A blocked widget stalls the whole page.',
   'native-workers':
     'React widgets on the main thread; the replay, the aggregator, alerts and the three engines in a hand-written worker each. A blocked widget stalls the whole page; the data keeps flowing.',
+  'native-mixed':
+    'As native + workers, except the filters and the alerts panel: those are Preact, built and shipped apart and loaded at run time, as another team’s part would be. A blocked widget stalls the whole page.',
 };
 
 /** The Placement row on native builds, kept so the box doesn't change height. */

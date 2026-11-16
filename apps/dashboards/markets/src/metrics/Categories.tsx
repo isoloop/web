@@ -120,7 +120,7 @@ export function CategoryPanel({ widgets }: { widgets: readonly WidgetName[] }) {
             <th>Slots</th>
             <th>Updates/s</th>
             <th>
-              {CURRENT === 'native-workers'
+              {CURRENT === 'native-workers' || CURRENT === 'native-mixed'
                 ? 'Render and draw (main thread; engines on their workers)'
                 : native
                   ? 'Render and draw (main thread)'

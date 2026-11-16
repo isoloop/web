@@ -61,6 +61,7 @@ const OTHERS = [
   ...inScope([
     'isoloop',
     'native-workers',
+    'native-mixed',
     'isoloop-preact',
     'native-preact',
     'mixed',

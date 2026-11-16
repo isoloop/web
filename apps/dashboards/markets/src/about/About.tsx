@@ -82,13 +82,15 @@ const placement = placementFrom(new URLSearchParams(location.search));
 const INTRO =
   CURRENT === 'native-workers'
     ? 'In this build the sources, the services and the engines each run in a worker of their own, and the widgets on the main thread; they talk through the page.'
-    : BUILD === 'native'
-      ? 'In this build everything shares the main thread.'
-      : placement === 'own'
-        ? 'In this build each box below is an isolate with its own event loop, talking over topics.'
-        : placement === 'matched'
-          ? 'In this build each box below is an isolate talking over topics; the sources, services and engines each have a worker of their own, and the widgets share one pool’s event loop.'
-          : 'In this build each box below is an isolate talking over topics; all of them share one pool’s event loop.';
+    : CURRENT === 'native-mixed'
+      ? 'In this build the sources, the services and the engines each run in a worker of their own, and the widgets on the main thread; the filters and the alerts panel are another team’s Preact part, loaded at run time.'
+      : BUILD === 'native'
+        ? 'In this build everything shares the main thread.'
+        : placement === 'own'
+          ? 'In this build each box below is an isolate with its own event loop, talking over topics.'
+          : placement === 'matched'
+            ? 'In this build each box below is an isolate talking over topics; the sources, services and engines each have a worker of their own, and the widgets share one pool’s event loop.'
+            : 'In this build each box below is an isolate talking over topics; all of them share one pool’s event loop.';
 
 export function About() {
   const [states, setStates] = useState(() => buildMetrics.states());

@@ -8,6 +8,7 @@ writeFileSync(
     '<meta http-equiv="refresh" content="0; url=./isoloop/">' +
     '<a href="./isoloop/">Markets on Isoloop</a> · <a href="./native/">native</a> · ' +
     '<a href="./native-workers/">native + workers</a> · ' +
+    '<a href="./native-mixed/">native + workers, React and Preact</a> · ' +
     '<a href="./isoloop-preact/">Isoloop, Preact</a> · <a href="./native-preact/">native, Preact</a> · ' +
     '<a href="./mixed/">React and Preact</a>\n',
 );
