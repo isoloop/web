@@ -9,6 +9,12 @@ export const SPECS_TOPIC = 'creator.specs.v1';
 export const DRAFT_TOPIC = 'creator.draft.v1';
 /** The page and the drawer talking: pool status, open, done (see board/ui.ts); compacted, in memory. */
 export const UI_TOPIC = 'creator.ui.v1';
+/**
+ * Each `auto` widget's measured load, keyed by isolate id (`widget-<id>`), so
+ * a reload places it from history (M3h decision 12); compacted, persistent.
+ * Only the page reads and writes it (board/loads.ts).
+ */
+export const PLACEMENT_TOPIC = 'creator.placement.v1';
 
 /**
  * A spec record: the widget's spec, or a tombstone. The bus has no delete, so

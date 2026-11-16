@@ -19,6 +19,23 @@ function withOp(i: number, op: unknown): unknown {
 }
 
 describe('validateSpec accepts', () => {
+  it('automatic placement (M3h)', () => {
+    expect(errors(validateSpec({ ...spec(), placement: { mode: 'auto' } }, CATALOG))).toEqual({});
+  });
+
+  it('burn with ?chaos, as a block or a steady load, anywhere in the list', () => {
+    const s = spec();
+    const chaos = { chaos: true };
+    const block = { op: 'burn', everyMs: 10_000, forMs: 500 };
+    const load = { op: 'burn', loadPct: 40 };
+    expect(
+      errors(validateSpec({ ...s, operators: [block, ...s.operators] }, CATALOG, chaos)),
+    ).toEqual({});
+    expect(
+      errors(validateSpec({ ...s, operators: [...s.operators, load] }, CATALOG, chaos)),
+    ).toEqual({});
+  });
+
   it('the plan example shape, trimming the title', () => {
     const result = validateSpec({ ...spec(), title: '  Pump 1  ' }, CATALOG);
     expect(result).toMatchObject({ ok: true, spec: { title: 'Pump 1' } });
@@ -75,10 +92,19 @@ describe('validateSpec rejects, with the path of the error', () => {
     expect(paths(withOp(1, { op: 'combine', with: 'x' }))).toEqual(['operators[1].op']);
   });
 
-  it('automatic placement, which v1 doesn’t have', () => {
-    const result = validateSpec({ ...spec(), placement: { mode: 'auto' } }, CATALOG);
-    expect(errors(result)['placement.mode']).toMatch(/manual/);
-    expect(Object.keys(errors(result))).toContain('placement.pool');
+  it('a placement that is neither manual with a pool nor auto alone', () => {
+    expect(paths({ ...spec(), placement: { mode: 'manual' } })).toEqual(['placement.pool']);
+    expect(paths({ ...spec(), placement: { mode: 'auto', pool: 'pool-1' } })).toEqual([
+      'placement',
+    ]);
+    expect(paths({ ...spec(), placement: { mode: 'somewhere' } })).toEqual(['placement.mode']);
+  });
+
+  it('burn without ?chaos, wherever it is', () => {
+    const s = spec();
+    const burn = { op: 'burn', everyMs: 10_000, forMs: 500 };
+    expect(paths({ ...s, operators: [burn, ...s.operators] })).toEqual(['operators[0]']);
+    expect(paths({ ...s, operators: [...s.operators, burn] })).toEqual(['operators[3]']);
   });
 
   it('a topic or key the catalog doesn’t have', () => {
@@ -214,5 +240,35 @@ describe('validateSpec rejects, with the path of the error', () => {
       'source.key',
       'view.type',
     ]);
+  });
+});
+
+/** The error paths of the default spec with `burn` added last, on a `?chaos` page. */
+function chaosPaths(burn: unknown): string[] {
+  const s = spec();
+  return Object.keys(
+    errors(validateSpec({ ...s, operators: [...s.operators, burn] }, CATALOG, { chaos: true })),
+  );
+}
+
+describe('burn, with ?chaos', () => {
+  it('is a block or a load, not both and not neither', () => {
+    expect(chaosPaths({ op: 'burn' })).toEqual(['operators[3]']);
+    expect(chaosPaths({ op: 'burn', everyMs: 1000, forMs: 10, loadPct: 5 })).toEqual([
+      'operators[3]',
+    ]);
+  });
+
+  it('needs both halves of a block, shorter than its period', () => {
+    expect(chaosPaths({ op: 'burn', everyMs: 1000 })).toEqual(['operators[3].forMs']);
+    expect(chaosPaths({ op: 'burn', forMs: 100 })).toEqual(['operators[3].everyMs']);
+    expect(chaosPaths({ op: 'burn', everyMs: 500, forMs: 500 })).toEqual(['operators[3].forMs']);
+  });
+
+  it('stays under the kill and a sane load', () => {
+    expect(chaosPaths({ op: 'burn', everyMs: 10_000, forMs: 1_501 })).toEqual([
+      'operators[3].forMs',
+    ]);
+    expect(chaosPaths({ op: 'burn', loadPct: 95 })).toEqual(['operators[3].loadPct']);
   });
 });

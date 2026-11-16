@@ -4,18 +4,20 @@
 //
 // The form has one filter operator (its rows joined by `and` or `or`, each
 // row optionally negated), one window (by seconds or by count) and one
-// aggregate, in the order validateSpec wants them.
+// aggregate, in the order validateSpec wants them; with `?chaos`, a test-only
+// burn after them (M3h decision 21).
 import { KEY_FIELD, fieldOf, topicOf, type Catalog, type CatalogTopic } from '../catalog';
 import type { OutputKind, ViewType } from '../outputs';
 import { outputKind } from '../pipeline';
-import type {
-  AggregateFn,
-  CompareOp,
-  Operator,
-  Scalar,
-  Size,
-  Where,
-  WidgetSpec,
+import {
+  placementKey,
+  type AggregateFn,
+  type CompareOp,
+  type Operator,
+  type Scalar,
+  type Size,
+  type Where,
+  type WidgetSpec,
 } from '../spec/types';
 import { VIEW_TYPES, viewAccepts } from '../views/kinds';
 
@@ -55,8 +57,20 @@ export type FormState = {
   /** Stat gauge bounds. */
   readonly gaugeMin: string;
   readonly gaugeMax: string;
+  /** A creator pool (`pool-1`), or AUTO_POOL for the page's balancer (M3h). */
   readonly pool: string;
+  /** Test only, with `?chaos` (M3h decision 21): none, a block, or a steady load. */
+  readonly burn: 'none' | 'block' | 'load';
+  /** Seconds between blocks. */
+  readonly burnEvery: string;
+  /** Milliseconds each block lasts. */
+  readonly burnFor: string;
+  /** Percent of one core. */
+  readonly burnLoad: string;
 };
+
+/** The placement field's "Automatic": the page's balancer places the widget (M3h decision 20). */
+export const AUTO_POOL = '$auto';
 
 export const COMPARE_OPS: readonly RowOp[] = ['==', '!=', '<', '<=', '>', '>=', 'in'];
 export const AGGREGATE_FNS: readonly AggregateFn[] = [
@@ -108,6 +122,10 @@ export function emptyForm(catalog: Catalog, id: string, pool: string): FormState
     gaugeMin: '',
     gaugeMax: '',
     pool,
+    burn: 'none',
+    burnEvery: '10',
+    burnFor: '500',
+    burnLoad: '40',
   };
 }
 
@@ -187,6 +205,16 @@ export function operatorsOf(form: FormState, catalog: Catalog): Operator[] {
       ...(form.groupBy === '' ? {} : { groupBy: form.groupBy }),
     });
   }
+  if (form.burn === 'block') {
+    const every = num(form.burnEvery) ?? Number.NaN;
+    ops.push({
+      op: 'burn',
+      everyMs: Math.round(every * 1000),
+      forMs: num(form.burnFor) ?? Number.NaN,
+    });
+  } else if (form.burn === 'load') {
+    ops.push({ op: 'burn', loadPct: num(form.burnLoad) ?? Number.NaN });
+  }
   return ops;
 }
 
@@ -246,7 +274,7 @@ export function specOfForm(form: FormState, catalog: Catalog): WidgetSpec {
       size: form.size,
       ...(Object.keys(options).length > 0 ? { options } : {}),
     },
-    placement: { mode: 'manual', pool: form.pool },
+    placement: form.pool === AUTO_POOL ? { mode: 'auto' } : { mode: 'manual', pool: form.pool },
   };
 }
 
@@ -274,7 +302,7 @@ function rowOf(w: Where): FilterRow | undefined {
  * the rows it can; the drawer was the only writer, so that doesn't happen.
  */
 export function formOfSpec(spec: WidgetSpec, catalog: Catalog): FormState {
-  const base = emptyForm(catalog, spec.id, spec.placement.pool);
+  const base = emptyForm(catalog, spec.id, placementKey(spec.placement));
   const patch: { -readonly [K in keyof FormState]?: FormState[K] } = {};
   for (const op of spec.operators) {
     if (op.op === 'filter') {
@@ -284,6 +312,15 @@ export function formOfSpec(spec: WidgetSpec, catalog: Catalog): FormState {
     } else if (op.op === 'window') {
       patch.windowBy = op.ms === undefined ? 'count' : 'seconds';
       patch.windowValue = op.ms === undefined ? String(op.n) : String(op.ms / 1000);
+    } else if (op.op === 'burn') {
+      if (op.loadPct === undefined) {
+        patch.burn = 'block';
+        patch.burnEvery = String(op.everyMs / 1000);
+        patch.burnFor = String(op.forMs);
+      } else {
+        patch.burn = 'load';
+        patch.burnLoad = String(op.loadPct);
+      }
     } else {
       patch.fn = op.fn;
       patch.field = op.field ?? base.field;
@@ -329,6 +366,11 @@ export function fieldOfPath(path: string, form: FormState): FieldId {
   const hasWindow = form.windowBy !== 'none';
   const filterAt = hasFilter ? 0 : -1;
   const windowAt = hasWindow ? (hasFilter ? 1 : 0) : -1;
+  const burnAt =
+    form.burn === 'none'
+      ? -1
+      : (hasFilter ? 1 : 0) + (hasWindow ? 1 : 0) + (form.fn === 'none' ? 0 : 1);
+  if (i === burnAt) return 'burn';
   if (i === filterAt) {
     const row = /^\.where\.(?:and|or)\[(\d+)\]/.exec(rest);
     return `row-${row ? Number(row[1]) : 0}`;

@@ -1,7 +1,7 @@
 // What a spec change does to a running widget (M3e decision 10). Grants and
 // placement are fixed when an isolate spawns, so a new source topic or a new
 // placement needs a new isolate; anything else the widget applies itself.
-import type { WidgetSpec } from '../spec/types';
+import { placementKey, type WidgetSpec } from '../spec/types';
 import type { WidgetMode } from './records';
 
 /**
@@ -20,10 +20,7 @@ export type ApplyKind = 'none' | 'reconfigure' | 'respawn';
 
 export function applyKind(old: WidgetSpec, next: WidgetSpec, mode: WidgetMode = 'spec'): ApplyKind {
   if (old.source.topic !== next.source.topic) return 'respawn';
-  if (
-    mode === 'spec' &&
-    (old.placement.mode !== next.placement.mode || old.placement.pool !== next.placement.pool)
-  ) {
+  if (mode === 'spec' && placementKey(old.placement) !== placementKey(next.placement)) {
     return 'respawn';
   }
   const equal = mode === 'spec' ? same(old, next) : same(unplaced(old), unplaced(next));

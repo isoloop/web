@@ -108,6 +108,53 @@
   position: relative;
   min-height: 0;
 }
+/* M3h: a moved widget's badge, its "Moving…" until it draws again, and the placement log. */
+.creator-slot {
+  position: relative;
+}
+.creator-slot-head .creator-slot-badge {
+  padding: 0 6px;
+  color: var(--creator-bg);
+  background: var(--creator-link);
+  border-radius: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.creator-slot-head .creator-slot-badge[data-reason='spike'],
+.creator-slot-head .creator-slot-badge[data-reason='crash'],
+.creator-slot-head .creator-slot-badge[data-reason='bisect'] {
+  background: var(--creator-bad);
+}
+.creator-slot-moving {
+  position: absolute;
+  inset: 24px 0 0 0;
+  display: grid;
+  place-items: center;
+  color: var(--creator-dim);
+  background: color-mix(in srgb, var(--creator-panel) 80%, transparent);
+}
+.creator-placement-log {
+  font-size: 12px;
+  color: var(--creator-dim);
+}
+.creator-placement-log ol {
+  position: absolute;
+  z-index: 5;
+  max-height: 240px;
+  margin: 4px 0 0;
+  padding: 8px 8px 8px 28px;
+  overflow: auto;
+  background: var(--creator-raise);
+  border: 1px solid var(--creator-edge);
+}
+.creator-placement-log p {
+  position: absolute;
+  z-index: 5;
+  margin: 4px 0 0;
+  padding: 8px;
+  background: var(--creator-raise);
+  border: 1px solid var(--creator-edge);
+}
 @media (max-width: 900px) {
   .creator-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

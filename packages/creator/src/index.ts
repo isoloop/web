@@ -18,8 +18,11 @@ export * from './outputs';
 export { outputKind, pipeline, type Pipeline } from './pipeline';
 export {
   SPEC_VERSION,
+  placementKey,
   type AggregateFn,
   type AggregateOp,
+  type BurnOp,
+  type Placement,
   type CompareOp,
   type FilterOp,
   type Operator,
@@ -30,6 +33,9 @@ export {
   type WindowOp,
 } from './spec/types';
 export {
+  BURN_MAX_FOR_MS,
+  BURN_MAX_LOAD_PCT,
+  BURN_MIN_EVERY_MS,
   MAX_CONDITIONS,
   MAX_DEPTH,
   MAX_IN_VALUES,
@@ -39,5 +45,6 @@ export {
   validateSpec,
   type SpecError,
   type SpecResult,
+  type ValidateOptions,
 } from './spec/validate';
 export { aggregate, aggregateSamples, compileWhere, percentile } from './operators';

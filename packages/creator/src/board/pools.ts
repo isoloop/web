@@ -1,5 +1,6 @@
 // Creator pools (M3e decision 13): named `pool-1`, `pool-2`… in specs, shown
 // as "Pool 1", "Pool 2"…, run as the kernel pools `creator-pool-1`… (poolId).
+// `auto` widgets aren't in them: the balancer's pools are its own (auto.ts).
 import type { IsolateSnapshot, PoolSnapshot } from '@isoloop/host';
 import type { WidgetSpec } from '../spec/types';
 import { poolId } from '../widget/host';
@@ -42,7 +43,10 @@ export function poolStatus(
   snapshots: { isolates: readonly IsolateSnapshot[]; pools: readonly PoolSnapshot[] },
 ): PoolStatus[] {
   const members = new Map<string, number>();
-  for (const s of specs) members.set(s.placement.pool, (members.get(s.placement.pool) ?? 0) + 1);
+  for (const s of specs) {
+    if (s.placement.mode !== 'manual') continue;
+    members.set(s.placement.pool, (members.get(s.placement.pool) ?? 0) + 1);
+  }
   return sortPools(members.keys()).map((pool) => {
     const kernelPool = poolId(pool);
     const lags = snapshots.isolates

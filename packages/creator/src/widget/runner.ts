@@ -5,9 +5,10 @@
 import { toRec, type CatalogTopic } from '../catalog';
 import type { Output } from '../outputs';
 import { pipeline, type Pipeline } from '../pipeline';
-import type { WidgetSpec } from '../spec/types';
+import { placementKey, type WidgetSpec } from '../spec/types';
 import { applyKind } from './apply';
 import { RawBuffer } from './buffer';
+import { startBurns } from './burn';
 import { specOf, specTopicOf, type WidgetMode } from './records';
 
 /**
@@ -39,10 +40,10 @@ export type WidgetConfig = {
   /** The source topic's catalog entry. Its name is the one topic the widget may read. */
   readonly topic: CatalogTopic;
   /**
-   * On the grid, the `placement.pool` it was spawned in. A spec naming
-   * another pool needs a new isolate. Replay delivers a key's older records
-   * first, so the widget compares each with where it runs, not with the
-   * record before it.
+   * On the grid, the placement it was spawned for: the `placement.pool`, or
+   * `$auto` (placementKey). A spec placed elsewhere needs a new isolate.
+   * Replay delivers a key's older records first, so the widget compares each
+   * with where it runs, not with the record before it.
    */
   readonly pool?: string;
 };
@@ -121,6 +122,9 @@ export class WidgetRunner {
   #working = false;
   /** Bumped when the pipeline is replaced or dropped, so a queued slice of the old one does nothing. */
   #generation = 0;
+  /** Stops the applied spec's `burn` operators (test only, M3h decision 21). */
+  #stopBurns: () => void = () => {};
+  readonly #burns: typeof startBurns;
 
   /**
    * `now`: the widget's clock for the data (ms since the epoch). `clock`:
@@ -129,8 +133,15 @@ export class WidgetRunner {
   constructor(
     bus: WidgetBus,
     config: WidgetConfig,
-    o: { now?: () => number; clock?: () => number; onChange?: (s: WidgetState) => void } = {},
+    o: {
+      now?: () => number;
+      clock?: () => number;
+      onChange?: (s: WidgetState) => void;
+      /** For tests: what starts a spec's burns. */
+      burns?: typeof startBurns;
+    } = {},
   ) {
+    this.#burns = o.burns ?? startBurns;
     this.#bus = bus;
     this.#config = config;
     this.#now = o.now ?? Date.now;
@@ -165,6 +176,8 @@ export class WidgetRunner {
 
   stop(): void {
     for (const u of this.#unsubscribe.splice(0)) u();
+    this.#stopBurns();
+    this.#stopBurns = () => {};
     if (this.#pending !== undefined) clearTimeout(this.#pending);
     this.#pending = undefined;
     this.#drop();
@@ -217,6 +230,8 @@ export class WidgetRunner {
     this.#pending = undefined;
     if (spec === null) {
       this.#drop();
+      this.#stopBurns();
+      this.#stopBurns = () => {};
       this.#applied = undefined;
       this.#pipeline = undefined;
       this.#output = undefined;
@@ -228,7 +243,7 @@ export class WidgetRunner {
     // topic, or (on the grid) another pool, waits for the host to respawn.
     const elsewhere =
       spec.source.topic !== topic.name ||
-      (mode === 'spec' && pool !== undefined && spec.placement.pool !== pool);
+      (mode === 'spec' && pool !== undefined && placementKey(spec.placement) !== pool);
     if (elsewhere) {
       this.#set({ status: 'respawn', spec: this.#applied, output: this.#output });
       return;
@@ -273,6 +288,8 @@ export class WidgetRunner {
     this.#drop();
     this.#applied = spec;
     this.#pipeline = p;
+    this.#stopBurns();
+    this.#stopBurns = this.#burns(spec.operators);
     this.#output = undefined;
     this.#set({ status: 'live', spec, output: undefined });
   }

@@ -42,7 +42,27 @@ export type AggregateOp = {
   readonly groupBy?: string;
 };
 
-export type Operator = FilterOp | WindowOp | AggregateOp;
+/**
+ * Test-only (M3h decision 21): makes the widget misbehave on command, for the
+ * balancer's E2E tests and measurement. `everyMs` + `forMs` blocks for
+ * `forMs` every `everyMs`; `loadPct` keeps a steady load (a share of one
+ * core). validateSpec rejects it unless the page runs with `?chaos`.
+ */
+export type BurnOp =
+  | {
+      readonly op: 'burn';
+      readonly everyMs: number;
+      readonly forMs: number;
+      readonly loadPct?: undefined;
+    }
+  | {
+      readonly op: 'burn';
+      readonly loadPct: number;
+      readonly everyMs?: undefined;
+      readonly forMs?: undefined;
+    };
+
+export type Operator = FilterOp | WindowOp | AggregateOp | BurnOp;
 
 export type Size = 's' | 'm' | 'l';
 
@@ -58,6 +78,16 @@ export type WidgetSpec = {
     /** View settings; each view says which it reads. */
     readonly options?: Readonly<Record<string, string | number | boolean>>;
   };
-  /** v1 places by hand; M3h adds `auto`. */
-  readonly placement: { readonly mode: 'manual'; readonly pool: string };
+  readonly placement: Placement;
 };
+
+/**
+ * Where a widget runs: a creator pool picked by hand (M3e decision 13), or
+ * wherever the page's balancer puts it (M3h decision 19).
+ */
+export type Placement =
+  | { readonly mode: 'manual'; readonly pool: string }
+  | { readonly mode: 'auto'; readonly pool?: undefined };
+
+/** One string per placement, to compare two: the pool, or `$auto`. */
+export const placementKey = (p: Placement): string => (p.mode === 'auto' ? '$auto' : p.pool);
