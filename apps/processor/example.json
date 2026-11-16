@@ -1,9 +1,14 @@
 {
   "title": "Processor",
-  "summary": "Background work as headless isolates: spawn tasks, turn their CPU dial, and watch the balancer move them between worker pools.",
-  "draft": true,
+  "summary": "Background work as headless isolates, placed by the balancer: a playground where you set each task's CPU and watch it move between worker pools, and a simulated file processor whose processors share their work through consumer groups.",
+  "order": 40,
+  "result": {
+    "line": "On 4 cores at 50 files a second, the balancer runs 8 light processors as one pool: 2 workers against 9, 17 points less CPU and 47 MB less memory, at a p95 latency of 158 ms against 39 ms. With faults (blocking, heavy and crashing files) it moves them apart and gets through 44 files a second against one pool's 27, at the cost of files done twice when it moves them; a worker per processor keeps the lowest latency.",
+    "tag": "processor-v0.1.0"
+  },
   "links": {
     "live": "/examples/processor/",
-    "source": "https://github.com/isoloop/web/tree/main/apps/processor"
+    "source": "https://github.com/isoloop/web/tree/main/apps/processor",
+    "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison"
   }
 }

@@ -9,6 +9,10 @@ Each task keeps `load` % of one core busy, in uninterrupted pieces of the page's
 
 A new task's dial is given to the balancer as its declared load, so it's placed at once; afterwards the balancer keeps its own measurements.
 
+## Measured
+
+The File processor, run on a worker per processor, in one pool and placed by the balancer, on the bench server: [comparison/README.md](comparison/README.md). The comparison itself is [`comparison/run.ts`](comparison/run.ts) and [`e2e/comparison.spec.ts`](e2e/comparison.spec.ts).
+
 ## The File processor
 
 - **Files:** the generator (a headless isolate on its own worker) makes each file from a seed, so a run with the same seed and dials makes the same files in the same order. Four kinds, each real CPU work that grows with the file's size (1–4): **CSV** (make the text, parse it, sum per region), **Image** (a 2× box-filter downscale and three blur passes), **Archive** (an LZ77 pass with a lazy wider search) and **Hash** (SHA-256 in JavaScript, checked against `node:crypto`). Each kind's work yields every few hundred microseconds, so a processor runs it in slices of up to 8 ms and its loop keeps turning.
