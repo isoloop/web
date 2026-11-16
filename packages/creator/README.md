@@ -1,11 +1,14 @@
 # creator
 
-The widget creator behind the dashboards' interactive pages ([M3e](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3e-live-widget-creator.md)). Private, with no version: apps use it from the workspace. This is the core: the spec format, its validator, the catalog type, the operators and the pipeline. The views, the drawer and the widget isolate come next.
+The widget creator behind the dashboards' interactive pages ([M3e](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3e-live-widget-creator.md)). Private, with no version: apps use it from the workspace. It holds the spec format, its validator, the catalog type, the operators, the pipeline and the five views. The drawer and the widget isolate come next.
 
 | Export | What it is |
 | --- | --- |
 | `creator` | `validateSpec(spec, catalog)`, `pipeline(spec, topic)`, `outputKind(operators)`, the `isoloop-spec@1` types (`WidgetSpec`, `Operator`, `Where`…), the catalog types with `topicOf`, `fieldOf` and `toRec`, and everything in `creator/outputs` |
 | `creator/outputs` | What a pipeline hands its view: the `rows`, `scalar`, `series` and `grid` shapes, their limits, and `VIEW_INPUTS`, the outputs each view draws |
+| `creator/views` | The five views (React): `View` renders any of them by type with the spec's `view.options`; `ViewEnv` gives canvas views their draw target |
+| `creator/view-kinds` | Without React: `VIEW_TYPES`, `VIEW_LABELS`, `viewAccepts`, and `VIEW_OPTIONS` with `checkViewOptions`, the options each view reads |
+| `creator/draw` | The canvas drawing the views use, on any 2D context: `drawChart`, `drawBars`, `drawHeatmap` |
 
 ## A widget spec
 
@@ -60,3 +63,25 @@ else {
 ```
 
 A pipeline with `every` takes its ticks on `read`, so the first read after a replay fills the history at once.
+
+## The views
+
+| View | Draws | Options (`view.options`) |
+| --- | --- | --- |
+| line | a series as one line; a grid as one line per group | none |
+| bar | a series as bars over time; a grid as a bar per group, its newest value | none |
+| heatmap | a grid: groups down, ticks across | none |
+| table | rows, newest first; a grid as a row per group with its newest value | `limit`: 1 to 200 rows (default 50) |
+| stat | a scalar; a series' newest value | `gaugeMin` and `gaugeMax`, both or neither: a gauge under the number |
+
+Nulls are gaps: a line lifts its pen, a heatmap cell is left dark, a table shows a dash. Labels and units come from the output. `size` (`s`, `m` or `l`) sets the view's height; `SIZE[size].columns` is how many grid columns it spans, for the page.
+
+Canvas views (line, bar, heatmap) draw through `<ViewEnv useCanvas={…}>`: a hook that turns the view's `<canvas>` into a 2D context sized to the element. A widget isolate passes one that asks the host for an `OffscreenCanvas`; the native build passes `useMainThreadCanvas`.
+
+```tsx
+import { View, ViewEnv, useMainThreadCanvas } from 'creator/views';
+
+<ViewEnv useCanvas={useMainThreadCanvas}>
+  <View type={spec.view.type} size={spec.view.size} options={spec.view.options} title={spec.title} output={p.read(Date.now())} />
+</ViewEnv>
+```
