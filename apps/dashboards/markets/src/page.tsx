@@ -8,7 +8,7 @@ import { CategoryPanel } from './metrics/Categories';
 import { MetricsPanel } from './metrics/Panel';
 import { Responsiveness } from './responsive/Responsiveness';
 import { SIZES, SPECS, specFrom, sizeHref } from './sizes/sizes';
-import { PLACEMENTS, placementFrom, placementHref, switchHref, type PlacementName } from './url';
+import { placementFrom, placementHref, placementsFor, switchHref, type PlacementName } from './url';
 
 const placement = placementFrom(new URLSearchParams(location.search));
 
@@ -121,7 +121,7 @@ export function Page() {
         >
           <span className="seg-label">Placement</span>
           <span className="seg-items">
-            {PLACEMENTS.map((p) =>
+            {placementsFor(CURRENT).map((p) =>
               BUILD === 'native' ? (
                 // Kept in place on native builds, so the header doesn't move.
                 <span key={p} aria-disabled="true" title="Placement is an Isoloop setting">

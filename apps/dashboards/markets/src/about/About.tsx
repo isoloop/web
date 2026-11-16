@@ -90,7 +90,9 @@ const INTRO =
           ? 'In this build each box below is an isolate with its own event loop, talking over topics.'
           : placement === 'matched'
             ? 'In this build each box below is an isolate talking over topics; the sources, services and engines each have a worker of their own, and the widgets share one pool’s event loop.'
-            : 'In this build each box below is an isolate talking over topics; all of them share one pool’s event loop.';
+            : placement === 'teams'
+              ? 'In this build each box below is an isolate talking over topics; the sources, services and engines each have a worker of their own, and each team’s widgets, React or Preact, share a pool of their own.'
+              : 'In this build each box below is an isolate talking over topics; all of them share one pool’s event loop.';
 
 export function About() {
   const [states, setStates] = useState(() => buildMetrics.states());

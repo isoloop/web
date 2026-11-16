@@ -8,16 +8,17 @@ import { Head } from './Head';
 
 /** Own workers numbered in the order the page starts them, for the headers. */
 let started = 0;
-/** The placement's pool for widgets, if it pools them (M3f decision 3). */
-const pool = poolOf(placementFrom(new URLSearchParams(location.search)), 'widget');
+const placement = placementFrom(new URLSearchParams(location.search));
 const LABEL = { react: 'React', preact: 'Preact' } as const;
 
 /** A slot in the Isoloop build: a surface the widget's isolate renders into. */
-export function Slot({ placement }: { placement: Placement }) {
+export function Slot({ placement: slot }: { placement: Placement }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { id, widget, config } = placement;
-  const [worker] = useState(() => (pool === undefined ? ++started : 0));
+  const { id, widget, config } = slot;
   const framework = FRAMEWORK?.[widget];
+  // The placement's pool for this widget, if it pools it (M3f decision 3, M3g decision 7).
+  const pool = poolOf(placement, 'widget', framework);
+  const [worker] = useState(() => (pool === undefined ? ++started : 0));
   const where = `${whereOf(pool, worker)}${framework ? ` · ${LABEL[framework]}` : ''}`;
   useEffect(() => {
     const surface = ref.current;
@@ -41,7 +42,7 @@ export function Slot({ placement }: { placement: Placement }) {
       stopped = true;
       void stop?.();
     };
-  }, [id, widget, config]);
+  }, [id, widget, config, pool]);
   return (
     <div className="slot" data-slot={id} data-widget={widget} data-pool={pool}>
       <Head slot={id} where={where} />

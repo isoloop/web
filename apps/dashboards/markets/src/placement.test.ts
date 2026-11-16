@@ -18,6 +18,22 @@ describe('placements', () => {
     expect(poolOf('one', 'data')).toBe('all');
   });
 
+  it('pools each team in teams, the data on its own workers', () => {
+    expect(poolOf('teams', 'widget', 'react')).toBe('react');
+    expect(poolOf('teams', 'widget', 'preact')).toBe('preact');
+    expect(poolOf('teams', 'data')).toBeUndefined();
+    // /mixed at Normal: 14 React widgets and the two Preact ones (filters, alerts).
+    const widgets = SPECS.normal.widgets.map((w) => ({
+      kind: 'widget' as const,
+      framework:
+        w.widget === 'filters' || w.widget === 'alerts-panel'
+          ? ('preact' as const)
+          : ('react' as const),
+    }));
+    const data = kinds('normal').filter((k) => k === 'data');
+    expect(workersOf('teams', [...widgets, ...data])).toBe(8);
+  });
+
   it('counts the workers each runs, the bus left out', () => {
     expect(workersOf('own', kinds('normal'))).toBe(22);
     expect(workersOf('own', kinds('heavy'))).toBe(30);
