@@ -1,0 +1,32 @@
+{
+  "name": "processor",
+  "private": true,
+  "type": "module",
+  "description": "Background work on Isoloop: a playground for the balancer's automatic placement, and a simulated file processor.",
+  "scripts": {
+    "dev": "vite --configLoader runner",
+    "build": "vite build --configLoader runner",
+    "preview": "vite preview --configLoader runner",
+    "typecheck": "tsc --noEmit",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@isoloop/balancer": "catalog:isoloop",
+    "@isoloop/bus": "catalog:isoloop",
+    "@isoloop/host": "catalog:isoloop",
+    "@isoloop/runtime": "catalog:isoloop",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@isoloop/vite": "catalog:isoloop",
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "typescript": "catalog:",
+    "ui": "workspace:*",
+    "vite": "catalog:"
+  }
+}
