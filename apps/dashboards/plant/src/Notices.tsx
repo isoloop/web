@@ -21,6 +21,9 @@ const LIBRARY: Record<BuildName, string> = {
   'native-workers':
     'React widgets on the main thread; a hand-written data worker per machine and one for the fleet. A blocked widget stalls the whole page; the data keeps flowing.',
 };
+/** The Placement row on native builds, kept so the box doesn't change height. */
+const NO_PLACEMENT =
+  'Not used: a native build has no isolates to place. What runs where is in the Library line.';
 const PLACED: Record<PlacementName, string> = {
   matched:
     'One data pool per machine, the fleet engine on its own worker, and all 72 widgets in one pool. A blocked widget stalls all 72 until their pool restarts; the data keeps flowing.',
@@ -56,12 +59,10 @@ export function Description() {
           <dt>Library</dt>
           <dd>{LIBRARY[CURRENT]}</dd>
         </div>
-        {isoloop ? (
-          <div>
-            <dt>Placement</dt>
-            <dd>{PLACED[SETTINGS.placement]}</dd>
-          </div>
-        ) : null}
+        <div {...(isoloop ? {} : { 'data-disabled': '' })}>
+          <dt>Placement</dt>
+          <dd>{isoloop ? PLACED[SETTINGS.placement] : NO_PLACEMENT}</dd>
+        </div>
       </dl>
     </section>
   );

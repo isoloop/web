@@ -1,7 +1,7 @@
 import { BUILD } from '#env';
 import { Slot } from '#slot';
 import { BUILDS, COUNTERPART, CURRENT, SIDE, SIDE_BUILDS, type BuildName } from './builds';
-import { LIBRARY, MODE } from './describe';
+import { LIBRARY, MODE, NO_PLACEMENT } from './describe';
 import { DESCRIPTION } from './placement';
 import { About } from './about/About';
 import { CategoryPanel } from './metrics/Categories';
@@ -111,24 +111,31 @@ export function Page() {
             )}
           </span>
         </nav>
-        {BUILD === 'native' ? null : (
-          <nav className="placements seg" aria-label="Placement">
-            <span className="seg-label">Placement</span>
-            <span className="seg-items">
-              {PLACEMENTS.map((p) =>
-                p === placement ? (
-                  <span key={p} aria-current="page">
-                    {p}
-                  </span>
-                ) : (
-                  <a key={p} href={placementHref(p, location.search)}>
-                    {p}
-                  </a>
-                ),
-              )}
-            </span>
-          </nav>
-        )}
+        <nav
+          className="placements seg"
+          aria-label="Placement"
+          {...(BUILD === 'native' ? { 'data-disabled': '' } : {})}
+        >
+          <span className="seg-label">Placement</span>
+          <span className="seg-items">
+            {PLACEMENTS.map((p) =>
+              BUILD === 'native' ? (
+                // Kept in place on native builds, so the header doesn't move.
+                <span key={p} aria-disabled="true" title="Placement is an Isoloop setting">
+                  {p}
+                </span>
+              ) : p === placement ? (
+                <span key={p} aria-current="page">
+                  {p}
+                </span>
+              ) : (
+                <a key={p} href={placementHref(p, location.search)}>
+                  {p}
+                </a>
+              ),
+            )}
+          </span>
+        </nav>
       </header>
       <section
         className="description"
@@ -152,12 +159,10 @@ export function Page() {
             <dt>Library</dt>
             <dd>{LIBRARY[CURRENT]}</dd>
           </div>
-          {BUILD === 'native' ? null : (
-            <div>
-              <dt>Placement</dt>
-              <dd>{DESCRIPTION[placement]}</dd>
-            </div>
-          )}
+          <div {...(BUILD === 'native' ? { 'data-disabled': '' } : {})}>
+            <dt>Placement</dt>
+            <dd>{BUILD === 'native' ? NO_PLACEMENT : DESCRIPTION[placement]}</dd>
+          </div>
         </dl>
       </section>
       <Responsiveness />

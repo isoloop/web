@@ -21,3 +21,7 @@ export const LIBRARY: Record<BuildName, string> = {
   'native-workers':
     'React widgets on the main thread; the replay, the aggregator, alerts and the three engines in a hand-written worker each. A blocked widget stalls the whole page; the data keeps flowing.',
 };
+
+/** The Placement row on native builds, kept so the box doesn't change height. */
+export const NO_PLACEMENT =
+  'Not used: a native build has no isolates to place. What runs where is in the Library line.';

@@ -30,9 +30,11 @@ for (const build of inScope(BUILDS)) {
     await expect(
       page.getByRole('navigation', { name: 'Vibration rate' }).locator('[aria-current]'),
     ).toHaveText('2 kHz');
-    // Placement is an Isoloop setting.
-    await expect(page.getByRole('navigation', { name: 'Placement' })).toHaveCount(
-      build === 'isoloop' ? 1 : 0,
+    // Placement is an Isoloop setting: on the native builds it stays in place, disabled.
+    const placements = page.getByRole('navigation', { name: 'Placement' });
+    await expect(placements.getByRole('link')).toHaveCount(build === 'isoloop' ? 5 : 0);
+    await expect(placements.locator('[aria-disabled="true"]')).toHaveCount(
+      build === 'isoloop' ? 0 : 6,
     );
   });
 }

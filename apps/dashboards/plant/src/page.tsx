@@ -81,24 +81,31 @@ export function Page() {
             )}
           </span>
         </nav>
-        {CURRENT === 'isoloop' && (
-          <nav className="placements seg" aria-label="Placement">
-            <span className="seg-label">Placement</span>
-            <span className="seg-items">
-              {PLACEMENTS.map((p) =>
-                p === SETTINGS.placement ? (
-                  <span key={p} aria-current="page">
-                    {p}
-                  </span>
-                ) : (
-                  <a key={p} href={withParam(location.search, 'placement', p)}>
-                    {p}
-                  </a>
-                ),
-              )}
-            </span>
-          </nav>
-        )}
+        <nav
+          className="placements seg"
+          aria-label="Placement"
+          {...(CURRENT === 'isoloop' ? {} : { 'data-disabled': '' })}
+        >
+          <span className="seg-label">Placement</span>
+          <span className="seg-items">
+            {PLACEMENTS.map((p) =>
+              CURRENT !== 'isoloop' ? (
+                // Kept in place on native builds, so the header doesn't move.
+                <span key={p} aria-disabled="true" title="Placement is an Isoloop setting">
+                  {p}
+                </span>
+              ) : p === SETTINGS.placement ? (
+                <span key={p} aria-current="page">
+                  {p}
+                </span>
+              ) : (
+                <a key={p} href={withParam(location.search, 'placement', p)}>
+                  {p}
+                </a>
+              ),
+            )}
+          </span>
+        </nav>
         <ClearHistory />
         <a className="architecture" href={architectureHref()}>
           Architecture

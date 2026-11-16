@@ -50,9 +50,17 @@ body {
   background: #22262b;
 }
 .page .seg-items > [aria-current] {
-  background: #2f3a4d;
+  background: #3a4a63;
   color: #fff;
-  font-weight: 600;
+}
+/* A fixed width that fits either side's builds, so switching sides doesn't
+   move the header; the items share it. */
+.page .builds .seg-items {
+  width: 18rem;
+}
+.page .builds .seg-items > * {
+  flex: 1;
+  text-align: center;
 }
 .page .seg-items > [aria-disabled='true'] {
   color: #5f6368;
@@ -67,6 +75,13 @@ body {
 }
 .page .kernel {
   margin-left: auto;
+}
+.page .seg[data-disabled] .seg-label {
+  color: #5f6368;
+}
+.page > .description [data-disabled] dt,
+.page > .description [data-disabled] dd {
+  color: #6b7076;
 }
 /* The box under the header: what runs where, and what a block takes down.
    The plant's notice box, with a blue rule: information, where a warning's is
