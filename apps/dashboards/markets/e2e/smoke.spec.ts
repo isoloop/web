@@ -73,3 +73,27 @@ test('the native + workers build runs the same pipeline from its workers', async
   await expect(page.locator('.about [data-node="aggregator"] .state')).toHaveText('worker');
   await expect(page.locator('.about [data-node="price"] .state')).toHaveText('main thread');
 });
+
+test("the native + workers build with parts runs the same pipeline, and a part publishes into the host's store", async ({
+  page,
+}) => {
+  await page.goto('./native-mixed/?size=normal&speed=10');
+  await expect(page.locator('.build')).toHaveAttribute('data-build', 'native');
+  await expect(page.locator('.build')).toContainText('Native + workers · React and Preact');
+  await expect(page.locator('[data-metric="workers"] dd')).toHaveText('6', { timeout: 15_000 });
+  const filters = page.evaluate(
+    () =>
+      new Promise<string>((resolve) => {
+        window.store.subscribe(
+          'filters',
+          (r) => {
+            if (r.value.symbols[0] === 'ETH-USD') resolve(r.value.symbols[0]);
+          },
+          'latest',
+        );
+      }),
+  );
+  // The filters are a Preact part: its publish goes through the host it was given.
+  await page.locator('[data-slot="filters"] select[name="symbol"]').selectOption('ETH-USD');
+  expect(await filters).toBe('ETH-USD');
+});

@@ -10,6 +10,7 @@ const BUILDS = [
   'isoloop',
   'native',
   'native-workers',
+  'native-mixed',
   'isoloop-preact',
   'native-preact',
   'mixed',

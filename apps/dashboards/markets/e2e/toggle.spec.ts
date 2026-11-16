@@ -1,18 +1,22 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Native + workers pairs with Isoloop's `matched` placement (M3f), both ways.
+// Native + workers pairs with Isoloop's `matched` placement (M3f), both ways,
+// and so does its React and Preact build with `mixed` (M3g).
 const builds = [
   ['isoloop', 'native', ''],
   ['native', 'isoloop', ''],
   ['native-workers', 'isoloop', 'matched'],
   ['isoloop', 'native-workers', 'matched'],
+  ['native-mixed', 'mixed', 'matched'],
+  ['mixed', 'native-mixed', 'matched'],
 ] as const;
 
 /** The replay position in the URL, in recording ms. */
 const at = (page: Page): number => Number(new URL(page.url()).searchParams.get('at'));
 
 for (const [from, to, placement] of builds) {
-  const extra = from === 'isoloop' && placement !== '' ? `&placement=${placement}` : '';
+  const extra =
+    (from === 'isoloop' || from === 'mixed') && placement !== '' ? `&placement=${placement}` : '';
   test(`${from}${extra} → ${to}: the toggle lands on the other build with the same filters and replay position`, async ({
     page,
   }) => {
@@ -31,7 +35,7 @@ for (const [from, to, placement] of builds) {
     await page.waitForTimeout(2_000);
     await page.getByRole('link', { name: `Switch to ${to}` }).click();
     await page.waitForURL(`**/${to}/**`);
-    if (to === 'isoloop') {
+    if (to === 'isoloop' || to === 'mixed') {
       expect(new URL(page.url()).searchParams.get('placement')).toBe(placement || null);
     }
     // At least the 2 s wait at 10× (20 s of recording), and no more than the
@@ -50,12 +54,9 @@ for (const [from, to, placement] of builds) {
   });
 }
 
-test('React and Preact on one page has no native build: the kernel switch shows Native as unavailable', async ({
-  page,
-}) => {
+test('React and Preact on one page switches to its native + workers build', async ({ page }) => {
   await page.goto('./mixed/?size=lite&speed=10');
   const kernel = page.getByRole('navigation', { name: 'Kernel' });
   await expect(kernel.locator('[aria-current="page"]')).toHaveText('Isoloop');
-  await expect(kernel.locator('[aria-disabled="true"]')).toHaveText('Native');
-  await expect(kernel.getByRole('link')).toHaveCount(0);
+  await expect(kernel.getByRole('link', { name: 'Switch to native-mixed' })).toHaveText('Native');
 });

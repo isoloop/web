@@ -5,7 +5,7 @@
   "description": "A backend-less markets dashboard, as an idiomatic native app and on Isoloop.",
   "scripts": {
     "dev": "vite --configLoader runner",
-    "build": "vite build --configLoader runner && vite build --configLoader runner --mode native && vite build --configLoader runner --mode native-workers && vite build --configLoader runner --mode isoloop-preact && vite build --configLoader runner --mode native-preact && vite build --configLoader runner --mode mixed && vite build --configLoader runner --mode mixed-preact && node scripts/index-page.ts && node scripts/check-builds.ts && node scripts/build-stats.ts",
+    "build": "vite build --configLoader runner && vite build --configLoader runner --mode native && vite build --configLoader runner --mode native-workers && vite build --configLoader runner --mode native-mixed && vite build --configLoader runner --mode native-mixed-parts && vite build --configLoader runner --mode isoloop-preact && vite build --configLoader runner --mode native-preact && vite build --configLoader runner --mode mixed && vite build --configLoader runner --mode mixed-preact && node scripts/index-page.ts && node scripts/check-builds.ts && node scripts/build-stats.ts",
     "preview": "vite preview --configLoader runner --outDir dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",

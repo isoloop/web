@@ -14,14 +14,17 @@ const placement = placementFrom(new URLSearchParams(location.search));
 
 /**
  * The toggle's build, and the placement it lands in: Isoloop's `matched`
- * pairs with native + workers, and native + workers with `matched`.
+ * pairs with native + workers, and native + workers with `matched`. Its React
+ * and Preact build, `native-mixed`, pairs with `mixed` in `matched` (M3g).
  */
 const TOGGLE: { build: BuildName | undefined; placement?: PlacementName } =
   CURRENT === 'native-workers'
     ? { build: 'isoloop', placement: 'matched' }
-    : CURRENT === 'isoloop' && placement === 'matched'
-      ? { build: 'native-workers' }
-      : { build: COUNTERPART[CURRENT] };
+    : CURRENT === 'native-mixed'
+      ? { build: 'mixed', placement: 'matched' }
+      : CURRENT === 'isoloop' && placement === 'matched'
+        ? { build: 'native-workers' }
+        : { build: COUNTERPART[CURRENT] };
 
 /** The page shell, the same in every build; only what a slot holds differs. */
 export function Page() {
@@ -155,7 +158,7 @@ export function Page() {
             <dt>Mode</dt>
             <dd>{MODE[SIDE]}</dd>
           </div>
-          <div {...(CURRENT === 'mixed' ? { 'data-mixed': '' } : {})}>
+          <div {...(CURRENT === 'mixed' || CURRENT === 'native-mixed' ? { 'data-mixed': '' } : {})}>
             <dt>Library</dt>
             <dd>{LIBRARY[CURRENT]}</dd>
           </div>
