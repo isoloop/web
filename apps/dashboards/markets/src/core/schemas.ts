@@ -129,6 +129,12 @@ export const timing = z.object({
    * recovery figure reads it. Left out when it didn't happen in that second.
    */
   resumedAt: z.number().nonnegative().optional(),
+  /**
+   * When the widget's code started (epoch ms), so a report from a restarted
+   * widget can be told from one its previous run sent late (M3g). Engines
+   * leave it out.
+   */
+  since: z.number().nonnegative().optional(),
   ts,
 });
 

@@ -87,6 +87,8 @@ export function withStress(
 ): FunctionComponent<{ config?: unknown }> {
   function Stressed({ config }: { config?: unknown }) {
     const [crashed, setCrashed] = useState(false);
+    // When this run of the widget started: a restart starts a new one.
+    const [since] = useState(() => Date.now());
     const slot = slotOf(config) ?? name;
     const publish = usePublish('timings');
     // The time this widget spends rendering and drawing, published once a
@@ -120,6 +122,7 @@ export function withStress(
           updates: renders.current,
           ...(draws.current > 0 ? { draws: draws.current } : {}),
           ...(resumedAt.current === undefined ? {} : { resumedAt: resumedAt.current }),
+          since,
           ts: Date.now(),
         });
         spent.current = 0;
@@ -130,7 +133,7 @@ export function withStress(
       return () => {
         clearInterval(id);
       };
-    }, [publish, slot]);
+    }, [publish, slot, since]);
     if (crashed) throw new Error(`stress: ${name} crashed`);
     return (
       <TimingContext.Provider value={record}>
