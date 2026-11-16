@@ -49,3 +49,13 @@ for (const [from, to, placement] of builds) {
     await expect(rows.first()).not.toContainText('okx');
   });
 }
+
+test('React and Preact on one page has no native build: the kernel switch shows Native as unavailable', async ({
+  page,
+}) => {
+  await page.goto('./mixed/?size=lite&speed=10');
+  const kernel = page.getByRole('navigation', { name: 'Kernel' });
+  await expect(kernel.locator('[aria-current="page"]')).toHaveText('Isoloop');
+  await expect(kernel.locator('[aria-disabled="true"]')).toHaveText('Native');
+  await expect(kernel.getByRole('link')).toHaveCount(0);
+});

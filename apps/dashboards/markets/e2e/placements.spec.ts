@@ -28,7 +28,9 @@ for (const placement of PLACEMENTS) {
   }) => {
     await page.goto(url(placement, 'lite'));
     await expect(page.locator('.build')).toHaveAttribute('data-placement', placement);
-    await expect(page.locator('[data-placement-note]')).toContainText(placement);
+    await expect(page.locator('.page > .description[data-placement-note]')).toContainText(
+      placement,
+    );
     await expect(workers(page)).toHaveText(String(WORKERS[placement].lite), { timeout: 15_000 });
     const pools = await page.evaluate(() =>
       Object.fromEntries(window.kernel.isolates().map((i) => [i.id, i.pool ?? null])),

@@ -50,6 +50,7 @@ test('the native + workers build runs the same pipeline from its workers', async
   await page.goto('./native-workers/?size=normal&speed=10');
   await expect(page.locator('.build')).toHaveAttribute('data-build', 'native');
   await expect(page.locator('.build')).toContainText('Native + workers');
+  await expect(page.locator('.page > .description')).toContainText('hand-written worker each');
   // The replay, the aggregator, the alerts and the three engines, a worker each.
   await expect(page.locator('[data-metric="workers"] dd')).toHaveText('6', { timeout: 15_000 });
   const seen = await page.evaluate(

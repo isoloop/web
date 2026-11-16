@@ -1,7 +1,8 @@
 import { BUILD } from '#env';
 import { Slot } from '#slot';
-import { BUILDS, COUNTERPART, CURRENT, type BuildName } from './builds';
-import { BLAST } from './placement';
+import { BUILDS, COUNTERPART, CURRENT, SIDE, SIDE_BUILDS, type BuildName } from './builds';
+import { LIBRARY, MODE, NO_PLACEMENT } from './describe';
+import { DESCRIPTION } from './placement';
 import { About } from './about/About';
 import { CategoryPanel } from './metrics/Categories';
 import { MetricsPanel } from './metrics/Panel';
@@ -11,23 +12,11 @@ import { PLACEMENTS, placementFrom, placementHref, switchHref, type PlacementNam
 
 const placement = placementFrom(new URLSearchParams(location.search));
 
-/** What the build runs where, for the header. */
-const LABEL =
-  CURRENT === 'native-workers'
-    ? 'Native + workers: data in workers, widgets on the main thread'
-    : BUILD === 'native'
-      ? 'Native: one main thread'
-      : placement === 'own'
-        ? 'Isoloop: an event loop per widget'
-        : placement === 'matched'
-          ? 'Isoloop: data on its own workers, widgets in one pool'
-          : 'Isoloop: every isolate in one pool';
-
 /**
  * The toggle's build, and the placement it lands in: Isoloop's `matched`
  * pairs with native + workers, and native + workers with `matched`.
  */
-const TOGGLE: { build: BuildName; placement?: PlacementName } =
+const TOGGLE: { build: BuildName | undefined; placement?: PlacementName } =
   CURRENT === 'native-workers'
     ? { build: 'isoloop', placement: 'matched' }
     : CURRENT === 'isoloop' && placement === 'matched'
@@ -44,76 +33,138 @@ export function Page() {
     <div className="page">
       <header>
         <h1>Markets</h1>
-        <span
+        <nav className="kernel seg" aria-label="Kernel">
+          <span className="seg-items">
+            {(['native', 'isoloop'] as const).map((side) => {
+              const text = side === 'native' ? 'Native' : 'Isoloop';
+              if (side === SIDE)
+                return (
+                  <span key={side} aria-current="page">
+                    {text}
+                  </span>
+                );
+              if (other === undefined)
+                return (
+                  <span
+                    key={side}
+                    aria-disabled="true"
+                    title={`No ${text.toLowerCase()} build of ${BUILDS.find((b) => b.name === CURRENT)?.label ?? CURRENT}`}
+                  >
+                    {text}
+                  </span>
+                );
+              return (
+                <a
+                  key={side}
+                  aria-label={`Switch to ${other}`}
+                  href={`../${other}/${location.search}`}
+                  onClick={(e) => {
+                    // Built at click time: the replay's position moves on.
+                    e.currentTarget.href = switchHref(other, TOGGLE.placement);
+                  }}
+                >
+                  {text}
+                </a>
+              );
+            })}
+          </span>
+        </nav>
+        <nav className="builds seg" aria-label="Builds">
+          <span className="seg-label">Build</span>
+          <span className="seg-items">
+            {SIDE_BUILDS[SIDE].map((b) => {
+              const title = BUILDS.find((x) => x.name === b.name)?.label;
+              const mixed = b.mixed ? { 'data-mixed': '' } : {};
+              return b.name === CURRENT ? (
+                <span key={b.name} aria-current="page" title={title} {...mixed}>
+                  {b.short}
+                </span>
+              ) : (
+                <a
+                  key={b.name}
+                  title={title}
+                  {...mixed}
+                  href={`../${b.name}/${location.search}`}
+                  onClick={(e) => {
+                    e.currentTarget.href = switchHref(b.name);
+                  }}
+                >
+                  {b.short}
+                </a>
+              );
+            })}
+          </span>
+        </nav>
+        <nav className="sizes seg" aria-label="Dashboard size">
+          <span className="seg-label">Size</span>
+          <span className="seg-items">
+            {SIZES.map((size) =>
+              size === spec.size ? (
+                <span key={size} aria-current="page">
+                  {SPECS[size].label}
+                </span>
+              ) : (
+                <a key={size} href={sizeHref(size, location.search)}>
+                  {SPECS[size].label}
+                </a>
+              ),
+            )}
+          </span>
+        </nav>
+        <nav
+          className="placements seg"
+          aria-label="Placement"
+          {...(BUILD === 'native' ? { 'data-disabled': '' } : {})}
+        >
+          <span className="seg-label">Placement</span>
+          <span className="seg-items">
+            {PLACEMENTS.map((p) =>
+              BUILD === 'native' ? (
+                // Kept in place on native builds, so the header doesn't move.
+                <span key={p} aria-disabled="true" title="Placement is an Isoloop setting">
+                  {p}
+                </span>
+              ) : p === placement ? (
+                <span key={p} aria-current="page">
+                  {p}
+                </span>
+              ) : (
+                <a key={p} href={placementHref(p, location.search)}>
+                  {p}
+                </a>
+              ),
+            )}
+          </span>
+        </nav>
+      </header>
+      <section
+        className="description"
+        aria-label="What runs where"
+        {...(BUILD === 'native' ? {} : { 'data-placement-note': placement })}
+      >
+        <h2
           className="build"
           data-build={BUILD}
           {...(BUILD === 'native' ? {} : { 'data-placement': placement })}
         >
-          {LABEL}
-        </span>
-        <a
-          className="toggle"
-          href={`../${other}/${location.search}`}
-          onClick={(e) => {
-            // Built at click time: the replay's position moves on.
-            e.currentTarget.href = switchHref(other, TOGGLE.placement);
-          }}
-        >
-          Switch to {other}
-        </a>
-        <nav className="builds" aria-label="Builds">
-          {BUILDS.map((b) =>
-            b.name === CURRENT ? (
-              <span key={b.name} aria-current="page">
-                {b.label}
-              </span>
-            ) : (
-              <a
-                key={b.name}
-                href={`../${b.name}/${location.search}`}
-                onClick={(e) => {
-                  e.currentTarget.href = switchHref(b.name);
-                }}
-              >
-                {b.label}
-              </a>
-            ),
-          )}
-        </nav>
-        <nav className="sizes" aria-label="Dashboard size">
-          {SIZES.map((size) =>
-            size === spec.size ? (
-              <span key={size} aria-current="page">
-                {SPECS[size].label}
-              </span>
-            ) : (
-              <a key={size} href={sizeHref(size, location.search)}>
-                {SPECS[size].label}
-              </a>
-            ),
-          )}
-        </nav>
-        {BUILD === 'native' ? null : (
-          <>
-            <nav className="placements" aria-label="Placement">
-              {PLACEMENTS.map((p) =>
-                p === placement ? (
-                  <span key={p} aria-current="page">
-                    {p}
-                  </span>
-                ) : (
-                  <a key={p} href={placementHref(p, location.search)}>
-                    {p}
-                  </a>
-                ),
-              )}
-            </nav>
-            <span className="placement-note" data-placement-note={placement}>
-              Placement <code>{placement}</code>: {BLAST[placement]}.
-            </span>
-          </>
-        )}
-      </header>
+          {BUILDS.find((b) => b.name === CURRENT)?.label}
+          {BUILD === 'native' ? null : <> · placement {placement}</>}
+        </h2>
+        <dl>
+          <div>
+            <dt>Mode</dt>
+            <dd>{MODE[SIDE]}</dd>
+          </div>
+          <div {...(CURRENT === 'mixed' ? { 'data-mixed': '' } : {})}>
+            <dt>Library</dt>
+            <dd>{LIBRARY[CURRENT]}</dd>
+          </div>
+          <div {...(BUILD === 'native' ? { 'data-disabled': '' } : {})}>
+            <dt>Placement</dt>
+            <dd>{BUILD === 'native' ? NO_PLACEMENT : DESCRIPTION[placement]}</dd>
+          </div>
+        </dl>
+      </section>
       <Responsiveness />
       <MetricsPanel />
       <CategoryPanel widgets={spec.widgets.map((p) => p.widget)} />

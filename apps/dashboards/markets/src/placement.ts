@@ -42,8 +42,13 @@ export function workersOf(p: PlacementName, kinds: readonly Kind[]): number {
 }
 
 /** What a widget's block stalls in each placement, for the page's note. */
-export const BLAST: Record<PlacementName, string> = {
-  own: 'a blocked widget stalls only itself',
-  matched: 'a blocked widget stalls every widget (they share one pool); the data keeps flowing',
-  one: 'a blocked widget stalls every isolate (they share one pool)',
+/**
+ * The box under the header, its Placement row: where the isolates run, and
+ * what a blocked widget takes down. One sentence, two lines at most.
+ */
+export const DESCRIPTION: Record<PlacementName, string> = {
+  own: 'Every isolate runs on its own worker. A blocked widget stalls only itself; the other widgets and the data keep going.',
+  matched:
+    'The data runs on its own workers, as in native + workers, and every widget shares one pool. A blocked widget stalls every widget, while the data keeps flowing.',
+  one: "Every isolate shares one pool, the nearest to native's single thread, but off the main thread. A blocked widget stalls every isolate, data included; the page itself keeps responding.",
 };

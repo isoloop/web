@@ -10,7 +10,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
-  align-items: baseline;
+  align-items: center;
   padding: 8px 16px;
   border-bottom: 1px solid #333;
 }
@@ -18,19 +18,73 @@ body {
   margin: 0;
   font-size: 18px;
 }
-.page nav {
-  display: flex;
-  gap: 8px;
+/* The header's controls: the kernel switch, then each setting as a small
+   segmented control with a label; the current item is filled. React and
+   Preact on one page (mixed) is shown in orange. */
+.page .seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   white-space: nowrap;
 }
-.page nav a {
+.page .seg-label {
+  color: #9aa0a6;
+  font-size: 12px;
+}
+.page .seg-items {
+  display: inline-flex;
+  border: 1px solid #3a3f45;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.page .seg-items > a,
+.page .seg-items > span {
+  padding: 2px 9px;
   color: #8ab4f8;
+  text-decoration: none;
 }
-.page nav [aria-current] {
-  font-weight: 600;
+.page .seg-items > * + * {
+  border-left: 1px solid #3a3f45;
 }
-.page .builds {
+.page .seg-items > a:hover {
+  background: #22262b;
+}
+.page .seg-items > [aria-current] {
+  background: #3a4a63;
+  color: #fff;
+}
+/* A fixed width that fits either side's builds, so switching sides doesn't
+   move the header; the items share it. */
+.page .builds .seg-items {
+  width: 14rem;
+}
+.page .builds .seg-items > * {
+  flex: 1;
+  text-align: center;
+}
+.page .seg-items > [aria-disabled='true'] {
+  color: #5f6368;
+  cursor: not-allowed;
+}
+.page .seg-items > [data-mixed] {
+  color: #f0a35e;
+}
+.page .seg-items > [data-mixed][aria-current] {
+  background: #4a3524;
+  color: #ffd2a8;
+}
+.page .kernel {
   margin-left: auto;
+}
+.page .seg[data-disabled] .seg-label {
+  color: #5f6368;
+}
+.page > .description [data-disabled] dt,
+.page > .description [data-disabled] dd {
+  color: #6b7076;
+}
+.page .architecture {
+  color: #8ab4f8;
 }
 .page h2 {
   margin: 0;
@@ -92,6 +146,57 @@ body {
   position: relative;
   flex: 1;
   min-height: 0;
+}
+/* The box under the header: what runs where, and what a block takes down.
+   The plant's notice box, with a blue rule: information, where a warning's is
+   yellow. */
+.page > .description {
+  margin: 8px;
+  padding: 8px 12px;
+  border-left: 3px solid #8ab4f8;
+  background: #22262b;
+  line-height: 1.45;
+}
+.page > .description h2 {
+  margin: 0 0 4px;
+  padding: 0;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.page > .description dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 3px 14px;
+  margin: 0;
+}
+.page > .description dl > div {
+  display: contents;
+}
+.page > .description dt {
+  padding-top: 2px;
+  color: #9aa0a6;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.page > .description dd {
+  margin: 0;
+  color: #bbb;
+}
+.page > .description [data-mixed] dt {
+  color: #f0a35e;
+}
+@media (max-width: 1100px) {
+  .page > .description dl {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .page > .description dd {
+    margin-bottom: 4px;
+  }
 }
 .notice {
   margin: 8px;
