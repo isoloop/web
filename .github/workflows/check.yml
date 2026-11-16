@@ -44,8 +44,12 @@ jobs:
           # (apps/<name> or apps/<group>/<name>); its id is that path below apps/.
           # The site has no E2E of its own; its smoke test is the site job.
           # apps/samples only holds the site's type-checked code samples.
-          all=$(find apps -name package.json -not -path '*/node_modules/*' \
-            | xargs -n1 dirname | sed 's#^apps/##' | grep -vxE 'site|samples' | sort)
+          # A package with a playwright.config.ts has E2E too; its id is its
+          # path, packages/<name> (e2e.yml runs it from there).
+          all=$( (find apps -name package.json -not -path '*/node_modules/*' \
+            | xargs -n1 dirname | sed 's#^apps/##' | grep -vxE 'site|samples'; \
+            find packages -maxdepth 2 -name playwright.config.ts -not -path '*/node_modules/*' \
+            | xargs -r -n1 dirname) | sort)
           if [ -z "$BASE" ]; then
             apps="$all"
           else

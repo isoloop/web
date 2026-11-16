@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { fieldOf, topicOf, type Catalog, type CatalogTopic, type FieldType } from '../catalog';
 import { VIEW_INPUTS, type OutputKind } from '../outputs';
 import { outputKind } from '../pipeline';
+import { checkViewOptions } from '../views/kinds';
 import type { Operator, WidgetSpec } from './types';
 
 export type SpecError = {
@@ -54,7 +55,8 @@ const operatorShape = z.discriminatedUnion('op', [filterShape, windowShape, aggr
   error: 'op must be "filter", "window" or "aggregate"',
 });
 
-const specShape = z.strictObject({
+/** The shape of a widget spec, before the catalog checks: for the bus (topics.ts). */
+export const specShape = z.strictObject({
   id,
   title: z.string().trim().min(1).max(80),
   source: z.strictObject({ topic: name, key: z.string().min(1).max(128).optional() }),
@@ -320,6 +322,7 @@ export function validateSpec(input: unknown, catalog: Catalog): SpecResult {
       message: `a ${spec.view.type} view draws ${takes.join(' or ')}; this pipeline gives ${kind} (${spec.view.type} needs ${takes.map((k) => NEEDS[k]).join(' or ')})`,
     });
   }
+  errors.push(...checkViewOptions(spec.view.type, spec.view.options));
 
   return errors.length > 0 ? { ok: false, errors } : { ok: true, spec };
 }

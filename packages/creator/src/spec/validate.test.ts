@@ -40,7 +40,7 @@ describe('validateSpec accepts', () => {
           },
           { op: 'window', n: 50 },
         ],
-        view: { type: 'table', size: 'l', options: { compact: true } },
+        view: { type: 'table', size: 'l', options: { limit: 20 } },
       }),
       CATALOG,
     );
@@ -178,6 +178,24 @@ describe('validateSpec rejects, with the path of the error', () => {
     expect(errors(result)['view.type']).toMatch(
       /heatmap view draws grid; this pipeline gives series/,
     );
+  });
+
+  it('view options the view doesn’t read, or that don’t fit', () => {
+    const line = validateSpec(
+      spec({ view: { type: 'line', size: 'm', options: { limit: 5 } } }),
+      CATALOG,
+    );
+    expect(errors(line)['view.options.limit']).toMatch(/line view has no option "limit"/);
+    const stat = validateSpec(
+      spec({ view: { type: 'stat', size: 's', options: { gaugeMin: 10, gaugeMax: 5 } } }),
+      CATALOG,
+    );
+    expect(errors(stat)['view.options.gaugeMax']).toMatch(/above gaugeMin/);
+    const ok = validateSpec(
+      spec({ view: { type: 'stat', size: 's', options: { gaugeMin: 0, gaugeMax: 120 } } }),
+      CATALOG,
+    );
+    expect(ok.ok).toBe(true);
   });
 
   it('reports every error at once', () => {
