@@ -14,3 +14,13 @@ for (const build of ['native', 'native-workers']) {
     await expect(page.locator('.build')).toHaveAttribute('data-build', build);
   });
 }
+
+test('the interactive page sends visitors to its Isoloop build, and both load', async ({
+  page,
+}) => {
+  await page.goto('./interactive/');
+  await expect(page).toHaveURL(/\/interactive\/isoloop\/$/);
+  await expect(page.locator('.creator-board[data-ready]')).toBeAttached();
+  await page.goto('./interactive/native/');
+  await expect(page.locator('.creator-board[data-ready]')).toBeAttached();
+});

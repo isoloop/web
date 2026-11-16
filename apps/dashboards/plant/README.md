@@ -101,5 +101,6 @@ Isoloop minus its matched native build, desktop machine, Chromium. The 16 s figu
 - **Decisions:**
   - [ADR 0016](https://github.com/isoloop/isoloop/blob/main/docs/adr/0016-fewer-messages-per-record.md): fewer bus messages per record.
   - [ADR 0001's amendment](https://github.com/isoloop/isoloop/blob/main/docs/adr/0001-one-worker-per-isolate.md): a pool's frozen built-ins leave V8's protected properties as plain data.
+- **Interactive mode:** a separate page, `/interactive/` (Isoloop or native, `?rate=1|2|5`), on the same machines, with six starter widgets you can edit or delete and a drawer that adds new ones from the plant's topics, each widget its own isolate in a pool you pick. The figures for it come with [M3e](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3e-live-widget-creator.md).
 - **The plan:** [M3d](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3d-plant-dashboard.md).
 - **Every recorded run:** [`comparison/`](comparison/README.md), with the method and how to run it again.

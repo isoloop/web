@@ -20,7 +20,7 @@ const scan = (dir: string, markers: string[]): string[] =>
     });
 
 let failed = false;
-for (const dir of ['dist/native', 'dist/native-workers']) {
+for (const dir of ['dist/native', 'dist/native-workers', 'dist/interactive/native']) {
   const hits = scan(dir, ISOLOOP);
   if (hits.length > 0) {
     console.error(`${dir} contains Isoloop code:\n${hits.join('\n')}`);
