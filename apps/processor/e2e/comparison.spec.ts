@@ -13,28 +13,37 @@ import { cpuDelta, cpuOf, memory, pageMetrics, pssMb, processes } from 'compare/
 //
 // - Warm-up (`COMPARE_WARM_MS`): the generator runs from navigation; the
 //   balancer measures every processor in its quarantine first (about 3 s),
-//   then places it, so the warm-up covers that.
+//   then places it, and the files that waited meanwhile drain; 20 s covers
+//   that, so the window shows the placement settled.
 // - Window (`COMPARE_WINDOW_MS`): files done per second, and the latency of
 //   each file from being made to its result (p50, p95); the most workers seen
 //   (bus excluded, the generator's included); the balancer's moves.
 // - Typing: median of 5 keystrokes into the latest results' filter, from the
 //   keystroke until the table is drawn with it (`data-filter`), with the
 //   files still flowing.
-// - Drain: the generator stops; the time until every file made has a result,
-//   then the files lost (none expected) and done twice (at least once is the
-//   contract, so a move can repeat a file).
+// - Drain: the generator stops; the time until every file made has a result
+//   (up to 2 min), then the files still without one (none expected: a file
+//   still waiting at 2 min, or one whose kind's processors were given up on,
+//   counts too), the processors the kernel gave up on (`failed`), and the
+//   files done twice (at least once is the contract, so a move can repeat
+//   a file).
 // - Main-thread CPU (CDP TaskDuration), renderer CPU across all threads, and
 //   renderer memory (PSS, Linux): Chromium only.
 //
-// Mixes: `normal` is files only; `faults` adds, in a hundred files, 1 poison
-// (blocks its processor 2 s), 10 heavy (ten times the work) and 1 corrupt
+// Mixes: `normal` is files only; `faults` adds, in a thousand files, 2 poison
+// (block their processor 2 s), 100 heavy (ten times the work) and 1 corrupt
 // (crashes its processor). The rate is the same for both (`COMPARE_RATE`).
+// A crash restarts the processor, and the kernel gives up on one that
+// crashes more than 3 times in a minute (it's `failed`); 1 in a thousand
+// keeps under that at 50 files/s, so the figures are about placement, not
+// about processors given up on (counted anyway, in `failed`).
 //
 // CPU throttling is not used, as in the dashboards' comparisons: the bench
 // server pins the run to fixed cores instead.
 declare global {
   interface Window {
     files: import('../src/files/model').FileProcessor;
+    kernel: import('@isoloop/host').Kernel;
   }
 }
 
@@ -44,13 +53,13 @@ const ALL = ['isoloop:own', 'isoloop:one', 'isoloop:balancer', 'isoloop:one-off'
 const CONFIGS = process.env['COMPARE_CONFIGS']?.split(',') ?? ALL;
 const RUNS = Number(process.env['COMPARE_RUNS'] ?? 1);
 const RATE = Number(process.env['COMPARE_RATE'] ?? 50);
-const WARM_MS = Number(process.env['COMPARE_WARM_MS'] ?? 8_000);
+const WARM_MS = Number(process.env['COMPARE_WARM_MS'] ?? 20_000);
 const WINDOW_MS = Number(process.env['COMPARE_WINDOW_MS'] ?? 20_000);
 const DRAIN_MS = 120_000;
 const SAMPLES = 5;
 const MIX: Readonly<Record<string, string>> = {
   normal: '',
-  faults: '&poison=1&heavy=10&corrupt=1',
+  faults: '&poison=0.2&heavy=10&corrupt=0.1',
 };
 const VIEWPORT = { width: 1400, height: 900 };
 const RUN_CAP_MS = 240_000;
@@ -162,6 +171,7 @@ for (const mix of MIXES) {
           const end = await page.evaluate(() => {
             const s = window.files.snapshot();
             return {
+              failed: window.kernel.isolates().filter((i) => i.state === 'failed').length,
               produced: s.produced,
               done: s.done,
               lost: window.files.outstanding().length,
@@ -182,6 +192,7 @@ for (const mix of MIXES) {
             queueAtStop,
             drainMs,
             lost: end.lost,
+            failed: end.failed,
             duplicates: end.duplicates,
             produced: end.produced,
             done: end.done,
