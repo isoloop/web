@@ -79,6 +79,7 @@ test('a task turned up to 90 % is separated within about 5 s', async ({ page }) 
     timeout: 8_000,
   });
   await expect(page.locator('.log li').first()).toContainText('task-3');
+  await expect(page.locator('.log li').first().locator('.badge')).toHaveText('too busy');
   // The light ones stay together.
   await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(4);
 });

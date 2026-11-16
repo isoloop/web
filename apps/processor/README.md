@@ -9,7 +9,7 @@ Each task keeps `load` % of one core busy, in uninterrupted pieces of the page's
 
 A new task's dial is given to the balancer as its declared load, so it's placed at once; afterwards the balancer keeps its own measurements.
 
-A task stops its own loop in `onShutdown`: in a pool the worker outlives a stopped member, and its timers and ports keep running, so without that every move would leave the old copy burning CPU in the pool it left.
+A task stops its own loop in `onShutdown`. In a pool the worker outlives a stopped member, and in `0.0.0-next.g3322248` its timers and ports keep running, so without that every move would leave the old copy burning CPU in the pool it left. The runtime fix (isoloop#206) cancels them on stop; the workaround is harmless and stays until a prerelease with that fix is in the catalog.
 
 ```sh
 pnpm --filter processor dev      # http://localhost:5173/

@@ -29,7 +29,10 @@ const MODES: { mode: Mode; label: string; hint: string }[] = [
 
 const REASONS: Record<string, string> = {
   spike: 'spike',
-  sustained: 'too busy',
+  /** A full pool: its tasks add up to 80 % of a core. */
+  full: 'too busy',
+  /** A pool that lags over 50 ms for 3 s. */
+  sustained: 'lagging',
   crash: 'crashed',
   bisect: 'bisect',
   steady: 'steady again',
