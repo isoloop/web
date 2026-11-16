@@ -1,12 +1,15 @@
 name: Comparison
 
-# The markets dashboard's head-to-head comparison (M3f): native against
-# Isoloop `one`, native + workers against Isoloop `matched`, and Isoloop `own`
-# alongside, at Normal and Heavy, one page at a time, one round, on each engine
-# in its own job (comparison/run.ts). Runs on demand, after a `markets-v*`
+# The markets dashboard's head-to-head comparisons, at Normal and Heavy, one
+# page at a time, one round, on each engine in its own job (comparison/run.ts):
+# - `final` (M3f): native against Isoloop `one`, native + workers against
+#   Isoloop `matched`, and Isoloop `own` alongside.
+# - `federated` (M3g): native + workers with the Preact part loaded apart
+#   against `mixed` in `matched`, with `mixed` in `teams` and `own` alongside. Runs on demand, after a `markets-v*`
 # deploy (release.yml) and weekly (weekly.yml). The numbers are uploaded as an
 # artifact, with summary.md in the run's summary; nothing is asserted. The
-# shipped figures come from the bench server (comparison/final/).
+# shipped figures come from the bench server (comparison/final/ and
+# comparison/federated/).
 on:
   workflow_dispatch:
   workflow_call:
@@ -14,21 +17,24 @@ on:
 permissions:
   contents: read
 
-env:
-  PAIRS: --pair native=isoloop:one --pair native-workers=isoloop:matched --extra isoloop:own
-
 jobs:
   engine:
     runs-on: ubuntu-latest
     # In the job, not the workflow: this one is also called from others.
     concurrency:
-      group: comparison-${{ matrix.browser }}
+      group: comparison-${{ matrix.set }}-${{ matrix.browser }}
       cancel-in-progress: false
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, firefox]
+        set: [final, federated]
+        include:
+          - set: final
+            pairs: --pair native=isoloop:one --pair native-workers=isoloop:matched --extra isoloop:own
+          - set: federated
+            pairs: --pair native-mixed=mixed:matched --extra mixed:teams --extra mixed:own
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
@@ -40,11 +46,11 @@ jobs:
       - uses: ./.github/actions/install-browsers
         with:
           browsers: ${{ matrix.browser }}
-      - run: node comparison/run.ts $PAIRS --sizes normal,heavy --rounds 1 --hold 0 --engines ${{ matrix.browser }} --out comparison-results
+      - run: node comparison/run.ts ${{ matrix.pairs }} --sizes normal,heavy --rounds 1 --hold 0 --engines ${{ matrix.browser }} --out comparison-results
         working-directory: apps/dashboards/markets
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: comparison-${{ matrix.browser }}
+          name: comparison-${{ matrix.set }}-${{ matrix.browser }}
           path: apps/dashboards/markets/comparison-results
           retention-days: 90
 
@@ -52,6 +58,17 @@ jobs:
     needs: engine
     if: always()
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        set: [final, federated]
+        include:
+          - set: final
+            title: Markets, M3f pairs
+            pairs: --pair native=isoloop:one --pair native-workers=isoloop:matched --extra isoloop:own
+          - set: federated
+            title: Markets, M3g federated pairs
+            pairs: --pair native-mixed=mixed:matched --extra mixed:teams --extra mixed:own
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
@@ -62,14 +79,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          pattern: comparison-*
+          pattern: comparison-${{ matrix.set }}-*
           path: apps/dashboards/markets/comparison-results
           merge-multiple: true
-      - run: node comparison/run.ts $PAIRS --summary-only --out comparison-results
+      - run: node comparison/run.ts ${{ matrix.pairs }} --summary-only --out comparison-results
         working-directory: apps/dashboards/markets
-      - run: cat apps/dashboards/markets/comparison-results/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - run: |
+          { echo "## ${{ matrix.title }}"; echo; cat apps/dashboards/markets/comparison-results/summary.md; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: comparison
+          name: comparison-${{ matrix.set }}
           path: apps/dashboards/markets/comparison-results
           retention-days: 90
