@@ -9,6 +9,8 @@ const ENGINES = [
 ] as const;
 const LOAD = /(budget)\.spec\.ts$/;
 const COMPARISON = /comparison\.spec\.ts$/;
+// The interactive page's measured run (M3e decision 22), on demand too.
+const INTERACTIVE = /interactive-compare\.spec\.ts$/;
 const LIVE = process.env['LIVE_URL'];
 
 export default defineConfig({
@@ -36,7 +38,7 @@ export default defineConfig({
   // run.
   projects: [
     ...ENGINES.flatMap(([name, device]) => [
-      { name, use: { ...devices[device] }, testIgnore: [LOAD, COMPARISON] },
+      { name, use: { ...devices[device] }, testIgnore: [LOAD, COMPARISON, INTERACTIVE] },
       { name: `${name}-load`, use: { ...devices[device] }, testMatch: LOAD },
     ]),
     { name: 'comparison', use: { ...devices['Desktop Chrome'] }, testMatch: COMPARISON },
@@ -46,6 +48,16 @@ export default defineConfig({
       testMatch: COMPARISON,
     },
     { name: 'comparison-webkit', use: { ...devices['Desktop Safari'] }, testMatch: COMPARISON },
+    {
+      name: 'interactive-comparison',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: INTERACTIVE,
+    },
+    {
+      name: 'interactive-comparison-firefox',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: INTERACTIVE,
+    },
     { name: 'live', use: { ...devices['Desktop Chrome'] }, testMatch: /smoke\.spec\.ts$/ },
   ],
 });

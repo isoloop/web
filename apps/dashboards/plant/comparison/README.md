@@ -2,6 +2,7 @@
 
 ## Recorded runs, newest first
 
+- The interactive page's head-to-head: not recorded yet; [below](#the-interactive-page-interactivets) for how.
 - [`final/`](final/README.md): the figures that ship with `plant-v0.1.0`, on the dedicated machine with `@isoloop/*@0.0.0-next.b8ffdcf`.
 - [`phone/ikko-mindone-focus156/`](phone/ikko-mindone-focus156/README.md): a mid-range phone, Firefox Focus 156.
 - [`phone/galaxy-fold6-chrome157/`](phone/galaxy-fold6-chrome157/README.md): a flagship phone, Chrome 157.
@@ -70,6 +71,48 @@ docker run --rm --init --cpuset-cpus=2,4,6,8 --shm-size=2g \
 - `--shm-size=2g` gives Chromium enough shared memory; Docker's default of 64 MB is too small for it.
 - The results land in `apps/dashboards/plant/comparison/matched/results/`, owned by root, because the container runs as root.
 - `run.json` there records the arguments and the CPUs the run was allowed.
+
+## The interactive page (`interactive.ts`)
+
+M3e decision 22: on plant's interactive page (`/interactive/native/` against `/interactive/isoloop/`, at 5 kHz), whether work in the drawer reaches the dashboard, and whether the dashboard's load reaches the drawer. [`e2e/interactive-compare.spec.ts`](../e2e/interactive-compare.spec.ts) runs one page per run:
+
+1. Load, wait until the starters draw, warm up (`--warm`).
+2. An idle window (`--window`), drawer closed: the reference.
+3. **Dashboard → drawer:** the drawer open on its default draft (light). 10 keystrokes into the title and 10 clicks (add a condition, remove it), one at a time.
+4. **Drawer → dashboard:** the draft made heavy (`plant.scalars`, bearing temp p95 over 120 s, every 1 s, by machine, a line), then a window with a keystroke into the title every 500 ms; each one makes the preview rebuild its pipeline from its 2-minute buffer.
+
+The figures:
+
+- **Draw gaps:** the time between two draws of a starter canvas (line, heatmap, bar), from `data-drawn-at`, the time each draw ran, on the drawing thread's clock (the widget's worker on Isoloop, the main thread on native). Widgets read their pipeline every 100 ms; a gap over 250 ms is counted.
+- **Main-thread frames:** gaps between the page's animation frames; over 25 ms is counted.
+- **Typing:** from the keydown on the page to the first animation frame after the drawer's form has rendered the new title (`data-title`, set by the drawer, in its own worker on Isoloop).
+- **Clicks:** from the click to the first animation frame after the form shows one condition more or fewer.
+- **CPU:** main thread and all renderer threads, % of one core, Chromium only.
+
+The page is timed from inside itself, by an init script that also watches the isolates' shadow roots, so Playwright's polling isn't in the figures.
+
+```bash
+pnpm --filter ./apps/dashboards/plant compare:interactive \
+  --pair native=isoloop --rates 5 --rounds 5 --hold 0 \
+  --engines chromium,firefox --out comparison/interactive/final
+```
+
+On CI, the `interactive` job of *Comparison (plant)* runs 3 rounds per engine, report-only. With a preview already on port 4792 from another checkout, serve this one elsewhere and pass `LIVE_URL=http://localhost:<port>`, so the runs don't measure the other build.
+
+On the dedicated machine, as above, after `sudo ~/bench-mode on`, holding the lock other runs on that machine take:
+
+```bash
+ssh hauseserver
+cd ~/bench/web && git fetch origin && git checkout --detach origin/main
+docker build -t plant-compare apps/dashboards/plant/comparison
+flock ~/bench/.lock docker run --rm --init --cpuset-cpus=2,4,6,8 --shm-size=2g \
+  -v "$PWD":/work -w /work plant-compare \
+  bash -lc 'pnpm install --frozen-lockfile && pnpm --filter ./apps/dashboards/plant compare:interactive \
+    --pair native=isoloop --rates 5 --rounds 5 --hold 0 \
+    --engines chromium,firefox --out comparison/interactive/final'
+```
+
+2 pages × 5 rounds × 2 engines = 20 runs of about a minute each.
 
 ## Chromium, 4 cores, 1 kHz and 5 kHz
 

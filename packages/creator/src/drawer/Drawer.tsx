@@ -236,6 +236,9 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
       data-mode={open.mode}
       data-valid={result?.ok ? 'true' : 'false'}
       data-kind={kind}
+      // The title as the form last rendered it: the comparison times a
+      // keystroke until the drawer has handled it (M3e decision 22).
+      data-title={form.title}
       onSubmit={(e) => e.preventDefault()}
     >
       <h2 className="creator-drawer-title">
