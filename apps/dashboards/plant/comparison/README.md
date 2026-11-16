@@ -2,7 +2,7 @@
 
 ## Recorded runs, newest first
 
-- The interactive page's head-to-head: not recorded yet; [below](#the-interactive-page-interactivets) for how.
+- [`interactive/final/`](interactive/final/summary.md): the interactive page's head-to-head (M3e), native against Isoloop at 5 kHz, on the dedicated machine at `a5562f0` with `@isoloop/*@0.0.0-next.g3322248`. How it runs is [below](#the-interactive-page-interactivets).
 - [`final/`](final/README.md): the figures that ship with `plant-v0.1.0`, on the dedicated machine with `@isoloop/*@0.0.0-next.b8ffdcf`.
 - [`phone/ikko-mindone-focus156/`](phone/ikko-mindone-focus156/README.md): a mid-range phone, Firefox Focus 156.
 - [`phone/galaxy-fold6-chrome157/`](phone/galaxy-fold6-chrome157/README.md): a flagship phone, Chrome 157.
