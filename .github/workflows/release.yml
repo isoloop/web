@@ -42,10 +42,12 @@ jobs:
 
   compare:
     needs: deploy
-    if: startsWith(github.ref_name, 'markets-v')
+    # Explicit status check: without one, GitHub adds success(), which also
+    # fails on the skipped `site` job upstream of deploy, so this never ran.
+    if: ${{ !cancelled() && needs.deploy.result == 'success' && startsWith(github.ref_name, 'markets-v') }}
     uses: ./.github/workflows/comparison.yml
 
   compare-plant:
     needs: deploy
-    if: startsWith(github.ref_name, 'plant-v')
+    if: ${{ !cancelled() && needs.deploy.result == 'success' && startsWith(github.ref_name, 'plant-v') }}
     uses: ./.github/workflows/comparison-plant.yml
