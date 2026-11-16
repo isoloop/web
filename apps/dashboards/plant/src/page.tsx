@@ -1,10 +1,10 @@
 import { Slot } from '#slot';
-import { BUILDS, CURRENT } from './builds';
+import { CURRENT, OTHER_SIDE, SIDE, SIDE_BUILDS } from './builds';
 import { ClearHistory } from './ClearHistory';
 import { CategoryPanel } from './metrics/Categories';
 import { MetricsPanel } from './metrics/Panel';
 import { Record } from './metrics/Record';
-import { Notices } from './Notices';
+import { Description, Notices } from './Notices';
 import { Responsiveness } from './responsive/Responsiveness';
 import { MACHINES } from './core/machines';
 import { WIDGETS } from './widgets';
@@ -25,53 +25,78 @@ const SHOWN = Object.keys(WIDGETS).filter((w): w is WidgetName => w in WIDGETS);
 
 export function Page() {
   const { fleet, machines } = layout(SHOWN);
-  const build = BUILDS.find((b) => b.name === CURRENT);
   return (
     <div className="page">
       <header>
         <h1>Plant 1</h1>
-        <span className="build" data-build={CURRENT}>
-          {build?.summary}
-        </span>
-        <nav className="builds" aria-label="Builds">
-          {BUILDS.map((b) =>
-            b.name === CURRENT ? (
-              <span key={b.name} aria-current="page">
-                {b.label}
-              </span>
-            ) : (
-              <a key={b.name} href={buildHref(b.name, location.search)}>
-                {b.label}
-              </a>
-            ),
-          )}
-        </nav>
-        <nav className="rates" aria-label="Vibration rate">
-          {RATES.map((r) =>
-            r === SETTINGS.rate ? (
-              <span key={r} aria-current="page">
-                {r} kHz
-              </span>
-            ) : (
-              <a key={r} href={withParam(location.search, 'rate', String(r))}>
-                {r} kHz
-              </a>
-            ),
-          )}
-        </nav>
-        {CURRENT === 'isoloop' && (
-          <nav className="placements" aria-label="Placement">
-            {PLACEMENTS.map((p) =>
-              p === SETTINGS.placement ? (
-                <span key={p} aria-current="page">
-                  {p}
+        <nav className="kernel seg" aria-label="Kernel">
+          <span className="seg-items">
+            {(['native', 'isoloop'] as const).map((side) => {
+              const text = side === 'native' ? 'Native' : 'Isoloop';
+              return side === SIDE ? (
+                <span key={side} aria-current="page">
+                  {text}
                 </span>
               ) : (
-                <a key={p} href={withParam(location.search, 'placement', p)}>
-                  {p}
+                <a
+                  key={side}
+                  aria-label={`Switch to ${OTHER_SIDE}`}
+                  href={buildHref(OTHER_SIDE, location.search)}
+                >
+                  {text}
+                </a>
+              );
+            })}
+          </span>
+        </nav>
+        <nav className="builds seg" aria-label="Builds">
+          <span className="seg-label">Build</span>
+          <span className="seg-items">
+            {SIDE_BUILDS[SIDE].map((b) =>
+              b.name === CURRENT ? (
+                <span key={b.name} aria-current="page">
+                  {b.short}
+                </span>
+              ) : (
+                <a key={b.name} href={buildHref(b.name, location.search)}>
+                  {b.short}
                 </a>
               ),
             )}
+          </span>
+        </nav>
+        <nav className="rates seg" aria-label="Vibration rate">
+          <span className="seg-label">Rate</span>
+          <span className="seg-items">
+            {RATES.map((r) =>
+              r === SETTINGS.rate ? (
+                <span key={r} aria-current="page">
+                  {r} kHz
+                </span>
+              ) : (
+                <a key={r} href={withParam(location.search, 'rate', String(r))}>
+                  {r} kHz
+                </a>
+              ),
+            )}
+          </span>
+        </nav>
+        {CURRENT === 'isoloop' && (
+          <nav className="placements seg" aria-label="Placement">
+            <span className="seg-label">Placement</span>
+            <span className="seg-items">
+              {PLACEMENTS.map((p) =>
+                p === SETTINGS.placement ? (
+                  <span key={p} aria-current="page">
+                    {p}
+                  </span>
+                ) : (
+                  <a key={p} href={withParam(location.search, 'placement', p)}>
+                    {p}
+                  </a>
+                ),
+              )}
+            </span>
           </nav>
         )}
         <ClearHistory />
@@ -79,6 +104,7 @@ export function Page() {
           Architecture
         </a>
       </header>
+      <Description />
       <Notices />
       <Responsiveness />
       <MetricsPanel />

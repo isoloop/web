@@ -10,7 +10,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
-  align-items: baseline;
+  align-items: center;
   padding: 8px 16px;
   border-bottom: 1px solid #333;
 }
@@ -18,29 +18,102 @@ body {
   margin: 0;
   font-size: 18px;
 }
-.page .toggle {
-  margin-left: auto;
-  color: #8ab4f8;
-}
-.page .builds,
-.page .sizes,
-.page .placements {
-  display: flex;
-  gap: 8px;
+/* The header's controls: the kernel switch, then each setting as a small
+   segmented control with a label; the current item is filled. React and
+   Preact on one page (mixed) is shown in orange. */
+.page .seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   white-space: nowrap;
 }
-.page .builds a,
-.page .sizes a,
-.page .placements a {
-  color: #8ab4f8;
+.page .seg-label {
+  color: #9aa0a6;
+  font-size: 12px;
 }
-.page .sizes [aria-current],
-.page .placements [aria-current] {
+.page .seg-items {
+  display: inline-flex;
+  border: 1px solid #3a3f45;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.page .seg-items > a,
+.page .seg-items > span {
+  padding: 2px 9px;
+  color: #8ab4f8;
+  text-decoration: none;
+}
+.page .seg-items > * + * {
+  border-left: 1px solid #3a3f45;
+}
+.page .seg-items > a:hover {
+  background: #22262b;
+}
+.page .seg-items > [aria-current] {
+  background: #2f3a4d;
+  color: #fff;
   font-weight: 600;
 }
-.page .placement-note {
-  color: #999;
-  font-size: 12px;
+.page .seg-items > [aria-disabled='true'] {
+  color: #5f6368;
+  cursor: not-allowed;
+}
+.page .seg-items > [data-mixed] {
+  color: #f0a35e;
+}
+.page .seg-items > [data-mixed][aria-current] {
+  background: #4a3524;
+  color: #ffd2a8;
+}
+.page .kernel {
+  margin-left: auto;
+}
+/* The box under the header: what runs where, and what a block takes down.
+   The plant's notice box, with a blue rule: information, where a warning's is
+   yellow. */
+.page > .description {
+  margin: 8px;
+  padding: 8px 12px;
+  border-left: 3px solid #8ab4f8;
+  background: #22262b;
+  line-height: 1.45;
+}
+.page > .description h2 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.page > .description dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 3px 14px;
+  margin: 0;
+}
+.page > .description dl > div {
+  display: contents;
+}
+.page > .description dt {
+  padding-top: 2px;
+  color: #9aa0a6;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.page > .description dd {
+  margin: 0;
+  color: #bbb;
+}
+.page > .description [data-mixed] dt {
+  color: #f0a35e;
+}
+@media (max-width: 1100px) {
+  .page > .description dl {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .page > .description dd {
+    margin-bottom: 4px;
+  }
 }
 .page > .slot {
   position: relative;
