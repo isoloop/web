@@ -3,13 +3,13 @@ import type { VNode } from 'preact';
 import { Callout, Frame } from 'ui/components';
 import { howItWorks } from '../copy.ts';
 import { rich } from './rich.tsx';
+import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
 
 function HowItWorks({ diagrams, pin }: SiteData): VNode {
   return (
     <main class="ui-shell">
-      <section class="ui-intro" aria-labelledby="title">
-        <h1 id="title">{howItWorks.heading}</h1>
+      <PageIntro title={howItWorks.heading}>
         <p class="ui-lede">{howItWorks.intro}</p>
         <p>
           <small>
@@ -19,7 +19,7 @@ function HowItWorks({ diagrams, pin }: SiteData): VNode {
             </a>
           </small>
         </p>
-      </section>
+      </PageIntro>
       {diagrams.map((d) => {
         const href = `/how-it-works/diagrams/${d.name}.html`;
         return (

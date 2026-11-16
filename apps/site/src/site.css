@@ -59,6 +59,32 @@
   max-width: none;
   margin-top: 1rem;
 }
+/* A page's opening (src/pages/intro.tsx): the expressive mark fills the
+   gutter, less a small gap, and the text beside it is centred on it. */
+.ui-intro > .ui-intro-mark {
+  grid-column: 1;
+  grid-row: 2;
+  max-width: none;
+  padding-right: 1.5rem;
+}
+.ui-intro-mark .ui-mark {
+  width: 100%;
+  height: auto;
+}
+.ui-intro > .ui-intro-text {
+  grid-row: 2;
+  align-self: center;
+  display: grid;
+  row-gap: 1.25rem;
+}
+@media (max-width: 760px) {
+  .ui-intro > .ui-intro-mark {
+    display: none;
+  }
+  .ui-intro > .ui-intro-text {
+    grid-row: auto;
+  }
+}
 .ui-gutter-empty {
   min-height: 1px;
 }

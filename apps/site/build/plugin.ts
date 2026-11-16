@@ -18,6 +18,7 @@ import { uiAssets } from 'ui/vite';
 import type { Plugin, ViteDevServer } from 'vite';
 import { buildDiagramFiles, DIAGRAMS_PATH, type EmittedFile } from './diagrams.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
+import { PAGE_MARK } from '../src/pages/intro.tsx';
 
 /** Every page's policy (ADR 0002, decision 8). */
 export const CSP = "default-src 'self'";
@@ -26,6 +27,14 @@ export const CSP = "default-src 'self'";
 export const PREVIEW = '/og-1200x630.png';
 const previewFile = (): string =>
   fileURLToPath(new URL('../../../packages/ui/brand/social/og-1200x630.png', import.meta.url));
+
+/** The expressive mark the inner pages open with (src/pages/intro.tsx), by served path. */
+const MARKS: Record<string, string> = Object.fromEntries(
+  Object.values(PAGE_MARK).map((path) => [
+    path,
+    fileURLToPath(new URL(`../../../packages/ui${path}`, import.meta.url)),
+  ]),
+);
 
 const STUB = /^\s*<!--\s*page:([a-z0-9-]+)\s*-->\s*$/;
 
@@ -107,6 +116,8 @@ export function site(opts: SiteOptions): Plugin {
           const hit = devDiagrams.get(path.slice(DIAGRAMS_PATH.length + 1));
           if (hit)
             file = { source: hit.source, type: TYPES[hit.fileName.split('.').pop() ?? ''] ?? '' };
+        } else if (MARKS[path]) {
+          file = { source: readFileSync(MARKS[path]), type: 'image/svg+xml' };
         } else if (path === PREVIEW && existsSync(previewFile())) {
           file = { source: readFileSync(previewFile()), type: 'image/png' };
         } else {
@@ -140,6 +151,9 @@ export function site(opts: SiteOptions): Plugin {
           fileName: PREVIEW.slice(1),
           source: readFileSync(previewFile()),
         });
+      for (const [path, source] of Object.entries(MARKS)) {
+        this.emitFile({ type: 'asset', fileName: path.slice(1), source: readFileSync(source) });
+      }
       for (const e of opts.data.examples) {
         if (!e.image) continue;
         this.emitFile({
