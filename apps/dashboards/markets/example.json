@@ -1,6 +1,6 @@
 {
   "title": "Markets dashboard",
-  "summary": "A backend-less markets dashboard on public exchange feeds: aggregates and alerts in the visitor's tab, built native, native with workers, and on Isoloop in three placements, with React and with Preact, in Lite, Normal and Heavy sizes.",
+  "summary": "A backend-less markets dashboard on public exchange feeds: aggregates and alerts in the visitor's tab, built native, native with workers, and on Isoloop in three placements, with React and with Preact, in Lite, Normal and Heavy sizes. A React and Preact build runs both ways too: native with workers, the Preact part shipped apart and loaded at run time, and on Isoloop with a pool per team.",
   "order": 30,
   "result": {
     "line": "At Heavy on 4 cores, both native builds fill the main thread and drop about a third of their frames; with every widget in one pool, Isoloop keeps them and types in 41 ms against 156 ms on Chromium. That placement costs +29 points of CPU and +52 MB against native with workers, and +4 points and +33 MB at Normal, where neither drops frames on Chromium.",

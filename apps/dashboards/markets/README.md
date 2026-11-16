@@ -24,6 +24,10 @@ On four cores at 2.0 GHz, Isoloop keeps the main thread free. At Heavy it keeps 
 
 The findings, the numbers and how they were measured are in [`comparison/final/`](comparison/final/README.md), recorded for `markets-v0.3.0`. The earlier M3b and M3c recording, native on one thread against Isoloop's `own`, is kept as history in [`comparison/`](comparison/README.md).
 
+### Parts from two teams
+
+The React and Preact build was measured against its native counterpart, native + workers with the Preact part loaded at run time, in [`comparison/federated/`](comparison/federated/README.md) (M3g). When the Preact team's alerts panel blocks for 3 s, the React team's widgets get none of their updates on the native build and in `matched`, and keep 91–99% of them in `teams` and `own`. When it crashes, native's error boundary keeps the rest running but the panel stays down; Isoloop has it back in 1.3–1.8 s. Isoloop loads 61 KB more JavaScript, gzipped, and costs 34–49 MB of memory and 5–29 points of CPU against native + workers.
+
 `own` is the default because markets shows containment: a blocked chart stalls only itself. In `matched`, a blocked widget stalls every widget, while the data keeps flowing. In `one`, it stalls everything until the block ends.
 
 ## Running it

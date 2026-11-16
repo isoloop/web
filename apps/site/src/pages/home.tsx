@@ -36,9 +36,15 @@ function Home({ examples }: SiteData): VNode {
         <h2 id="for-h">{home.uses.heading}</h2>
         <div class="ui-body">
           <ul class="ui-uses">
-            {home.uses.items.map(([b, t]) => (
+            {home.uses.items.map(([b, t, link]) => (
               <li key={b}>
                 <b>{b}</b> {t}
+                {link ? (
+                  <>
+                    {' '}
+                    <a href={link.href}>{link.text}</a>
+                  </>
+                ) : null}
               </li>
             ))}
           </ul>

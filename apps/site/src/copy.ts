@@ -135,6 +135,9 @@ export const recording = {
   open: 'Open basic on its own page',
 };
 
+/** A use: the lead, its sentence, and optionally a link to the figures behind it. */
+type Use = [lead: string, text: string, link?: { text: string; href: string }];
+
 export const home = {
   title: 'Isoloop: event-loop isolation for web apps',
   intro: {
@@ -153,7 +156,11 @@ export const home = {
       ],
       [
         'Apps built from many teams’ parts.',
-        'Isolates built and deployed apart, with a version floor so an old host or an old isolate says so instead of breaking.',
+        'Isolates built and deployed apart, with a version floor so an old host or an old isolate says so instead of breaking. On the markets dashboard, when one team’s part blocks for 3 s, the other team’s widgets keep 91–98% of their updates with a pool per team, against none on a native build that loads the part at run time; a crashed part is back in 1.3–1.8 s, for 61 KB more JavaScript and 34–49 MB more memory.',
+        {
+          text: 'The measurements',
+          href: 'https://github.com/isoloop/web/tree/main/apps/dashboards/markets/comparison/federated',
+        },
       ],
       [
         'Third-party or less-trusted widgets.',
@@ -167,7 +174,7 @@ export const home = {
         'Heavy work next to a UI.',
         'Parsing, search or simulation off the main thread, restarted if it hangs.',
       ],
-    ] as [string, string][],
+    ] as Use[],
   },
   strip: { heading: 'Features', all: 'All features, with live demos' },
   gives: {
