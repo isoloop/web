@@ -69,7 +69,11 @@ export type BoardOptions = {
 
 type Entry = { spec: WidgetSpec; added: number; seq: number };
 type Slot = { surface: Element; mounted: Mounted | undefined; spec: WidgetSpec | undefined };
-type Preview = { mounted: Mounted; topic: string };
+/**
+ * The running preview. `mounted` settles once it has started: a preview for a
+ * new topic waits for the old one's `stop()`, since both have the draft's id.
+ */
+type Preview = { mounted: Promise<Mounted | undefined>; topic: string };
 
 const randomText = (): string => Math.random().toString(36).slice(2, 10);
 
@@ -155,7 +159,7 @@ export class BoardController {
       void slot.mounted?.stop();
       slot.mounted = undefined;
     }
-    this.#stopPreview();
+    void this.#stopPreview();
     void this.#formMounted?.stop();
     this.#formMounted = undefined;
   }
@@ -199,7 +203,7 @@ export class BoardController {
     const d = this.#drawer;
     if (!d.open) return;
     this.#drawer = { open: false };
-    this.#stopPreview();
+    void this.#stopPreview();
     void this.#rt.bus.publish(DRAFT_TOPIC, d.draftId, TOMBSTONE);
     this.#emit();
   }
@@ -294,7 +298,7 @@ export class BoardController {
   #open(mode: 'add' | 'edit', id?: string): void {
     const prev = this.#drawer;
     if (prev.open) {
-      this.#stopPreview();
+      void this.#stopPreview();
       void this.#rt.bus.publish(DRAFT_TOPIC, prev.draftId, TOMBSTONE);
     }
     const n = ++this.#n;
@@ -321,15 +325,20 @@ export class BoardController {
     const topic = topicOf(this.#catalog, spec.source.topic);
     if (!topic) return;
     if (this.#preview?.topic === topic.name) return;
-    this.#stopPreview();
-    this.#preview = {
+    const stopped = this.#stopPreview();
+    const surface = this.#previewSurface;
+    const draftId = d.draftId;
+    const entry: Preview = {
       topic: topic.name,
-      mounted: this.#rt.mountWidget(spec, this.#previewSurface, {
-        mode: 'draft',
-        topic,
-        draftId: d.draftId,
-      }),
+      // Spawned once the old preview, with the same id, has stopped; not at
+      // all if the drawer closed or moved to another topic meanwhile.
+      mounted: stopped.then(() =>
+        this.#preview === entry && this.#drawer.open && this.#drawer.draftId === draftId
+          ? this.#rt.mountWidget(spec, surface, { mode: 'draft', topic, draftId })
+          : undefined,
+      ),
     };
+    this.#preview = entry;
   }
 
   #onDone(value: unknown): void {
@@ -338,9 +347,11 @@ export class BoardController {
     this.closeDrawer();
   }
 
-  #stopPreview(): void {
-    void this.#preview?.mounted.stop();
+  #stopPreview(): Promise<void> {
+    const p = this.#preview;
     this.#preview = undefined;
+    if (!p) return Promise.resolve();
+    return p.mounted.then((m) => m?.stop()).catch(() => {});
   }
 
   #publishPools(): void {

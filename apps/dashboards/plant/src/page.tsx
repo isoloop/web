@@ -110,6 +110,9 @@ export function Page() {
         <a className="architecture" href={architectureHref()}>
           Architecture
         </a>
+        <a className="interactive-link" href={`../interactive/${SIDE}/?rate=${SETTINGS.rate}`}>
+          Interactive mode
+        </a>
       </header>
       <Description />
       <Notices />

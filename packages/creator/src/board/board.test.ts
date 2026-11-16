@@ -296,6 +296,37 @@ describe('BoardController: the drawer', () => {
     expect(widgets[0]?.stop).toHaveBeenCalled();
   });
 
+  it('a preview for a new topic starts only once the old one has stopped: both have the draft id', async () => {
+    const { ctl, bus, widgets } = await opened();
+    ctl.openAdd();
+    const { drawer } = ctl.state;
+    if (!drawer.open) throw new Error('closed');
+    await bus.publish(DRAFT_TOPIC, drawer.draftId, specRecord(spec({ id: 'new' })));
+    await settle();
+    expect(widgets).toHaveLength(1);
+    let release: (() => void) | undefined;
+    widgets[0]?.stop.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const events = spec({
+      id: 'new',
+      source: { topic: 'plant.events.v1' },
+      operators: [],
+      view: { type: 'table', size: 'm' },
+    });
+    await bus.publish(DRAFT_TOPIC, drawer.draftId, specRecord(events));
+    await settle();
+    expect(widgets[0]?.stop).toHaveBeenCalled();
+    expect(widgets).toHaveLength(1);
+    release?.();
+    await settle();
+    expect(widgets).toHaveLength(2);
+    expect(widgets[1]).toMatchObject({ mode: 'draft', draftId: drawer.draftId });
+  });
+
   it("the form's done closes the drawer and stops the preview; an old opening's done doesn't", async () => {
     const { ctl, bus, widgets } = await opened();
     ctl.openAdd();
