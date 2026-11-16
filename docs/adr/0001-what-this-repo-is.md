@@ -44,6 +44,7 @@ The rename keeps the history, shas, tags, PRs and the `github-pages` environment
 | `apps/basic` | The smallest example: four isolates, two on their own workers and two sharing a pool. It replaces the main repo's four-loops. |
 | `apps/dashboards/<name>` | The markets and plant dashboards, as today |
 | `packages/ui` | The design system: tokens, shell CSS, header and footer partials ([ADR 0003](0003-design-system.md)). Not published. |
+| `packages/compare` | The head-to-head runner the dashboards' comparisons share: interleaved pairs, rounds, memory readings and `summary.md` (added in M3f, #98). Not published. |
 
 ### 4. Address: `isoloop.dev`
 
@@ -88,7 +89,7 @@ The differences:
 | ADR 0009 rule | Here |
 | --- | --- |
 | 2. `isolatedDeclarations` in published packages | Nothing here is published, so it's not used. `packages/ui` is private. |
-| 3. Cross-package imports resolve to source | `@isoloop/*` comes from npm (`catalogs.isoloop`, one `next` prerelease for every app until 0.1). Workspace packages here (`packages/ui`) are imported by name. |
+| 3. Cross-package imports resolve to source | `@isoloop/*` comes from npm (`catalogs.isoloop`, one `next` prerelease for every app until 0.1). Workspace packages here (`packages/ui`, `packages/compare`) are imported by name. |
 | 7. Browser baseline from the features the library uses | Vite's default target, Baseline widely available: Chrome and Edge 111, Firefox 114, Safari 16.4. Every app page carries the plain-HTML notice from `shared/browser-check.ts`. |
 | 12. Four CI jobs; Pages from `main` | PRs run checks and E2E for the changed apps only; pushes to main run `check`; tags deploy; the weekly run does the full matrix and comparisons. Pages deploys only from tags or by hand. |
 
