@@ -2,28 +2,42 @@
   "name": "creator",
   "private": true,
   "type": "module",
-  "description": "The interactive pages' widget creator (M3e): the isoloop-spec@1 widget format, its validator, the topic catalog type, the filter, window and aggregate operators a widget's pipeline runs, and the five views that draw its output.",
+  "description": "The interactive pages' widget creator (M3e): the isoloop-spec@1 widget format, its validator, the topic catalog type, the filter, window and aggregate operators a widget's pipeline runs, the five views that draw its output, and the widget isolate that runs it.",
   "exports": {
     ".": "./src/index.ts",
     "./outputs": "./src/outputs.ts",
     "./draw": "./src/draw/index.ts",
     "./views": "./src/views/index.ts",
-    "./view-kinds": "./src/views/kinds.ts"
+    "./view-kinds": "./src/views/kinds.ts",
+    "./widget": "./src/widget/index.ts",
+    "./widget-isolate": "./src/widget/isolate.tsx",
+    "./topics": "./src/topics.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:harness": "vite build --configLoader runner --config e2e/vite.config.ts",
+    "preview:harness": "vite preview --configLoader runner --config e2e/vite.config.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
+    "@isoloop/bus": "catalog:isoloop",
+    "@isoloop/host": "catalog:isoloop",
+    "@isoloop/protocol": "catalog:isoloop",
+    "@isoloop/react": "catalog:isoloop",
+    "@isoloop/runtime": "catalog:isoloop",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@isoloop/vite": "catalog:isoloop",
+    "@playwright/test": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "typescript": "catalog:",
+    "vite": "catalog:",
     "vitest": "catalog:"
   }
 }

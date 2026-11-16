@@ -1,6 +1,6 @@
 # creator
 
-The widget creator behind the dashboards' interactive pages ([M3e](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3e-live-widget-creator.md)). Private, with no version: apps use it from the workspace. It holds the spec format, its validator, the catalog type, the operators, the pipeline and the five views. The drawer and the widget isolate come next.
+The widget creator behind the dashboards' interactive pages ([M3e](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3e-live-widget-creator.md)). Private, with no version: apps use it from the workspace. It holds the spec format, its validator, the catalog type, the operators, the pipeline, the five views and the widget isolate that runs them. The drawer comes next.
 
 | Export | What it is |
 | --- | --- |
@@ -9,6 +9,9 @@ The widget creator behind the dashboards' interactive pages ([M3e](https://githu
 | `creator/views` | The five views (React): `View` renders any of them by type with the spec's `view.options`; `ViewEnv` gives canvas views their draw target |
 | `creator/view-kinds` | Without React: `VIEW_TYPES`, `VIEW_LABELS`, `viewAccepts`, and `VIEW_OPTIONS` with `checkViewOptions`, the options each view reads |
 | `creator/draw` | The canvas drawing the views use, on any 2D context: `drawChart`, `drawBars`, `drawHeatmap` |
+| `creator/widget` | A widget at run time, with no Isoloop runtime code: `WidgetRunner`, `Widget` and `NativeWidget`, `applyKind`, `widgetGrants`, `spawnWidget`, the spec records (`specRecord`, `TOMBSTONE`) and topic names |
+| `creator/widget-isolate` | The widget isolate's module, for `?isolate` |
+| `creator/topics` | `creatorTopics()` and `specRecordSchema`, for a page's contracts module (Zod) |
 
 ## A widget spec
 
@@ -85,3 +88,37 @@ import { View, ViewEnv, useMainThreadCanvas } from 'creator/views';
   <View type={spec.view.type} size={spec.view.size} options={spec.view.options} title={spec.title} output={p.read(Date.now())} />
 </ViewEnv>
 ```
+
+## A widget at run time
+
+Each widget is one visual isolate (or, on the native page, the same component on the main thread). It reads two topics, both from `earliest`:
+
+- **its source topic**, whose raw records it keeps for as long as the topic does (the catalog's `history`, at most 100,000), so an edited pipeline starts full;
+- **its spec record:** its key in `creator.specs.v1` on the grid, or in `creator.draft.v1` as the drawer's preview, which rebuilds 300 ms after the draft last changed.
+
+A spec record is `{ spec }` or the tombstone `{ deleted: true }`. Its grants are those two topics, and it publishes nothing.
+
+| Change to the spec | `applyKind` | What happens |
+| --- | --- | --- |
+| nothing | `none` | nothing |
+| operators, view, title or the source key | `reconfigure` | the running widget rebuilds its pipeline from the records it kept |
+| the source topic, or the placement (not for a preview) | `respawn` | the widget keeps drawing its old spec, with `data-state="respawn"`; the page stops it and spawns a new one |
+| a tombstone | | the widget draws nothing (`data-state="deleted"`); the page stops it |
+
+```ts
+// The page's contracts module:
+import { creatorTopics } from 'creator/topics';
+export default contracts(...dashboardTopics, ...creatorTopics());
+
+// The page:
+import { spawnWidget, specRecord, applyKind } from 'creator/widget';
+import widgetSrc from 'creator/widget-isolate?isolate';
+
+await kernel.publish(specsTopic, { key: spec.id, value: specRecord(spec) });
+const handle = spawnWidget(kernel, spec, { src: widgetSrc, surface, topic: topicOf(catalog, spec.source.topic)! });
+// Later, on an edit: publish the new spec, and if applyKind(old, next) is 'respawn', stop and spawn again.
+```
+
+A widget on the grid runs in the kernel pool `creator-<placement.pool>` (`poolId`); a preview gets its own worker. `NativeWidget` takes any `WidgetBus` (topics by name, from `earliest`) and a memoized `WidgetConfig`.
+
+`pnpm e2e` runs the widget isolate on a real kernel (`e2e/harness`) in Chromium, Firefox and WebKit.
