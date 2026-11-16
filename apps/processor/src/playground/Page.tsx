@@ -1,22 +1,9 @@
 // The playground page: tasks with a CPU dial, the worker each runs on, and
 // the balancer's moves. It redraws from `playground.snapshot()` ten times a
 // second; every action goes back through the model.
-import { useEffect, useState, type ReactElement } from 'react';
-import {
-  MAX_TASKS,
-  type ColumnView,
-  type LogEntry,
-  type Mode,
-  type Playground,
-  type Snapshot,
-  type TaskView,
-} from './model';
-
-/** The balancer's thresholds (ADR 0017 defaults), drawn on each worker's lag. */
-const SUSTAINED_MS = 50;
-const SPIKE_MS = 100;
-/** The lag chart's top. */
-const CHART_MAX_MS = 150;
+import type { ReactElement } from 'react';
+import { LagChart, MoveLog, REASONS, SPIKE_MS, SUSTAINED_MS, useSnapshot } from '../ui';
+import { MAX_TASKS, type ColumnView, type Mode, type Playground, type TaskView } from './model';
 
 const LIGHT = [5, 8, 10, 12, 15];
 const CHUNKS = [10, 25, 50, 100];
@@ -26,28 +13,6 @@ const MODES: { mode: Mode; label: string; hint: string }[] = [
   { mode: 'own', label: 'Own', hint: 'every task on a worker of its own' },
   { mode: 'one', label: 'One pool', hint: 'every task in a single pool' },
 ];
-
-const REASONS: Record<string, string> = {
-  spike: 'spike',
-  /** A full pool: its tasks add up to 80 % of a core. */
-  full: 'too busy',
-  /** A pool that lags over 50 ms for 3 s. */
-  sustained: 'lagging',
-  crash: 'crashed',
-  bisect: 'bisect',
-  steady: 'steady again',
-  restart: 'restarted',
-};
-
-/** The model's snapshot, ten times a second, and a way to redraw at once after an action. */
-function useSnapshot(playground: Playground): [Snapshot, () => void] {
-  const [snap, setSnap] = useState(() => playground.snapshot());
-  useEffect(() => {
-    const t = setInterval(() => setSnap(playground.snapshot()), 100);
-    return () => clearInterval(t);
-  }, [playground]);
-  return [snap, () => setSnap(playground.snapshot())];
-}
 
 export function PlaygroundPage({ playground }: { playground: Playground }): ReactElement {
   const [snap, refresh] = useSnapshot(playground);
@@ -167,43 +132,6 @@ function Column({ column, playground }: { column: ColumnView; playground: Playgr
   );
 }
 
-function LagChart({ lags }: { lags: number[] }) {
-  const w = 240;
-  const h = 48;
-  const y = (ms: number): number => h - (Math.min(ms, CHART_MAX_MS) / CHART_MAX_MS) * h;
-  const step = w / 60;
-  const last = lags.at(-1);
-  const peak = lags.length > 0 ? Math.max(...lags) : undefined;
-  return (
-    <figure className="lag">
-      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" role="img" aria-label="Worker lag">
-        <line
-          className="threshold sustained"
-          x1="0"
-          x2={w}
-          y1={y(SUSTAINED_MS)}
-          y2={y(SUSTAINED_MS)}
-        />
-        <line className="threshold spike" x1="0" x2={w} y1={y(SPIKE_MS)} y2={y(SPIKE_MS)} />
-        {lags.map((ms, i) => (
-          <rect
-            key={i}
-            className={ms > SPIKE_MS ? 'bar over' : ms > SUSTAINED_MS ? 'bar high' : 'bar'}
-            x={w - (lags.length - i) * step}
-            y={y(ms)}
-            width={Math.max(1, step - 1)}
-            height={h - y(ms)}
-          />
-        ))}
-      </svg>
-      <figcaption className="mono">
-        lag {last === undefined ? '--' : Math.round(last)} ms · peak{' '}
-        {peak === undefined ? '--' : Math.round(peak)} ms
-      </figcaption>
-    </figure>
-  );
-}
-
 function TaskCard({ task, playground }: { task: TaskView; playground: Playground }) {
   const measured = task.measured === undefined ? undefined : Math.round(task.measured);
   return (
@@ -261,28 +189,5 @@ function TaskCard({ task, playground }: { task: TaskView; playground: Playground
         </span>
       </div>
     </li>
-  );
-}
-
-function MoveLog({ log }: { log: LogEntry[] }) {
-  return (
-    <section className="log" aria-label="Moves">
-      <h2>Moves</h2>
-      {log.length === 0 ? (
-        <p className="muted">Nothing has moved yet.</p>
-      ) : (
-        <ol>
-          {log.map((e, i) => (
-            <li key={`${e.at}-${i}`} data-kind={e.kind}>
-              <time className="mono muted">{new Date(e.at).toLocaleTimeString()}</time>
-              <span className="badge" data-reason={e.kind}>
-                {REASONS[e.kind] ?? e.kind}
-              </span>
-              <span className="mono">{e.text}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
   );
 }

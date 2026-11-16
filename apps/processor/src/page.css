@@ -291,3 +291,73 @@
   padding: var(--ui-space-1) 0;
   border-bottom: 1px solid var(--ui-rule);
 }
+
+/* The File processor */
+.dial-control input {
+  width: 7rem;
+  accent-color: var(--ui-accent);
+}
+.dial-control .mono {
+  min-width: 2.2rem;
+  text-align: right;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--ui-space-3);
+  margin-bottom: var(--ui-space-4);
+}
+.stat {
+  display: grid;
+  gap: var(--ui-space-1);
+  padding: var(--ui-space-2) var(--ui-space-3);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-rule);
+  border-radius: var(--ui-radius-m);
+  font-size: var(--ui-text-s);
+}
+.stat strong {
+  font-size: var(--ui-text-l);
+}
+.kinds,
+.recent table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ui-text-s);
+  margin-bottom: var(--ui-space-5);
+}
+.kinds th,
+.kinds td,
+.recent th,
+.recent td {
+  text-align: left;
+  padding: var(--ui-space-1) var(--ui-space-2);
+  border-bottom: 1px solid var(--ui-rule);
+}
+.recent {
+  margin-top: var(--ui-space-6);
+}
+.recent header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ui-space-2);
+}
+.recent h2 {
+  font-size: var(--ui-text-l);
+  margin: 0;
+}
+.recent input {
+  font: inherit;
+  padding: 0.25rem 0.5rem;
+  min-width: min(100%, 18rem);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-s);
+  background: var(--ui-bg);
+  color: var(--ui-text);
+}
+.recent tr[data-status='corrupt'] td {
+  color: var(--ui-bad);
+}
