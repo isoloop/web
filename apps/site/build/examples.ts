@@ -1,7 +1,7 @@
 // The examples hub's data (ADR 0002, decision 5): one example.json per app,
 // validated at build time. A bad or missing file fails the build with an error
 // naming the file and the field. A new example joins the hub by adding its
-// example.json in the same PR as the app.
+// example.json in the same PR as the app, or later, marked `draft` until then.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { z } from 'zod';
@@ -34,6 +34,12 @@ export const exampleSchema = z.strictObject({
     results: https.optional(),
     architecture: rootPath.optional(),
   }),
+  /**
+   * Built and tested in CI but not deployed yet: the hub leaves it out until
+   * the app is assembled into the site (scripts/assemble-site.sh), so the hub
+   * never links to a page that isn't there.
+   */
+  draft: z.literal(true).optional(),
   /** A WebP next to example.json, written by `pnpm screenshots`. */
   screenshot: z
     .string()
@@ -107,6 +113,7 @@ export function loadExamples(repoRoot: string): Example[] {
         .join('\n');
       throw new Error(`${where} is invalid:\n${issues}`);
     }
+    if (parsed.data.draft) continue;
     const example: Example = { ...parsed.data, id };
     if (parsed.data.screenshot) {
       const shot = join(appsDir, id, parsed.data.screenshot);
