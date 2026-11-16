@@ -7,7 +7,15 @@ export { RAW_BUFFER_LIMIT, RawBuffer } from './buffer';
 export { isolateBus, type BusLike } from './bus';
 export { widgetConfig } from './config';
 export { widgetGrants } from './grants';
-export { isolateIdOf, poolId, poolOfId, spawnWidget, type SpawnWidget } from './host';
+export {
+  isolateIdOf,
+  poolId,
+  poolOfId,
+  spawnWidget,
+  widgetIdOf,
+  widgetManifest,
+  type SpawnWidget,
+} from './host';
 export {
   DRAFT_TOPIC,
   SPECS_TOPIC,

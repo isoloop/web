@@ -4,6 +4,8 @@
 //
 // - `pools` (page → drawer): the page's creator pools, about once a second,
 //   for the placement field. Isoloop pages only.
+// - `placements` (page → drawer): where the balancer has each `auto` widget,
+//   about once a second (M3h decision 20). Isoloop pages with a balancer only.
 // - `open` (page → drawer): the drawer opened, to add a widget or to edit one.
 //   `n` counts the openings, so the drawer acts once on each.
 // - `done` (drawer → page): the drawer added, saved, deleted or cancelled;
@@ -21,6 +23,19 @@ export type PoolStatus = {
   readonly lagMs: number | null;
 };
 
+/** Where the page's balancer runs an `auto` widget (M3h decision 20). */
+export type AutoPlacement = {
+  /** The widget id. */
+  readonly id: string;
+  /** The kernel pool: `balancer-2`, `balancer-quarantine-1`. */
+  readonly pool: string;
+  /** "Auto 2", "Quarantine". */
+  readonly label: string;
+  readonly state: 'placed' | 'quarantined' | 'kept-apart' | 'moving';
+  /** Over budget, with nowhere to go: the worker cap is reached. */
+  readonly atCap?: boolean;
+};
+
 export type OpenCommand = {
   readonly n: number;
   readonly mode: 'add' | 'edit';
@@ -36,11 +51,17 @@ export type DoneMessage = { readonly n: number; readonly what: DoneWhat; readonl
 
 export type UiRecord =
   | { readonly pools: readonly PoolStatus[] }
+  | { readonly placements: readonly AutoPlacement[] }
   | { readonly open: OpenCommand }
   | { readonly done: DoneMessage };
 
 /** The keys each record kind goes under: one value each in the compacted topic. */
-export const UI_KEY = { pools: 'pools', open: 'open', done: 'done' } as const;
+export const UI_KEY = {
+  pools: 'pools',
+  placements: 'placements',
+  open: 'open',
+  done: 'done',
+} as const;
 
 const obj = (v: unknown): v is Readonly<Record<string, unknown>> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -48,6 +69,11 @@ const obj = (v: unknown): v is Readonly<Record<string, unknown>> =>
 export function poolsOf(v: unknown): readonly PoolStatus[] | undefined {
   if (!obj(v) || !Array.isArray(v['pools'])) return undefined;
   return v['pools'] as readonly PoolStatus[];
+}
+
+export function placementsOf(v: unknown): readonly AutoPlacement[] | undefined {
+  if (!obj(v) || !Array.isArray(v['placements'])) return undefined;
+  return v['placements'] as readonly AutoPlacement[];
 }
 
 export function openOf(v: unknown): OpenCommand | undefined {

@@ -6,7 +6,7 @@ import { fieldOf, topicOf, type Catalog, type CatalogTopic, type FieldType } fro
 import { VIEW_INPUTS, type OutputKind } from '../outputs';
 import { outputKind } from '../pipeline';
 import { checkViewOptions } from '../views/kinds';
-import type { Operator, WidgetSpec } from './types';
+import type { BurnOp, Operator, WidgetSpec } from './types';
 
 export type SpecError = {
   /** Where in the spec, e.g. `operators[1].ms`; empty for the spec as a whole. */
@@ -36,6 +36,14 @@ export const MAX_IN_VALUES = 100;
 export const MAX_WINDOW_N = 10_000;
 /** The shortest `every`, in ms. */
 export const MIN_EVERY_MS = 100;
+/**
+ * `burn` (test only, M3h decision 21): the longest block, under plant's 2 s
+ * kill so a burn shows as a spike, not a hang; the shortest period; the
+ * highest steady load, as a share of one core.
+ */
+export const BURN_MAX_FOR_MS = 1_500;
+export const BURN_MIN_EVERY_MS = 100;
+export const BURN_MAX_LOAD_PCT = 90;
 
 const filterShape = z.strictObject({ op: z.literal('filter'), where: z.unknown() });
 const windowShape = z.strictObject({
@@ -51,9 +59,27 @@ const aggregateShape = z.strictObject({
   every: z.number().int().min(MIN_EVERY_MS).optional(),
   groupBy: name.optional(),
 });
-const operatorShape = z.discriminatedUnion('op', [filterShape, windowShape, aggregateShape], {
-  error: 'op must be "filter", "window" or "aggregate"',
+const burnShape = z.strictObject({
+  op: z.literal('burn'),
+  everyMs: z.number().int().min(BURN_MIN_EVERY_MS).max(600_000).optional(),
+  forMs: z.number().int().min(1).max(BURN_MAX_FOR_MS).optional(),
+  loadPct: z.number().gt(0).max(BURN_MAX_LOAD_PCT).optional(),
 });
+const operatorShape = z.discriminatedUnion(
+  'op',
+  [filterShape, windowShape, aggregateShape, burnShape],
+  { error: 'op must be "filter", "window" or "aggregate"' },
+);
+
+/** Where a widget runs: a creator pool by hand, or the page's balancer (M3h decision 19). */
+const placementShape = z.discriminatedUnion(
+  'mode',
+  [
+    z.strictObject({ mode: z.literal('manual'), pool: id }),
+    z.strictObject({ mode: z.literal('auto') }),
+  ],
+  { error: 'mode must be "manual" (with a pool) or "auto"' },
+);
 
 /** The shape of a widget spec, before the catalog checks: for the bus (topics.ts). */
 export const specShape = z.strictObject({
@@ -66,10 +92,7 @@ export const specShape = z.strictObject({
     size: z.enum(['s', 'm', 'l']),
     options: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   }),
-  placement: z.strictObject({
-    mode: z.literal('manual', { error: 'v1 places widgets by hand: mode must be "manual"' }),
-    pool: id,
-  }),
+  placement: placementShape,
 });
 
 function pathOf(segments: readonly PropertyKey[]): string {
@@ -197,12 +220,17 @@ function checkOperators(
   operators: readonly Operator[],
   topic: CatalogTopic | undefined,
   errors: SpecError[],
+  chaos: boolean,
 ): void {
   // filters, then at most one window, then at most one aggregate, last.
   let stage: 'filters' | 'window' | 'aggregate' = 'filters';
   let windowed = false;
   operators.forEach((o, i) => {
     const at = `operators[${i}]`;
+    if (o.op === 'burn') {
+      checkBurn(o, at, errors, chaos);
+      return;
+    }
     if (stage === 'aggregate') {
       errors.push({ path: at, message: 'the aggregate is the last operator' });
       return;
@@ -278,6 +306,31 @@ function checkOperators(
   });
 }
 
+/**
+ * `burn` is for tests (M3h decision 21): only with `?chaos`, anywhere in the
+ * list, as a block (`everyMs` and `forMs`, shorter than the period) or a
+ * steady load (`loadPct`).
+ */
+function checkBurn(o: BurnOp, at: string, errors: SpecError[], chaos: boolean): void {
+  if (!chaos) {
+    errors.push({ path: at, message: 'burn is a test operator: only on a page run with ?chaos' });
+    return;
+  }
+  const block = o.everyMs !== undefined || o.forMs !== undefined;
+  const load = o.loadPct !== undefined;
+  if (block === load) {
+    errors.push({ path: at, message: 'a burn has either everyMs and forMs, or loadPct' });
+    return;
+  }
+  if (!block) return;
+  if (o.everyMs === undefined)
+    errors.push({ path: `${at}.everyMs`, message: 'how often to block' });
+  if (o.forMs === undefined) errors.push({ path: `${at}.forMs`, message: 'how long to block' });
+  if (o.everyMs !== undefined && o.forMs !== undefined && o.forMs >= o.everyMs) {
+    errors.push({ path: `${at}.forMs`, message: 'the block is shorter than its period' });
+  }
+}
+
 /** Whether a condition tests `field` anywhere in it. */
 function tests(where: unknown, field: string): boolean {
   if (!isRecord(where)) return false;
@@ -323,12 +376,21 @@ function checkSamples(
   }
 }
 
+export type ValidateOptions = {
+  /** The page runs with `?chaos`: the test-only `burn` operator is allowed (M3h decision 21). */
+  readonly chaos?: boolean;
+};
+
 /**
  * Checks a widget spec, as JSON from anywhere (a form, a topic, an agent),
  * against a dashboard's catalog. On success `spec` is the checked spec, with
  * the title trimmed.
  */
-export function validateSpec(input: unknown, catalog: Catalog): SpecResult {
+export function validateSpec(
+  input: unknown,
+  catalog: Catalog,
+  options: ValidateOptions = {},
+): SpecResult {
   const parsed = specShape.safeParse(input);
   if (!parsed.success) {
     return {
@@ -357,7 +419,7 @@ export function validateSpec(input: unknown, catalog: Catalog): SpecResult {
     }
   }
 
-  checkOperators(spec.operators, topic, errors);
+  checkOperators(spec.operators, topic, errors, options.chaos === true);
   if (topic?.samples) checkSamples(spec.operators, topic, topic.samples.value, errors);
 
   const kind = outputKind(spec.operators);

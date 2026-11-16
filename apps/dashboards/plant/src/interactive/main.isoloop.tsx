@@ -1,7 +1,10 @@
 // The interactive page on Isoloop: the plant's feeds and engines as headless
-// isolates, and the board, whose widgets and drawer are isolates too.
+// isolates, and the board, whose widgets and drawer are isolates too. One
+// balancer places the `auto` widgets (M3h), from loads kept in
+// `creator.placement.v1`.
+import { createBalancer } from '@isoloop/balancer';
 import { createKernel } from '@isoloop/host';
-import { isoloopRuntime } from 'creator/board';
+import { hostBus, isoloopRuntime, placementLoads } from 'creator/board';
 import drawerSrc from 'creator/drawer-isolate?isolate';
 import widgetSrc from 'creator/widget-isolate?isolate';
 import { createRoot } from 'react-dom/client';
@@ -23,13 +26,19 @@ const kernel = createKernel({
   heartbeat: { killAfterMs: KILL_AFTER_MS },
 });
 
+const loads = placementLoads(hostBus(kernel));
+const balancer = createBalancer(kernel, { loads });
+
 declare global {
   interface Window {
     /** For the E2E suite. */
     kernel: typeof kernel;
+    /** For the E2E suite and the comparison (M3h). */
+    balancer: typeof balancer;
   }
 }
 window.kernel = kernel;
+window.balancer = balancer;
 
 for (const j of jobs(SETTINGS.seed, SETTINGS.rate)) {
   kernel.spawn({
@@ -41,7 +50,13 @@ for (const j of jobs(SETTINGS.seed, SETTINGS.rate)) {
   });
 }
 
-const runtime = isoloopRuntime({ kernel, widgetSrc, drawerSrc });
+const runtime = isoloopRuntime({
+  kernel,
+  widgetSrc,
+  drawerSrc,
+  auto: { balancer, loads },
+  chaos: SETTINGS.chaos,
+});
 const root = document.getElementById('root');
 if (!root) throw new Error('#root missing');
 createRoot(root).render(<InteractivePage runtime={runtime} />);

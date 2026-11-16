@@ -68,7 +68,7 @@ function fakeRuntime(o: { pools?: boolean; storage?: ReturnType<typeof memory> }
     ...(o.pools
       ? { pools: (specs: readonly WidgetSpec[]) => poolStatus(specs, { isolates: [], pools: [] }) }
       : {}),
-    where: (s) => poolLabel(s.placement.pool),
+    where: (s) => (s.placement.mode === 'manual' ? poolLabel(s.placement.pool) : 'Automatic'),
   };
   return { bus, runtime, widgets, drawers };
 }
@@ -479,7 +479,13 @@ describe('the Isoloop runtime', () => {
     const surface = el();
     rt.mountWidget(spec(), surface, { mode: 'spec', topic: SCALARS });
     rt.mountWidget(spec(), surface, { mode: 'draft', topic: SCALARS, draftId: 'd1' });
-    rt.mountDrawer(surface, { catalog: CATALOG, native: false, cap: 24 });
+    rt.mountDrawer(surface, {
+      catalog: CATALOG,
+      native: false,
+      cap: 24,
+      auto: false,
+      chaos: false,
+    });
     expect(spawned.map((m) => [m.id, m.pool, m.src])).toEqual([
       ['widget-w1', 'creator-pool-1', 'widget.js'],
       ['preview-d1', undefined, 'widget.js'],
@@ -548,5 +554,35 @@ describe('a respawned widget', () => {
     t.emit(SPECS_TOPIC, specRecord(spec({ placement: { mode: 'manual', pool: 'pool-3' } })), 'w1');
     expect(runner.state).toMatchObject({ status: 'live', spec: { placement: { pool: 'pool-3' } } });
     runner.stop();
+  });
+});
+
+describe('an automatically placed widget (M3h)', () => {
+  it('runs an auto spec, waits for a respawn on a manual one, and burns what its spec says', () => {
+    const t = createTestContext({});
+    const started: unknown[] = [];
+    let stops = 0;
+    const runner = new WidgetRunner(
+      isolateBus(t.ctx.bus),
+      { id: 'w1', mode: 'spec', topic: SCALARS, pool: '$auto' },
+      {
+        now: () => 1_000_000,
+        burns: (ops) => {
+          started.push(ops.filter((o) => o.op === 'burn'));
+          return () => void stops++;
+        },
+      },
+    );
+    runner.start();
+    const s = spec({ placement: { mode: 'auto' } });
+    t.emit(SPECS_TOPIC, specRecord(s), 'w1');
+    expect(runner.state.status).toBe('live');
+    const burn = { op: 'burn', loadPct: 30 } as const;
+    t.emit(SPECS_TOPIC, specRecord({ ...s, operators: [...s.operators, burn] }), 'w1');
+    expect(started).toEqual([[], [burn]]);
+    t.emit(SPECS_TOPIC, specRecord(spec()), 'w1');
+    expect(runner.state.status).toBe('respawn');
+    runner.stop();
+    expect(stops).toBe(2);
   });
 });

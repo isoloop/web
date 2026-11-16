@@ -3,7 +3,10 @@
 // surface the grid gives it, respawning one whose source topic or placement
 // changed; it seeds the starter widgets on a first visit and resets to them;
 // and it runs the drawer: the form, opened to add or edit, and the preview,
-// which follows the form's draft. Pure logic over a BoardRuntime, so the
+// which follows the form's draft. With a balancer (M3h decisions 5, 12, 17
+// and 20) it also follows where `auto` widgets run, notes each move for a few
+// seconds and in a log, holds a widget while the drawer edits it, and stores
+// the preview's measured load on Save. Pure logic over a BoardRuntime, so the
 // Isoloop and native pages share it, and tests run it on a fake one.
 import { topicOf, type Catalog } from '../catalog';
 import type { WidgetSpec } from '../spec/types';
@@ -18,8 +21,9 @@ import {
   specOf,
   specRecord,
 } from '../widget/records';
+import type { AutoMove } from './auto';
 import type { BoardRuntime, Mounted } from './runtime';
-import { UI_KEY, doneOf, type UiRecord } from './ui';
+import { UI_KEY, doneOf, type AutoPlacement, type UiRecord } from './ui';
 
 /** Most widgets a page holds, the preview not counted (decision 20). */
 export const WIDGET_CAP = 24;
@@ -27,6 +31,10 @@ export const WIDGET_CAP = 24;
 export const POOLS_EVERY_MS = 1_000;
 /** The replay probe's key in `creator.specs.v1`. */
 export const SYNC_KEY = '$sync';
+/** How long a widget shows its move badge (M3h decision 20). */
+export const MOVE_BADGE_MS = 6_000;
+/** Most moves the placement log keeps, newest first. */
+export const MOVE_LOG = 50;
 
 export type BoardWidget = {
   readonly id: string;
@@ -53,6 +61,12 @@ export type BoardState = {
   /** The page holds `cap` widgets: Add is off. */
   readonly full: boolean;
   readonly drawer: DrawerState;
+  /** Where the balancer runs each `auto` widget, by widget id (M3h). Empty without one. */
+  readonly placements: ReadonlyMap<string, AutoPlacement>;
+  /** Each widget's latest move, while its badge shows. */
+  readonly moved: ReadonlyMap<string, AutoMove>;
+  /** Every move, newest first, at most MOVE_LOG. */
+  readonly log: readonly AutoMove[];
 };
 
 export type BoardOptions = {
@@ -103,6 +117,14 @@ export class BoardController {
   #previewSurface: Element | undefined;
   #formMounted: Mounted | undefined;
   #preview: Preview | undefined;
+  /** The open draft's widget id, as its last record said. */
+  #draftSpecId: string | undefined;
+  /** Releases the hold on the widget the drawer edits. */
+  #release: (() => void) | undefined;
+
+  #placements: ReadonlyMap<string, AutoPlacement> = new Map();
+  readonly #moved = new Map<string, AutoMove>();
+  #log: AutoMove[] = [];
 
   constructor(o: BoardOptions) {
     this.#rt = o.runtime;
@@ -145,13 +167,16 @@ export class BoardController {
       }),
     );
     void bus.publish(SPECS_TOPIC, SYNC_KEY, { sync: this.#probe });
-    if (this.#rt.pools) {
-      this.#timer = setInterval(() => this.#publishPools(), this.#poolsEveryMs);
+    const { auto } = this.#rt;
+    if (auto) this.#unsubscribe.push(auto.onMove((m) => this.#onMove(m)));
+    if (this.#rt.pools || auto) {
+      this.#timer = setInterval(() => this.#everySecond(), this.#poolsEveryMs);
     }
   }
 
   /** Stops every widget, the preview and the form, and unsubscribes. */
   stop(): void {
+    this.#unhold();
     for (const u of this.#unsubscribe.splice(0)) u();
     if (this.#timer !== undefined) clearInterval(this.#timer);
     this.#timer = undefined;
@@ -203,6 +228,8 @@ export class BoardController {
     const d = this.#drawer;
     if (!d.open) return;
     this.#drawer = { open: false };
+    this.#draftSpecId = undefined;
+    this.#unhold();
     void this.#stopPreview();
     void this.#rt.bus.publish(DRAFT_TOPIC, d.draftId, TOMBSTONE);
     this.#emit();
@@ -245,6 +272,7 @@ export class BoardController {
     this.#seen = true;
     const spec = specOf(value);
     if (spec === null) {
+      if (this.#entries.get(key)?.spec.placement.mode === 'auto') this.#rt.auto?.forget(key);
       this.#entries.delete(key);
       const slot = this.#slots.get(key);
       if (slot?.mounted) {
@@ -254,6 +282,12 @@ export class BoardController {
       }
       if (this.#drawer.open && this.#drawer.id === key) this.closeDrawer();
     } else {
+      const d = this.#drawer;
+      // Saved from the drawer: the preview ran this spec, so its measured
+      // load is the widget's before the balancer places it (M3h decision 12).
+      if (d.open && this.#draftSpecId === key && spec.placement.mode === 'auto') {
+        this.#rt.auto?.measured(key, d.draftId);
+      }
       const prev = this.#entries.get(key);
       this.#entries.set(key, {
         spec,
@@ -301,14 +335,20 @@ export class BoardController {
       void this.#stopPreview();
       void this.#rt.bus.publish(DRAFT_TOPIC, prev.draftId, TOMBSTONE);
     }
+    this.#unhold();
+    this.#draftSpecId = undefined;
     const n = ++this.#n;
     const draftId = `d${n}-${this.#random()}`;
     this.#drawer = { open: true, mode, draftId, ...(id === undefined ? {} : { id }) };
+    // Left where it is while it's being edited (M3h decision 5).
+    if (id !== undefined && this.#rt.auto) this.#release = this.#rt.auto.hold(id);
     if (!this.#formMounted && this.#form) {
       this.#formMounted = this.#rt.mountDrawer(this.#form, {
         catalog: this.#catalog,
         native: this.#rt.kind === 'native',
         cap: this.#cap,
+        auto: this.#rt.auto !== undefined,
+        chaos: this.#rt.chaos === true,
       });
     }
     const open: UiRecord = { open: { n, mode, draftId, ...(id === undefined ? {} : { id }) } };
@@ -322,6 +362,7 @@ export class BoardController {
     if (!d.open || key !== d.draftId || !this.#previewSurface) return;
     const spec = specOf(value);
     if (spec === null) return;
+    this.#draftSpecId = spec.id;
     const topic = topicOf(this.#catalog, spec.source.topic);
     if (!topic) return;
     if (this.#preview?.topic === topic.name) return;
@@ -354,6 +395,52 @@ export class BoardController {
     return p.mounted.then((m) => m?.stop()).catch(() => {});
   }
 
+  #unhold(): void {
+    this.#release?.();
+    this.#release = undefined;
+  }
+
+  #onMove(m: AutoMove): void {
+    this.#moved.set(m.id, m);
+    this.#log = [m, ...this.#log].slice(0, MOVE_LOG);
+    this.#refreshPlacements();
+    this.#emit();
+  }
+
+  /** Re-reads the balancer's placements; true if any changed. */
+  #refreshPlacements(): boolean {
+    const auto = this.#rt.auto;
+    if (!auto) return false;
+    const next = auto.placements();
+    const prev = this.#placements;
+    const same =
+      next.size === prev.size &&
+      [...next].every(([id, p]) => {
+        const q = prev.get(id);
+        return q?.pool === p.pool && q.state === p.state && q.atCap === p.atCap;
+      });
+    if (same) return false;
+    this.#placements = next;
+    return true;
+  }
+
+  #everySecond(): void {
+    this.#publishPools();
+    let changed = this.#refreshPlacements();
+    const now = this.#now();
+    for (const [id, m] of this.#moved) {
+      if (now - m.at >= MOVE_BADGE_MS) {
+        this.#moved.delete(id);
+        changed = true;
+      }
+    }
+    if (changed) this.#emit();
+    if (this.#rt.auto && this.#ready) {
+      const placements: UiRecord = { placements: [...this.#placements.values()] };
+      void this.#rt.bus.publish(UI_TOPIC, UI_KEY.placements, placements).catch(() => {});
+    }
+  }
+
   #publishPools(): void {
     if (!this.#rt.pools || !this.#ready) return;
     const pools = this.#rt.pools(this.#state.widgets.map((w) => w.spec));
@@ -370,6 +457,9 @@ export class BoardController {
       widgets,
       full: widgets.length >= this.#cap,
       drawer: this.#drawer,
+      placements: this.#placements,
+      moved: new Map(this.#moved),
+      log: this.#log,
     };
   }
 

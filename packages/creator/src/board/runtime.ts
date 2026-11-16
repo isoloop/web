@@ -6,6 +6,7 @@ import type { CatalogTopic } from '../catalog';
 import type { WidgetSpec } from '../spec/types';
 import type { WidgetMode } from '../widget/records';
 import type { DrawerConfig } from '../drawer/config';
+import type { AutoPlacer } from './auto';
 import type { PoolStatus } from './ui';
 
 /** Topics by name from the host: every subscription from `earliest`. */
@@ -35,6 +36,10 @@ export interface BoardRuntime {
   mountDrawer(surface: Element, config: DrawerConfig): Mounted;
   /** The placement field's list, from the kernel's snapshots. Isoloop only. */
   pools?(specs: readonly WidgetSpec[]): PoolStatus[];
-  /** What a widget's header says about where it runs. */
+  /** What a widget's header says about where it runs, when the balancer doesn't say. */
   where(spec: WidgetSpec): string;
+  /** The page's balancer, for `auto` widgets (M3h). Isoloop pages with one only. */
+  readonly auto?: AutoPlacer;
+  /** The page runs with `?chaos`: the drawer offers the test-only `burn` (M3h decision 21). */
+  readonly chaos?: boolean;
 }

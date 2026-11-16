@@ -14,7 +14,9 @@ import { nextPool, poolLabel, sortPools } from '../board/pools';
 import {
   UI_KEY,
   openOf,
+  placementsOf,
   poolsOf,
+  type AutoPlacement,
   type DoneWhat,
   type OpenCommand,
   type PoolStatus,
@@ -34,6 +36,7 @@ import type { WidgetSpec } from '../spec/types';
 import type { DrawerConfig } from './config';
 import {
   AGGREGATE_FNS,
+  AUTO_POOL,
   COMPARE_OPS,
   emptyForm,
   fieldOfPath,
@@ -97,6 +100,7 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
   const { catalog } = config;
   const [held, setHeld] = useState<ReadonlyMap<string, Held>>(new Map());
   const [pools, setPools] = useState<readonly PoolStatus[]>([]);
+  const [placements, setPlacements] = useState<readonly AutoPlacement[]>([]);
   const [open, setOpen] = useState<OpenCommand | undefined>(undefined);
   const [form, setForm] = useState<FormState | undefined>(undefined);
   const applied = useRef(-1);
@@ -116,6 +120,7 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
       UI_TOPIC,
       (r) => {
         if (r.key === UI_KEY.pools) setPools(poolsOf(r.value) ?? []);
+        else if (r.key === UI_KEY.placements) setPlacements(placementsOf(r.value) ?? []);
         else if (r.key === UI_KEY.open) {
           const cmd = openOf(r.value);
           if (cmd) setOpen(cmd);
@@ -136,12 +141,17 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
     };
   }, [bus]);
 
-  // The pool of the widget added last: the one a new widget starts in.
+  // Where a new widget starts: "Automatic" when the page has a balancer or
+  // runs natively (M3h decision 20), else the pool of the widget added last.
   const lastPool = useMemo(() => {
+    if (config.auto || config.native) return AUTO_POOL;
     let best: Held | undefined;
-    for (const h of held.values()) if (!best || (h.added ?? 0) > (best.added ?? 0)) best = h;
-    return best?.spec.placement.pool ?? 'pool-1';
-  }, [held]);
+    for (const h of held.values()) {
+      if (h.spec.placement.mode !== 'manual') continue;
+      if (!best || (h.added ?? 0) > (best.added ?? 0)) best = h;
+    }
+    return best?.spec.placement.mode === 'manual' ? best.spec.placement.pool : 'pool-1';
+  }, [held, config.auto, config.native]);
 
   // A new opening: a fresh form to add, or the widget's own to edit (once its spec is here).
   useEffect(() => {
@@ -160,8 +170,9 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
   }, [open, held, catalog, lastPool]);
 
   const result = useMemo(
-    () => (form ? validateSpec(specOfForm(form, catalog), catalog) : undefined),
-    [form, catalog],
+    () =>
+      form ? validateSpec(specOfForm(form, catalog), catalog, { chaos: config.chaos }) : undefined,
+    [form, catalog, config.chaos],
   );
 
   // Every valid change goes to the draft; the preview rebuilds 300 ms after the last.
@@ -216,9 +227,14 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
 
   const poolNames = sortPools([
     ...pools.map((p) => p.pool),
-    ...[...held.values()].map((h) => h.spec.placement.pool),
-    form.pool,
+    ...[...held.values()].flatMap((h) =>
+      h.spec.placement.mode === 'manual' ? [h.spec.placement.pool] : [],
+    ),
+    ...(form.pool === AUTO_POOL ? [] : [form.pool]),
   ]);
+  // "Automatic", and where the balancer has the widget being edited now.
+  const autoAt = open.mode === 'edit' ? placements.find((p) => p.id === form.id) : undefined;
+  const autoText = autoAt ? `Automatic · in ${autoAt.label}` : 'Automatic';
   const statusOf = (pool: string) => pools.find((p) => p.pool === pool);
   const poolText = (pool: string) => {
     const s = statusOf(pool);
@@ -265,7 +281,10 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
                       {
                         ...preset.spec,
                         id: form.id,
-                        placement: { mode: 'manual', pool: form.pool },
+                        placement:
+                          form.pool === AUTO_POOL
+                            ? { mode: 'auto' }
+                            : { mode: 'manual', pool: form.pool },
                       },
                       catalog,
                     ),
@@ -587,6 +606,53 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
         </Field>
       </fieldset>
 
+      {config.chaos ? (
+        <fieldset data-chaos>
+          <legend>Burn (test only)</legend>
+          <Field label="Make it misbehave" id="burn" errors={errors}>
+            <select
+              name="burn"
+              value={form.burn}
+              onChange={(e) => {
+                const v = e.currentTarget.value;
+                set({ burn: v === 'block' || v === 'load' ? v : 'none' });
+              }}
+            >
+              <option value="none">No</option>
+              <option value="block">Block every few seconds</option>
+              <option value="load">Steady load</option>
+            </select>
+          </Field>
+          {form.burn === 'block' ? (
+            <>
+              <Field label="Every (s)" id="burnEvery" errors={errors}>
+                <input
+                  name="burnEvery"
+                  value={form.burnEvery}
+                  onChange={(e) => set({ burnEvery: e.currentTarget.value })}
+                />
+              </Field>
+              <Field label="For (ms)" id="burnFor" errors={errors}>
+                <input
+                  name="burnFor"
+                  value={form.burnFor}
+                  onChange={(e) => set({ burnFor: e.currentTarget.value })}
+                />
+              </Field>
+            </>
+          ) : null}
+          {form.burn === 'load' ? (
+            <Field label="Load (% of a core)" id="burnLoad" errors={errors}>
+              <input
+                name="burnLoad"
+                value={form.burnLoad}
+                onChange={(e) => set({ burnLoad: e.currentTarget.value })}
+              />
+            </Field>
+          ) : null}
+        </fieldset>
+      ) : null}
+
       <fieldset>
         <legend>Placement</legend>
         <Field label="Runs in" id="pool" errors={errors}>
@@ -603,6 +669,7 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
                 set({ pool: v === NEW_POOL ? nextPool(poolNames) : v });
               }}
             >
+              {config.auto ? <option value={AUTO_POOL}>{autoText}</option> : null}
               {poolNames.map((p) => (
                 <option key={p} value={p}>
                   {poolText(p)}

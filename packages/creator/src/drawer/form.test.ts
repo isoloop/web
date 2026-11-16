@@ -3,6 +3,7 @@ import { CATALOG, spec } from '../test-fixtures';
 import { validateSpec } from '../spec/validate';
 import { drawerConfig } from './config';
 import {
+  AUTO_POOL,
   autoTitle,
   emptyForm,
   fieldOfPath,
@@ -165,13 +166,72 @@ describe('the drawer form', () => {
   });
 });
 
+describe('the drawer form, M3h', () => {
+  it('places automatically with AUTO_POOL, and reads it back', () => {
+    const f = form({ pool: AUTO_POOL });
+    const s = specOfForm(f, CATALOG);
+    expect(s.placement).toEqual({ mode: 'auto' });
+    expect(valid(f).ok).toBe(true);
+    expect(formOfSpec(s, CATALOG).pool).toBe(AUTO_POOL);
+  });
+
+  it('adds a burn last, valid only with ?chaos, and reads it back', () => {
+    const f = form({
+      windowBy: 'seconds',
+      fn: 'avg',
+      view: 'stat',
+      burn: 'block',
+      burnEvery: '10',
+      burnFor: '500',
+    });
+    const ops = operatorsOf(f, CATALOG);
+    expect(ops.at(-1)).toEqual({ op: 'burn', everyMs: 10_000, forMs: 500 });
+    expect(valid(f).ok).toBe(false);
+    expect(validateSpec(specOfForm(f, CATALOG), CATALOG, { chaos: true }).ok).toBe(true);
+    expect(formOfSpec(specOfForm(f, CATALOG), CATALOG)).toMatchObject({
+      burn: 'block',
+      burnEvery: '10',
+      burnFor: '500',
+      fn: 'avg',
+    });
+    const load = form({ burn: 'load', burnLoad: '40' });
+    expect(operatorsOf(load, CATALOG)).toEqual([{ op: 'burn', loadPct: 40 }]);
+    expect(formOfSpec(specOfForm(load, CATALOG), CATALOG)).toMatchObject({
+      burn: 'load',
+      burnLoad: '40',
+    });
+  });
+
+  it('puts a burn error on the burn field', () => {
+    const f = form({
+      windowBy: 'seconds',
+      fn: 'avg',
+      view: 'stat',
+      burn: 'block',
+      burnFor: '20000',
+    });
+    const r = validateSpec(specOfForm(f, CATALOG), CATALOG, { chaos: true });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.errors.map((e) => fieldOfPath(e.path, f))).toEqual(['burn']);
+  });
+});
+
 describe('drawerConfig', () => {
   it('takes a catalog, native and a cap, and names what’s wrong', () => {
     expect(drawerConfig({ catalog: CATALOG, native: true, cap: 24 })).toEqual({
       catalog: CATALOG,
       native: true,
       cap: 24,
+      auto: false,
+      chaos: false,
     });
+    expect(
+      drawerConfig({ catalog: CATALOG, native: false, cap: 24, auto: true, chaos: true }),
+    ).toMatchObject({ auto: true, chaos: true });
+    expect(() => drawerConfig({ catalog: CATALOG, native: true, cap: 24, auto: 1 })).toThrow(
+      /auto/,
+    );
     expect(() => drawerConfig({ catalog: CATALOG, native: 'no', cap: 24 })).toThrow(/native/);
     expect(() => drawerConfig({ catalog: {}, native: true, cap: 24 })).toThrow(/catalog/);
     expect(() => drawerConfig({ catalog: CATALOG, native: true, cap: 0 })).toThrow(/cap/);
