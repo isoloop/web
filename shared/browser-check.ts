@@ -83,9 +83,15 @@ const FILE = 'browser-check.js';
  * (those are deferred), so the check always runs before the app. The build
  * writes the file into each build's output; the dev server serves it.
  */
+/** `./` for a page at the root, `../` for one a folder down, and so on. */
+export function upTo(path = '/index.html'): string {
+  const depth = path.split('/').filter(Boolean).length - 1;
+  return depth > 0 ? '../'.repeat(depth) : './';
+}
+
 export function browserCheck(needs: Needs): {
   name: string;
-  transformIndexHtml: () => HtmlTag[];
+  transformIndexHtml: (html: string, ctx?: { path?: string }) => HtmlTag[];
   generateBundle(this: {
     emitFile(file: { type: 'asset'; fileName: string; source: string }): string;
   }): void;
@@ -104,9 +110,11 @@ export function browserCheck(needs: Needs): {
   const source = checkScript(needs);
   return {
     name: 'examples-browser-check',
-    transformIndexHtml: () => [
+    // The file is at the build's root: a page in a folder (the processor's
+    // files/index.html) reaches it one level up per folder.
+    transformIndexHtml: (_html, ctx) => [
       { tag: 'style', children: CSS, injectTo: 'head' },
-      { tag: 'script', attrs: { src: `./${FILE}` }, injectTo: 'head' },
+      { tag: 'script', attrs: { src: `${upTo(ctx?.path)}${FILE}` }, injectTo: 'head' },
       {
         tag: 'div',
         attrs: { id: NOTICE_ID, role: 'status' },

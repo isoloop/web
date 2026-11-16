@@ -8,6 +8,8 @@
 #   /how-it-works/                   -> the site's diagrams page (with the site)
 #   /examples/                       -> the hub (with the site), else a list
 #   /examples/basic/                 -> basic: four isolates, two of them pooled
+#   /examples/processor/             -> the processor: the balancer playground,
+#                                       and the File processor at files/ (M3h)
 #   /examples/dashboards/            -> lists the dashboards
 #   /examples/dashboards/markets/    -> the markets dashboard, every build under it
 #   /examples/dashboards/plant/      -> the plant dashboard, every build under it
@@ -30,6 +32,7 @@ fi
 markets=apps/dashboards/markets/dist
 plant=apps/dashboards/plant/dist
 basic=apps/basic/dist
+processor=apps/processor/dist
 
 ex=$site/examples
 
@@ -39,6 +42,7 @@ cp scripts/placeholder/* "$site/"
 cp -r "$markets" "$ex/dashboards/markets"
 cp -r "$plant" "$ex/dashboards/plant"
 cp -r "$basic" "$ex/basic"
+cp -r "$processor" "$ex/processor"
 mkdir -p "$ex/dashboards/plant/architecture"
 cp apps/dashboards/plant/architecture/*.html apps/dashboards/plant/architecture/*.js \
   "$ex/dashboards/plant/architecture/"
@@ -63,7 +67,7 @@ page() { # title, body
 
 if [ "$SITE" = 0 ]; then
 page 'Isoloop examples' \
-  '<h1>Isoloop examples</h1><ul><li><a href="./basic/">Basic</a>: four isolates on three event loops, two of them sharing a pool. Block or crash any of them and watch what keeps running.</li><li><a href="./dashboards/">Dashboards</a></li></ul>' \
+  '<h1>Isoloop examples</h1><ul><li><a href="./basic/">Basic</a>: four isolates on three event loops, two of them sharing a pool. Block or crash any of them and watch what keeps running.</li><li><a href="./dashboards/">Dashboards</a></li><li><a href="./processor/">Processor</a>: background work as headless isolates, placed by the balancer: a playground, and a simulated file processor.</li></ul>' \
   > "$ex/index.html"
 
 page 'Dashboards · Isoloop examples' \

@@ -4,9 +4,10 @@ name: Deploy
 # site-v* tag is reachable (before that a placeholder), basic at
 # <pages url>/examples/basic/ (website plan task 4b), and the dashboards at <pages url>/examples/dashboards/markets/ (M3b task 19; the old
 # <pages url>/examples/markets/ paths redirect there) and
-# <pages url>/examples/dashboards/plant/ (M3d), then each one's smoke test
+# <pages url>/examples/dashboards/plant/ (M3d) and the processor at
+# <pages url>/examples/processor/ (M3h), then each one's smoke test
 # against the live URL. Pages serves one site, so every deploy builds every app. Only
-# from a `markets-v*`, `plant-v*` or `basic-v*` tag (release.yml) or by hand: the public
+# from a `markets-v*`, `plant-v*`, `basic-v*` or `processor-v*` tag (release.yml) or by hand: the public
 # demos change when someone decides they should.
 #
 # GitHub Pages can't set COOP/COEP headers, so the metrics panel's memory figure
@@ -33,7 +34,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter "./apps/dashboards/*" --filter ./apps/basic --filter ./apps/site build
+      - run: pnpm --filter "./apps/dashboards/*" --filter ./apps/basic --filter ./apps/processor --filter ./apps/site build
       - name: Assemble the site
         run: scripts/assemble-site.sh site
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
@@ -66,7 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [dashboards/markets, dashboards/plant, basic]
+        app: [dashboards/markets, dashboards/plant, basic, processor]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
