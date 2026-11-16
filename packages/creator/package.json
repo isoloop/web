@@ -2,20 +2,27 @@
   "name": "creator",
   "private": true,
   "type": "module",
-  "description": "The interactive pages' widget creator (M3e): the isoloop-spec@1 widget format, its validator, the topic catalog type, and the filter, window and aggregate operators a widget's pipeline runs.",
+  "description": "The interactive pages' widget creator (M3e): the isoloop-spec@1 widget format, its validator, the topic catalog type, the filter, window and aggregate operators a widget's pipeline runs, and the five views that draw its output.",
   "exports": {
     ".": "./src/index.ts",
-    "./outputs": "./src/outputs.ts"
+    "./outputs": "./src/outputs.ts",
+    "./draw": "./src/draw/index.ts",
+    "./views": "./src/views/index.ts",
+    "./view-kinds": "./src/views/kinds.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
