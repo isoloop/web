@@ -25,7 +25,9 @@ export function nativeSources(store: Store): NativeSources {
           ? 'health'
           : topic === MERGED.spectrum
             ? 'spectrum'
-            : undefined;
+            : topic === MERGED.vib
+              ? 'vib'
+              : undefined;
     if (k === undefined) return () => {};
     const offs = MACHINES.map((m) => {
       const stream = of(m, k);

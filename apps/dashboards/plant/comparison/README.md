@@ -79,14 +79,17 @@ M3e decision 22: on plant's interactive page (`/interactive/native/` against `/i
 1. Load, wait until the starters draw, warm up (`--warm`).
 2. An idle window (`--window`), drawer closed: the reference.
 3. **Dashboard → drawer:** the drawer open on its default draft (light). 10 keystrokes into the title and 10 clicks (add a condition, remove it), one at a time.
-4. **Drawer → dashboard:** the draft made heavy (`plant.scalars`, bearing temp p95 over 120 s, every 1 s, by machine, a line), then a window with a keystroke into the title every 500 ms; each one makes the preview rebuild its pipeline from its 2-minute buffer.
+4. **Drawer → dashboard, typical:** the draft made a typical widget (`plant.scalars`, bearing temp p95 over 120 s, every 1 s, by machine, a line: about 4,800 records), then a window with a keystroke into the title every 500 ms; each one makes the preview rebuild its pipeline from its buffer.
+5. **Drawer → dashboard, heavy:** the drawer's "Try a heavy widget" preset (`plant.vib`, the 99th percentile of every raw vibration sample over 30 s, every 1 s, by machine, a line). At 5 kHz that's about 1.2 million samples, sorted into eight percentiles each second, and each rebuild backfills the 30 s; then the same typed window. On native it runs on the main thread, on Isoloop in the preview's own worker.
+
+`plant.vib` is each machine's raw vibration chunks, also published to one topic keyed by machine. On the Isoloop page the feed isolates publish that copy at all times, so it's in every window's figures, drawer open or closed; on the native page the merged topic is read from the machines' own streams only while a widget reads it.
 
 The figures:
 
 - **Draw gaps:** the time between two draws of a starter canvas (line, heatmap, bar), from `data-drawn-at`, the time each draw ran, on the drawing thread's clock (the widget's worker on Isoloop, the main thread on native). Widgets read their pipeline every 100 ms; a gap over 250 ms is counted.
 - **Main-thread frames:** gaps between the page's animation frames; over 25 ms is counted.
-- **Typing:** from the keydown on the page to the first animation frame after the drawer's form has rendered the new title (`data-title`, set by the drawer, in its own worker on Isoloop).
-- **Clicks:** from the click to the first animation frame after the form shows one condition more or fewer.
+- **Typing:** from the keydown on the page to the first animation frame after the drawer's form has rendered the new title (`data-title`, set by the drawer, in its own worker on Isoloop). The keydown's time is the event's `timeStamp`, when the browser took the input, so time spent waiting behind a busy main thread counts. In the typed windows, the keystrokes sent (of 20, one per 500 ms) are reported too: fewer means each press waited for the page.
+- **Clicks:** from the click (its `timeStamp`) to the first animation frame after the form shows one condition more or fewer.
 - **CPU:** main thread and all renderer threads, % of one core, Chromium only.
 
 The page is timed from inside itself, by an init script that also watches the isolates' shadow roots, so Playwright's polling isn't in the figures.
@@ -112,7 +115,7 @@ flock ~/bench/.lock docker run --rm --init --cpuset-cpus=2,4,6,8 --shm-size=2g \
     --engines chromium,firefox --out comparison/interactive/final'
 ```
 
-2 pages × 5 rounds × 2 engines = 20 runs of about a minute each.
+2 pages × 5 rounds × 2 engines = 20 runs of about a minute and a half each.
 
 ## Chromium, 4 cores, 1 kHz and 5 kHz
 

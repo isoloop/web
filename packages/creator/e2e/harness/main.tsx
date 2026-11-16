@@ -99,6 +99,15 @@ const boardApi = {
       ),
     ).then(() => {});
   },
+  /**
+   * Resolves once every earlier spec publish is on disk: a persistent topic
+   * acknowledges a publish once its batch is written (ADR 0007), in order,
+   * so the ack of a probe publish follows them.
+   */
+  flushSpecs: (): Promise<void> =>
+    kernel
+      .publish(ref('creator.specs.v1'), { key: '$sync', value: { sync: 'flushed' } })
+      .then(() => {}),
   restart: (id: string) => kernel.restart(id),
   crashBus: () => kernel.debug.crashBus(),
   isolates: harness.isolates,

@@ -14,11 +14,17 @@ import { cpuDelta, pageMetrics, processes } from 'compare/probes';
 // 3. Dashboard → drawer: the drawer open on the default draft (a light one,
 //    the records of the first topic in a table). 10 keystrokes into its title
 //    and 10 clicks (5 × add a condition, 5 × remove it), one at a time.
-// 4. Drawer → dashboard: the draft made heavy (plant.scalars, bearing temp p95
-//    over 120 s, every 1 s, by machine, a line), then the same window with a
-//    keystroke into the title every 500 ms. Each keystroke changes the draft,
-//    so the preview rebuilds its pipeline from its 2-minute buffer 300 ms
-//    later (decision 10): about 20 rebuilds per window.
+// 4. Drawer → dashboard, typical: the draft made a typical widget
+//    (plant.scalars, bearing temp p95 over 120 s, every 1 s, by machine, a
+//    line: about 4,800 records), then the same window with a keystroke into
+//    the title every 500 ms. Each keystroke changes the draft, so the preview
+//    rebuilds its pipeline from its buffer 300 ms later (decision 10): about
+//    20 rebuilds per window.
+// 5. Drawer → dashboard, heavy: the drawer's "Try a heavy widget" preset
+//    (plant.vib, the 99th percentile of every raw vibration sample over 30 s,
+//    every 1 s, by machine: at 5 kHz about 1.2 million samples, sorted into
+//    eight percentiles a second, and each rebuild backfills 30 seconds of
+//    them), then the same typed window.
 //
 // What each figure is:
 // - Draw gaps: the starters' canvases (line, heatmap, bar) carry the time of
@@ -30,9 +36,13 @@ import { cpuDelta, pageMetrics, processes } from 'compare/probes';
 //   page's main thread; over 25 ms is late (as on plant's page).
 // - Typing: from the keydown on the host page to the first animation frame
 //   after the drawer's form has rendered the new title (`data-title` on the
-//   form, set by the drawer, in its worker on Isoloop).
-// - Clicks: from the click to the first animation frame after the form has
-//   rendered one row more (add) or less (remove).
+//   form, set by the drawer, in its worker on Isoloop). The keydown's time is
+//   the event's own `timeStamp`, when the browser took the input, so the time
+//   it waited behind a busy main thread counts.
+// - Clicks: from the click (its `timeStamp`) to the first animation frame
+//   after the form has rendered one row more (add) or less (remove).
+// - Keys: how many keystrokes the window sent at its 500 ms cadence; fewer
+//   than 20 means each press waited for the page.
 // - CPU: main thread (CDP TaskDuration) and renderer, all threads, as % of one
 //   core, over each window. Chromium only.
 //
@@ -145,7 +155,7 @@ function install(): void {
   window.addEventListener(
     'keydown',
     (e) => {
-      if (target(e)?.getAttribute('name') === 'title') p.keys.push(performance.now());
+      if (target(e)?.getAttribute('name') === 'title') p.keys.push(e.timeStamp);
     },
     true,
   );
@@ -153,7 +163,7 @@ function install(): void {
     'click',
     (e) => {
       const a = target(e)?.closest('[data-action]')?.getAttribute('data-action');
-      if (a === 'add-row' || a === 'remove-row') p.clicks.push(performance.now());
+      if (a === 'add-row' || a === 'remove-row') p.clicks.push(e.timeStamp);
     },
     true,
   );
@@ -343,8 +353,63 @@ for (const rate of RATES) {
             clicks.push(await click('remove-row', rows0));
           }
 
-          // 4. Drawer → dashboard: the heavy preview, typed into while it rebuilds.
-          stage = 'heavy preview';
+          /** A window typed into while the preview rebuilds on each keystroke. */
+          const previewWindow = async () => {
+            await title.click();
+            await title.fill('');
+            await expect(form).toHaveAttribute('data-title', '', { timeout: WAIT });
+            const k0 = await page.evaluate(() => window.probe.keys.length);
+            const e0 = await page.evaluate(() => window.probe.echoes.length);
+            const meter = await cpu();
+            const w0 = await now(page);
+            const end = Date.now() + WINDOW_MS;
+            let sent = 0;
+            while (Date.now() < end) {
+              const next = Date.now() + KEY_EVERY_MS;
+              // oxlint-disable-next-line no-await-in-loop -- a cadence
+              await page.keyboard.press(String.fromCharCode(97 + (sent % 26)));
+              sent += 1;
+              // oxlint-disable-next-line no-await-in-loop -- a cadence
+              await page.waitForTimeout(Math.max(0, Math.min(next, end) - Date.now()));
+            }
+            const w1 = await now(page);
+            const used = await meter();
+            const fig = await windowFigures(page, [w0.epoch, w1.epoch], [w0.perf, w1.perf]);
+            // Every keystroke's echo, once the form has caught up.
+            await page
+              .waitForFunction((n) => window.probe.echoes.some((e) => e.len === n), sent, {
+                timeout: WAIT,
+              })
+              .catch(() => {});
+            const typed = await page.evaluate(
+              (a) => {
+                const keys = window.probe.keys.slice(a.k0, a.k0 + a.sent);
+                const echoes = window.probe.echoes.slice(a.e0);
+                return keys.map((at, i) => {
+                  const echo = echoes.find((e) => e.len === i + 1);
+                  return echo ? echo.at - at : null;
+                });
+              },
+              { k0, e0, sent },
+            );
+            const done = typed.filter((x): x is number => x !== null);
+            return {
+              drawGapsLate: fig.drawGapsLate,
+              drawGapP95Ms: fig.drawGapP95Ms,
+              drawGapMaxMs: fig.drawGapMaxMs,
+              draws: fig.draws,
+              framesLate: fig.framesLate,
+              fps: fig.fps,
+              mainThreadCpuPct: used.main,
+              rendererCpuPct: used.all,
+              keys: sent,
+              typingMedianMs: r1(median(done)),
+              typingP95Ms: r1(quantile(done, 0.95)),
+              typingMissing: sent - done.length,
+            };
+          };
+          // 4. Drawer → dashboard, typical: a 2-minute p95 over the slow signals.
+          stage = 'typical preview';
           await field('topic').selectOption('plant.scalars');
           await field('window-by').selectOption('seconds');
           await field('window-value').fill('120');
@@ -355,51 +420,43 @@ for (const rate of RATES) {
           await field('group-by').selectOption('$key');
           await field('view').selectOption('line');
           await expect(form).toHaveAttribute('data-valid', 'true', { timeout: WAIT });
-          const previewFrom = Date.now();
+          const typicalFrom = Date.now();
           await expect(
             page.locator('.creator-drawer-preview canvas[data-view="line"]'),
           ).toHaveAttribute('data-drawn', /^line:8x/, { timeout: WAIT });
-          const previewMs = Date.now() - previewFrom;
-          await title.click();
-          await title.fill('');
-          await expect(form).toHaveAttribute('data-title', '', { timeout: WAIT });
+          const typicalPreviewMs = Date.now() - typicalFrom;
+          stage = 'typical window';
+          const typical = await previewWindow();
 
-          stage = 'heavy window';
-          const k0 = await page.evaluate(() => window.probe.keys.length);
-          const e0 = await page.evaluate(() => window.probe.echoes.length);
-          const heavyCpu = await cpu();
-          const h0 = await now(page);
-          const end = Date.now() + WINDOW_MS;
-          let sent = 0;
-          while (Date.now() < end) {
-            const next = Date.now() + KEY_EVERY_MS;
-            // oxlint-disable-next-line no-await-in-loop -- a cadence
-            await page.keyboard.press(String.fromCharCode(97 + (sent % 26)));
-            sent += 1;
-            // oxlint-disable-next-line no-await-in-loop -- a cadence
-            await page.waitForTimeout(Math.max(0, Math.min(next, end) - Date.now()));
-          }
-          const h1 = await now(page);
-          const heavyCpuEnd = await heavyCpu();
-          const heavy = await windowFigures(page, [h0.epoch, h1.epoch], [h0.perf, h1.perf]);
-          // Every keystroke's echo, once the form has caught up.
-          await page
-            .waitForFunction((n) => window.probe.echoes.some((e) => e.len === n), sent, {
-              timeout: WAIT,
-            })
-            .catch(() => {});
-          const heavyTyping = await page.evaluate(
-            (a) => {
-              const keys = window.probe.keys.slice(a.k0, a.k0 + a.sent);
-              const echoes = window.probe.echoes.slice(a.e0);
-              return keys.map((at, i) => {
-                const echo = echoes.find((e) => e.len === i + 1);
-                return echo ? echo.at - at : null;
-              });
-            },
-            { k0, e0, sent },
+          // 5. Drawer → dashboard, heavy: the preset over every raw vibration sample.
+          stage = 'heavy preview';
+          await form.locator('[data-action="preset"][data-preset="heavy-vib-p99"]').click();
+          await expect(field('topic')).toHaveValue('plant.vib', { timeout: WAIT });
+          await expect(form).toHaveAttribute('data-valid', 'true', { timeout: WAIT });
+          const heavyFrom = Date.now();
+          // The topic changed, so the preview is a new isolate on plant.vib:
+          // its first draw of the eight machines' p99 line after the click,
+          // timed on the drawing thread's clock (data-drawn-at).
+          const line = page.locator(
+            '.creator-drawer-preview .creator-widget[data-topic="plant.vib"][data-state="live"] canvas[data-view="line"]',
           );
-          const heavyDone = heavyTyping.filter((x): x is number => x !== null);
+          let heavyDrawnAt = 0;
+          await expect
+            .poll(
+              async () => {
+                if ((await line.count()) === 0) return false;
+                const drawn = await line.getAttribute('data-drawn', { timeout: 1_000 });
+                const at = Number(await line.getAttribute('data-drawn-at', { timeout: 1_000 }));
+                if (!(drawn ?? '').startsWith('line:8x') || !(at > heavyFrom)) return false;
+                heavyDrawnAt = at;
+                return true;
+              },
+              { timeout: WAIT, intervals: [50] },
+            )
+            .toBe(true);
+          const heavyPreviewMs = heavyDrawnAt - heavyFrom;
+          stage = 'heavy window';
+          const heavy = await previewWindow();
 
           write({
             stopped: false,
@@ -417,19 +474,32 @@ for (const rate of RATES) {
             clickMedianMs: r1(median(clicks)),
             clickP95Ms: r1(quantile(clicks, 0.95)),
             clicks: clicks.map(r1),
-            previewMs,
+            typicalPreviewMs,
+            typicalDrawGapsLate: typical.drawGapsLate,
+            typicalDrawGapP95Ms: typical.drawGapP95Ms,
+            typicalDrawGapMaxMs: typical.drawGapMaxMs,
+            typicalDraws: typical.draws,
+            typicalFramesLate: typical.framesLate,
+            typicalFps: typical.fps,
+            typicalMainThreadCpuPct: typical.mainThreadCpuPct,
+            typicalRendererCpuPct: typical.rendererCpuPct,
+            typicalKeys: typical.keys,
+            typicalTypingMedianMs: typical.typingMedianMs,
+            typicalTypingP95Ms: typical.typingP95Ms,
+            typicalTypingMissing: typical.typingMissing,
+            heavyPreviewMs,
             heavyDrawGapsLate: heavy.drawGapsLate,
             heavyDrawGapP95Ms: heavy.drawGapP95Ms,
             heavyDrawGapMaxMs: heavy.drawGapMaxMs,
             heavyDraws: heavy.draws,
             heavyFramesLate: heavy.framesLate,
             heavyFps: heavy.fps,
-            heavyMainThreadCpuPct: heavyCpuEnd.main,
-            heavyRendererCpuPct: heavyCpuEnd.all,
-            heavyKeys: sent,
-            heavyTypingMedianMs: r1(median(heavyDone)),
-            heavyTypingP95Ms: r1(quantile(heavyDone, 0.95)),
-            heavyTypingMissing: sent - heavyDone.length,
+            heavyMainThreadCpuPct: heavy.mainThreadCpuPct,
+            heavyRendererCpuPct: heavy.rendererCpuPct,
+            heavyKeys: heavy.keys,
+            heavyTypingMedianMs: heavy.typingMedianMs,
+            heavyTypingP95Ms: heavy.typingP95Ms,
+            heavyTypingMissing: heavy.typingMissing,
           });
         } catch (e) {
           write({

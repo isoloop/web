@@ -1,5 +1,5 @@
 // The merged topics behind the catalog's per-machine entries (catalog.ts):
-// each machine's slow signals, health and spectrum summary, also published to
+// each machine's slow signals, health, spectrum summary and raw vibration, also published to
 // one topic keyed by machine. On the Isoloop page the feed and engines tee
 // what they publish (isolates/); on the native page the sources read the
 // store's per-machine streams instead (native.ts). No Zod.
@@ -19,6 +19,7 @@ export function mergedOf(
   const key = m as MachineId;
   if (k === 'scalars') return { topic: MERGED.scalars, key, value };
   if (k === 'health') return { topic: MERGED.health, key, value };
+  if (k === 'vib') return { topic: MERGED.vib, key, value };
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a `spectrum` stream's record
   if (k === 'spectrum') return { topic: MERGED.spectrum, key, value: summary(value as Spectrum) };
   return undefined;

@@ -29,7 +29,8 @@ export function useWidget(bus: WidgetBus, config: WidgetConfig): WidgetState {
 
 /**
  * A widget: nothing while it waits for its spec or after a tombstone, else
- * its view. `data-state` is the runner's status, for the page and E2E tests.
+ * its view. `data-state` is the runner's status and `data-topic` its source
+ * topic, for the page and E2E tests.
  * Needs a <ViewEnv> around it for canvas views.
  */
 export function Widget({ bus, config }: { bus: WidgetBus; config: WidgetConfig }): ReactElement {
@@ -37,7 +38,12 @@ export function Widget({ bus, config }: { bus: WidgetBus; config: WidgetConfig }
   const spec = state.status === 'live' || state.status === 'respawn' ? state.spec : undefined;
   const output = state.status === 'live' || state.status === 'respawn' ? state.output : undefined;
   return (
-    <div className="creator-widget" data-widget={config.id} data-state={state.status}>
+    <div
+      className="creator-widget"
+      data-widget={config.id}
+      data-topic={config.topic.name}
+      data-state={state.status}
+    >
       {spec ? (
         <View
           type={spec.view.type}

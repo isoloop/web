@@ -278,6 +278,51 @@ function checkOperators(
   });
 }
 
+/** Whether a condition tests `field` anywhere in it. */
+function tests(where: unknown, field: string): boolean {
+  if (!isRecord(where)) return false;
+  for (const group of ['and', 'or'] as const) {
+    const list = where[group];
+    if (Array.isArray(list)) return list.some((w) => tests(w, field));
+  }
+  if ('not' in where) return tests(where['not'], field);
+  return where['field'] === field;
+}
+
+/**
+ * A topic whose records carry samples (catalog.ts `samples`): the samples are
+ * read only by an aggregate over a time window, and a filter tests a record,
+ * not a sample.
+ */
+function checkSamples(
+  operators: readonly Operator[],
+  topic: CatalogTopic,
+  value: string,
+  errors: SpecError[],
+): void {
+  operators.forEach((o, i) => {
+    const at = `operators[${i}]`;
+    if (o.op === 'filter' && tests(o.where, value)) {
+      errors.push({
+        path: `${at}.where`,
+        message: `"${value}" is a sample of "${topic.name}": filters test whole records, so filter on another field`,
+      });
+    }
+    if (o.op === 'window' && o.n !== undefined) {
+      errors.push({
+        path: `${at}.n`,
+        message: `"${topic.name}" carries many samples per record: use a time window (ms)`,
+      });
+    }
+  });
+  if (!operators.some((o) => o.op === 'aggregate')) {
+    errors.push({
+      path: 'operators',
+      message: `"${topic.name}" carries many samples per record: add an aggregate over "${value}"`,
+    });
+  }
+}
+
 /**
  * Checks a widget spec, as JSON from anywhere (a form, a topic, an agent),
  * against a dashboard's catalog. On success `spec` is the checked spec, with
@@ -313,6 +358,7 @@ export function validateSpec(input: unknown, catalog: Catalog): SpecResult {
   }
 
   checkOperators(spec.operators, topic, errors);
+  if (topic?.samples) checkSamples(spec.operators, topic, topic.samples.value, errors);
 
   const kind = outputKind(spec.operators);
   const takes = VIEW_INPUTS[spec.view.type];

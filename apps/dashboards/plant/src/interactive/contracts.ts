@@ -11,7 +11,7 @@ import { MACHINE_KEEP, PLANT_KEEP } from '../core/retention';
 import * as s from '../core/schemas';
 import { of, type MachineStream, type PlantStream } from '../core/streams';
 import { retentionOf, topicName } from '../isoloop/names';
-import { MERGED, SPECTRUM_KEEP_MS } from './catalog';
+import { MERGED, SPECTRUM_KEEP_MS, VIB_KEEP_MS } from './catalog';
 
 /** The machine streams this page runs: no stats engine, nothing reads it. */
 export const STREAMS = ['vib', 'scalars', 'spectrum', 'health'] as const satisfies MachineStream[];
@@ -36,6 +36,7 @@ const mergedTopics = [
     schema: spectrumSummary,
     retention: { kind: 'time', ms: SPECTRUM_KEEP_MS },
   }),
+  topic(MERGED.vib, { schema: s.vibChunk, retention: { kind: 'time', ms: VIB_KEEP_MS } }),
 ];
 
 const plantTopics = [
@@ -52,6 +53,7 @@ export const OFFERED: Record<string, z.ZodObject> = {
   [MERGED.scalars]: s.scalars,
   [MERGED.health]: s.health,
   [MERGED.spectrum]: spectrumSummary,
+  [MERGED.vib]: s.vibChunk,
   'plant.fleet': s.fleet,
   'plant.alarms': s.alarm,
   'plant.events': s.event,

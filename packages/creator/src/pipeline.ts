@@ -1,7 +1,7 @@
 // A widget's pipeline: its source key, filters, window and aggregate, run on
 // records as they arrive, read as one of the four outputs.
 import { fieldOf, KEY_FIELD, type CatalogTopic, type Rec } from './catalog';
-import { aggregate, groupBy } from './operators/aggregate';
+import { aggregate, aggregateSamples, groupBy } from './operators/aggregate';
 import { compileFilters, fieldValue } from './operators/filter';
 import { BUFFER_LIMIT, RecordWindow, type WindowShape } from './operators/window';
 import {
@@ -108,7 +108,10 @@ export function pipeline(spec: WidgetSpec, topic: CatalogTopic): Pipeline {
         ? `p${p ?? 50} ${label(topic, field ?? '')}`
         : `${fn} ${label(topic, field ?? '')}`;
   const unit = fn === 'count' ? {} : unitOf(topic, field);
-  const at = (recs: readonly Rec[]): number | null => aggregate(fn, recs, field, p);
+  // A sample topic's aggregate reads the samples (catalog.ts `samples`).
+  const sampled = topic.samples !== undefined && (fn === 'count' || field === topic.samples.value);
+  const at = (recs: readonly Rec[]): number | null =>
+    sampled ? aggregateSamples(fn, recs, topic, p) : aggregate(fn, recs, field, p);
   const groupField = agg.groupBy;
   const groupLabel = groupField === undefined ? '' : label(topic, groupField);
 

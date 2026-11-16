@@ -249,6 +249,36 @@ export function Drawer({ bus, config }: { bus: DrawerBus; config: DrawerConfig }
           {m}
         </p>
       ))}
+      {open.mode === 'add' && (catalog.presets?.length ?? 0) > 0 ? (
+        <div className="creator-presets">
+          {catalog.presets?.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              data-action="preset"
+              data-preset={preset.id}
+              disabled={busy}
+              onClick={() =>
+                setForm(
+                  fitView(
+                    formOfSpec(
+                      {
+                        ...preset.spec,
+                        id: form.id,
+                        placement: { mode: 'manual', pool: form.pool },
+                      },
+                      catalog,
+                    ),
+                    catalog,
+                  ),
+                )
+              }
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <fieldset>
         <legend>Source</legend>

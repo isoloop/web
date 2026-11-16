@@ -4,18 +4,24 @@
 //
 // The machines' slow signals, health and spectrum summaries come as one topic
 // each, keyed by machine (merged.ts), so a widget can pick one machine
-// (`source.key`) or group by all eight (`$key`). Raw vibration is left out:
-// its samples are an array, not fields.
-import type { Catalog, CatalogTopic } from 'creator';
+// (`source.key`) or group by all eight (`$key`). Raw vibration comes the same
+// way, with each chunk's samples offered as the number field `value`
+// (creator's sample topics): the widget keeps the chunks and its aggregate
+// reads the samples from their arrays.
+import type { Catalog, CatalogPreset, CatalogTopic } from 'creator';
 import { MACHINES } from '../core/machines';
-import { SLOW_KEEP_MS } from '../core/retention';
+import { MACHINE_KEEP, SLOW_KEEP_MS } from '../core/retention';
 
 /** The merged, per-machine topics (merged.ts). */
 export const MERGED = {
   scalars: 'plant.scalars',
   health: 'plant.health',
   spectrum: 'plant.spectrum',
+  vib: 'plant.vib',
 } as const;
+
+/** How long the merged raw vibration is kept: as long as each machine's (30 s). */
+export const VIB_KEEP_MS = MACHINE_KEEP.vib.kind === 'time' ? MACHINE_KEEP.vib.ms : 30_000;
 
 /** How long the merged spectrum is kept: as long as each machine's (30 s). */
 export const SPECTRUM_KEEP_MS = 30_000;
@@ -74,6 +80,20 @@ export const SPECTRUM: CatalogTopic = {
   time: 'ts',
 };
 
+export const VIB: CatalogTopic = {
+  name: MERGED.vib,
+  title: 'Raw vibration (1–5 kHz samples, every 50 ms per machine)',
+  key: machine,
+  fields: [
+    { name: 't0', type: 'time', label: 'Time' },
+    { name: 'machine', type: 'string', label: 'Machine' },
+    { name: 'value', type: 'number', label: 'Vibration sample', unit: 'mm/s' },
+  ],
+  history: VIB_KEEP_MS,
+  time: 't0',
+  samples: { field: 'values', value: 'value' },
+};
+
 export const FLEET: CatalogTopic = {
   name: 'plant.fleet',
   title: 'Fleet (every second)',
@@ -117,4 +137,27 @@ export const EVENTS: CatalogTopic = {
   time: 'ts',
 };
 
-export const CATALOG: Catalog = { topics: [SCALARS, HEALTH, SPECTRUM, FLEET, ALARMS, EVENTS] };
+/**
+ * The drawer's "Try a heavy widget": the 99th percentile of every raw
+ * vibration sample, per machine, over 30 s, every second. At `?rate=5` that's
+ * about 1.2 million samples sorted into eight percentiles each second, plus
+ * the first draw's backfill. The comparison's heavy preview (M3e task 7b).
+ */
+export const HEAVY_PRESET: CatalogPreset = {
+  id: 'heavy-vib-p99',
+  label: 'Try a heavy widget',
+  spec: {
+    title: 'Vibration p99 by machine (30 s, every sample)',
+    source: { topic: MERGED.vib },
+    operators: [
+      { op: 'window', ms: 30_000 },
+      { op: 'aggregate', fn: 'percentile', p: 99, field: 'value', every: 1_000, groupBy: '$key' },
+    ],
+    view: { type: 'line', size: 'l' },
+  },
+};
+
+export const CATALOG: Catalog = {
+  topics: [SCALARS, HEALTH, SPECTRUM, VIB, FLEET, ALARMS, EVENTS],
+  presets: [HEAVY_PRESET],
+};

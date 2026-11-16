@@ -35,7 +35,7 @@ function machineJobs(m: MachineId, seed: number, rateKHz: number): Job[] {
   });
   return [
     job('feed', feed, {
-      publish: [...t(of(m, 'vib'), of(m, 'scalars')), MERGED.scalars],
+      publish: [...t(of(m, 'vib'), of(m, 'scalars')), MERGED.scalars, MERGED.vib],
       subscribe: [],
     }),
     job('fft', fft, {
