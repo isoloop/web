@@ -1,0 +1,21 @@
+{
+  "started": "2026-11-16T21:25:15.870Z",
+  "args": {
+    "pair": [
+      "isoloop:own=isoloop:balancer",
+      "isoloop:one=isoloop:balancer",
+      "isoloop:one-off=isoloop:one"
+    ],
+    "mixes": "normal,faults",
+    "rounds": "5",
+    "hold": "0",
+    "warm": "20",
+    "window": "20",
+    "engines": "chromium,firefox",
+    "out": "comparison/final/results",
+    "extra": [],
+    "summary-only": false
+  },
+  "configs": ["isoloop:own", "isoloop:balancer", "isoloop:one", "isoloop:one-off"],
+  "cpus": "2,4,6,8"
+}
