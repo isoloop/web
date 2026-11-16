@@ -10,7 +10,7 @@ import list from '../contracts';
 import contractsUrl from '../contracts?isolate';
 import generatorSrc from '../isolates/generator?isolate';
 import processorSrc from '../isolates/processor?isolate';
-import { FileProcessor } from './model';
+import { FileProcessor, type Dials, type Mode } from './model';
 import { FilesPage } from './Page';
 import '../../../../shared/booted.ts';
 
@@ -22,10 +22,39 @@ const kernel = createKernel({
   routing: false,
 });
 
+/**
+ * The page's settings from the URL, for links and the comparison
+ * (comparison/run.ts): `placement` balancer (the default), own, one, or
+ * one-off (one pool and no balancer at all: the baseline for its own cost);
+ * the generator's `rate`, `poison`, `heavy`, `corrupt` and `seed`; and
+ * `start=1` to start at once.
+ */
+const params = new URLSearchParams(location.search);
+const num = (key: string): number | undefined => {
+  const v = params.get(key);
+  const n = v === null ? Number.NaN : Number(v);
+  return Number.isFinite(n) ? n : undefined;
+};
+const placement = params.get('placement') ?? 'balancer';
+const mode: Mode = placement === 'own' ? 'own' : placement.startsWith('one') ? 'one' : 'balancer';
+const dials: Partial<Dials> = { running: params.get('start') === '1' };
+for (const key of ['rate', 'poison', 'heavy', 'corrupt', 'seed'] as const) {
+  const v = num(key);
+  if (v !== undefined) dials[key] = v;
+}
+
 /** The balancer's own allowance of pools: its default, made visible on the page. */
 const maxWorkers = Math.max(2, (navigator.hardwareConcurrency || 4) - 2);
-const balancer = createBalancer(kernel, { maxWorkers });
-const model = new FileProcessor({ kernel, balancer, processorSrc, generatorSrc, maxWorkers });
+const balancer = placement === 'one-off' ? undefined : createBalancer(kernel, { maxWorkers });
+const model = new FileProcessor({
+  kernel,
+  balancer,
+  processorSrc,
+  generatorSrc,
+  maxWorkers,
+  mode,
+  dials,
+});
 
 declare global {
   interface Window {

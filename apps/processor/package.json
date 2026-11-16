@@ -9,7 +9,8 @@
     "preview": "vite preview --configLoader runner",
     "typecheck": "tsc --noEmit",
     "e2e": "playwright test",
-    "test": "vitest run"
+    "test": "vitest run",
+    "compare:pairs": "node comparison/run.ts"
   },
   "dependencies": {
     "@isoloop/balancer": "catalog:isoloop",
@@ -26,6 +27,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
+    "compare": "workspace:*",
     "typescript": "catalog:",
     "ui": "workspace:*",
     "vite": "catalog:",

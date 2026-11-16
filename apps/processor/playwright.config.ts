@@ -10,6 +10,7 @@ const ENGINES = [
   ['webkit', 'Desktop Safari'],
 ] as const;
 const SMOKE = /smoke\.spec\.ts$/;
+const COMPARISON = /comparison\.spec\.ts$/;
 const LIVE = process.env['LIVE_URL'];
 
 export default defineConfig({
@@ -31,9 +32,17 @@ export default defineConfig({
       }),
   projects: [
     ...ENGINES.flatMap(([name, device]) => [
-      { name, use: { ...devices[device] }, testIgnore: SMOKE },
+      { name, use: { ...devices[device] }, testIgnore: [SMOKE, COMPARISON] },
       { name: `${name}-load`, use: { ...devices[device] }, testMatch: /^$/ },
     ]),
     { name: 'live', use: { ...devices['Desktop Chrome'] }, testMatch: SMOKE },
+    // The placements compared (M3h decision 23, comparison/run.ts): one page
+    // at a time, on demand, never in the default run.
+    { name: 'comparison', use: { ...devices['Desktop Chrome'] }, testMatch: COMPARISON },
+    {
+      name: 'comparison-firefox',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: COMPARISON,
+    },
   ],
 });
