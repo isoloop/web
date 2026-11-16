@@ -5,7 +5,8 @@
 //
 // and spawns it with spawnWidget (host.ts).
 import { defineIsolate, useIsolate } from '@isoloop/react';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import css from '../styles.css?inline';
 import { ViewEnv } from '../views/env';
 import { widgetConfig } from './config';
 import { useIsolateCanvas } from './isolate-canvas';
@@ -13,7 +14,9 @@ import { isolateBus } from './bus';
 import { Widget } from './widget';
 
 function WidgetIsolate({ config }: { config: unknown }) {
-  const { bus } = useIsolate();
+  const ctx = useIsolate();
+  const { bus } = ctx;
+  useEffect(() => ctx.styles(css), [ctx]);
   const cfg = useMemo(() => widgetConfig(config), [config]);
   const wbus = useMemo(() => isolateBus(bus), [bus]);
   return (

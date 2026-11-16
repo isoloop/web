@@ -23,5 +23,8 @@ export function widgetConfig(v: unknown): WidgetConfig {
   if (mode !== 'spec' && mode !== 'draft')
     throw new Error('widget config: `mode` must be "spec" or "draft"');
   if (!isTopic(topic)) throw new Error('widget config: `topic` must be a catalog topic');
-  return { id, mode, topic };
+  const pool: unknown = Reflect.get(v, 'pool');
+  if (pool !== undefined && typeof pool !== 'string')
+    throw new Error('widget config: `pool` must be a string');
+  return pool === undefined ? { id, mode, topic } : { id, mode, topic, pool };
 }

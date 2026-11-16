@@ -164,7 +164,7 @@ describe('the host side', () => {
         id: 'widget-w1',
         src: '/w.js',
         surface,
-        config: { id: 'w1', mode: 'spec', topic: SCALARS },
+        config: { id: 'w1', mode: 'spec', topic: SCALARS, pool: 'pool-1' },
         grants: widgetGrants(spec(), 'spec'),
         pool: 'creator-pool-1',
       },

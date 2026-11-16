@@ -1,7 +1,11 @@
 // A minimal Isoloop page for the widget isolate's E2E test (M3e task 4): a
 // kernel with the creator topics and a source topic fed from the host, and
-// window.harness for the test to drive.
+// window.harness for the test to drive. With `?board=isoloop` it also mounts
+// the interactive board (task 5); `?board=native` is the native page, with
+// no kernel at all (board-native.tsx).
 import { createKernel, type IsolateHandle } from '@isoloop/host';
+import { CreatorBoard, isoloopRuntime, type BoardController } from '../../src/board';
+import drawerSrc from '../../src/drawer/isolate.tsx?isolate';
 import type { TopicRef } from '@isoloop/protocol';
 import { createRoot } from 'react-dom/client';
 import workers from 'virtual:isoloop/workers';
@@ -15,7 +19,7 @@ import {
   type WidgetMode,
 } from '../../src/widget';
 import widgetSrc from '../../src/widget/isolate.tsx?isolate';
-import { OTHER, SOURCE } from './catalog';
+import { CATALOG, OTHER, SOURCE, STARTERS } from './catalog';
 import list from './contracts';
 import contractsUrl from './contracts?isolate';
 
@@ -81,5 +85,43 @@ const harness = {
       .map((i) => ({ id: i.id, state: i.state, pool: i.pool, restarts: i.restarts })),
 };
 
-Object.assign(window, { harness });
+let board: BoardController | undefined;
+const boardApi = {
+  controller: () => board,
+  /** Publishes widget specs straight to the specs topic (e.g. to fill the page). */
+  publishSpecs(specs: WidgetSpec[]): Promise<void> {
+    return Promise.all(
+      specs.map((s, i) =>
+        kernel.publish(ref('creator.specs.v1'), {
+          key: s.id,
+          value: specRecord(s, Date.now() + 1000 + i),
+        }),
+      ),
+    ).then(() => {});
+  },
+  restart: (id: string) => kernel.restart(id),
+  crashBus: () => kernel.debug.crashBus(),
+  isolates: harness.isolates,
+  busReady: 0,
+};
+kernel.on('bus:ready', () => {
+  boardApi.busReady++;
+});
+
+Object.assign(window, { harness, board: boardApi });
+if (new URLSearchParams(location.search).get('board') === 'isoloop') {
+  const runtime = isoloopRuntime({ kernel, widgetSrc, drawerSrc });
+  const el = document.createElement('div');
+  document.body.append(el);
+  createRoot(el).render(
+    <CreatorBoard
+      runtime={runtime}
+      catalog={CATALOG}
+      starters={STARTERS}
+      onController={(c) => {
+        board = c;
+      }}
+    />,
+  );
+}
 document.body.dataset['ready'] = 'true';
