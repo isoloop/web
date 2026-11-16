@@ -97,3 +97,13 @@ test("the native + workers build with parts runs the same pipeline, and a part p
   await page.locator('[data-slot="filters"] select[name="symbol"]').selectOption('ETH-USD');
   expect(await filters).toBe('ETH-USD');
 });
+
+test('the interactive page sends visitors to its Isoloop build, and both load', async ({
+  page,
+}) => {
+  await page.goto('./interactive/');
+  await expect(page).toHaveURL(/\/interactive\/isoloop\/$/);
+  await expect(page.locator('.creator-board[data-ready]')).toBeAttached();
+  await page.goto('./interactive/native/');
+  await expect(page.locator('.creator-board[data-ready]')).toBeAttached();
+});

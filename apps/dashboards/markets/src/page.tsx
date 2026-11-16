@@ -139,6 +139,9 @@ export function Page() {
             )}
           </span>
         </nav>
+        <a className="interactive-link" href={`../interactive/${SIDE}/?size=${spec.size}`}>
+          Interactive mode
+        </a>
       </header>
       <section
         className="description"

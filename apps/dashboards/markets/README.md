@@ -14,6 +14,8 @@ The Isoloop builds place their isolates with `?placement=`:
 - `one`: everything in one pool.
 - `teams`, on `/mixed` only: the data on its own workers, plus a pool per team, one for the React widgets and one for the Preact ones. A blocked widget stalls its own team's widgets only.
 
+**Interactive mode** is a separate page, `/interactive/` (Isoloop or native, `?size=lite|normal|heavy`), on the same replay, with six starter widgets you can edit or delete and a drawer that adds new ones from the dashboard's trades, prices, cross-market figures and rolling stats, each widget its own isolate in a pool you pick ([M3e](https://github.com/isoloop/isoloop/blob/main/docs/plans/m3e-live-widget-creator.md)).
+
 Live at **https://isoloop.dev/examples/dashboards/markets/** (`?size=lite|normal|heavy`; `?placement=own|matched|one` on the Isoloop builds, `teams` on `/mixed`).
 
 ## What was measured

@@ -28,6 +28,7 @@ const rules: [dir: string, what: string, markers: string[]][] = [
   ['dist/native-mixed', 'Isoloop code', ISOLOOP],
   ['dist/native-mixed/parts', 'React DOM', REACT_DOM],
   ['dist/native-preact', 'Isoloop code', ISOLOOP],
+  ['dist/interactive/native', 'Isoloop code', ISOLOOP],
   ['dist/native-preact', 'React DOM', REACT_DOM],
   ['dist/isoloop-preact', 'React DOM', REACT_DOM],
   ['dist/mixed/preact', 'React DOM', REACT_DOM],
