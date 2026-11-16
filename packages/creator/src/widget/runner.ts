@@ -74,11 +74,39 @@ function isRecord(v: unknown): v is Readonly<Record<string, unknown>> {
 export const DRAFT_DELAY_MS = 300;
 /** How often a widget reads its pipeline for the view. */
 export const READ_EVERY_MS = 100;
+/**
+ * Longest a widget works on its pipeline before it yields its thread. A read
+ * can take seconds (the first one replays the whole history), and a worker
+ * that doesn't answer the heartbeat within `killAfterMs` is killed as hung,
+ * so the work goes in slices this long, with a task between them.
+ */
+export const SLICE_MS = 10;
+
+/** Runs `fn` in a new task: a MessageChannel message, which browsers don't clamp as they do nested timers. */
+function nextTask(fn: () => void): void {
+  if (typeof MessageChannel === 'undefined') {
+    setTimeout(fn, 0);
+    return;
+  }
+  const ch = new MessageChannel();
+  ch.port1.addEventListener(
+    'message',
+    () => {
+      ch.port1.close();
+      fn();
+    },
+    { once: true },
+  );
+  // A port listened to with addEventListener delivers only once started.
+  ch.port1.start();
+  ch.port2.postMessage(null);
+}
 
 export class WidgetRunner {
   readonly #bus: WidgetBus;
   readonly #config: WidgetConfig;
   readonly #now: () => number;
+  readonly #clock: () => number;
   readonly #onChange: (s: WidgetState) => void;
   readonly #buffer: RawBuffer;
   #applied: WidgetSpec | undefined;
@@ -87,15 +115,26 @@ export class WidgetRunner {
   #state: WidgetState = { status: 'waiting' };
   #pending: ReturnType<typeof setTimeout> | undefined;
   #unsubscribe: (() => void)[] = [];
+  /** The newest time a read was asked for; the slices work toward it. */
+  #target = 0;
+  /** A slice is queued for the next task. */
+  #working = false;
+  /** Bumped when the pipeline is replaced or dropped, so a queued slice of the old one does nothing. */
+  #generation = 0;
 
+  /**
+   * `now`: the widget's clock for the data (ms since the epoch). `clock`:
+   * a monotonic one for the slice budget (`performance.now` by default).
+   */
   constructor(
     bus: WidgetBus,
     config: WidgetConfig,
-    o: { now?: () => number; onChange?: (s: WidgetState) => void } = {},
+    o: { now?: () => number; clock?: () => number; onChange?: (s: WidgetState) => void } = {},
   ) {
     this.#bus = bus;
     this.#config = config;
     this.#now = o.now ?? Date.now;
+    this.#clock = o.clock ?? (() => performance.now());
     this.#onChange = o.onChange ?? (() => {});
     this.#buffer = new RawBuffer(config.topic.history);
   }
@@ -128,25 +167,56 @@ export class WidgetRunner {
     for (const u of this.#unsubscribe.splice(0)) u();
     if (this.#pending !== undefined) clearTimeout(this.#pending);
     this.#pending = undefined;
+    this.#drop();
   }
 
-  /** Reads the pipeline at `now`, for the view; the state carries the output. */
+  /**
+   * Reads the pipeline at `now`, for the view; the state carries the output.
+   * A read that fits in one slice (SLICE_MS) is in the returned state. A
+   * longer one goes on in later tasks and the finished output arrives through
+   * `onChange`; meanwhile the state keeps the last finished output.
+   */
   tick(): WidgetState {
     const now = this.#now();
     this.#buffer.evict(now);
-    if (this.#pipeline) {
-      this.#output = this.#pipeline.read(now);
-      const s = this.#state;
-      if (s.status === 'live' || s.status === 'respawn')
-        this.#state = { ...s, output: this.#output };
-    }
+    this.#target = now;
+    if (this.#pipeline && !this.#working) this.#slice(false);
     return this.#state;
+  }
+
+  /** One slice of work on the pipeline; queues the next while it isn't caught up. */
+  #slice(later: boolean): void {
+    const p = this.#pipeline;
+    if (!p) return;
+    const end = this.#clock() + SLICE_MS;
+    if (!p.advance(this.#target, () => this.#clock() >= end)) {
+      this.#working = true;
+      const generation = this.#generation;
+      nextTask(() => {
+        if (generation === this.#generation && this.#pipeline === p) this.#slice(true);
+      });
+      return;
+    }
+    this.#working = false;
+    this.#output = p.output();
+    const s = this.#state;
+    if (s.status === 'live' || s.status === 'respawn') {
+      this.#state = { ...s, output: this.#output };
+      if (later) this.#onChange(this.#state);
+    }
+  }
+
+  /** Forgets the work in flight: the pipeline is being replaced or dropped. */
+  #drop(): void {
+    this.#generation++;
+    this.#working = false;
   }
 
   #onSpec(spec: WidgetSpec | null): void {
     if (this.#pending !== undefined) clearTimeout(this.#pending);
     this.#pending = undefined;
     if (spec === null) {
+      this.#drop();
       this.#applied = undefined;
       this.#pipeline = undefined;
       this.#output = undefined;
@@ -189,6 +259,7 @@ export class WidgetRunner {
   #onSourceReset(): void {
     this.#buffer.clear();
     if (this.#applied === undefined) return;
+    this.#drop();
     this.#pipeline = pipeline(this.#applied, this.#config.topic);
     this.#output = undefined;
     const s = this.#state;
@@ -199,6 +270,7 @@ export class WidgetRunner {
     this.#pending = undefined;
     const p = pipeline(spec, this.#config.topic);
     this.#buffer.refill(p);
+    this.#drop();
     this.#applied = spec;
     this.#pipeline = p;
     this.#output = undefined;
