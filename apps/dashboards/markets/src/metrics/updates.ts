@@ -24,9 +24,14 @@ const WINDOW_MS = 1_000;
 
 const draws = new Map<string, { draws: number; at: number }>();
 const resumed = new Map<string, number>();
+/** The last minute of widget reports, for the comparison's fault figures (M3g decision 10). */
+const reports: { slot: string; n: number; ts: number }[] = [];
+const KEEP_REPORTS_MS = 60_000;
 buildMetrics.timings((t) => {
   if (t.draws !== undefined) draws.set(t.slot, { draws: t.draws, at: performance.now() });
   if (t.resumedAt !== undefined) resumed.set(t.slot, t.resumedAt);
+  reports.push({ slot: t.slot, n: (t.updates ?? 0) + (t.draws ?? 0), ts: t.ts });
+  while ((reports[0]?.ts ?? Infinity) < t.ts - KEEP_REPORTS_MS) reports.shift();
 });
 
 /** Per DOM-widget slot: whether its DOM changed since the last frame, and the frames it did. */
@@ -142,7 +147,39 @@ declare global {
     slotsWithData: () => number;
     /** The slot's last `resumedAt` (a canvas widget's first draw after a pause), epoch ms. */
     resumedAt: (slot: string) => number | null;
+    /**
+     * The renders and draws these slots reported (once a second, in their
+     * own code) with a report time in (from, to], epoch ms.
+     */
+    updatesIn: (slots: readonly string[], from: number, to: number) => number;
+    /**
+     * The longest time between two reports of any of these slots, over the
+     * reports in [from, to], epoch ms: about 1 s for a widget that kept
+     * running, longer for one whose thread stalled.
+     */
+    longestSilence: (slots: readonly string[], from: number, to: number) => number | null;
+    /** The time of the slot's first report after `after`, epoch ms, if there is one. */
+    firstReport: (slot: string, after: number) => number | null;
   }
 }
 window.slotsWithData = () => [...document.querySelectorAll('[data-slot]')].filter(hasData).length;
 window.resumedAt = (slot) => resumed.get(slot) ?? null;
+window.updatesIn = (slots, from, to) =>
+  reports
+    .filter((r) => slots.includes(r.slot) && r.ts > from && r.ts <= to)
+    .reduce((n, r) => n + r.n, 0);
+window.longestSilence = (slots, from, to) => {
+  let longest: number | null = null;
+  for (const slot of slots) {
+    const ts = reports
+      .filter((r) => r.slot === slot && r.ts >= from && r.ts <= to)
+      .map((r) => r.ts);
+    for (let i = 1; i < ts.length; i++) {
+      const gap = (ts[i] ?? 0) - (ts[i - 1] ?? 0);
+      if (longest === null || gap > longest) longest = gap;
+    }
+  }
+  return longest;
+};
+window.firstReport = (slot, after) =>
+  reports.find((r) => r.slot === slot && r.ts > after)?.ts ?? null;

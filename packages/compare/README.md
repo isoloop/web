@@ -5,7 +5,7 @@ The head-to-head comparison the dashboards share: the plant's since M3d, the mar
 | Export | What it is |
 | --- | --- |
 | `compare/pairs` | `runPairs(app)`: the command line, the interleaved rounds (A, B, A, B…, one page at a time), `run.json` and `summary.md` with the median gap B − A per round, its share of A and its spread. `summarize` and `readResults` are the summary on its own. |
-| `compare/probes` | the spec's readings from outside the page: `pageMetrics` (main thread), `processes`, `cpuOf` and `cpuDelta` (CPU per process), `pssMb` and `memory` (renderer PSS, before and after `gcAll`, a forced GC in the page and every worker). CPU and memory are Chromium only; memory is Linux only. |
+| `compare/probes` | the spec's readings from outside the page: `pageMetrics` (main thread), `processes`, `cpuOf` and `cpuDelta` (CPU per process), `pssMb` and `memory` (renderer PSS, before and after `gcAll`, a forced GC in the page and every worker). CPU and memory are Chromium only; memory is Linux only. `jsLoaded` (every engine): the JavaScript a context requested, its pages' and workers', each file once, sized from the build output, raw and gzipped. |
 | `compare/stopped` | how a run whose page stopped shows in a summary: `stoppedLabel`, `cellOr`. |
 
 ## Using it

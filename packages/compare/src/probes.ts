@@ -3,7 +3,9 @@
 // the page and every worker. CPU and memory are Chromium only (CDP), and
 // memory is Linux only.
 import { existsSync, readFileSync } from 'node:fs';
-import type { Browser, CDPSession } from '@playwright/test';
+import { join } from 'node:path';
+import { gzipSync } from 'node:zlib';
+import type { Browser, BrowserContext, CDPSession } from '@playwright/test';
 
 export type PageMetrics = Record<string, number>;
 
@@ -106,4 +108,36 @@ export async function memory(
   await gcAll(browser);
   await new Promise((r) => setTimeout(r, 1_000));
   return { pss, pssGc: pssMb(await pids()) };
+}
+
+export interface JsLoaded {
+  files: number;
+  bytes: number;
+  gzipBytes: number;
+}
+
+/**
+ * Watches the JavaScript a context requests, the page's and its workers', and
+ * returns a reading: each file once, sized from the build output in `dist`
+ * (its bytes, and gzipped, what a server would send). Every engine, since it
+ * reads the files and not the responses.
+ */
+export function jsLoaded(context: BrowserContext, dist: string): () => JsLoaded {
+  const paths = new Set<string>();
+  context.on('request', (r) => {
+    const path = new URL(r.url()).pathname;
+    if (path.endsWith('.js')) paths.add(path);
+  });
+  return () => {
+    const out: JsLoaded = { files: 0, bytes: 0, gzipBytes: 0 };
+    for (const path of paths) {
+      const file = join(dist, path);
+      if (!existsSync(file)) continue;
+      const b = readFileSync(file);
+      out.files++;
+      out.bytes += b.length;
+      out.gzipBytes += gzipSync(b).length;
+    }
+    return out;
+  };
 }

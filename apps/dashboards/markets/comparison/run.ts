@@ -5,6 +5,14 @@
 // what's the markets dashboard's: its projects, its load knob (the size) and
 // its figures. final/README.md has the bench server's command.
 //
+// M3g's federated comparison (federated/README.md) runs the React and Preact
+// builds with the alerts panel's faults in place of the price chart's:
+//
+//   COMPARE_FAULT=alerts node comparison/run.ts \
+//     --pair native-mixed=mixed:matched --extra mixed:teams --extra mixed:own \
+//     --sizes normal,heavy --rounds 5 --hold 0 \
+//     --engines chromium,firefox --out comparison/federated/results
+//
 //   node comparison/run.ts \
 //     --pair native=isoloop:one --pair native-workers=isoloop:matched \
 //     --extra isoloop:own --sizes normal,heavy --rounds 5 --hold 0 \
@@ -54,6 +62,23 @@ export const MARKETS: PairsApp = {
     { key: 'firstDataMs', label: 'First data', unit: ' ms' },
     { key: 'allWidgetsMs', label: 'All widgets with data', unit: ' ms' },
     { key: 'recoveryMs', label: 'Recovery after a 3 s block of the price chart', unit: ' ms' },
+    { key: 'jsGzKb', label: 'JS loaded, gzipped', unit: ' KB' },
+    {
+      key: 'blockOtherKeptPct',
+      label: 'Alerts panel blocked 3 s: the other widgets’ updates kept',
+      unit: '%',
+    },
+    {
+      key: 'blockOtherSilenceMs',
+      label: 'Alerts panel blocked 3 s: the other widgets’ longest silence',
+      unit: ' ms',
+    },
+    {
+      key: 'crashOtherKeptPct',
+      label: 'Alerts panel crashed: the other widgets’ updates kept',
+      unit: '%',
+    },
+    { key: 'crashBackMs', label: 'Alerts panel crashed: back after', unit: ' ms' },
   ],
 };
 

@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { cpuDelta, cpuOf, memory, pageMetrics, processes, pssMb } from 'compare/probes';
+import { cpuDelta, cpuOf, jsLoaded, memory, pageMetrics, processes, pssMb } from 'compare/probes';
 
 // The head-to-head comparison (M3f decisions 7 and 8): the native builds and
 // each Isoloop placement, at each size, one page at a time, on the engine of
@@ -32,13 +32,40 @@ import { cpuDelta, cpuOf, memory, pageMetrics, processes, pssMb } from 'compare/
 //   (`resumedAt`, reported in its timings). Markets sets no
 //   `heartbeat.killAfterMs`, so on Isoloop the blocked thread is waited out,
 //   not restarted, in every placement, as on the native builds.
+// - JS loaded: every JavaScript file the page and its workers requested, each
+//   once, sized from dist/ (gzipped, what a server would send).
+// - `COMPARE_FAULT=alerts` (M3g decision 10) replaces the price chart's fault
+//   with two on the alerts panel, which is the Preact team's in `/mixed` and
+//   `/native-mixed`; "the other team" is every other widget but the filters:
+//   - block for 3 s: the other team's renders and draws in the block's last
+//     2 s, as a share of the 2 s before (from the widgets' own reports, once a
+//     second), and the longest silence between two reports of any of them.
+//   - crash (a throw while rendering): the same share over the 2 s after it,
+//     and the time until the panel reports again, from its code restarted
+//     (none if not within 10 s, as on the native builds, which have no restart).
 //
 // CPU throttling is not used: CDP throttling slows the main thread but not
 // workers, so it would not be a like-for-like slowdown. The bench server pins
 // the run to fixed cores instead (comparison/final/README.md).
 const OUT = process.env['COMPARE_OUT'] ?? 'comparison-results';
 const SIZES = (process.env['COMPARE_SIZES'] ?? 'normal').split(',');
-const ALL = ['native', 'native-workers', 'isoloop:own', 'isoloop:matched', 'isoloop:one'];
+const ALL = [
+  'native',
+  'native-workers',
+  'isoloop:own',
+  'isoloop:matched',
+  'isoloop:one',
+  'native-mixed',
+  'mixed:matched',
+  'mixed:teams',
+  'mixed:own',
+];
+const FAULT = process.env['COMPARE_FAULT'] ?? 'price';
+/** The widgets the alerts faults watch: every one but the Preact team's two. */
+const OTHER_TEAM = (slots: string[]): string[] =>
+  slots.filter((s) => s !== 'alerts-panel' && s !== 'filters');
+const BLOCK_MS = 3_000;
+const DIST = new URL('../dist', import.meta.url).pathname;
 const CONFIGS = process.env['COMPARE_CONFIGS']?.split(',') ?? ALL;
 const RUNS = Number(process.env['COMPARE_RUNS'] ?? 1);
 const HOLD_MS = Number(process.env['COMPARE_HOLD_MS'] ?? 0);
@@ -88,6 +115,73 @@ async function recovered(page: Page, since: number, timeoutMs: number): Promise<
   return null;
 }
 
+/** Every slot on the page. */
+const slotsOf = (page: Page): Promise<string[]> =>
+  page
+    .locator('[data-slot]')
+    .evaluateAll((els) => els.map((e) => e.getAttribute('data-slot') ?? ''));
+
+const share = (during: number, before: number): number | null =>
+  before > 0 ? Math.round((during / before) * 100) : null;
+
+/** The alerts panel's two faults (`COMPARE_FAULT=alerts`): a 3 s block, then a crash. */
+async function alertsFaults(page: Page): Promise<Record<string, number | null>> {
+  const others = OTHER_TEAM(await slotsOf(page));
+  const panelSlot = panel(page);
+  await panelSlot.hover();
+  // Two reports of every widget before the block.
+  await page.waitForTimeout(2_500);
+  const blockAt = Date.now();
+  // From a timer, not awaited: on the native builds the click would wait the loop out.
+  await panelSlot
+    .locator('button[name="stress-block"]')
+    .evaluate((el: HTMLElement) => setTimeout(() => el.click(), 0));
+  // The block, then the reports that come after it.
+  await page.waitForTimeout(BLOCK_MS + 4_000);
+  const block = await page.evaluate(
+    ([slots, at, ms]) => ({
+      before: window.updatesIn(slots, at - 2_000, at),
+      during: window.updatesIn(slots, at + 1_000, at + ms),
+      silence: window.longestSilence(slots, at - 1_500, at + ms + 3_000),
+    }),
+    [others, blockAt, BLOCK_MS] as const,
+  );
+
+  await page.waitForTimeout(2_000);
+  const crashAt = Date.now();
+  await panelSlot.locator('button[name="stress-crash"]').click();
+  // Back: the panel reports again, from its code restarted. A report already
+  // on its way as the click landed is left out.
+  let backMs: number | null = null;
+  while (Date.now() < crashAt + 10_000) {
+    // oxlint-disable-next-line no-await-in-loop -- polling
+    const report = await page.evaluate(
+      ([since]) => window.firstReport('alerts-panel', since + 250),
+      [crashAt] as const,
+    );
+    if (report !== null) {
+      backMs = report - crashAt;
+      break;
+    }
+    // oxlint-disable-next-line no-await-in-loop -- polling
+    await page.waitForTimeout(100);
+  }
+  await page.waitForTimeout(Math.max(0, crashAt + 3_500 - Date.now()));
+  const crash = await page.evaluate(
+    ([slots, at]) => ({
+      before: window.updatesIn(slots, at - 2_000, at),
+      after: window.updatesIn(slots, at + 1_000, at + 3_000),
+    }),
+    [others, crashAt] as const,
+  );
+  return {
+    blockOtherKeptPct: share(block.during, block.before),
+    blockOtherSilenceMs: block.silence,
+    crashOtherKeptPct: share(crash.after, crash.before),
+    crashBackMs: backMs,
+  };
+}
+
 for (const size of SIZES) {
   for (let run = 1; run <= RUNS; run++) {
     for (const config of CONFIGS) {
@@ -112,6 +206,7 @@ for (const size of SIZES) {
           ...(baseURL === undefined ? {} : { baseURL }),
           viewport: VIEWPORT,
         });
+        const js = jsLoaded(context, DIST);
         const page = await context.newPage();
         const chromium = engine === 'chromium';
         const cdp = chromium ? await context.newCDPSession(page) : null;
@@ -179,17 +274,25 @@ for (const size of SIZES) {
             held = chromium ? await memory(browser) : null;
           }
 
-          // The fault: block the price chart for 3 s.
-          stage = 'fault';
-          const price = page.locator('[data-slot="price"]');
-          await price.hover();
-          const block = price.locator('button[name="stress-block"]');
-          const clicked = Date.now();
-          // Clicked from a timer, not awaited: on the native builds Playwright's
-          // click would wait the busy loop out.
-          await block.evaluate((el: HTMLElement) => setTimeout(() => el.click(), 0));
-          const recoveryMs = await recovered(page, clicked, 20_000);
-          await page.waitForTimeout(1_000);
+          const jsAtStart = js();
+          let recoveryMs: number | null = null;
+          let alerts: Record<string, number | null> = {};
+          if (FAULT === 'alerts') {
+            stage = 'fault';
+            alerts = await alertsFaults(page);
+          } else {
+            // The fault: block the price chart for 3 s.
+            stage = 'fault';
+            const price = page.locator('[data-slot="price"]');
+            await price.hover();
+            const block = price.locator('button[name="stress-block"]');
+            const clicked = Date.now();
+            // Clicked from a timer, not awaited: on the native builds Playwright's
+            // click would wait the busy loop out.
+            await block.evaluate((el: HTMLElement) => setTimeout(() => el.click(), 0));
+            recoveryMs = await recovered(page, clicked, 20_000);
+            await page.waitForTimeout(1_000);
+          }
 
           write({
             stopped: false,
@@ -215,6 +318,11 @@ for (const size of SIZES) {
             rendererPssHoldMb: held?.pss ?? null,
             rendererPssHoldGcMb: held?.pssGc ?? null,
             recoveryMs,
+            fault: FAULT,
+            ...alerts,
+            jsFiles: jsAtStart.files,
+            jsKb: Math.round(jsAtStart.bytes / 1024),
+            jsGzKb: Math.round(jsAtStart.gzipBytes / 1024),
             categories,
             bundle: await metric(page, 'bundle'),
           });
