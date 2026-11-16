@@ -29,11 +29,74 @@ export interface Pipeline {
   /** Takes a record from the source topic; records for another key or that fail a filter are dropped. */
   push(rec: Rec): void;
   /**
-   * The output at `now` (ms since the epoch). With `every`, it first takes
-   * the aggregate at each tick (multiples of `every`) since the last read, or,
-   * on the first read, since the oldest record, so a replayed history shows at once.
+   * The output at `now` (ms since the epoch), all at once: `advance` with no
+   * time limit, then `output`. With `every`, it first takes the aggregate at
+   * each tick (multiples of `every`) since the last read, or, on the first
+   * read, since the oldest record, so a replayed history shows at once.
    */
   read(now: number): Output;
+  /**
+   * Works toward the output at `now` in units (one aggregate, for one group
+   * at one tick), asking `expired` after each; true once the output is up to
+   * date for `now`. A caller that yields between calls keeps its thread
+   * responsive however long the whole read takes: a widget does, since a
+   * worker that blocks past the heartbeat's `killAfterMs` counts as hung.
+   * Records pushed between calls count from the next tick on, as between reads.
+   */
+  advance(now: number, expired: () => boolean): boolean;
+  /** The last finished output, or undefined before the first. */
+  output(): Output | undefined;
+}
+
+/** One read's work, yielding between units; it ends by setting the output. */
+type Work = Generator<undefined, void, undefined>;
+
+/**
+ * A read's plan: work that yields between units, or nothing when the read is
+ * one unit and it set the output already.
+ */
+type Plan = (now: number, done: (o: Output) => void) => Work | undefined;
+
+/**
+ * The shared driver over `plan`: runs the current read's work, then plans the
+ * next one toward the newest `now` asked for.
+ */
+function driven(kind: OutputKind, push: (rec: Rec) => void, plan: Plan): Pipeline {
+  let out: Output | undefined;
+  let work: Work | undefined;
+  let plannedFor: number | undefined;
+  const done = (o: Output): void => {
+    out = o;
+  };
+  const advance = (now: number, expired: () => boolean): boolean => {
+    for (;;) {
+      if (work === undefined) {
+        if (plannedFor === now) return true;
+        plannedFor = now;
+        work = plan(now, done);
+        if (work === undefined) continue;
+      }
+      for (;;) {
+        if (work.next().done === true) {
+          work = undefined;
+          break;
+        }
+        if (expired()) return false;
+      }
+      if (expired()) return plannedFor === now;
+    }
+  };
+  return {
+    kind,
+    push,
+    advance,
+    output: () => out,
+    read(now) {
+      advance(now, () => false);
+      if (out === undefined) throw new Error('a pipeline read ended without an output');
+      return out;
+    },
+  };
 }
 
 function label(topic: CatalogTopic, field: string): string {
@@ -82,22 +145,19 @@ export function pipeline(spec: WidgetSpec, topic: CatalogTopic): Pipeline {
         ...(f.unit === undefined ? {} : { unit: f.unit }),
       })),
     ];
-    return {
-      kind,
-      push,
-      read(now) {
-        const recs = window.at(now);
-        window.evict(now);
-        const rows = recs
-          .slice(-ROWS_LIMIT)
-          .toReversed()
-          .map((r) => {
-            const cells = columns.map((c) => cell(fieldValue(r, c.name)));
-            return r.key === undefined ? { t: r.t, cells } : { key: r.key, t: r.t, cells };
-          });
-        return { kind: 'rows', columns, rows };
-      },
-    };
+    return driven(kind, push, (now, done) => {
+      const recs = window.at(now);
+      window.evict(now);
+      const rows = recs
+        .slice(-ROWS_LIMIT)
+        .toReversed()
+        .map((r) => {
+          const cells = columns.map((c) => cell(fieldValue(r, c.name)));
+          return r.key === undefined ? { t: r.t, cells } : { key: r.key, t: r.t, cells };
+        });
+      done({ kind: 'rows', columns, rows });
+      return undefined;
+    });
   }
 
   const { fn, field, p, every } = agg;
@@ -135,45 +195,49 @@ export function pipeline(spec: WidgetSpec, topic: CatalogTopic): Pipeline {
 
   if (groupField === undefined) {
     if (every === undefined) {
-      return {
-        kind,
-        push,
-        read(now) {
-          const value = at(window.at(now));
-          window.evict(now);
-          return { kind: 'scalar', label: aggLabel, ...unit, t: now, value };
-        },
-      };
+      return driven(kind, push, (now, done) => {
+        const value = at(window.at(now));
+        window.evict(now);
+        done({ kind: 'scalar', label: aggLabel, ...unit, t: now, value });
+        return undefined;
+      });
     }
     let points: Point[] = [];
-    return {
-      kind,
-      push,
-      read(now) {
-        for (const t of ticks(now, every)) points.push({ t, v: at(window.at(t)) });
-        if (points.length > SERIES_POINTS) points = points.slice(-SERIES_POINTS);
-        if (lastTick !== undefined) window.evict(lastTick);
-        return { kind: 'series', label: aggLabel, ...unit, points: [...points] };
-      },
-    };
+    return driven(kind, push, function* seriesTo(now, done) {
+      for (const t of ticks(now, every)) {
+        points.push({ t, v: at(window.at(t)) });
+        yield;
+      }
+      if (points.length > SERIES_POINTS) points = points.slice(-SERIES_POINTS);
+      if (lastTick !== undefined) window.evict(lastTick);
+      done({ kind: 'series', label: aggLabel, ...unit, points: [...points] });
+    });
   }
 
   // A grid: one row per group, one column per tick (or just now).
+  const by: string = groupField;
   let times: number[] = [];
   let rows = new Map<string, (number | null)[]>();
-  const column = (t: number): void => {
-    const groups = groupBy(window.at(t), groupField, GRID_GROUPS);
+  // One column, one group's aggregate per unit; the rows change only once
+  // every group's value is in, so an output never shows half a column.
+  function* column(t: number): Work {
+    const groups = groupBy(window.at(t), by, GRID_GROUPS);
+    const values = new Map<string, number | null>();
     for (const [g, recs] of groups) {
+      values.set(g, at(recs));
+      yield;
+    }
+    for (const [g, v] of values) {
       if (!rows.has(g) && rows.size < GRID_GROUPS)
         rows.set(
           g,
           times.map(() => null),
         );
-      rows.get(g)?.push(at(recs));
+      rows.get(g)?.push(v);
     }
     times.push(t);
-    for (const [g, values] of rows) if (!groups.has(g)) values.push(null);
-  };
+    for (const [g, list] of rows) if (!groups.has(g)) list.push(null);
+  }
   const grid = (): Output => {
     const groups = [...rows.keys()].toSorted();
     return {
@@ -186,29 +250,26 @@ export function pipeline(spec: WidgetSpec, topic: CatalogTopic): Pipeline {
       values: groups.map((g) => (rows.get(g) ?? []).slice()),
     };
   };
-  return {
-    kind,
-    push,
-    read(now) {
-      if (every === undefined) {
-        times = [];
-        rows = new Map();
-        column(now);
-        window.evict(now);
-        return grid();
+  return driven(kind, push, function* gridTo(now, done) {
+    if (every === undefined) {
+      times = [];
+      rows = new Map();
+      yield* column(now);
+      window.evict(now);
+      done(grid());
+      return;
+    }
+    for (const t of ticks(now, every)) yield* column(t);
+    if (times.length > SERIES_POINTS) {
+      const drop = times.length - SERIES_POINTS;
+      times = times.slice(drop);
+      for (const [g, values] of rows) {
+        const kept = values.slice(drop);
+        if (kept.every((v) => v === null)) rows.delete(g);
+        else rows.set(g, kept);
       }
-      for (const t of ticks(now, every)) column(t);
-      if (times.length > SERIES_POINTS) {
-        const drop = times.length - SERIES_POINTS;
-        times = times.slice(drop);
-        for (const [g, values] of rows) {
-          const kept = values.slice(drop);
-          if (kept.every((v) => v === null)) rows.delete(g);
-          else rows.set(g, kept);
-        }
-      }
-      if (lastTick !== undefined) window.evict(lastTick);
-      return grid();
-    },
-  };
+    }
+    if (lastTick !== undefined) window.evict(lastTick);
+    done(grid());
+  });
 }
