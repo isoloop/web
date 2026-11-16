@@ -225,7 +225,9 @@ test.describe('isoloop', () => {
     await open(page, 'isoloop');
     await slot(page, 'btc-volume').locator('[data-action="edit"]').click();
     await expect(field(page, 'pool')).toHaveValue('pool-1');
+    // "Automatic" first (M3h), then the pools the page has, then "Create new".
     await expect(field(page, 'pool').locator('option')).toHaveText([
+      /^Automatic/,
       /^Pool 1 · 3 widgets/,
       /^Pool 2 · 3 widgets/,
       'Create new',
