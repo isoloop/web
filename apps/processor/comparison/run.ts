@@ -8,7 +8,8 @@
 //   node comparison/run.ts \
 //     --pair isoloop:own=isoloop:balancer --pair isoloop:one=isoloop:balancer \
 //     --pair isoloop:one-off=isoloop:one --mixes normal,faults --rounds 5 \
-//     --hold 0 --engines chromium,firefox --out comparison/final/results
+//     --hold 0 --warm 20 --window 20 --engines chromium,firefox \
+//     --out comparison/final/results
 //
 // `COMPARE_RATE` sets the generator's files per second (default 50).
 import { resolve } from 'node:path';
