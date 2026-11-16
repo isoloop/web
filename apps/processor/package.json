@@ -8,7 +8,8 @@
     "build": "vite build --configLoader runner",
     "preview": "vite preview --configLoader runner",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "test": "vitest run"
   },
   "dependencies": {
     "@isoloop/balancer": "catalog:isoloop",
@@ -27,6 +28,7 @@
     "@types/react-dom": "catalog:react",
     "typescript": "catalog:",
     "ui": "workspace:*",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }
