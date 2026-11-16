@@ -91,3 +91,68 @@ declare global {
     aggregatesSeen: number;
   }
 }
+
+// M3g decision 7: `teams`, on `/mixed` only. The data on its own workers, as
+// in `matched`, and a pool per team: the React widgets', the Preact widgets'.
+const teams = (size: string): string => `/mixed/?size=${size}&speed=1&placement=teams`;
+
+test('teams: each team’s widgets share a pool of their own, the data its own workers', async ({
+  page,
+}) => {
+  await page.goto(teams('lite'));
+  await expect(page.locator('.build')).toHaveAttribute('data-placement', 'teams');
+  await expect(page.locator('.page > .description')).toContainText(
+    "A blocked widget stalls its own team's widgets only.",
+  );
+  // Lite: the replay, the aggregator and the alerts, plus the two teams' pools.
+  await expect(workers(page)).toHaveText('5', { timeout: 15_000 });
+  const pools = await page.evaluate(() =>
+    Object.fromEntries(window.kernel.isolates().map((i) => [i.id, i.pool ?? null])),
+  );
+  expect(pools['price']).toBe('react');
+  expect(pools['filters']).toBe('preact');
+  expect(pools['alerts-panel']).toBe('preact');
+  expect(pools['replay']).toBe(null);
+  await expect(page.locator('[data-slot="price"] [data-head="where"]')).toHaveText(
+    'pool react · React',
+  );
+  await expect(page.locator('[data-slot="filters"] [data-head="where"]')).toHaveText(
+    'pool preact · Preact',
+  );
+  await expect(page.locator('[data-slot="trades"] .trade').first()).toBeVisible({
+    timeout: 15_000,
+  });
+  const nav = page.getByRole('navigation', { name: 'Placement' });
+  await expect(nav.locator('[aria-current="page"]')).toHaveText('teams');
+});
+
+test('teams at Normal: 8 workers', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Worker counts are the same in every engine');
+  await page.goto(teams('normal'));
+  await expect(workers(page)).toHaveText('8', { timeout: 20_000 });
+});
+
+test('teams: a blocked Preact widget leaves the React team’s widgets updating', async ({
+  page,
+}) => {
+  await page.goto(teams('lite'));
+  const trades = page.locator('[data-slot="trades"] [data-head="updates"]');
+  const filters = page.locator('[data-slot="filters"] [data-head="updates"]');
+  const n = async (l: typeof trades): Promise<number> =>
+    Number((await l.innerText()).replace(/\D+/g, '') || 0);
+  await expect.poll(() => n(trades), { timeout: 15_000 }).toBeGreaterThan(0);
+  await page.locator('[data-slot="alerts-panel"] button[name="stress-block"]').click();
+  // The filters share the blocked pool; the trades table is on the React team's.
+  await expect(filters).toHaveText('0 updates/s', { timeout: 2_900 });
+  expect(await n(trades)).toBeGreaterThan(0);
+});
+
+test('teams is offered on /mixed only', async ({ page }) => {
+  await page.goto('/isoloop/?size=lite&speed=1&placement=teams');
+  // Not a placement of the React build: it falls back to the default.
+  await expect(page.locator('.build')).toHaveAttribute('data-placement', 'own');
+  const nav = page.getByRole('navigation', { name: 'Placement' });
+  await expect(nav.getByText('teams')).toHaveCount(0);
+  await page.goto('/mixed/?size=lite&speed=1');
+  await expect(nav.getByRole('link', { name: 'teams' })).toBeVisible();
+});

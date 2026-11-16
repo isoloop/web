@@ -12,8 +12,9 @@ The Isoloop builds place their isolates with `?placement=`:
 - `own`: a worker per isolate, the default.
 - `matched`: native + workers' data workers, plus one pool for every widget.
 - `one`: everything in one pool.
+- `teams`, on `/mixed` only: the data on its own workers, plus a pool per team, one for the React widgets and one for the Preact ones. A blocked widget stalls its own team's widgets only.
 
-Live at **https://isoloop.dev/examples/dashboards/markets/** (`?size=lite|normal|heavy`; `?placement=own|matched|one` on the Isoloop builds).
+Live at **https://isoloop.dev/examples/dashboards/markets/** (`?size=lite|normal|heavy`; `?placement=own|matched|one` on the Isoloop builds, `teams` on `/mixed`).
 
 ## What was measured
 

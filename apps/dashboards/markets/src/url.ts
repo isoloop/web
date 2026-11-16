@@ -73,16 +73,24 @@ export function switchHref(other: string, placement?: PlacementName): string {
 
 /**
  * Where the Isoloop builds run each isolate (M3f decision 3):
- * `?placement=own|matched|one`. `own`, a worker per isolate, is the default:
- * markets is the containment example, and in a pool a block stalls every
- * member. The native builds ignore it.
+ * `?placement=own|matched|one`, and `teams` on `/mixed` only (M3g decision 7).
+ * `own`, a worker per isolate, is the default: markets is the containment
+ * example, and in a pool a block stalls every member. The native builds
+ * ignore it.
  */
-export const PLACEMENTS = ['own', 'matched', 'one'] as const;
+export const PLACEMENTS = ['own', 'matched', 'one', 'teams'] as const;
 export type PlacementName = (typeof PLACEMENTS)[number];
 export const DEFAULT_PLACEMENT: PlacementName = 'own';
 
-export const placementFrom = (params: URLSearchParams): PlacementName =>
-  PLACEMENTS.find((p) => p === params.get('placement')) ?? DEFAULT_PLACEMENT;
+/** The placements a build offers: `teams` needs two teams, so only `/mixed` has it. */
+export const placementsFor = (build: string | undefined): readonly PlacementName[] =>
+  build === 'mixed' ? PLACEMENTS : PLACEMENTS.filter((p) => p !== 'teams');
+
+export const placementFrom = (
+  params: URLSearchParams,
+  build: string | undefined = import.meta.env.MARKETS_BUILD,
+): PlacementName =>
+  placementsFor(build).find((p) => p === params.get('placement')) ?? DEFAULT_PLACEMENT;
 
 /** The current page's URL in another placement: the same settings, a fresh replay. */
 export function placementHref(p: PlacementName, search: string): string {

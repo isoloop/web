@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filtersFrom, placementFrom, placementHref, replayConfig } from './url';
+import { filtersFrom, placementFrom, placementHref, placementsFor, replayConfig } from './url';
 
 describe('replayConfig', () => {
   it('reads the replay settings, with defaults', () => {
@@ -39,6 +39,13 @@ describe('placementFrom', () => {
     expect(placementFrom(new URLSearchParams('placement=matched'))).toBe('matched');
     expect(placementFrom(new URLSearchParams('placement=one'))).toBe('one');
     expect(placementFrom(new URLSearchParams('placement=split'))).toBe('own');
+  });
+
+  it('reads teams on /mixed only', () => {
+    expect(placementFrom(new URLSearchParams('placement=teams'), 'mixed')).toBe('teams');
+    expect(placementFrom(new URLSearchParams('placement=teams'), 'isoloop')).toBe('own');
+    expect(placementsFor('mixed')).toContain('teams');
+    expect(placementsFor('isoloop')).not.toContain('teams');
   });
 
   it("builds another placement's URL, without the replay position", () => {
