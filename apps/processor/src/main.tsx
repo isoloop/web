@@ -21,7 +21,7 @@ const kernel = createKernel({
   routing: false,
 });
 
-/** The balancer's worker cap: its default, made visible on the page. */
+/** The balancer's own allowance of pools: its default, made visible on the page. */
 const maxWorkers = Math.max(2, (navigator.hardwareConcurrency || 4) - 2);
 /** Measured loads, kept for the page's life: the balancer reads and writes them. */
 const loads = new Map<string, number>();

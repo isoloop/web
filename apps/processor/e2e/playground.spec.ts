@@ -41,7 +41,23 @@ test('a task that blocks its pool goes to quarantine', async ({ page }) => {
   await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'quarantine', {
     timeout: 15_000,
   });
+  // The kernel's beat names the culprit, so nothing else moves (no bisect).
+  await expect(page.locator('.log li[data-kind="bisect"]')).toHaveCount(0);
   await expect(page.locator('.log li').first()).toContainText(heavy);
+});
+
+test('a blocked task leaves quarantine once it has been steady for 30 s', async ({ page }) => {
+  test.setTimeout(90_000);
+  const heavy = await add(page, 30);
+  await add(page, 5);
+  await page.waitForTimeout(1_500);
+  await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
+  await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'quarantine', {
+    timeout: 15_000,
+  });
+  await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'pool', { timeout: 50_000 });
+  await expect(page.locator('.log li').first()).toContainText(heavy);
+  await expect(page.locator('.log li').first().locator('.badge')).toHaveText('steady again');
 });
 
 test('a task that crashes goes to quarantine', async ({ page }) => {
@@ -52,17 +68,19 @@ test('a task that crashes goes to quarantine', async ({ page }) => {
   await expect(page.locator('.log')).toContainText(`${a} crashed`);
 });
 
-// Not yet: with the dial up, the pool saturates (its tasks' busy time adds up
-// to a whole core) but a task that yields every 10 ms keeps the worker's lag
-// low, so neither the spike nor the sustained trigger fires and nothing moves.
-// The balancer has no trigger on a pool's load; see the M3h report.
-test.fixme('a task turned up to 90 % is separated within about 5 s', async ({ page }) => {
+// The pool fills (its tasks' busy time adds up to a whole core) while each
+// task yields every 10 ms, so the lag stays low: the full-pool trigger (80 %
+// of a core over 3 s) moves the heaviest out.
+test('a task turned up to 90 % is separated within about 5 s', async ({ page }) => {
   await page.getByRole('button', { name: 'Add 5 light tasks' }).click();
   await expect(page.locator('li.card[data-state="running"]')).toHaveCount(5, { timeout: 15_000 });
   await page.getByRole('slider', { name: 'Task 3 CPU' }).fill('90');
   await expect(columnOf(page, 'task-3')).not.toHaveAttribute('data-pool', 'balancer-1', {
     timeout: 8_000,
   });
+  await expect(page.locator('.log li').first()).toContainText('task-3');
+  // The light ones stay together.
+  await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(4);
 });
 
 for (const mode of ['own', 'one'] as const) {

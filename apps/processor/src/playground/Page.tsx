@@ -61,9 +61,10 @@ export function PlaygroundPage({ playground }: { playground: Playground }): Reac
         <h1>Balancer playground</h1>
         <p>
           Each task is a headless isolate that keeps a share of one core busy. Add some, turn a dial
-          up, and watch the balancer: it reads every worker’s heartbeat, moves a task out of a pool
-          that stays over {SUSTAINED_MS} ms of lag, sends one that blocks past {SPIKE_MS} ms to
-          quarantine, and lets it back once it has been steady for 30 s.
+          up, and watch the balancer. It reads every worker’s heartbeat and moves the heaviest task
+          out of a pool that is full (its tasks add up to 80 % of a core) or stays over{' '}
+          {SUSTAINED_MS} ms of lag for 3 s. A task that blocks its loop past {SPIKE_MS} ms goes to
+          quarantine, and comes back once it has been quiet for 30 s.
         </p>
       </section>
 
@@ -126,9 +127,9 @@ export function PlaygroundPage({ playground }: { playground: Playground }): Reac
         <span
           className="chip mono"
           data-testid="workers"
-          title="Workers on the page (bus included) / the balancer's cap"
+          title="Workers on the page (bus included); the balancer's pools against its allowance (the first quarantine is on top)"
         >
-          workers {snap.workers}/{snap.maxWorkers}
+          workers {snap.workers} · balancer pools {snap.balancerPools}/{snap.maxWorkers}
         </span>
       </section>
 

@@ -48,7 +48,10 @@ export type Snapshot = {
   mode: Mode;
   chunkMs: number;
   columns: ColumnView[];
+  /** Every worker on the page, the bus included. */
   workers: number;
+  /** The balancer's own pools: its allowance counts these (the first quarantine is on top). */
+  balancerPools: number;
   maxWorkers: number;
   log: LogEntry[];
   count: number;
@@ -91,6 +94,25 @@ export class Playground {
     this.#balancer.on('move', (e) => {
       this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
       this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`);
+    });
+    // Every heartbeat as it arrives (ADR 0017): each task's busy time, and
+    // each worker's lag once per beat (a pool's members share one beat).
+    this.#kernel.on('isolate:beat', (e) => {
+      if (!this.#dials.has(e.id)) return;
+      const b = this.#beats.get(e.id);
+      if (b) {
+        b.beats.push({ at: e.at, busy: e.busyMs ?? 0, dur: e.at - b.last });
+        if (b.beats.length > KEEP) b.beats.shift();
+        b.last = e.at;
+      } else this.#beats.set(e.id, { last: e.at, beats: [] });
+      const key = e.pool ?? e.id;
+      const l = this.#lags.get(key) ?? { last: -1, lags: [] };
+      if (e.at !== l.last) {
+        l.lags.push(e.lagMs);
+        if (l.lags.length > KEEP) l.lags.shift();
+        l.last = e.at;
+      }
+      this.#lags.set(key, l);
     });
     this.#kernel.on('isolate:crash', (e) => {
       if (!this.#dials.has(e.id)) return;
@@ -161,26 +183,6 @@ export class Playground {
     const byId = new Map(isolates.map((i) => [i.id, i]));
     const placements = new Map(this.#balancer.placements().map((p) => [p.id, p]));
 
-    // Beats: each task's busy time, and each worker's lag, once per beat.
-    for (const i of isolates) {
-      if (!this.#dials.has(i.id) || i.state !== 'running') continue;
-      const b = this.#beats.get(i.id) ?? { last: i.lastBeatAt, beats: [] };
-      if (i.lastBeatAt !== b.last) {
-        b.beats.push({ at: i.lastBeatAt, busy: i.busyMs ?? 0, dur: i.lastBeatAt - b.last });
-        if (b.beats.length > KEEP) b.beats.shift();
-        b.last = i.lastBeatAt;
-      }
-      this.#beats.set(i.id, b);
-      const key = i.pool ?? i.id;
-      const l = this.#lags.get(key) ?? { last: -1, lags: [] };
-      if (i.lastBeatAt !== l.last) {
-        l.lags.push(i.lagMs);
-        if (l.lags.length > KEEP) l.lags.shift();
-        l.last = i.lastBeatAt;
-      }
-      this.#lags.set(key, l);
-    }
-
     const columns = new Map<string, ColumnView>();
     const column = (key: string): ColumnView => {
       let c = columns.get(key);
@@ -221,12 +223,17 @@ export class Playground {
     }
 
     const live = isolates.filter((i) => i.pool === undefined && LIVE.has(i.state)).length;
-    const pools = this.#kernel.pools().filter((p) => p.running).length;
+    const running = this.#kernel.pools().filter((p) => p.running);
+    const pools = running.length;
+    const balancerPools = running.filter(
+      (p) => p.name.startsWith('balancer-') && p.name !== 'balancer-quarantine-1',
+    ).length;
     return {
       mode: this.#mode,
       chunkMs: this.#chunkMs,
       columns: [...columns.values()].toSorted((a, b) => order(a.key, b.key)),
       workers: 1 + live + pools,
+      balancerPools,
       maxWorkers: this.#maxWorkers,
       log: this.#log.slice(-40).toReversed(),
       count: this.#dials.size,

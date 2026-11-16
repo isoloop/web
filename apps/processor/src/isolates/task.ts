@@ -41,23 +41,37 @@ export default defineIsolate({
       { from: 'latest' },
     );
 
-    // Rests shorter than a timer's 4 ms floor go through a message port.
+    // A rest shorter than a timer's 4 ms floor is owed: the loop turns
+    // through a message port at once, and the rests add up until one timer
+    // can take them, so the share stays `load` %.
     const { port1, port2 } = new MessageChannel();
+    let owed = 0;
+    let stopped = false;
     const step = (): void => {
+      if (stopped) return;
       if (load <= 0) {
+        owed = 0;
         setTimeout(step, 100);
         return;
       }
       sink += spin(chunkMs);
-      const rest = load >= 100 ? 0 : chunkMs * (100 / load - 1);
-      if (rest < 4) port2.postMessage(0);
-      else setTimeout(step, rest);
+      owed += load >= 100 ? 0 : chunkMs * (100 / load - 1);
+      if (owed < 4) {
+        port2.postMessage(0);
+        return;
+      }
+      setTimeout(step, owed);
+      owed = 0;
     };
     port1.addEventListener('message', step);
     port1.start();
     step();
-    // Keep the result observable, so the work isn't optimised away.
+    // In a pool the worker outlives a stopped member, and so would this
+    // loop: stop it here. (Keeping `sink` observable, so the work isn't
+    // optimised away.)
     ctx.onShutdown(() => {
+      stopped = true;
+      port1.close();
       if (sink === -1) console.log(sink);
     });
   },
