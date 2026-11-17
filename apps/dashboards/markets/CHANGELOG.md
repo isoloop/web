@@ -1,5 +1,11 @@
 # markets
 
+## 0.6.1
+
+### Patch Changes
+
+- cb2f44e: The WebKit typing checks at Heavy are reported, not expected to fail. With the widgets' work in 10 ms slices (web#126), they passed in the markets-v0.6.0 release run (medians 104–240 ms against 400 ms on the CI runner, run 44118384318), and because they were marked expected to fail, the passes counted as failures and stopped that release from deploying.
+
 ## 0.6.0
 
 ### Minor Changes
