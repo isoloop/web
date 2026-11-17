@@ -1,0 +1,37 @@
+name: Changeset
+
+# A pull request that changes an app or a shared package carries a changeset
+# (ADR 0004): one file in .changeset/ for the app changelogs. Internal-only
+# changes (tests, CI, refactors nobody sees) take the `no-changeset` label.
+# Dependabot's PRs are exempt: they change versions, not behaviour.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  changeset:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'no-changeset') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Require a changeset for app and shared-package changes
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          changed=$(git diff --name-only "$BASE"...HEAD)
+          if ! printf '%s\n' "$changed" | grep -qE '^(apps/|packages/)'; then
+            echo "No app or shared-package files changed: no changeset needed."
+            exit 0
+          fi
+          added=$(git diff --name-only --diff-filter=A "$BASE"...HEAD -- .changeset | grep -E '^\.changeset/[^/]+\.md$' | grep -v '^\.changeset/README\.md$' || true)
+          if [ -n "$added" ]; then
+            echo "Changeset: $added"
+            exit 0
+          fi
+          echo "::error::This PR changes apps/ or packages/ but adds no changeset. Run \`pnpm changeset\`, or add the \`no-changeset\` label if the change is internal-only (tests, CI, refactors nobody sees)."
+          exit 1
