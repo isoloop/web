@@ -163,7 +163,7 @@ export interface Changelog {
   library: { version: string; entries: Entry[] }[];
   /** Library packages with no released version yet. */
   libraryUnreleased: string[];
-  /** The apps' releases, one per tag, newest first by the tag's date. */
+  /** The apps' releases, one per tag, newest first by when the tag was made. */
   apps: { tag: string; source: string; version: string; date?: string; entries: Entry[] }[];
   /** Apps with no version in their changelog yet. */
   appsUnreleased: string[];
@@ -172,14 +172,22 @@ export interface Changelog {
 const LIBRARY_BLOB = 'https://github.com/isoloop/isoloop/blob';
 const WEB_BLOB = 'https://github.com/isoloop/web/blob/main';
 
-function tagDate(webRoot: string, tag: string): string | undefined {
+/**
+ * When a tag was made: the tag's own date for an annotated tag, its commit's
+ * for a lightweight one. `date` is shown; `at` (UTC ms) orders tags made the
+ * same day.
+ */
+function tagDate(webRoot: string, tag: string): { date: string; at: number } | undefined {
   try {
-    const out = execFileSync('git', ['log', '-1', '--format=%cs', `refs/tags/${tag}`], {
-      cwd: webRoot,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : undefined;
+    const out = execFileSync(
+      'git',
+      ['for-each-ref', '--format=%(creatordate:iso-strict)', `refs/tags/${tag}`],
+      { cwd: webRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    ).trim();
+    const at = Date.parse(out);
+    return /^\d{4}-\d{2}-\d{2}T/.test(out) && !Number.isNaN(at)
+      ? { date: out.slice(0, 10), at }
+      : undefined;
   } catch {
     return undefined;
   }
@@ -254,6 +262,7 @@ export function loadChangelog(
 
   // The apps: one release per tag, dated by the tag.
   const apps: Changelog['apps'] = [];
+  const tagAt = new Map<string, number>();
   const appsUnreleased: string[] = [];
   for (const dir of appFolders(webRoot)) {
     const name = nameOf(readFileSync(join(webRoot, dir, 'package.json'), 'utf8')).name ?? dir;
@@ -262,28 +271,31 @@ export function loadChangelog(
     if (releases.length === 0) appsUnreleased.push(name);
     for (const r of releases) {
       const tag = `${name}-v${r.version}`;
-      const date = tagDate(webRoot, tag);
+      const made = tagDate(webRoot, tag);
+      if (made) tagAt.set(tag, made.at);
       apps.push({
         tag,
         source: name,
         version: r.version,
-        ...(date ? { date } : {}),
+        ...(made ? { date: made.date } : {}),
         entries: r.groups.flatMap((g) =>
           g.entries.map((blocks) => ({ source: name, kind: g.kind, blocks })),
         ),
       });
     }
   }
-  const appReleases = apps.toSorted((a, b) =>
-    a.date && b.date
-      ? b.date.localeCompare(a.date)
-      : a.date
+  const appReleases = apps.toSorted((a, b) => {
+    const x = tagAt.get(a.tag);
+    const y = tagAt.get(b.tag);
+    return x !== undefined && y !== undefined
+      ? y - x
+      : x !== undefined
         ? -1
-        : b.date
+        : y !== undefined
           ? 1
           : a.source === b.source
             ? newestFirst(a.version, b.version)
-            : a.source.localeCompare(b.source),
-  );
+            : a.source.localeCompare(b.source);
+  });
   return { library: libraryReleases, libraryUnreleased, apps: appReleases, appsUnreleased };
 }
