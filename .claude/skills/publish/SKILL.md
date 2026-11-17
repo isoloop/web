@@ -19,7 +19,7 @@ Go through every place below and decide, for each, *changes* or *unaffected*:
 
 | Kind of change | Where it goes |
 | --- | --- |
-| A capability or behaviour change | `/features/`: the feature entries (`apps/site/content/features/` once they exist; until then the features in `apps/site/src/copy.ts`), and the features strip on the landing page |
+| A capability or behaviour change | `/features/`: the feature's entry in `apps/site/content/features/<id>.json` (its strip line, section text, `since` and `proof`), which also feeds the landing page's strip; the demo's own labels stay in `apps/site/src/copy.ts` |
 | A new example or app | its `example.json` and screenshot; the landing page's examples section |
 | New or changed measurements | the results tables on the landing page and the example's results, each figure with device, build and tag |
 | A change to how Isoloop works inside | `/how-it-works/` and the diagrams (redrawn in `isoloop/isoloop`, then the pin in `apps/site/library.lock` bumped) |
