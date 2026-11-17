@@ -15,6 +15,7 @@ Until the site's first tag (`site-v0.1.0`), [isoloop.dev](https://isoloop.dev/) 
 | [`apps/basic`](apps/basic) | The smallest example: four vanilla isolates on three event loops, A and B on their own workers, C and D sharing a pool. Block or crash any of them; a pool is a unit of failure. It's embedded on the landing page. [Live](https://isoloop.dev/examples/basic/) |
 | [`apps/dashboards/markets`](apps/dashboards/markets) | A backend-less markets dashboard: public exchange feeds, cross-market aggregates and alerts, all in the visitor's tab. One code base, six builds (native and Isoloop, each with React and with Preact; native + workers with React; a mixed React and Preact Isoloop build), three Isoloop placements (`own`, `matched`, `one`), in Lite, Normal and Heavy sizes, with live metrics. [Live](https://isoloop.dev/examples/dashboards/markets/) |
 | [`apps/dashboards/plant`](apps/dashboards/plant) | A telemetry dashboard for a fictional plant of eight machines: 72 widgets on seeded high-rate sensor data. Three builds (native, native with a data worker per machine, Isoloop), and placements of the Isoloop build's isolates in workers and pools. [Live](https://isoloop.dev/examples/dashboards/plant/) |
+| [`apps/processor`](apps/processor) | Background work as headless isolates, placed by `@isoloop/balancer`. The Playground: add tasks, set each one's CPU, block or crash it, and watch the balancer move it between worker pools. The File processor: groups of processors share a seeded stream of synthetic files through the bus's consumer groups, measured on a worker each, in one pool and with the balancer ([results](apps/processor/comparison/README.md)). [Live](https://isoloop.dev/examples/processor/) |
 
 ## Browser support
 
@@ -36,6 +37,7 @@ pnpm install
 pnpm check            # format, lint, typecheck, unit tests
 pnpm e2e              # Playwright, all three engines
 pnpm --filter markets dev
+pnpm --filter processor dev   # the Playground; the File processor at /files/
 ```
 
 Until Isoloop 0.1, the apps use `next` prereleases of `@isoloop/*`: one version for every package, set in `pnpm-workspace.yaml` (`catalogs.isoloop`). To move to a newer one, change it there and run `pnpm install`.
