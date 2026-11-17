@@ -32,7 +32,7 @@ async function watch(page: Page): Promise<() => Promise<string[]>> {
   };
 }
 
-const PAGES = ['/', '/features/', '/how-it-works/', '/examples/', '/__specimens/'];
+const PAGES = ['/', '/features/', '/how-it-works/', '/examples/', '/changelog/', '/__specimens/'];
 
 for (const path of PAGES) {
   test(`${path} loads cleanly and is accessible`, async ({ page }) => {

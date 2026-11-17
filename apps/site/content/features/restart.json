@@ -1,0 +1,35 @@
+{
+  "id": "restart",
+  "order": 20,
+  "part": "isolate",
+  "name": "Restart and catch-up.",
+  "line": "A stopped isolate starts again and catches up from the bus.",
+  "text": [
+    "The kernel expects a heartbeat from every loop. After 400 ms without one, an isolate is marked blocked. After `killAfterMs` (10 s by default; basic uses 2 s) its worker is stopped and started again. Three restarts within a minute and it’s marked failed, and stays down: that’s the crash-loop guard, so an isolate that keeps crashing stops costing restarts. `kernel.restart(id)` brings it back.",
+    "Restarted, each subscription starts where its `from` says. `committed` reads on after its last commit; commits go out every 100 ms, so the few records it had read but not committed come again: at least once, none lost. `earliest` reads everything the topic still retains. `latest`, the default, starts with new records."
+  ],
+  "demo": "restart-still",
+  "since": "site-v0.1.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/supervisor/machine.ts",
+      "symbol": "DEFAULT_SUPERVISOR_CONFIG"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/kernel.ts",
+      "symbol": "Kernel"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/protocol/src/bus.ts",
+      "symbol": "StartPosition"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/isolation.spec.ts",
+      "test": "I3 and I1: four crashes fail C; A, B and D stay running, responsive and untouched"
+    }
+  ]
+}

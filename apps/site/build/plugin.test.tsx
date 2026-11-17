@@ -1,5 +1,7 @@
 /** @jsxImportSource preact */
 import { describe, expect, it } from 'vitest';
+import { fileURLToPath } from 'node:url';
+import { loadFeatures } from './features.ts';
 import { CSP, renderDocument } from './plugin.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
 import { PAGES } from '../src/pages/index.ts';
@@ -13,6 +15,18 @@ function named(name: string): Page {
 const data: SiteData = {
   pin: 'f'.repeat(40),
   diagrams: [{ name: 'runtime-topology', title: 'Isoloop runtime topology' }],
+  changelog: {
+    library: [],
+    libraryUnreleased: ['@isoloop/bus'],
+    apps: [],
+    appsUnreleased: ['site'],
+  },
+  features: loadFeatures(
+    fileURLToPath(new URL('../content/features', import.meta.url)),
+    { read: () => undefined, has: () => false },
+    '.',
+    { proofs: false },
+  ),
   examples: [
     {
       id: 'basic',
