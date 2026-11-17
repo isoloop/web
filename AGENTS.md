@@ -1,0 +1,30 @@
+# isoloop/web
+
+The Isoloop website (`isoloop.dev`), the examples, and the design system, built on the published `@isoloop` packages. What this repo is: [ADR 0001](docs/adr/0001-what-this-repo-is.md). How changes get published and checked: [ADR 0004](docs/adr/0004-publishing-and-governance.md).
+
+## Definition of done
+
+A change is done when all five hold:
+
+1. **Tests** cover it, and CI is green.
+2. **A changeset** describes it for the app's changelog (`pnpm changeset`). An internal-only change (tests, CI, refactors nobody sees) takes the `no-changeset` label instead.
+3. **Docs** match it: the app's README, or `docs/` for repo-wide behaviour.
+4. **Site impact** closes the PR description: `none`, `update needed`, or `done in web#N`. Site-worthy means a new capability or a behaviour change users see, a new example or app, new or changed measurements, copy the change makes wrong, or a newly found limitation.
+5. **When Site impact is `update needed`,** run the `publish` skill in the same session, while the context is fresh.
+
+## Copy and claims
+
+- **Positioning:** Isoloop is a complete toolchain: containment, restart and catch-up, a bus with retention, replay and durable history, placement as a switch, with React, Preact or plain DOM. It costs CPU, memory and start-up time, and the site says so plainly.
+- **Performance is a measurement:** device, build, tag, and the numbers. Compare Isoloop with native as measured results, in both directions.
+- **Every claim is checked** against the code or a test before it ships. Feature entries carry proof links.
+- **The maintainer reviews copy, ADRs and these rules.** Forks merge their own code and tooling PRs on green.
+
+## Releases
+
+- **Tags are pushed by the maintainer, or on the maintainer's explicit word for that release.**
+- **Each deploy tag goes on its own commit.** Pages names a deployment after its commit, so a second deploy of the same commit leaves the first one live.
+- **After a deploy,** check the live pages once the CDN serves them (it caches for up to 10 minutes and ignores query strings).
+
+## Look and build
+
+The design system, the site's build and the brand are in [ADR 0002](docs/adr/0002-site-build.md), [ADR 0003](docs/adr/0003-design-system.md) and [`docs/brand.md`](docs/brand.md). Pages run under `default-src 'self'`: scripts and styles as same-origin files, every request same-origin.
