@@ -32,7 +32,17 @@ import { cpuDelta, cpuOf, memory, pageMetrics, pssMb, processes } from 'compare/
 //
 // Mixes: `normal` is files only; `faults` adds, in a thousand files, 2 poison
 // (block their processor 2 s), 100 heavy (ten times the work) and 1 corrupt
-// (crashes its processor). The rate is the same for both (`COMPARE_RATE`).
+// (crashes its processor). `faults-calm` (M3i) runs 60 s with faults, then
+// stops them: its window is the last 20 s of 60 s calm, so it shows whether
+// the balancer packs its processors back into fewer workers. The rate is the
+// same for every mix (`COMPARE_RATE`).
+//
+// The balancer runs with `maxWorkers=2` (M3i), what its default gives a
+// 4-core machine: in a container `hardwareConcurrency` can report the host's
+// threads. Every run also records (M3i) a trace, once a second, of each
+// processor's pool, its load as the balancer and the beats see it, and its
+// kind's backlog; every move with its reason and cost; and the spikes the
+// balancer only noted and its `behind` events.
 // A crash restarts the processor, and the kernel gives up on one that
 // crashes more than 3 times in a minute (it's `failed`); 1 in a thousand
 // keeps under that at 50 files/s, so the figures are about placement, not
@@ -57,12 +67,17 @@ const WARM_MS = Number(process.env['COMPARE_WARM_MS'] ?? 20_000);
 const WINDOW_MS = Number(process.env['COMPARE_WINDOW_MS'] ?? 20_000);
 const DRAIN_MS = 120_000;
 const SAMPLES = 5;
+const FAULTS = '&poison=0.2&heavy=10&corrupt=0.1';
 const MIX: Readonly<Record<string, string>> = {
   normal: '',
-  faults: '&poison=0.2&heavy=10&corrupt=0.1',
+  faults: FAULTS,
+  'faults-calm': FAULTS,
 };
+/** `faults-calm`: how long the faults run, and the calm before the window. */
+const FAULTS_MS = 60_000;
+const CALM_BEFORE_WINDOW_MS = 40_000;
 const VIEWPORT = { width: 1400, height: 900 };
-const RUN_CAP_MS = 240_000;
+const RUN_CAP_MS = 330_000;
 const CLOSE_MS = 15_000;
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 const median = (xs: number[]): number =>
@@ -96,7 +111,7 @@ for (const mix of MIXES) {
         const engine = browserName;
         const dir = `${OUT}/${engine}`;
         mkdirSync(dir, { recursive: true });
-        const url = `./files/?placement=${placement}&rate=${RATE}&seed=7&start=1${MIX[mix] ?? ''}`;
+        const url = `./files/?placement=${placement}&rate=${RATE}&seed=7&start=1&maxWorkers=2${MIX[mix] ?? ''}`;
         const write = (result: object): void => {
           writeFileSync(
             `${dir}/${name}.json`,
@@ -121,8 +136,34 @@ for (const mix of MIXES) {
         try {
           await page.goto(url);
           await page.waitForFunction(() => window.files !== undefined, null, { timeout: 30_000 });
-          stage = 'warm-up';
-          await page.waitForTimeout(WARM_MS);
+          const origin = await page.evaluate(() => performance.now());
+          // Once a second from here to the end of the window (M3i).
+          const trace: { t: number; procs: unknown }[] = [];
+          const tracing = new AbortController();
+          const tracer = (async () => {
+            while (!tracing.signal.aborted) {
+              // oxlint-disable-next-line no-await-in-loop -- sampling once a second
+              const row = await page
+                .evaluate(() => ({ t: performance.now(), procs: window.files.trace() }))
+                .catch(() => null);
+              if (row) trace.push({ t: Math.round(row.t - origin), procs: row.procs });
+              // oxlint-disable-next-line no-await-in-loop -- sampling once a second
+              await sleep(1_000);
+            }
+          })();
+          let workersAfterFaults: number | null = null;
+          if (mix === 'faults-calm') {
+            stage = 'faults';
+            await page.waitForTimeout(FAULTS_MS);
+            workersAfterFaults =
+              (await page.evaluate(() => window.files.snapshot().workerCount)) - 1;
+            await page.evaluate(() => window.files.setDials({ poison: 0, heavy: 0, corrupt: 0 }));
+            stage = 'calm';
+            await page.waitForTimeout(CALM_BEFORE_WINDOW_MS);
+          } else {
+            stage = 'warm-up';
+            await page.waitForTimeout(WARM_MS);
+          }
 
           stage = 'window';
           const start = await page.evaluate(() => performance.now());
@@ -140,6 +181,12 @@ for (const mix of MIXES) {
           const m1 = cdp ? await pageMetrics(cdp) : {};
           const p1 = chromium ? await processes(browser) : [];
           const win = await page.evaluate((t) => window.files.since(t), start);
+          const workersEnd = (await page.evaluate(() => window.files.snapshot().workerCount)) - 1;
+          tracing.abort();
+          await tracer;
+          const moveLog = await page.evaluate((t) => window.files.movesSince(t), origin);
+          const events = await page.evaluate(() => window.files.events());
+          const costs = moveLog.flatMap((m) => (m.costMs === undefined ? [] : [m.costMs]));
           const seconds = cdp
             ? (m1['Timestamp'] ?? 0) - (m0['Timestamp'] ?? 0) || WINDOW_MS / 1000
             : WINDOW_MS / 1000;
@@ -187,6 +234,14 @@ for (const mix of MIXES) {
             p50Ms: win.p50 === undefined ? null : Math.round(win.p50),
             p95Ms: win.p95 === undefined ? null : Math.round(win.p95),
             moves: win.moves,
+            workersAfterFaults,
+            workersEnd,
+            movesTotal: moveLog.length,
+            backlogMoves: moveLog.filter((m) => m.reason === 'backlog').length,
+            packs: moveLog.filter((m) => m.reason === 'pack').length,
+            moveCostMedianMs: costs.length > 0 ? Math.round(median(costs)) : null,
+            noted: events.noted,
+            behind: events.behind,
             typingMedianMs: median(typing),
             typing,
             queueAtStop,
@@ -201,6 +256,12 @@ for (const mix of MIXES) {
             rendererCpuPct: chromium ? r1((cpuDelta(p0, p1, 'renderer') / seconds) * 100) : null,
             rendererPssMb: chromium ? pssMb([...cpuOf(p1, 'renderer').keys()]) : null,
             rendererPssGcMb: mem.pssGc,
+            moveLog: moveLog.map(({ at, id, from, to, reason, costMs }) =>
+              costMs === undefined
+                ? { at: Math.round(at - origin), id, from, to, reason }
+                : { at: Math.round(at - origin), id, from, to, reason, costMs: Math.round(costMs) },
+            ),
+            trace,
           });
         } catch (e) {
           write({

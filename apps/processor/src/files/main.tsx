@@ -26,8 +26,8 @@ const kernel = createKernel({
  * The page's settings from the URL, for links and the comparison
  * (comparison/run.ts): `placement` balancer (the default), own, one, or
  * one-off (one pool and no balancer at all: the baseline for its own cost);
- * the generator's `rate`, `poison`, `heavy`, `corrupt` and `seed`; and
- * `start=1` to start at once.
+ * the generator's `rate`, `poison`, `heavy`, `corrupt` and `seed`; the
+ * balancer's `maxWorkers`; and `start=1` to start at once.
  */
 const params = new URLSearchParams(location.search);
 const num = (key: string): number | undefined => {
@@ -43,8 +43,12 @@ for (const key of ['rate', 'poison', 'heavy', 'corrupt', 'seed'] as const) {
   if (v !== undefined) dials[key] = v;
 }
 
-/** The balancer's own allowance of pools: its default, made visible on the page. */
-const maxWorkers = Math.max(2, (navigator.hardwareConcurrency || 4) - 2);
+/**
+ * The balancer's own allowance of pools: its default, made visible on the
+ * page, or `maxWorkers` from the URL. The comparison sets 2, what the default
+ * gives a 4-core machine, since a container can report the host's threads.
+ */
+const maxWorkers = num('maxWorkers') ?? Math.max(2, (navigator.hardwareConcurrency || 4) - 2);
 const balancer = placement === 'one-off' ? undefined : createBalancer(kernel, { maxWorkers });
 const model = new FileProcessor({
   kernel,
