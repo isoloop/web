@@ -101,6 +101,82 @@ test('a task turned up to 90 % is separated within about 5 s', async ({ page }) 
   await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(4);
 });
 
+// Jobs whose work the busy time can't see (promise continuations): the pool
+// is short of CPU, but neither its lag nor its measured load says so. Only
+// the backlog the page reports does (M3i).
+test('a task whose backlog keeps growing is moved within about 15 s', async ({
+  page,
+  browserName,
+}) => {
+  // On Playwright's WebKit the pool's lag rises with work its busy time
+  // can't see, so the balancer bisects for an unnamed culprit instead.
+  test.skip(browserName === 'webkit', 'Playwright WebKit: unseen work shows as lag, so it bisects');
+  test.setTimeout(60_000);
+  const a = await page.evaluate(() => window.playground.add(20, 10, true));
+  const b = await page.evaluate(() => window.playground.add(20, 10, true));
+  if (!a || !b) throw new Error('no room for a task');
+  await expect(columnOf(page, b)).toHaveAttribute('data-pool', 'balancer-1', { timeout: 15_000 });
+  await expect(columnOf(page, a)).toHaveAttribute('data-pool', 'balancer-1');
+  // Each one's jobs now need 70 % of a core: 140 % between them.
+  await page.evaluate(
+    ([x, y]) => {
+      window.playground.setLoad(x, 70);
+      window.playground.setLoad(y, 70);
+    },
+    [a, b] as const,
+  );
+  await expect(page.locator('.log li[data-kind="backlog"]').first()).toBeVisible({
+    timeout: 25_000,
+  });
+  await expect(page.locator('.log li[data-kind="backlog"]').first()).toContainText(
+    /balancer-1 → balancer-/,
+  );
+  await expect(columnOf(page, a)).not.toHaveAttribute(
+    'data-pool',
+    (await columnOf(page, b).getAttribute('data-pool')) ?? '',
+  );
+  // A worker each is enough: the backlog drains.
+  await expect
+    .poll(
+      async () => Number(await card(page, a).getByTestId('backlog').getAttribute('data-backlog')),
+      {
+        timeout: 20_000,
+      },
+    )
+    .toBeLessThan(5);
+});
+
+test('after Calm, a quiet task packs back into another pool within about 60 s', async ({
+  page,
+  browserName,
+}) => {
+  // Playwright's WebKit stalls workers now and then, which the balancer
+  // notes as spikes, so a task there is never steady for the full minute.
+  test.skip(browserName === 'webkit', 'Playwright WebKit stalls workers, so nothing stays steady');
+  test.setTimeout(150_000);
+  // 50 % and 40 % don't fit one pool (60 %), so the second gets its own.
+  const a = await add(page, 50);
+  const b = await add(page, 40);
+  await expect(columnOf(page, a)).toHaveAttribute('data-kind', 'pool', { timeout: 15_000 });
+  await expect(columnOf(page, b)).toHaveAttribute('data-kind', 'pool', { timeout: 15_000 });
+  const before = await columnOf(page, b).getAttribute('data-pool');
+  expect(before).not.toBe(await columnOf(page, a).getAttribute('data-pool'));
+  await page.getByRole('button', { name: 'Calm' }).click();
+  await expect(page.locator('.log li[data-kind="pack"]').first()).toBeVisible({ timeout: 100_000 });
+  await expect
+    .poll(
+      async () =>
+        (await columnOf(page, a).getAttribute('data-pool')) ===
+        (await columnOf(page, b).getAttribute('data-pool')),
+      { timeout: 15_000 },
+    )
+    .toBe(true);
+  // The move's cost is shown once the packed task has beaten in its new pool.
+  await expect(page.locator('.log li[data-kind="pack"]').first().getByTestId('cost')).toBeVisible({
+    timeout: 10_000,
+  });
+});
+
 for (const mode of ['own', 'one'] as const) {
   test(`in "${mode}" placement nothing moves`, async ({ page }) => {
     await page.getByRole('radio', { name: mode === 'own' ? 'Own' : 'One pool' }).check();

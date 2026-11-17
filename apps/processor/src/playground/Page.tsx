@@ -31,8 +31,15 @@ export function PlaygroundPage({ playground }: { playground: Playground }): Reac
           Each task is a headless isolate that keeps a share of one core busy. Add some, turn a dial
           up, and watch the balancer. It reads every worker’s heartbeat and moves the heaviest task
           out of a pool that is full (its tasks add up to 80 % of a core) or stays over{' '}
-          {SUSTAINED_MS} ms of lag for 3 s. A task that blocks its loop past {SPIKE_MS} ms goes to
-          quarantine, and comes back once it has been quiet for 30 s.
+          {SUSTAINED_MS} ms of lag for 3 s. A task that blocks its loop past {SPIKE_MS} ms twice
+          within a minute goes to quarantine, and comes back once it has been quiet for 30 s.
+        </p>
+        <p>
+          Give a task jobs a second and its CPU dial becomes what those jobs need. The page reports
+          each task’s backlog to the balancer, which moves a task whose backlog keeps growing to
+          where it gets more CPU. Hide its work from the busy time and the backlog is all the
+          balancer has to go on. Press Calm, and a minute later quiet tasks pack back into fewer
+          pools.
         </p>
       </section>
 
@@ -56,6 +63,9 @@ export function PlaygroundPage({ playground }: { playground: Playground }): Reac
             }}
           >
             Add 5 light tasks
+          </button>
+          <button type="button" className="ui-button" onClick={() => playground.calm()}>
+            Calm
           </button>
           <span className="chip mono" data-testid="count">
             {snap.count}/{MAX_TASKS} tasks
@@ -150,6 +160,7 @@ function TaskCard({ task, playground }: { task: TaskView; playground: Playground
           </span>
         )}
         {task.placement?.atCap && <span className="badge cap">at cap</span>}
+        {task.placement?.behind && <span className="badge cap">behind</span>}
       </div>
       <label className="dial">
         <span className="mono">CPU {task.load} %</span>
@@ -163,6 +174,27 @@ function TaskCard({ task, playground }: { task: TaskView; playground: Playground
           onChange={(e) => playground.setLoad(task.id, Number(e.currentTarget.value))}
         />
       </label>
+      <label className="dial">
+        <span className="mono">Jobs {task.rate}/s</span>
+        <input
+          type="range"
+          min="0"
+          max="50"
+          step="1"
+          value={task.rate}
+          aria-label={`${task.name} jobs per second`}
+          onChange={(e) => playground.setRate(task.id, Number(e.currentTarget.value))}
+        />
+      </label>
+      <label className="hidden-work mono muted">
+        <input
+          type="checkbox"
+          checked={task.hidden}
+          aria-label={`${task.name} hides its work`}
+          onChange={(e) => playground.setHidden(task.id, e.currentTarget.checked)}
+        />
+        hide work from busy time
+      </label>
       <div className="meter" aria-label={`${task.name} measured load`}>
         <span className="set" style={{ width: `${task.load}%` }} />
         <span className="got" style={{ width: `${measured ?? 0}%` }} />
@@ -171,6 +203,11 @@ function TaskCard({ task, playground }: { task: TaskView; playground: Playground
         <span className="mono muted" data-testid="measured">
           measured {measured === undefined ? '--' : `${measured} %`}
         </span>
+        {task.backlog !== undefined && (
+          <span className="mono muted" data-testid="backlog" data-backlog={task.backlog}>
+            backlog {task.backlog}
+          </span>
+        )}
         <span className="actions">
           <button type="button" className="ui-button" onClick={() => playground.block(task.id)}>
             Block 2 s

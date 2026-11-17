@@ -18,10 +18,21 @@ export const REASONS: Record<string, string> = {
   bisect: 'bisect',
   steady: 'steady again',
   restart: 'restarted',
+  /** Its reported backlog kept rising (M3i). */
+  backlog: 'falling behind',
+  /** A quiet task joining another pool to free a worker (M3i). */
+  pack: 'packed',
+  /** A first long task: noted, nothing moves (M3i). */
+  noted: 'spike noted',
+  /** Falling behind with nowhere to give it more CPU (M3i). */
+  behind: 'behind',
 };
 
 /** A move or crash, as both pages log it. */
-export type LogEntry = { at: number; text: string; kind: string };
+export type LogEntry = { at: number; text: string; kind: string; costMs?: number };
+
+const cost = (ms: number): string =>
+  ms < 1_000 ? `${Math.round(ms)} ms` : `${(ms / 1_000).toFixed(1)} s`;
 
 /** A model's snapshot, ten times a second, and a way to redraw at once after an action. */
 export function useSnapshot<S>(model: { snapshot(): S }): [S, () => void] {
@@ -85,6 +96,15 @@ export function MoveLog({ log }: { log: LogEntry[] }): ReactElement {
                 {REASONS[e.kind] ?? e.kind}
               </span>
               <span className="mono">{e.text}</span>
+              {e.costMs !== undefined && (
+                <span
+                  className="mono muted"
+                  data-testid="cost"
+                  title="Stopped until its first beat in the new place"
+                >
+                  · back in {cost(e.costMs)}
+                </span>
+              )}
             </li>
           ))}
         </ol>
