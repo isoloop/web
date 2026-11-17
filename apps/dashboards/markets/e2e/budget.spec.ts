@@ -38,6 +38,7 @@ const PAIRS: (readonly [isoloop: string, native: string])[] = [
 //   expecting a failure is stable. They're reported only: measured, annotated
 //   and attached, not asserted; a run that times out is annotated as such.
 // See https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md
+// Empty since markets-v0.6.1; kept so a check WebKit is known to miss can be marked again.
 const WEBKIT_EXPECTED_FAIL = new Set<string>([]);
 const WEBKIT_REPORT_ONLY = new Map([
   ['isoloop@heavy', '217–219 ms (markets-v0.6.0)'],
