@@ -3,7 +3,7 @@
 // second; every change goes through the kernel or the balancer.
 import type { Balancer, MoveReason, Placement } from '@isoloop/balancer';
 import type { Kernel } from '@isoloop/host';
-import { control, tasks } from '../contracts';
+import { control, done as doneTopic, tasks } from '../contracts';
 
 export type Mode = 'balancer' | 'own' | 'one';
 
@@ -16,14 +16,25 @@ const KEEP = 60;
 const BADGE_MS = 6_000;
 /** Kernel states in which an isolate holds a worker. */
 const LIVE = new Set(['loading', 'running', 'blocked', 'crashed', 'restarting']);
+/** How often the page tells the balancer each task's backlog (it goes stale after 10 s). */
+const REPORT_MS = 1_000;
+
+/** A task's dials: its CPU, and its jobs (M3i). */
+type Dial = { load: number; rate: number; hidden: boolean; base: number; since: number };
 
 type Beat = { at: number; busy: number; dur: number };
 
 export type TaskView = {
   id: string;
   name: string;
-  /** The dial: the share of one core it's asked to burn. */
+  /** The dial: the share of one core it's asked to burn, or its jobs need. */
   load: number;
+  /** Jobs a second; 0 when it just burns its share. */
+  rate: number;
+  /** Its jobs' work is out of the busy time's sight. */
+  hidden: boolean;
+  /** Jobs arrived and not yet done; undefined when it takes no jobs. */
+  backlog: number | undefined;
   /** Measured over the last second of beats, 0–100; undefined before two beats. */
   measured: number | undefined;
   state: string;
@@ -42,7 +53,14 @@ export type ColumnView = {
   tasks: TaskView[];
 };
 
-export type LogEntry = { at: number; text: string; kind: MoveReason | 'crash' | 'mode' };
+export type LogEntry = {
+  at: number;
+  text: string;
+  kind: MoveReason | 'crash' | 'mode' | 'noted' | 'behind';
+  /** A move's cost, once the moved task has beaten in its new place (`arrived`). */
+  costMs?: number;
+  id?: string;
+};
 
 export type Snapshot = {
   mode: Mode;
@@ -70,7 +88,9 @@ export class Playground {
   readonly #src: string;
   readonly #maxWorkers: number;
   readonly #loads: Map<string, number>;
-  readonly #dials = new Map<string, number>();
+  readonly #dials = new Map<string, Dial>();
+  /** Jobs each task has done, from playground.done.v1. */
+  readonly #done = new Map<string, number>();
   readonly #beats = new Map<string, { last: number; beats: Beat[] }>();
   readonly #lags = new Map<string, { last: number; lags: number[] }>();
   readonly #moved = new Map<string, { reason: MoveReason | 'restart'; from: string; at: number }>();
@@ -93,8 +113,35 @@ export class Playground {
     this.#loads = opts.loads;
     this.#balancer.on('move', (e) => {
       this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
-      this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`);
+      this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`, e.id);
     });
+    // What each move cost the task: stopped until its first beat in the new place.
+    this.#balancer.on('arrived', (e) => {
+      const entry = this.#log.findLast((l) => l.id === e.id && l.kind === e.reason);
+      if (entry && entry.costMs === undefined) entry.costMs = e.costMs;
+    });
+    this.#balancer.on('spike', (e) => {
+      if (e.action === 'noted')
+        this.#entry('noted', `${e.id}: one long task (${Math.round(e.lagMs)} ms), noted`, e.id);
+    });
+    this.#balancer.on('behind', (e) => {
+      this.#entry('behind', `${e.id}: ${e.backlog} jobs waiting, nowhere with more CPU`, e.id);
+    });
+    this.#kernel.subscribe(
+      doneTopic,
+      (r) => {
+        if (r.key) this.#done.set(r.key, Math.max(this.#done.get(r.key) ?? 0, r.value.done));
+      },
+      { from: 'earliest' },
+    );
+    // The backlog goes to the balancer as a report (M3i); only it can place them.
+    setInterval(() => {
+      if (this.#mode !== 'balancer') return;
+      for (const [id, d] of this.#dials) {
+        if (d.rate > 0 || (this.backlog(id) ?? 0) > 0)
+          this.#balancer.report(id, { backlog: this.backlog(id) ?? 0 });
+      }
+    }, REPORT_MS);
     // Every heartbeat as it arrives (ADR 0017): each task's busy time, and
     // each worker's lag once per beat (a pool's members share one beat).
     this.#kernel.on('isolate:beat', (e) => {
@@ -124,10 +171,10 @@ export class Playground {
     return this.#dials.size;
   }
 
-  add(load: number): string | undefined {
+  add(load: number, rate = 0, hidden = false): string | undefined {
     if (this.#dials.size >= MAX_TASKS) return undefined;
     const id = `task-${this.#next++}`;
-    this.#dials.set(id, load);
+    this.#dials.set(id, { load, rate, hidden, base: 0, since: Date.now() });
     // The dial is the task's declared load until the balancer has measured
     // it, so it's placed at once instead of waiting in quarantine.
     this.#loads.set(id, load);
@@ -139,14 +186,48 @@ export class Playground {
   async remove(id: string): Promise<void> {
     if (!this.#dials.delete(id)) return;
     this.#beats.delete(id);
+    this.#done.delete(id);
     this.#moved.delete(id);
     await (this.#mode === 'balancer' ? this.#balancer.stop(id) : this.#kernel.stop(id));
   }
 
   setLoad(id: string, load: number): void {
-    if (!this.#dials.has(id)) return;
-    this.#dials.set(id, load);
+    const d = this.#dials.get(id);
+    if (!d) return;
+    d.load = load;
     this.#publish(id);
+  }
+
+  /** Jobs a second; the arrivals so far carry over, so the backlog doesn't jump. */
+  setRate(id: string, rate: number): void {
+    const d = this.#dials.get(id);
+    if (!d) return;
+    d.base = arrivals(d, Date.now());
+    d.since = Date.now();
+    d.rate = rate;
+    this.#publish(id);
+  }
+
+  setHidden(id: string, hidden: boolean): void {
+    const d = this.#dials.get(id);
+    if (!d) return;
+    d.hidden = hidden;
+    this.#publish(id);
+  }
+
+  /** Every slider back to idle: no CPU and no jobs, to watch tasks pack back. */
+  calm(): void {
+    for (const id of this.#dials.keys()) {
+      this.setRate(id, 0);
+      this.setLoad(id, 0);
+    }
+  }
+
+  /** Jobs arrived and not yet done; undefined for a task that has never taken jobs. */
+  backlog(id: string): number | undefined {
+    const d = this.#dials.get(id);
+    if (!d || (d.rate === 0 && d.base === 0)) return undefined;
+    return Math.max(0, arrivals(d, Date.now()) - (this.#done.get(id) ?? 0));
   }
 
   setChunk(ms: number): void {
@@ -201,7 +282,7 @@ export class Playground {
       return c;
     };
 
-    for (const [id, load] of this.#dials) {
+    for (const [id, dial] of this.#dials) {
       const snap = byId.get(id);
       const placement = placements.get(id);
       const where =
@@ -213,7 +294,10 @@ export class Playground {
       column(where).tasks.push({
         id,
         name: id.replace('task-', 'Task '),
-        load,
+        load: dial.load,
+        rate: dial.rate,
+        hidden: dial.hidden,
+        backlog: this.backlog(id),
         measured: dur > 0 ? Math.min(100, (busy / dur) * 100) : undefined,
         state: placement?.state === 'moving' ? 'moving' : (snap?.state ?? 'starting'),
         placement,
@@ -246,7 +330,7 @@ export class Playground {
     const manifest = {
       id,
       src: this.#src,
-      grants: { publish: [], subscribe: [tasks.name, control.name] },
+      grants: { publish: [doneTopic.name], subscribe: [tasks.name, control.name, doneTopic.name] },
     };
     if (this.#mode === 'balancer') this.#balancer.spawn(manifest);
     else if (this.#mode === 'one') this.#kernel.spawn({ ...manifest, pool: ONE });
@@ -254,12 +338,30 @@ export class Playground {
   }
 
   #publish(id: string): void {
-    const load = this.#dials.get(id) ?? 0;
-    void this.#kernel.publish(tasks, { key: id, value: { load, chunkMs: this.#chunkMs } });
+    const d = this.#dials.get(id);
+    if (!d) return;
+    void this.#kernel.publish(tasks, {
+      key: id,
+      value: {
+        load: d.load,
+        chunkMs: this.#chunkMs,
+        rate: d.rate,
+        base: d.base,
+        since: d.since,
+        hidden: d.hidden,
+      },
+    });
   }
 
-  #entry(kind: LogEntry['kind'], text: string): void {
-    this.#log.push({ at: Date.now(), text, kind });
+  #entry(kind: LogEntry['kind'], text: string, id?: string): void {
+    this.#log.push(
+      id === undefined ? { at: Date.now(), text, kind } : { at: Date.now(), text, kind, id },
+    );
     if (this.#log.length > 200) this.#log.shift();
   }
+}
+
+/** Jobs arrived by `now` (epoch ms), as the task counts them. */
+function arrivals(d: Dial, now: number): number {
+  return d.rate > 0 ? Math.floor(d.base + ((now - d.since) / 1_000) * d.rate) : Math.floor(d.base);
 }

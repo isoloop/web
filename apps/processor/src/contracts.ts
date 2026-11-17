@@ -15,7 +15,33 @@ export const tasks = topic('playground.tasks.v1', {
   schema: z.object({
     load: z.number().min(0).max(100),
     chunkMs: z.number().int().min(1).max(500),
+    /**
+     * Jobs a second (M3i). At 0 the task burns `load` % of a core on its own.
+     * Above 0, jobs arrive at this rate and each costs `load × 10 ÷ rate` ms,
+     * so `load` is the share of a core the jobs need: the task falls behind
+     * when it gets less.
+     */
+    rate: z.number().min(0).max(100),
+    /** Jobs arrived up to `since` (epoch ms): with `rate`, the arrivals so far. */
+    base: z.number().nonnegative(),
+    since: z.number(),
+    /**
+     * Do the jobs' work in promise continuations, which the runtime's busy
+     * time doesn't see (ADR 0017's "what busyMs can't see"): the balancer
+     * then knows the task is behind only from its backlog.
+     */
+    hidden: z.boolean(),
   }),
+  retention: { kind: 'compacted' },
+});
+
+/**
+ * Each task's jobs done so far, keyed by task id, published by the task as it
+ * works. Compacted and read from `earliest`, so a moved task carries on from
+ * its count; the page's backlog is arrivals − done.
+ */
+export const done = topic('playground.done.v1', {
+  schema: z.object({ done: z.number().int().nonnegative() }),
   retention: { kind: 'compacted' },
 });
 
@@ -92,4 +118,14 @@ export const dials = topic('files.dials.v1', {
   retention: { kind: 'compacted' },
 });
 
-export default contracts(tasks, control, csvJobs, imageJobs, archiveJobs, hashJobs, results, dials);
+export default contracts(
+  tasks,
+  done,
+  control,
+  csvJobs,
+  imageJobs,
+  archiveJobs,
+  hashJobs,
+  results,
+  dials,
+);

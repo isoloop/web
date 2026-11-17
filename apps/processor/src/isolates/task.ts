@@ -1,10 +1,17 @@
 import { defineIsolate } from '@isoloop/runtime';
-import { control, tasks } from '../topics';
+import { control, done as doneTopic, tasks } from '../topics';
 
-// A playground task: a headless isolate that keeps one core `load` % busy, in
-// uninterrupted pieces of `chunkMs`, and rests in between so its loop still
-// turns. Its dial comes from playground.tasks.v1 under its own id, read from
-// the start, so wherever the balancer moves it, it carries on as set.
+// A playground task: a headless isolate. Its dial comes from
+// playground.tasks.v1 under its own id, read from the start, so wherever the
+// balancer moves it, it carries on as set.
+//
+// - Jobs/s at 0: it keeps one core `load` % busy, in uninterrupted pieces of
+//   `chunkMs`, and rests in between so its loop still turns.
+// - Jobs/s above 0 (M3i): jobs arrive at that rate, each costing
+//   `load × 10 ÷ rate` ms of work in `chunkMs` pieces. It works through them
+//   as fast as its worker lets it and publishes how many it has done, so the
+//   page can tell its backlog. `hidden` does the work in promise
+//   continuations, which the runtime's busy time doesn't see.
 
 /** Keeps the loop busy for `ms`, with work the engine can't skip. */
 function spin(ms: number): number {
@@ -16,18 +23,35 @@ function spin(ms: number): number {
   return x;
 }
 
+/** How often the task publishes its count while it works. */
+const PUBLISH_MS = 250;
+
 export default defineIsolate({
   start(ctx) {
     let load = 0;
     let chunkMs = 50;
+    let rate = 0;
+    let base = 0;
+    let since = 0;
+    let hidden = false;
     let sink = 0;
+    let done = 0;
+    let published = -1;
+    let publishedAt = 0;
 
     ctx.bus.subscribe(
       tasks,
       (r) => {
         if (r.key !== ctx.id) return;
-        load = r.value.load;
-        chunkMs = r.value.chunkMs;
+        ({ load, chunkMs, rate, base, since, hidden } = r.value);
+      },
+      { from: 'earliest' },
+    );
+    // Its count so far, from before a move: never counted down.
+    ctx.bus.subscribe(
+      doneTopic,
+      (r) => {
+        if (r.key === ctx.id) done = Math.max(done, r.value.done);
       },
       { from: 'earliest' },
     );
@@ -41,12 +65,32 @@ export default defineIsolate({
       { from: 'latest' },
     );
 
-    // A rest shorter than a timer's 4 ms floor is owed: the loop turns
-    // through a message port at once, and the rests add up until one timer
-    // can take them, so the share stays `load` %.
+    const arrived = (): number =>
+      rate > 0 ? Math.floor(base + ((Date.now() - since) / 1_000) * rate) : Math.floor(base);
+    const publish = (force: boolean): void => {
+      const now = performance.now();
+      if (done === published || (!force && now - publishedAt < PUBLISH_MS)) return;
+      published = done;
+      publishedAt = now;
+      void ctx.bus.publish(doneTopic, { key: ctx.id, value: { done } });
+    };
+
+    // The loop turns through a message port (no 4 ms timer floor). A rest
+    // shorter than a timer's floor is owed, and the rests add up until one
+    // timer can take them, so a burning task's share stays `load` %.
     const { port1, port2 } = new MessageChannel();
     let owed = 0;
+    /** Work left on the current job, ms. */
+    let left = 0;
+    const next = (): void => {
+      port2.postMessage(0);
+    };
     const step = (): void => {
+      if (rate > 0) {
+        jobStep();
+        return;
+      }
+      left = 0;
       if (load <= 0) {
         owed = 0;
         setTimeout(step, 100);
@@ -55,11 +99,41 @@ export default defineIsolate({
       sink += spin(chunkMs);
       owed += load >= 100 ? 0 : chunkMs * (100 / load - 1);
       if (owed < 4) {
-        port2.postMessage(0);
+        next();
         return;
       }
       setTimeout(step, owed);
       owed = 0;
+    };
+    const jobStep = (): void => {
+      if (left <= 0) {
+        if (arrived() <= done) {
+          publish(true);
+          setTimeout(step, 20);
+          return;
+        }
+        left = (load * 10) / rate;
+      }
+      const slice = Math.min(chunkMs, left);
+      const finish = (): void => {
+        left -= slice;
+        if (left <= 0) {
+          done++;
+          publish(false);
+        }
+        next();
+      };
+      if (hidden) {
+        // A promise continuation runs after the port's callback has returned,
+        // outside the time the runtime puts on this task.
+        void Promise.resolve().then(() => {
+          sink += spin(slice);
+          finish();
+        });
+      } else {
+        sink += spin(slice);
+        finish();
+      }
     };
     port1.addEventListener('message', step);
     port1.start();
