@@ -1,0 +1,37 @@
+# The Publishing queue (isoloop/web ADR 0004, decision 7): one issue in this
+# repo listing the PRs merged in isoloop/isoloop and isoloop/web whose Site
+# impact is "update needed". Every 6 hours, on pushes to main, and by hand.
+# No install: the script runs on the runner's Node with GITHUB_TOKEN, which can
+# read both public repos and write this repo's issues and labels.
+name: Publishing queue
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: publishing-queue
+  cancel-in-progress: false
+
+jobs:
+  queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: scripts
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: node scripts/queue/publishing-queue.ts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

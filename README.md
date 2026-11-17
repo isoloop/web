@@ -51,6 +51,10 @@ Each app keeps a `CHANGELOG.md`, written by [Changesets](.changeset/README.md) (
 3. **Tag** the merge commit `<app>-v<version>`, with the version from the app's `package.json` (for example `plant-v0.2.1`). Each tag goes on its own commit, since GitHub Pages names a deployment after its commit.
 4. **The release run** checks, deploys, and then creates a GitHub Release for the tag with the changelog section as its notes.
 
+### Publishing queue
+
+Every PR in `isoloop/isoloop` and here ends with a `Site impact:` line. Those merged with `update needed` are listed in one issue, **Publishing queue**, kept by a workflow (`.github/workflows/publishing-queue.yml`) every 6 hours, on pushes to `main` and by hand ([ADR 0004](docs/adr/0004-publishing-and-governance.md), decision 7). An item is ticked when its PR's description says `done in web#N`, or by hand; the `publish` skill takes each one to the site.
+
 ## License
 
 MIT
