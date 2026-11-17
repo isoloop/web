@@ -44,6 +44,7 @@ export const featureSchema = z.strictObject({
     'replay',
     'durable-still',
     'placement-still',
+    'balancer-table',
     'framework-tabs',
     'safety-facts',
     'cost-table',

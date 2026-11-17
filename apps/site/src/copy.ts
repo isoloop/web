@@ -212,7 +212,7 @@ export const home = {
     label:
       'Isoloop isn’t at 0.1 yet, and the API may change. These are prereleases from the main branch, published under the next tag.',
     command:
-      'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next',
+      'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next',
     guide: 'The hosting guide',
   },
 };
@@ -220,9 +220,9 @@ export const home = {
 export const featuresPage = {
   title: 'Features',
   description:
-    'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, your framework, safety, and the cost.',
+    'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
-  lede: 'Code that shares data shouldn’t share an event loop. That idea runs through nine parts of one toolchain. Three run live below, on basic, the smallest example, running in this page; the rest are shown as code or as a still.',
+  lede: 'Code that shares data shouldn’t share an event loop. That idea runs through ten parts of one toolchain. Three run live below, on basic, the smallest example, running in this page; the rest are shown as code or as a still.',
   changelog: 'What changed, release by release',
   containment: {
     caption:
@@ -281,6 +281,41 @@ export const featuresPage = {
     caption:
       'The same four isolates in three placements. When C blocks, everything hatched stalls with it. In the plant dashboard a small headless isolate costs about 0.2 MB in a pool, against 2.8 MB on its own worker.',
     more: 'When to pool, with the plant’s figures',
+  },
+  // Source: isoloop/isoloop docs/guide/balancer.md, "Moving", "The quarantine"
+  // and "Packing back", at the library pin; the defaults are its options'.
+  balancer: {
+    caption:
+      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes.',
+    head: ['When', 'What the balancer does'],
+    rows: <Row[]>[
+      [
+        'An isolate blocks its pool for over 100 ms twice within 60 s, or crashes',
+        'Moves it to the quarantine pool until it has been quiet for 30 s, a window that doubles with each repeat offence, up to 2 minutes',
+      ],
+      [
+        'A pool lags over 50 ms for 3 s, or its members use 80 % of a core or more',
+        'Moves the heaviest member to a pool with room, or to a new one within the cap',
+      ],
+      [
+        'A pool is killed for blocking and no heartbeat names the culprit',
+        'Moves half its members to quarantine; whichever half blocks again holds the culprit',
+      ],
+      [
+        'The backlog the app reports for an isolate grows over 10 s',
+        'Gives the isolate a pool of its own if the cap allows, else a less loaded pool',
+      ],
+      [
+        'An isolate alone in its pool stays steady for 60 s',
+        'Packs it into another pool that stays under 40 % with it, freeing a worker',
+      ],
+      [
+        'The kernel gives up on an isolate',
+        'Marks it failed and leaves it alone until the app restarts it',
+      ],
+    ],
+    guide: 'The balancer guide',
+    example: 'Watch it move tasks in the processor example',
   },
   frameworks: {
     tabs: [

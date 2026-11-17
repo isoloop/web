@@ -1,0 +1,58 @@
+{
+  "id": "balancer",
+  "order": 65,
+  "part": "pool",
+  "name": "Automatic placement.",
+  "line": "Experimental: a balancer picks the pool from measured load, and moves an isolate that blocks or falls behind.",
+  "text": [
+    "`@isoloop/balancer` is experimental and opt-in. Spawn through it instead of naming a pool, and it puts each isolate in a pool where its measured load fits, within a cap on workers. The kernel never moves anything on its own, and the balancer moves only the isolates spawned through it.",
+    "It reads every isolate’s heartbeat: its worker’s lag and the isolate’s own busy time. For work the runtime can’t attribute, such as code that resumes after `await`, the app can report its own busy time and how much work is queued. An isolate that blocks twice within a minute, or crashes, waits in a quarantine pool until it has been quiet; the fourth time, it’s kept apart for good. An isolate the kernel has given up on is left alone until the app restarts it.",
+    "A move is a restart: the isolate stops, starts again in its new pool and catches up from the bus, and a visual one is blank until it redraws. The balancer groups by load, not by what belongs together, so place by hand what must fail together or stay apart."
+  ],
+  "demo": "balancer-table",
+  "since": "0.1.0-next.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/balancer/src/balancer.ts",
+      "symbol": "createBalancer"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/balancer/src/balancer.test.ts",
+      "test": "never moves isolates spawned through the kernel, nor one on hold"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/balancer/src/balancer.test.ts",
+      "test": "reads work the beats miss from the report: a full pool moves its heaviest instead of bisecting"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/balancer/src/balancer.test.ts",
+      "test": "doubles the steady window on each re-offence, then keeps a repeat offender apart"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/balancer/src/balancer.test.ts",
+      "test": "marks a failed member, takes it out of its pool, and never moves or restarts it"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/balancer/src/kernel.browser.test.ts",
+      "test": "spawns into its own pools on a real kernel, and allows one balancer per kernel"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/guide/balancer.md"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/adr/0017-opt-in-balancer.md"
+    },
+    {
+      "repo": "web",
+      "path": "apps/processor"
+    }
+  ]
+}

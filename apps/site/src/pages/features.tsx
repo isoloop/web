@@ -11,6 +11,8 @@ import type { Page, SiteData } from './types.ts';
 const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison';
 const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
+const BALANCER_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/balancer.md';
+const PROCESSOR = '/examples/processor/';
 
 /** A feature's section: its heading in the gutter, with the bar of its part of the system, then its text and its figure. */
 function Feature({ entry, children }: { entry: Entry; children: ComponentChildren }): VNode {
@@ -211,6 +213,18 @@ function Features({ samples, features }: SiteData): VNode {
         <Code>{samples.placement}</Code>
         <p>
           <a href={POOLS_GUIDE}>{f.placement.more}</a>
+        </p>
+      </>
+    ),
+    'balancer-table': (
+      <>
+        <Table caption={f.balancer.caption} head={f.balancer.head} rows={f.balancer.rows} />
+        <Code>{samples.balancer}</Code>
+        <p>
+          <a href={BALANCER_GUIDE}>{f.balancer.guide}</a>
+        </p>
+        <p>
+          <a href={PROCESSOR}>{f.balancer.example}</a>
         </p>
       </>
     ),
