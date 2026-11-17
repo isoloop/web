@@ -1,0 +1,2644 @@
+{
+  "engine": "firefox",
+  "build": "isoloop",
+  "placement": "balancer",
+  "mix": "faults",
+  "rate": 50,
+  "url": "./files/?placement=balancer&rate=50&seed=7&start=1&maxWorkers=2&poison=0.2&heavy=10&corrupt=0.1",
+  "stopped": false,
+  "workers": 4,
+  "jobsPerSec": 35.5,
+  "p50Ms": 2527,
+  "p95Ms": 25416,
+  "moves": 2,
+  "workersAfterFaults": null,
+  "workersEnd": 4,
+  "movesTotal": 25,
+  "backlogMoves": 0,
+  "packs": 0,
+  "moveCostMedianMs": 1060,
+  "noted": 4,
+  "behind": 2,
+  "typingMedianMs": 60,
+  "typing": [81, 69, 60, 48, 54],
+  "queueAtStop": 788,
+  "drainMs": 119410,
+  "lost": 0,
+  "failed": 0,
+  "duplicates": 1485,
+  "produced": 2046,
+  "done": 2046,
+  "corrupt": 1,
+  "mainThreadCpuPct": null,
+  "rendererCpuPct": null,
+  "rendererPssMb": null,
+  "rendererPssGcMb": null,
+  "moveLog": [
+    {
+      "at": 3460,
+      "id": "image-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 199
+    },
+    {
+      "at": 4393,
+      "id": "csv-1",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1066
+    },
+    {
+      "at": 4394,
+      "id": "csv-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1066
+    },
+    {
+      "at": 4394,
+      "id": "image-1",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1066
+    },
+    {
+      "at": 4394,
+      "id": "archive-1",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1065
+    },
+    {
+      "at": 4394,
+      "id": "archive-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1065
+    },
+    {
+      "at": 4395,
+      "id": "hash-1",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1065
+    },
+    {
+      "at": 4395,
+      "id": "hash-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1064
+    },
+    {
+      "at": 6210,
+      "id": "archive-2",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 453
+    },
+    {
+      "at": 6891,
+      "id": "image-2",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 1115
+    },
+    {
+      "at": 6892,
+      "id": "archive-1",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 1115
+    },
+    {
+      "at": 6892,
+      "id": "csv-1",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 1114
+    },
+    {
+      "at": 9770,
+      "id": "hash-2",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 71
+    },
+    {
+      "at": 10693,
+      "id": "image-1",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 1035
+    },
+    {
+      "at": 13709,
+      "id": "hash-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-quarantine-2",
+      "reason": "bisect",
+      "costMs": 672
+    },
+    {
+      "at": 14507,
+      "id": "archive-1",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 192
+    },
+    {
+      "at": 14516,
+      "id": "csv-1",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 192
+    },
+    {
+      "at": 14600,
+      "id": "archive-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 287
+    },
+    {
+      "at": 14763,
+      "id": "image-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 400
+    },
+    {
+      "at": 17314,
+      "id": "archive-2",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 249
+    },
+    {
+      "at": 18095,
+      "id": "archive-1",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 1060
+    },
+    {
+      "at": 18096,
+      "id": "csv-2",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 1060
+    },
+    {
+      "at": 19529,
+      "id": "image-2",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "spike",
+      "costMs": 230
+    },
+    {
+      "at": 23566,
+      "id": "csv-1",
+      "from": "balancer-1",
+      "to": "balancer-quarantine-1",
+      "reason": "bisect",
+      "costMs": 871
+    },
+    {
+      "at": 28404,
+      "id": "csv-2",
+      "from": "balancer-quarantine-1",
+      "to": "balancer-1",
+      "reason": "steady",
+      "costMs": 1942
+    }
+  ],
+  "trace": [
+    {
+      "t": 3,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "backlog": 0
+        }
+      ]
+    },
+    {
+      "t": 1018,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 1,
+          "backlog": 11
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 1,
+          "backlog": 11
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 21,
+          "backlog": 9
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 3,
+          "backlog": 9
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 1,
+          "backlog": 4
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 13,
+          "backlog": 4
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 14
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 1,
+          "backlog": 14
+        }
+      ]
+    },
+    {
+      "t": 2023,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 20
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 20
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 16
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 16
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 1,
+          "backlog": 11
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 11
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 24
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "measuredPct": 0,
+          "backlog": 24
+        }
+      ]
+    },
+    {
+      "t": 3029,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 23
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 23
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 6,
+          "measuredPct": 0,
+          "backlog": 23
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 23
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 17
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 4,
+          "measuredPct": 0,
+          "backlog": 17
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 29
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 29
+        }
+      ]
+    },
+    {
+      "t": 4032,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 34
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 34
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 27
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-1",
+          "loadPct": 1,
+          "measuredPct": 4,
+          "backlog": 27
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 25
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-1",
+          "loadPct": 4,
+          "measuredPct": 0,
+          "backlog": 25
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 38
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 38
+        }
+      ]
+    },
+    {
+      "t": 5037,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 45
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 45
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 34
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-1",
+          "loadPct": 1,
+          "measuredPct": 9,
+          "backlog": 34
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-1",
+          "loadPct": 1,
+          "measuredPct": 1,
+          "backlog": 38
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-1",
+          "loadPct": 4,
+          "measuredPct": 1,
+          "backlog": 38
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 47
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 47
+        }
+      ]
+    },
+    {
+      "t": 6042,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 53
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 53
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 47
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 47
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 47
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 4,
+          "measuredPct": 0,
+          "backlog": 47
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 53
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 53
+        }
+      ]
+    },
+    {
+      "t": 7046,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 64
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 64
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 57
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 6,
+          "backlog": 57
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 1,
+          "backlog": 56
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 4,
+          "measuredPct": 5,
+          "backlog": 56
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 49
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 9,
+          "backlog": 49
+        }
+      ]
+    },
+    {
+      "t": 8052,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 3,
+          "backlog": 63
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 63
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 63
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 63
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 4,
+          "backlog": 61
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 4,
+          "measuredPct": 0,
+          "backlog": 61
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 48
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-1",
+          "loadPct": 4,
+          "measuredPct": 0,
+          "backlog": 48
+        }
+      ]
+    },
+    {
+      "t": 9059,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 2,
+          "backlog": 67
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 67
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 65
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 4,
+          "backlog": 65
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 1,
+          "backlog": 66
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 2,
+          "measuredPct": 0,
+          "backlog": 66
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 44
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-1",
+          "loadPct": 4,
+          "measuredPct": 3,
+          "backlog": 44
+        }
+      ]
+    },
+    {
+      "t": 10066,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 2,
+          "measuredPct": 0,
+          "backlog": 70
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 70
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 67
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 3,
+          "measuredPct": 5,
+          "backlog": 67
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 2,
+          "measuredPct": 0,
+          "backlog": 74
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 74
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 43
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 3,
+          "measuredPct": 7,
+          "backlog": 43
+        }
+      ]
+    },
+    {
+      "t": 11071,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 72
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 72
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 2,
+          "backlog": 76
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 11,
+          "measuredPct": 19,
+          "backlog": 76
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 83
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 83
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 55
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 3,
+          "measuredPct": 6,
+          "backlog": 55
+        }
+      ]
+    },
+    {
+      "t": 12077,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 72
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 72
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 3,
+          "backlog": 83
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 9,
+          "measuredPct": 0,
+          "backlog": 83
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 79
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 79
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 66
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 3,
+          "measuredPct": 0,
+          "backlog": 66
+        }
+      ]
+    },
+    {
+      "t": 13084,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 83
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "backlog": 83
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 94
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 8,
+          "measuredPct": 0,
+          "backlog": 94
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 77
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 77
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "backlog": 71
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 2,
+          "measuredPct": 0,
+          "backlog": 71
+        }
+      ]
+    },
+    {
+      "t": 14088,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 85
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 85
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 105
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 105
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 90
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 90
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 80
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 2,
+          "measuredPct": 2,
+          "backlog": 80
+        }
+      ]
+    },
+    {
+      "t": 15094,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 2,
+          "backlog": 95
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 95
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 105
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 2,
+          "backlog": 105
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 101
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 2,
+          "backlog": 101
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 82
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 2,
+          "measuredPct": 15,
+          "backlog": 82
+        }
+      ]
+    },
+    {
+      "t": 16103,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 102
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 102
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 105
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 2,
+          "backlog": 105
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 105
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 105
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 88
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 2,
+          "measuredPct": 7,
+          "backlog": 88
+        }
+      ]
+    },
+    {
+      "t": 17110,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 112
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 112
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 112
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 112
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 114
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 114
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 92
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 12,
+          "measuredPct": 14,
+          "backlog": 92
+        }
+      ]
+    },
+    {
+      "t": 18114,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 116
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 116
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 116
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-1",
+          "loadPct": 2,
+          "measuredPct": 5,
+          "backlog": 116
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 123
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 4,
+          "backlog": 123
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 84
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 9,
+          "measuredPct": 7,
+          "backlog": 84
+        }
+      ]
+    },
+    {
+      "t": 19120,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 124
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 124
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 120
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-1",
+          "loadPct": 4,
+          "measuredPct": 7,
+          "backlog": 120
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 133
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 8,
+          "backlog": 133
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 76
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 10,
+          "measuredPct": 11,
+          "backlog": 76
+        }
+      ]
+    },
+    {
+      "t": 20126,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 130
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 130
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 133
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 10,
+          "measuredPct": 21,
+          "backlog": 133
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 140
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 4,
+          "measuredPct": 0,
+          "backlog": 140
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 77
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 8,
+          "measuredPct": 9,
+          "backlog": 77
+        }
+      ]
+    },
+    {
+      "t": 21131,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 137
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 1,
+          "backlog": 137
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 136
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 10,
+          "measuredPct": 0,
+          "backlog": 136
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 148
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 3,
+          "measuredPct": 0,
+          "backlog": 148
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 73
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 8,
+          "measuredPct": 5,
+          "backlog": 73
+        }
+      ]
+    },
+    {
+      "t": 22136,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 136
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 136
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 138
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 10,
+          "measuredPct": 0,
+          "backlog": 138
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 159
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 159
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 74
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 7,
+          "measuredPct": 6,
+          "backlog": 74
+        }
+      ]
+    },
+    {
+      "t": 23144,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 133
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 133
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 139
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 139
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 172
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 172
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 77
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 2,
+          "measuredPct": 0,
+          "backlog": 77
+        }
+      ]
+    },
+    {
+      "t": 24149,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 142
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 142
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 145
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 145
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 173
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 173
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 73
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 2,
+          "backlog": 73
+        }
+      ]
+    },
+    {
+      "t": 25154,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 2,
+          "backlog": 143
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 143
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 155
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 155
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 176
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 176
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 57
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 66,
+          "measuredPct": 74,
+          "backlog": 57
+        }
+      ]
+    },
+    {
+      "t": 26163,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 154
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 154
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 155
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 155
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 181
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 181
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 37
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 55,
+          "measuredPct": 6,
+          "backlog": 37
+        }
+      ]
+    },
+    {
+      "t": 27167,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 2,
+          "measuredPct": 3,
+          "backlog": 159
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 159
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 162
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 162
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 190
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 190
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 25
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 44,
+          "measuredPct": 3,
+          "backlog": 25
+        }
+      ]
+    },
+    {
+      "t": 28170,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 1,
+          "backlog": 169
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 169
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 174
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 174
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 188
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 188
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 24
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 6,
+          "measuredPct": 8,
+          "backlog": 24
+        }
+      ]
+    },
+    {
+      "t": 29175,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 1,
+          "measuredPct": 0,
+          "backlog": 183
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 183
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 176
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 176
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 193
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 193
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "backlog": 35
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 8,
+          "measuredPct": 15,
+          "backlog": 35
+        }
+      ]
+    },
+    {
+      "t": 30180,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 189
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 1,
+          "backlog": 189
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 186
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 186
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 203
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 203
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 2
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 9,
+          "measuredPct": 6,
+          "backlog": 2
+        }
+      ]
+    },
+    {
+      "t": 31184,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 192
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 0,
+          "measuredPct": 6,
+          "backlog": 192
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 197
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 197
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 210
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 210
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 2,
+          "measuredPct": 9,
+          "backlog": 2
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 10,
+          "measuredPct": 9,
+          "backlog": 2
+        }
+      ]
+    },
+    {
+      "t": 32188,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 194
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 4,
+          "measuredPct": 4,
+          "backlog": 194
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 207
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 207
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 220
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 220
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 3,
+          "measuredPct": 7,
+          "backlog": 0
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 6,
+          "measuredPct": 3,
+          "backlog": 0
+        }
+      ]
+    },
+    {
+      "t": 33195,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 199
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 5,
+          "measuredPct": 3,
+          "backlog": 199
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 215
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 215
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 223
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 223
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 10,
+          "measuredPct": 15,
+          "backlog": 3
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 12,
+          "measuredPct": 25,
+          "backlog": 3
+        }
+      ]
+    },
+    {
+      "t": 34200,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 203
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 4,
+          "measuredPct": 6,
+          "backlog": 203
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 221
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 221
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 229
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 229
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 10,
+          "measuredPct": 8,
+          "backlog": 0
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 10,
+          "measuredPct": 3,
+          "backlog": 0
+        }
+      ]
+    },
+    {
+      "t": 35203,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 210
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 5,
+          "measuredPct": 5,
+          "backlog": 210
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 230
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 230
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 235
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 235
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 11,
+          "measuredPct": 10,
+          "backlog": 0
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 13,
+          "measuredPct": 12,
+          "backlog": 0
+        }
+      ]
+    },
+    {
+      "t": 36209,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 216
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 5,
+          "measuredPct": 5,
+          "backlog": 216
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 238
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 238
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 246
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 246
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 8,
+          "measuredPct": 8,
+          "backlog": 0
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 7,
+          "measuredPct": 4,
+          "backlog": 0
+        }
+      ]
+    },
+    {
+      "t": 37212,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 224
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 6,
+          "measuredPct": 8,
+          "backlog": 224
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 248
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 248
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 252
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 252
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 12,
+          "measuredPct": 19,
+          "backlog": 0
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 8,
+          "measuredPct": 7,
+          "backlog": 0
+        }
+      ]
+    },
+    {
+      "t": 38217,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 233
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 6,
+          "measuredPct": 4,
+          "backlog": 233
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 250
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 250
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 261
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 261
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 13,
+          "measuredPct": 14,
+          "backlog": 7
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 8,
+          "measuredPct": 13,
+          "backlog": 7
+        }
+      ]
+    },
+    {
+      "t": 39224,
+      "procs": [
+        {
+          "id": "csv-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 236
+        },
+        {
+          "id": "csv-2",
+          "pool": "balancer-1",
+          "loadPct": 5,
+          "measuredPct": 2,
+          "backlog": 236
+        },
+        {
+          "id": "image-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 252
+        },
+        {
+          "id": "image-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 252
+        },
+        {
+          "id": "archive-1",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 273
+        },
+        {
+          "id": "archive-2",
+          "pool": "balancer-quarantine-1",
+          "loadPct": 0,
+          "measuredPct": 0,
+          "backlog": 273
+        },
+        {
+          "id": "hash-1",
+          "pool": "balancer-1",
+          "loadPct": 14,
+          "measuredPct": 11,
+          "backlog": 5
+        },
+        {
+          "id": "hash-2",
+          "pool": "balancer-quarantine-2",
+          "loadPct": 9,
+          "measuredPct": 7,
+          "backlog": 5
+        }
+      ]
+    }
+  ]
+}

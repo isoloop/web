@@ -1,0 +1,29 @@
+{
+  "id": "durable",
+  "order": 50,
+  "part": "bus",
+  "name": "Durable history.",
+  "line": "Persistent topics live in OPFS and survive a reload.",
+  "text": [
+    "Mark a topic persistent and the bus keeps it in the origin private file system (OPFS). It survives a page reload, a closed tab and a crash of the bus worker. A publish is acknowledged once its batch is on disk; batches are written every 5 ms. The plant dashboard keeps its alarms and events this way."
+  ],
+  "demo": "durable-still",
+  "since": "site-v0.1.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/bus/src/storage/opfs.ts",
+      "symbol": "OpfsStorage"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/durable.spec.ts",
+      "test": "I12: a persistent topic loses no acknowledged record when the page is reloaded"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/durable.spec.ts",
+      "test": "a second tab runs in memory with bus:durability-degraded; after the first closes, a reload takes the files"
+    }
+  ]
+}

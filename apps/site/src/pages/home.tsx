@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
 import { Table } from 'ui/components';
-import { features, home, site } from '../copy.ts';
+import { home, site } from '../copy.ts';
 import { ExampleList } from './examples.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
@@ -10,7 +10,7 @@ import type { Page, SiteData } from './types.ts';
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
 
 /** The landing page, in the order ADR 0002's amendment sets. */
-function Home({ examples }: SiteData): VNode {
+function Home({ examples, features }: SiteData): VNode {
   return (
     <main class="ui-shell">
       <PageIntro title={home.intro.heading} id="intro">

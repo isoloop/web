@@ -2,6 +2,8 @@
 
 The processor's File processor run three ways on the bench server (M3h, decision 23): the same 8 headless processors on a worker each (`own`), all in one pool (`one`), and placed by `@isoloop/balancer`. The question is placement, so there's no native build. The runs are in [`final/results/`](final/results/), with [`summary.md`](final/results/summary.md).
 
+**Run again on the M3i balancer** (backlog, packing back, fewer moves): [`v0.2.0/`](v0.2.0/README.md). What's below is M3h's run.
+
 ## What we found
 
 On four cores at 2.0 GHz, at 50 files a second:

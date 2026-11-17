@@ -83,10 +83,7 @@ export type BoardOptions = {
 
 type Entry = { spec: WidgetSpec; added: number; seq: number };
 type Slot = { surface: Element; mounted: Mounted | undefined; spec: WidgetSpec | undefined };
-/**
- * The running preview. `mounted` settles once it has started: a preview for a
- * new topic waits for the old one's `stop()`, since both have the draft's id.
- */
+/** The running preview. `mounted` settles once it has started, after the old preview has stopped. */
 type Preview = { mounted: Promise<Mounted | undefined>; topic: string };
 
 const randomText = (): string => Math.random().toString(36).slice(2, 10);
@@ -371,8 +368,8 @@ export class BoardController {
     const draftId = d.draftId;
     const entry: Preview = {
       topic: topic.name,
-      // Spawned once the old preview, with the same id, has stopped; not at
-      // all if the drawer closed or moved to another topic meanwhile.
+      // Spawned once the old preview has stopped; not at all if the drawer
+      // closed or moved to another topic meanwhile.
       mounted: stopped.then(() =>
         this.#preview === entry && this.#drawer.open && this.#drawer.draftId === draftId
           ? this.#rt.mountWidget(spec, surface, { mode: 'draft', topic, draftId })

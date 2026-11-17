@@ -1,12 +1,18 @@
 import type { VNode } from 'preact';
+import type { Changelog } from '../../build/changelog.ts';
 import type { Diagram } from '../../build/diagrams.ts';
 import type { Example } from '../../build/examples.ts';
+import type { Feature } from '../../build/features.ts';
 import type { Samples } from '../../build/samples.ts';
 import type { Current } from 'ui/components';
 
 /** What every page is rendered from, gathered at build time. */
 export interface SiteData {
   examples: Example[];
+  /** /changelog/: the library's changelogs at the pin and the apps' (build/changelog.ts). */
+  changelog: Changelog;
+  /** The features on /features/ and the landing strip, in order (content/features/). */
+  features: Feature[];
   diagrams: Diagram[];
   /** The isoloop/isoloop sha the diagrams come from. */
   pin: string;

@@ -1,0 +1,29 @@
+{
+  "id": "bus",
+  "order": 30,
+  "part": "bus",
+  "name": "The message bus.",
+  "line": "Typed topics in their own worker, every record checked against its schema.",
+  "text": [
+    "The bus runs in a worker of its own. Each isolate talks to it over its own channel, so records never pass through the main thread. Every topic has a schema, written with any Standard Schema library (Zod, Valibot, ArkType), and the bus checks each record before it’s appended. One that fails is rejected with `invalid` and no reader ever sees it."
+  ],
+  "demo": "bus",
+  "since": "site-v0.1.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/bus/src/broker.ts",
+      "symbol": "Broker"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/bus/src/standard-schema.ts",
+      "symbol": "toIssues"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/bus/src/topic.ts",
+      "symbol": "topic"
+    }
+  ]
+}

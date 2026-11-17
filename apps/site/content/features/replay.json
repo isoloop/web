@@ -1,0 +1,29 @@
+{
+  "id": "replay",
+  "order": 40,
+  "part": "bus",
+  "name": "Retention and replay.",
+  "line": "Topics keep their records, so a reader can go back and read them again.",
+  "text": [
+    "A topic keeps its records under a retention policy: the last n, a time window, or the latest record per key. Where a restarted reader starts is its own choice: `earliest` reads every retained record again, `committed` reads on after its last commit, `latest` takes only new records. D subscribes from `earliest`, which is how it rebuilds its list of notes."
+  ],
+  "demo": "replay",
+  "since": "site-v0.1.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/protocol/src/bus.ts",
+      "symbol": "StartPosition"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/bus/src/topic.ts",
+      "symbol": "topicConfig"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/replay.spec.ts",
+      "test": "a crashed D replays its log and shows the same history, with no new events"
+    }
+  ]
+}

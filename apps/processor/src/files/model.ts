@@ -505,9 +505,8 @@ export class FileProcessor {
       id,
       src: this.#src,
       config: { kind },
-      // Its own job topic too: a stopping processor puts back the files it hadn't done.
       grants: {
-        publish: [resultsTopic.name, TOPICS[kind].name],
+        publish: [resultsTopic.name],
         subscribe: [TOPICS[kind].name],
       },
     };

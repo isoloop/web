@@ -1,0 +1,28 @@
+{
+  "id": "placement",
+  "order": 60,
+  "part": "pool",
+  "name": "Placement.",
+  "line": "Its own worker or a shared pool: one option per isolate.",
+  "text": [
+    "Each isolate gets a worker of its own by default. Give several the same pool name and they share one: less memory and a faster start, but one event loop, so they stall and restart together. A pool is a unit of failure, so group what can fail together."
+  ],
+  "demo": "placement-still",
+  "since": "site-v0.1.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/kernel.ts",
+      "symbol": "IsolateManifest"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/pools.spec.ts",
+      "test": "a member that hangs restarts its pool; the members replay from their committed offsets"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/guide/pools.md"
+    }
+  ]
+}

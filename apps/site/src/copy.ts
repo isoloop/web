@@ -16,68 +16,8 @@ export const site = {
     'Event-loop isolation for web apps. Each part of your app runs on its own worker or in a shared pool, talks through a message bus that keeps its records, and is restarted when it fails. React, Preact or plain DOM.',
 };
 
-/** One line per feature, in the order of /features/, with the part of the system it's about. */
-export const features: {
-  id: string;
-  part: 'isolate' | 'bus' | 'pool' | 'host' | 'cost';
-  name: string;
-  line: string;
-}[] = [
-  {
-    id: 'containment',
-    part: 'isolate',
-    name: 'Containment.',
-    line: 'A blocked or crashed isolate stops nothing beyond its own worker.',
-  },
-  {
-    id: 'restart',
-    part: 'isolate',
-    name: 'Restart and catch-up.',
-    line: 'A stopped isolate starts again and catches up from the bus.',
-  },
-  {
-    id: 'bus',
-    part: 'bus',
-    name: 'The message bus.',
-    line: 'Typed topics in their own worker, every record checked against its schema.',
-  },
-  {
-    id: 'replay',
-    part: 'bus',
-    name: 'Retention and replay.',
-    line: 'Topics keep their records, so a reader can go back and read them again.',
-  },
-  {
-    id: 'durable',
-    part: 'bus',
-    name: 'Durable history.',
-    line: 'Persistent topics live in OPFS and survive a reload.',
-  },
-  {
-    id: 'placement',
-    part: 'pool',
-    name: 'Placement.',
-    line: 'Its own worker or a shared pool: one option per isolate.',
-  },
-  {
-    id: 'frameworks',
-    part: 'host',
-    name: 'Your framework.',
-    line: 'React, Preact or plain DOM, chosen per isolate.',
-  },
-  {
-    id: 'safety',
-    part: 'host',
-    name: 'Safety.',
-    line: 'Grants per isolate, a sanitised DOM, no inline scripts.',
-  },
-  {
-    id: 'cost',
-    part: 'cost',
-    name: 'What it costs.',
-    line: 'CPU, memory and start-up time, measured on four devices.',
-  },
-];
+// The features themselves (their strip line, heading and section text, with
+// proof links) are in content/features/<id>.json (ADR 0004, decision 5).
 
 /** The recording on the landing page and in /features/#containment. */
 export const recording = {
@@ -283,16 +223,12 @@ export const featuresPage = {
     'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
   lede: 'Code that shares data shouldn’t share an event loop. That idea runs through nine parts of one toolchain. Three run live below, on basic, the smallest example, running in this page; the rest are shown as code or as a still.',
+  changelog: 'What changed, release by release',
   containment: {
-    text: 'Each isolate runs on an event loop in a worker: its own, or one it shares in a pool. When a loop blocks, the kernel stops it and starts it again. When an isolate reports an error, only that isolate restarts, even in a pool. The main thread and the other loops don’t wait for either.',
     caption:
       'A bar is work on that loop, and time moves to the left. Hatched means the loop is stuck. A line across a track means that isolate was stopped and started again. C and D share one loop; placement decides that. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
   },
   restart: {
-    text: [
-      'The kernel expects a heartbeat from every loop. After 400 ms without one, an isolate is marked blocked. After `killAfterMs` (10 s by default; basic uses 2 s) its worker is stopped and started again. Three restarts within a minute and it’s marked failed, and stays down: that’s the crash-loop guard, so an isolate that keeps crashing stops costing restarts. `kernel.restart(id)` brings it back.',
-      'Restarted, each subscription starts where its `from` says. `committed` reads on after its last commit; commits go out every 100 ms, so the few records it had read but not committed come again: at least once, none lost. `earliest` reads everything the topic still retains. `latest`, the default, starts with new records.',
-    ],
     rows: { loop: 'Loop', reads: 'Reads' },
     stuck: 'stuck: no heartbeat',
     again: 'started again',
@@ -305,7 +241,6 @@ export const featuresPage = {
       'A subscription from `committed`: it had read to 4139 and committed 4137 when it got stuck.',
   },
   bus: {
-    text: 'The bus runs in a worker of its own. Each isolate talks to it over its own channel, so records never pass through the main thread. Every topic has a schema, written with any Standard Schema library (Zod, Valibot, ArkType), and the bus checks each record before it’s appended. One that fails is rejected with `invalid` and no reader ever sees it.',
     topics: [
       ['count.v1', 'from A'],
       ['primes.v1', 'from C'],
@@ -317,7 +252,6 @@ export const featuresPage = {
       'Each box is a record and its offset in that topic. The tags under a topic show the last record each reader read there. A crossed-out box is a publish the bus rejected because it failed the schema: every 11 s D sends an empty note.',
   },
   replay: {
-    text: 'A topic keeps its records under a retention policy: the last n, a time window, or the latest record per key. Where a restarted reader starts is its own choice: `earliest` reads every retained record again, `committed` reads on after its last commit, `latest` takes only new records. D subscribes from `earliest`, which is how it rebuilds its list of notes.',
     tape: 'note.v1, as D reads it',
     crashD: 'Crash D',
     restartD: 'Restart D',
@@ -334,13 +268,11 @@ export const featuresPage = {
       'Each cell is a note and its offset. Shaded cells are notes D had read before the crash and read again after it.',
   },
   durable: {
-    text: 'Mark a topic persistent and the bus keeps it in the origin private file system (OPFS). It survives a page reload, a closed tab and a crash of the bus worker. A publish is acknowledged once its batch is on disk; batches are written every 5 ms. The plant dashboard keeps its alarms and events this way.',
     head: ['Topic', 'Before the reload', 'After the reload'],
     caption:
       'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability-degraded`.',
   },
   placement: {
-    text: 'Each isolate gets a worker of its own by default. Give several the same pool name and they share one: less memory and a faster start, but one event loop, so they stall and restart together. A pool is a unit of failure, so group what can fail together.',
     layouts: [
       ['Own workers', '4 loops', [['A'], ['B'], ['C', 'hit'], ['D']]],
       ['As in basic', '3 loops', [['A'], ['B'], ['C and D', 'hit']]],
@@ -351,7 +283,6 @@ export const featuresPage = {
     more: 'When to pool, with the plant’s figures',
   },
   frameworks: {
-    text: 'Write an isolate with React (18 or 19), Preact (10 or 11) or plain DOM. Each isolate picks its own, and one page can mix them. An isolate renders into a DOM subset inside its worker; the host applies the changes to the page once a frame.',
     tabs: [
       ['react', 'React'],
       ['preact', 'Preact'],
@@ -375,7 +306,6 @@ export const featuresPage = {
     ] as [string, string][],
   },
   cost: {
-    text: 'Isoloop adds workers, a bus and a kernel. That takes CPU, memory and start-up time on every device. On some it buys responsiveness; on others it buys nothing but the features above.',
     more: 'The full results, per device and build',
   },
 };
@@ -417,13 +347,32 @@ export const examplesPage = {
   // Shown where an example has no measured result yet (its example.json `note`).
   title: 'Examples',
   description:
-    'Isoloop examples: basic, and the plant and markets dashboards. Each one runs live, with its measured results.',
+    'Isoloop examples: basic, the processor, and the plant and markets dashboards. Each one runs live, with its measured results.',
   heading: 'Examples',
   intro:
     'Each example runs live in your browser on the published @isoloop packages. The dashboards come as a native build and an Isoloop build of the same code, so you can compare them side by side.',
   measuredAt: 'measured at',
   links: { live: 'Open live', source: 'Source', results: 'Results', architecture: 'Architecture' },
   support: 'They need Safari 16.4 or later, or a recent Chrome, Edge or Firefox.',
+};
+
+export const changelogPage = {
+  title: 'Changelog',
+  description:
+    'What changed in the Isoloop packages and in the site and its examples, release by release.',
+  heading: 'Changelog',
+  lede: 'What changed, release by release. The library’s packages share one version; the site and each example have their own. Every entry is the one written with the change.',
+  library: {
+    heading: 'The library',
+    unreleased:
+      'No library version has been released with a changelog yet. The packages are published as prereleases under the next tag, and the first versioned one appears here when it ships.',
+    packages: 'The packages:',
+  },
+  apps: {
+    heading: 'The site and examples',
+    unreleased: 'Earlier releases of these are listed by their tags on GitHub:',
+    tags: 'release tags',
+  },
 };
 
 export const notFound = {
