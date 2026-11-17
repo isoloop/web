@@ -1,0 +1,12 @@
+{
+  // The repo's own scripts that Node runs directly as TypeScript (CI checks
+  // and the agents' PR gate, ADR 0004): typed as Node code, nothing emitted.
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  },
+  "include": ["**/*.ts"]
+}
