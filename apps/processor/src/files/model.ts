@@ -29,6 +29,30 @@ const RATE_WINDOW_MS = 5_000;
 const LATENCY_KEEP = 500;
 const RECENT_KEEP = 200;
 const LIVE = new Set(['loading', 'running', 'blocked', 'crashed', 'restarting']);
+/** How often the page tells the balancer each group's backlog (it goes stale after 10 s). */
+const REPORT_MS = 1_000;
+
+/** A move, with what it cost once the moved processor beat again (`arrived`). */
+export type Move = {
+  at: number;
+  id: string;
+  from: string;
+  to: string;
+  reason: string;
+  costMs?: number;
+};
+
+/** One processor at one moment, for the comparison's trace (M3i). */
+export type TraceRow = {
+  id: string;
+  pool: string;
+  /** The balancer's figure, over 3 s; undefined when it doesn't place this processor. */
+  loadPct: number | undefined;
+  /** From the last second of beats. */
+  measuredPct: number | undefined;
+  /** Its kind's files made and not done. */
+  backlog: number;
+};
 
 export type Dials = {
   running: boolean;
@@ -149,6 +173,10 @@ export class FileProcessor {
   readonly #moved = new Map<string, { reason: string; from: string; at: number }>();
   readonly #log: LogEntry[] = [];
   readonly #movesAt: number[] = [];
+  readonly #moves: Move[] = [];
+  /** Noted spikes and `behind` events, counted for the comparison (M3i). */
+  #noted = 0;
+  #behind = 0;
 
   constructor(opts: {
     kernel: Kernel;
@@ -246,8 +274,34 @@ export class FileProcessor {
     this.#balancer?.on('move', (e) => {
       this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
       this.#movesAt.push(performance.now());
+      this.#moves.push({ at: performance.now(), ...e });
       this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`);
     });
+    // What each move cost: from the stop to the first beat in its new place.
+    this.#balancer?.on('arrived', (e) => {
+      const m = this.#moves.findLast((x) => x.id === e.id && x.costMs === undefined);
+      if (m) m.costMs = e.costMs;
+      const entry = this.#log.findLast(
+        (l) => l.text.startsWith(`${e.id}: `) && l.kind === e.reason,
+      );
+      if (entry && entry.costMs === undefined) entry.costMs = e.costMs;
+    });
+    this.#balancer?.on('spike', (e) => {
+      if (e.action !== 'noted') return;
+      this.#noted++;
+      this.#entry('noted', `${e.id}: one long task (${Math.round(e.lagMs)} ms), noted`);
+    });
+    this.#balancer?.on('behind', (e) => {
+      this.#behind++;
+      this.#entry('behind', `${e.id}: ${e.backlog} files waiting, nowhere with more CPU`);
+    });
+    // Each kind's backlog, reported on every processor of its group (M3i):
+    // a group's files belong to the group, not to one member.
+    setInterval(() => {
+      const b = this.#balancer;
+      if (this.#mode !== 'balancer' || !b) return;
+      for (const [id, kind] of this.#kinds) b.report(id, { backlog: this.#backlogOf(kind) });
+    }, REPORT_MS);
     this.#kernel.on('isolate:crash', (e) => {
       if (this.#ids.includes(e.id)) this.#entry('crash', `${e.id} crashed (${e.reason})`);
     });
@@ -314,6 +368,40 @@ export class FileProcessor {
     const lat = done.filter((r) => !r.corrupt).map((r) => r.latency);
     const moves = this.#movesAt.filter((at) => at >= t).length;
     return { done: done.length, p50: percentile(lat, 50), p95: percentile(lat, 95), moves };
+  }
+
+  /** The moves since `t` (`performance.now()`), with their cost where known. */
+  movesSince(t: number): Move[] {
+    return this.#moves.filter((m) => m.at >= t).map((m) => ({ ...m }));
+  }
+
+  /** Noted spikes and `behind` events so far. */
+  events(): { noted: number; behind: number } {
+    return { noted: this.#noted, behind: this.#behind };
+  }
+
+  /** Every processor now: where it runs, its load as the balancer and the beats see it, its backlog. */
+  trace(): TraceRow[] {
+    const now = performance.now();
+    const isolates = new Map(this.#kernel.isolates().map((i) => [i.id, i]));
+    const placements = new Map((this.#balancer?.placements() ?? []).map((p) => [p.id, p]));
+    return this.#ids.map((id) => {
+      const placement = placements.get(id);
+      const recent = (this.#beats.get(id)?.beats ?? []).filter((b) => b.at > now - 1_000);
+      const dur = recent.reduce((s, b) => s + b.dur, 0);
+      const busy = recent.reduce((s, b) => s + b.busy, 0);
+      return {
+        id,
+        pool: placement?.pool ?? isolates.get(id)?.pool ?? id,
+        loadPct: placement?.loadPct === undefined ? undefined : Math.round(placement.loadPct),
+        measuredPct: dur > 0 ? Math.round(Math.min(100, (busy / dur) * 100)) : undefined,
+        backlog: this.#backlogOf(this.#kinds.get(id) ?? 'csv'),
+      };
+    });
+  }
+
+  #backlogOf(kind: Kind): number {
+    return Math.max(0, (this.#producedBy.get(kind) ?? 0) - (this.#doneOf.get(kind) ?? 0));
   }
 
   /** This run's file ids that have no result yet. */

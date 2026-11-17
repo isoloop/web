@@ -7,15 +7,15 @@
 //
 //   node comparison/run.ts \
 //     --pair isoloop:own=isoloop:balancer --pair isoloop:one=isoloop:balancer \
-//     --pair isoloop:one-off=isoloop:one --mixes normal,faults --rounds 5 \
+//     --pair isoloop:one-off=isoloop:one --mixes normal,faults,faults-calm --rounds 5 \
 //     --hold 0 --warm 20 --window 20 --engines chromium,firefox \
-//     --out comparison/final/results
+//     --out comparison/v0.2.0/results
 //
 // `COMPARE_RATE` sets the generator's files per second (default 50).
 import { resolve } from 'node:path';
 import { runPairs, type PairsApp } from 'compare/pairs';
 
-const MIXES = ['normal', 'faults'] as const;
+const MIXES = ['normal', 'faults', 'faults-calm'] as const;
 
 export const PROCESSOR: PairsApp = {
   title: 'File processor, placements compared',
@@ -26,7 +26,8 @@ export const PROCESSOR: PairsApp = {
     env: 'COMPARE_MIXES',
     default: 'normal',
     field: 'mix',
-    label: (m) => (m === 'faults' ? 'With faults' : 'Normal'),
+    label: (m) =>
+      m === 'faults' ? 'With faults' : m === 'faults-calm' ? 'Faults, then calm' : 'Normal',
     order: MIXES,
   },
   figures: [
@@ -36,6 +37,14 @@ export const PROCESSOR: PairsApp = {
     { key: 'p95Ms', label: 'Latency per file, p95', unit: ' ms' },
     { key: 'typingMedianMs', label: 'Typing (median of 5)', unit: ' ms' },
     { key: 'moves', label: 'Moves in the window', unit: '' },
+    { key: 'workersAfterFaults', label: 'Workers after the faults (faults, then calm)', unit: '' },
+    { key: 'workersEnd', label: 'Workers at the end of the window', unit: '' },
+    { key: 'movesTotal', label: 'Moves in the whole run', unit: '' },
+    { key: 'backlogMoves', label: 'Moves for a rising backlog', unit: '' },
+    { key: 'packs', label: 'Packs back', unit: '' },
+    { key: 'moveCostMedianMs', label: 'Move cost, median (stop to first beat)', unit: ' ms' },
+    { key: 'noted', label: 'Spikes only noted', unit: '' },
+    { key: 'behind', label: 'Behind events', unit: '' },
     { key: 'queueAtStop', label: 'Queue when the generator stops', unit: '' },
     { key: 'drainMs', label: 'Drain after the generator stops', unit: ' ms' },
     { key: 'lost', label: 'Files without a result 2 min after the generator stops', unit: '' },
