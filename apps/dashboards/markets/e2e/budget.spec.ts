@@ -24,23 +24,25 @@ const PAIRS: (readonly [isoloop: string, native: string])[] = [
 // Playwright's WebKit (Linux, no GPU) presents the canvases workers draw on the
 // main thread, so typing waits. Measured on the 4-core CI runner, budget 400 ms
 // with the ×2 scale:
-// - Heavy: both Isoloop builds over budget or timed out in every run. Marked
-//   expected to fail, not skipped: they still run, report their numbers, and
-//   turn red if WebKit gets within budget. The same for `matched` (M3f
-//   decision 5): it timed out on both attempts in the markets-v0.3.0 release
-//   run, with every widget drawing from one pool. `matched` at Normal is
-//   reported only, like the others (246–384 ms, and one timeout).
+// - Heavy: until web#126, both Isoloop builds were over budget or timed out
+//   in every run, and `matched` (M3f decision 5) timed out on both attempts
+//   in the markets-v0.3.0 release run. They were marked expected to fail, so
+//   they'd turn red once WebKit got within budget. With the widgets' work in
+//   10 ms slices (web#126) they did, in the markets-v0.6.0 release run
+//   (isoloop 217–219 ms, isoloop-preact 125–240 ms, matched 104–116 ms). One
+//   run isn't enough to assert, so they're reported only, like Normal.
+//   `matched` at Normal is reported only, like the others (246–384 ms, and
+//   one timeout).
 // - Normal: the medians fall either side of the budget from run to run
 //   (isoloop 170–588 ms, isoloop-preact 228–642 ms), so neither asserting nor
 //   expecting a failure is stable. They're reported only: measured, annotated
 //   and attached, not asserted; a run that times out is annotated as such.
 // See https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md
-const WEBKIT_EXPECTED_FAIL = new Set([
-  'isoloop@heavy',
-  'isoloop-preact@heavy',
-  'isoloop?placement=matched@heavy',
-]);
+const WEBKIT_EXPECTED_FAIL = new Set<string>([]);
 const WEBKIT_REPORT_ONLY = new Map([
+  ['isoloop@heavy', '217–219 ms (markets-v0.6.0)'],
+  ['isoloop-preact@heavy', '125–240 ms (markets-v0.6.0)'],
+  ['isoloop?placement=matched@heavy', '104–116 ms (markets-v0.6.0)'],
   ['isoloop@normal', '170–588 ms'],
   ['isoloop-preact@normal', '228–642 ms'],
   ['isoloop?placement=matched@normal', '246–384 ms, and one timeout'],
