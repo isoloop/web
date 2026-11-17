@@ -113,9 +113,11 @@ arbitrage) show about 7% fewer (43 against 46).
 ## WebKit
 
 The recorded comparison runs in Chromium. Playwright's WebKit on Linux (no GPU)
-behaves differently, and Isoloop's typing latency there is above Chromium's at
-every size: at Heavy in the `markets-v0.6.0` release run, 104–240 ms on WebKit
-against 33–34 ms on Chromium, within the 400 ms budget on both:
+behaves differently, and Isoloop's typing latency there is above Chromium's.
+In the `markets-v0.6.0` release run's budget check, on the same CI runner, the
+three Isoloop builds (React, Preact and `matched`) at Heavy measured 104–240 ms
+on WebKit and 33–34 ms on Chromium, both within the 400 ms budget. The table's
+WebKit ranges, by size:
 
 | WebKit | Isoloop · React | Native · React | Isoloop · Preact | Native · Preact |
 | --- | --- | --- | --- | --- |
