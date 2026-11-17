@@ -347,7 +347,7 @@ export const examplesPage = {
   // Shown where an example has no measured result yet (its example.json `note`).
   title: 'Examples',
   description:
-    'Isoloop examples: basic, and the plant and markets dashboards. Each one runs live, with its measured results.',
+    'Isoloop examples: basic, the processor, and the plant and markets dashboards. Each one runs live, with its measured results.',
   heading: 'Examples',
   intro:
     'Each example runs live in your browser on the published @isoloop packages. The dashboards come as a native build and an Isoloop build of the same code, so you can compare them side by side.',
