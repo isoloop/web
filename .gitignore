@@ -31,3 +31,8 @@ apps/dashboards/markets/comparison-results/
 
 # The assembled site (scripts/assemble-site.sh)
 /site/
+
+# Claude Code: local state stays out; skills, agents and settings.json are committed (ADR 0004).
+/.claude/worktrees/
+/.claude/settings.local.json
+/.claude/.cc-writes/
