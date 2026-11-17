@@ -284,18 +284,29 @@ export function loadChangelog(
       });
     }
   }
-  const appReleases = apps.toSorted((a, b) => {
+  const appReleases = apps.toSorted(byTagMade(tagAt));
+  return { library: libraryReleases, libraryUnreleased, apps: appReleases, appsUnreleased };
+}
+
+/**
+ * Orders app releases newest first by when their tag was made (`tagAt`, UTC ms
+ * by tag). Releases without a tag time go after those with one, newest version
+ * first within an app, apps by name.
+ */
+export function byTagMade(
+  tagAt: ReadonlyMap<string, number>,
+): (
+  a: { tag: string; source: string; version: string },
+  b: { tag: string; source: string; version: string },
+) => number {
+  return (a, b) => {
     const x = tagAt.get(a.tag);
     const y = tagAt.get(b.tag);
-    return x !== undefined && y !== undefined
-      ? y - x
-      : x !== undefined
-        ? -1
-        : y !== undefined
-          ? 1
-          : a.source === b.source
-            ? newestFirst(a.version, b.version)
-            : a.source.localeCompare(b.source);
-  });
-  return { library: libraryReleases, libraryUnreleased, apps: appReleases, appsUnreleased };
+    if (x !== undefined && y !== undefined) return y - x;
+    if (x !== undefined) return -1;
+    if (y !== undefined) return 1;
+    return a.source === b.source
+      ? newestFirst(a.version, b.version)
+      : a.source.localeCompare(b.source);
+  };
 }

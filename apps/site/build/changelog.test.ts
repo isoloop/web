@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { absoluteLinks, newestFirst, parseChangelog } from './changelog.ts';
+import { absoluteLinks, byTagMade, newestFirst, parseChangelog } from './changelog.ts';
 
 // The shape Changesets 3 writes: a version per `##`, kinds per `###`, one
 // bullet per changeset, its later paragraphs indented by two spaces.
@@ -70,5 +70,39 @@ describe('newestFirst', () => {
     expect(
       ['0.1.0-next.2', '0.1.0', '0.1.0-next.10', '0.0.9', '0.1.1-rc.1'].toSorted(newestFirst),
     ).toEqual(['0.1.1-rc.1', '0.1.0', '0.1.0-next.10', '0.1.0-next.2', '0.0.9']);
+  });
+});
+
+/** An app release from its tag, `<app>-v<version>`. */
+function release(tag: string): { tag: string; source: string; version: string } {
+  const [, source = '', version = ''] = /^(.+)-v(.+)$/.exec(tag) ?? [];
+  return { tag, source, version };
+}
+
+describe('byTagMade', () => {
+  it('orders same-day tags by the time they were made, then untagged releases', () => {
+    const at = new Map([
+      ['site-v0.1.2', Date.parse('2026-11-16T10:21:23+02:00')],
+      ['markets-v0.3.1', Date.parse('2026-11-16T09:12:00+02:00')],
+      // Written in another offset, it still sorts by the instant: 08:30Z is after site's 08:21Z.
+      ['plant-v0.1.1', Date.parse('2026-11-16T08:30:00Z')],
+    ]);
+    const tags = ['markets-v0.3.1', 'site-v0.2.0', 'plant-v0.1.1', 'site-v0.1.2', 'basic-v0.2.0'];
+    expect(
+      tags
+        .map(release)
+        .toSorted(byTagMade(at))
+        .map((x) => x.tag),
+    ).toEqual(['plant-v0.1.1', 'site-v0.1.2', 'markets-v0.3.1', 'basic-v0.2.0', 'site-v0.2.0']);
+  });
+
+  it('without any tag times, orders by app, newest version first', () => {
+    const tags = ['site-v0.1.0', 'basic-v0.1.0', 'site-v0.1.1-rc.1', 'site-v0.1.1'];
+    expect(
+      tags
+        .map(release)
+        .toSorted(byTagMade(new Map()))
+        .map((x) => x.tag),
+    ).toEqual(['basic-v0.1.0', 'site-v0.1.1', 'site-v0.1.1-rc.1', 'site-v0.1.0']);
   });
 });
