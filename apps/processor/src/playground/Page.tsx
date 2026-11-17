@@ -37,9 +37,16 @@ export function PlaygroundPage({ playground }: { playground: Playground }): Reac
         <p>
           Give a task jobs a second and its CPU dial becomes what those jobs need. The page reports
           each task’s backlog to the balancer, which moves a task whose backlog keeps growing to
-          where it gets more CPU. Hide its work from the busy time and the backlog is all the
-          balancer has to go on. Press Calm, and a minute later quiet tasks pack back into fewer
+          where it gets more CPU. Press Calm, and a minute later quiet tasks pack back into fewer
           pools.
+        </p>
+        <p>
+          Switch a task to work after <code>await</code> and the runtime’s busy time no longer sees
+          its work. Each task also times its own work, and the page reports that to the balancer, so
+          the card shows both: what the kernel measured, and what the task reported. Turn its report
+          off, and the backlog is all the balancer has to go on. A task the kernel gives up on (it
+          crashed past its restart limit) stays where it is: the balancer never moves or restarts
+          it.
         </p>
       </section>
 
@@ -144,6 +151,7 @@ function Column({ column, playground }: { column: ColumnView; playground: Playgr
 
 function TaskCard({ task, playground }: { task: TaskView; playground: Playground }) {
   const measured = task.measured === undefined ? undefined : Math.round(task.measured);
+  const reported = task.reported === undefined ? undefined : Math.round(task.reported);
   return (
     <li
       className="card"
@@ -190,18 +198,35 @@ function TaskCard({ task, playground }: { task: TaskView; playground: Playground
         <input
           type="checkbox"
           checked={task.hidden}
-          aria-label={`${task.name} hides its work`}
+          aria-label={`${task.name} works after await`}
           onChange={(e) => playground.setHidden(task.id, e.currentTarget.checked)}
         />
-        hide work from busy time
+        after await
+      </label>
+      <label className="hidden-work mono muted">
+        <input
+          type="checkbox"
+          checked={task.reports}
+          aria-label={`${task.name} reports its busy time`}
+          onChange={(e) => playground.setReports(task.id, e.currentTarget.checked)}
+        />
+        report its busy time
       </label>
       <div className="meter" aria-label={`${task.name} measured load`}>
         <span className="set" style={{ width: `${task.load}%` }} />
         <span className="got" style={{ width: `${measured ?? 0}%` }} />
+        {reported !== undefined && <span className="reported" style={{ width: `${reported}%` }} />}
       </div>
       <div className="card-foot">
-        <span className="mono muted" data-testid="measured">
-          measured {measured === undefined ? '--' : `${measured} %`}
+        <span className="mono muted" data-testid="measured" title="From the kernel's heartbeats">
+          kernel {measured === undefined ? '--' : `${measured} %`}
+        </span>
+        <span
+          className="mono muted"
+          data-testid="reported"
+          title="From the task's own timing, as the balancer has it"
+        >
+          reported {reported === undefined ? '--' : `${reported} %`}
         </span>
         {task.backlog !== undefined && (
           <span className="mono muted" data-testid="backlog" data-backlog={task.backlog}>

@@ -1,5 +1,5 @@
 import { defineIsolate } from '@isoloop/runtime';
-import { control, done as doneTopic, tasks } from '../topics';
+import { busy as busyTopic, control, done as doneTopic, tasks } from '../topics';
 
 // A playground task: a headless isolate. Its dial comes from
 // playground.tasks.v1 under its own id, read from the start, so wherever the
@@ -10,8 +10,12 @@ import { control, done as doneTopic, tasks } from '../topics';
 // - Jobs/s above 0 (M3i): jobs arrive at that rate, each costing
 //   `load × 10 ÷ rate` ms of work in `chunkMs` pieces. It works through them
 //   as fast as its worker lets it and publishes how many it has done, so the
-//   page can tell its backlog. `hidden` does the work in promise
-//   continuations, which the runtime's busy time doesn't see.
+//   page can tell its backlog.
+// - `hidden` ("after await"): either way, each piece runs in a promise
+//   continuation, which the runtime's busy time doesn't see.
+//
+// It times its own work and publishes the running total (M3j), which the page
+// reports to the balancer: the balancer then sees work done after `await` too.
 
 /** Keeps the loop busy for `ms`, with work the engine can't skip. */
 function spin(ms: number): number {
@@ -25,6 +29,8 @@ function spin(ms: number): number {
 
 /** How often the task publishes its count while it works. */
 const PUBLISH_MS = 250;
+/** How often it publishes its measured busy time, while that grows. */
+const BUSY_MS = 500;
 
 export default defineIsolate({
   start(ctx) {
@@ -38,6 +44,19 @@ export default defineIsolate({
     let done = 0;
     let published = -1;
     let publishedAt = 0;
+    /** Its own measured work since it started, ms (M3j). */
+    let worked = 0;
+    let workedSent = 0;
+    const work = (ms: number): void => {
+      const t = performance.now();
+      sink += spin(ms);
+      worked += performance.now() - t;
+    };
+    setInterval(() => {
+      if (worked === workedSent) return;
+      workedSent = worked;
+      void ctx.bus.publish(busyTopic, { key: ctx.id, value: { busyMs: Math.round(worked) } });
+    }, BUSY_MS);
 
     ctx.bus.subscribe(
       tasks,
@@ -59,6 +78,8 @@ export default defineIsolate({
       control,
       (r) => {
         if (r.value.to !== ctx.id) return;
+        // A fault, not work: the kernel sees the long task as a spike, and it stays
+        // out of the reported busy time, or one block would read as a full pool.
         if (r.value.act === 'block') sink += spin(r.value.ms ?? 2_000);
         else ctx.reportError(new Error(`${ctx.id} crashed on purpose`));
       },
@@ -96,7 +117,18 @@ export default defineIsolate({
         setTimeout(step, 100);
         return;
       }
-      sink += spin(chunkMs);
+      if (hidden) {
+        // Out of the busy time's sight: after the port's callback has returned.
+        void Promise.resolve().then(() => {
+          work(chunkMs);
+          rest();
+        });
+      } else {
+        work(chunkMs);
+        rest();
+      }
+    };
+    const rest = (): void => {
       owed += load >= 100 ? 0 : chunkMs * (100 / load - 1);
       if (owed < 4) {
         next();
@@ -127,11 +159,11 @@ export default defineIsolate({
         // A promise continuation runs after the port's callback has returned,
         // outside the time the runtime puts on this task.
         void Promise.resolve().then(() => {
-          sink += spin(slice);
+          work(slice);
           finish();
         });
       } else {
-        sink += spin(slice);
+        work(slice);
         finish();
       }
     };

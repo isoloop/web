@@ -10,6 +10,7 @@ function handle<T extends { name: string }>(name: T['name']): T {
 export const tasks: typeof C.tasks = handle('playground.tasks.v1');
 export const control: typeof C.control = handle('playground.control.v1');
 export const done: typeof C.done = handle('playground.done.v1');
+export const busy: typeof C.busy = handle('processor.busy.v1');
 export const csvJobs: typeof C.csvJobs = handle('files.jobs.csv.v1');
 export const imageJobs: typeof C.imageJobs = handle('files.jobs.image.v1');
 export const archiveJobs: typeof C.archiveJobs = handle('files.jobs.archive.v1');
