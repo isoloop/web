@@ -46,9 +46,7 @@ export default defineIsolate({
     // can take them, so the share stays `load` %.
     const { port1, port2 } = new MessageChannel();
     let owed = 0;
-    let stopped = false;
     const step = (): void => {
-      if (stopped) return;
       if (load <= 0) {
         owed = 0;
         setTimeout(step, 100);
@@ -66,13 +64,7 @@ export default defineIsolate({
     port1.addEventListener('message', step);
     port1.start();
     step();
-    // In a pool the worker outlives a stopped member, and so would this
-    // loop: stop it here. (Keeping `sink` observable, so the work isn't
-    // optimised away.)
-    ctx.onShutdown(() => {
-      stopped = true;
-      port1.close();
-      if (sink === -1) console.log(sink);
-    });
+    // A stopped member's timers and ports never run again (ADR 0015,
+    // decision 9), so the loop ends with it.
   },
 });

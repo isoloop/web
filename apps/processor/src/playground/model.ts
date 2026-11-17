@@ -167,29 +167,16 @@ export class Playground {
     const ids = [...this.#dials.keys()];
     const prev = this.#mode;
     this.#mode = mode;
-    // The balancer's `stop` throws for one it's in the middle of moving (it
-    // already stopped it, and drops the move): it's stopped either way.
+    // Mid-move, the balancer's `stop` cancels the move and waits for the
+    // stop (isoloop#209), so every one is gone when this resolves.
     await Promise.all(
-      ids.map((id) =>
-        (prev === 'balancer' ? this.#balancer.stop(id) : this.#kernel.stop(id)).catch(() => {}),
-      ),
+      ids.map((id) => (prev === 'balancer' ? this.#balancer.stop(id) : this.#kernel.stop(id))),
     );
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
     this.#entry('mode', `placement: ${mode}`);
-    // A task the balancer was moving may still be stopping: wait until the
-    // kernel has let it go, or spawning it again would throw.
-    await Promise.all(ids.map((id) => this.#gone(id)));
     for (const id of ids) if (this.#dials.has(id)) this.#spawn(id);
-  }
-
-  async #gone(id: string): Promise<void> {
-    const until = performance.now() + 5_000;
-    while (this.#kernel.isolates().some((i) => i.id === id) && performance.now() < until) {
-      // oxlint-disable-next-line eslint/no-await-in-loop -- polling until the kernel lets it go
-      await new Promise((r) => setTimeout(r, 20));
-    }
   }
 
   snapshot(): Snapshot {
