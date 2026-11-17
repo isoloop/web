@@ -14,9 +14,12 @@
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "e2e": "pnpm -r e2e",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "changeset": "changeset",
+    "version": "changeset version"
   },
   "devDependencies": {
+    "@changesets/cli": "catalog:",
     "@playwright/test": "catalog:",
     "@types/node": "catalog:",
     "oxfmt": "catalog:",

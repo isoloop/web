@@ -21,6 +21,8 @@ catalog:
   preact-render-to-string: 6.8.3
   # The site's smoke test checks accessibility with axe, behind expectAccessible() (ADR 0002, decision 9).
   '@axe-core/playwright': 4.14.0
+  # Changelogs and app versions (ADR 0004): dev tooling only, never shipped.
+  '@changesets/cli': 3.0.3
 
 # Isoloop itself, installed from npm like any app would. One version for every
 # package (they release as one fixed group, ADR 0012), so all apps move to a

@@ -42,6 +42,15 @@ pnpm --filter processor dev   # the Playground; the File processor at /files/
 
 Until Isoloop 0.1, the apps use `next` prereleases of `@isoloop/*`: one version for every package, set in `pnpm-workspace.yaml` (`catalogs.isoloop`). To move to a newer one, change it there and run `pnpm install`.
 
+## Releases
+
+Each app keeps a `CHANGELOG.md`, written by [Changesets](.changeset/README.md) ([ADR 0004](docs/adr/0004-publishing-and-governance.md)):
+
+1. **Every change** to an app or a shared package adds a changeset (`pnpm changeset`), or carries the `no-changeset` label when it's internal-only. CI checks it.
+2. **To release,** run `pnpm version` on a branch. It bumps each app's version from the pending changesets and writes its changelog section. Merge that PR.
+3. **Tag** the merge commit `<app>-v<version>`, with the version from the app's `package.json` (for example `plant-v0.2.1`). Each tag goes on its own commit, since GitHub Pages names a deployment after its commit.
+4. **The release run** checks, deploys, and then creates a GitHub Release for the tag with the changelog section as its notes.
+
 ## License
 
 MIT
