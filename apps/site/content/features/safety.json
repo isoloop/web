@@ -1,0 +1,31 @@
+{
+  "id": "safety",
+  "order": 80,
+  "part": "host",
+  "name": "Safety.",
+  "line": "Grants per isolate, a sanitised DOM, no inline scripts.",
+  "text": [],
+  "demo": "safety-facts",
+  "since": "site-v0.1.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/protocol/src/grants.ts",
+      "symbol": "Grants"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/render/registry.ts",
+      "symbol": "createRegistry"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/sanitising.spec.ts",
+      "test": "I9: a hostile isolate gets no script, frame, handler or script URL onto the page"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/guide/hosting.md"
+    }
+  ]
+}

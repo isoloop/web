@@ -1,7 +1,8 @@
 /** @jsxImportSource preact */
 import type { ComponentChildren, VNode } from 'preact';
 import { Table } from 'ui/components';
-import { features, featuresPage as f, home } from '../copy.ts';
+import type { Feature as Entry } from '../../build/features.ts';
+import { featuresPage as f, home } from '../copy.ts';
 import { Recording } from './recording.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
@@ -11,16 +12,19 @@ const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/
 const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
 
-/** A feature's section: its heading in the gutter, with the bar of its part of the system. */
-function Feature({ id, children }: { id: string; children: ComponentChildren }): VNode {
-  const feature = features.find((x) => x.id === id);
-  if (!feature) throw new Error(`no feature "${id}" in copy.ts`);
+/** A feature's section: its heading in the gutter, with the bar of its part of the system, then its text and its figure. */
+function Feature({ entry, children }: { entry: Entry; children: ComponentChildren }): VNode {
   return (
-    <section class="ui-gutter" id={id} aria-labelledby={`${id}-h`}>
-      <h2 id={`${id}-h`} data-part={feature.part}>
-        {feature.name.replace(/\.$/, '')}
+    <section class="ui-gutter" id={entry.id} aria-labelledby={`${entry.id}-h`}>
+      <h2 id={`${entry.id}-h`} data-part={entry.part}>
+        {entry.name.replace(/\.$/, '')}
       </h2>
-      <div class="ui-body">{children}</div>
+      <div class="ui-body">
+        {entry.text.map((t) => (
+          <p key={t}>{rich(t)}</p>
+        ))}
+        {children}
+      </div>
     </section>
   );
 }
@@ -33,42 +37,20 @@ function Code({ children }: { children: string }): VNode {
   );
 }
 
-function Features({ samples }: SiteData): VNode {
-  return (
-    <main class="ui-shell">
-      <PageIntro
-        title={f.heading}
-        after={
-          <nav class="ui-strip" aria-label="Features">
-            <ul>
-              {features.map((x) => (
-                <li key={x.id} data-part={x.part}>
-                  <a href={`#${x.id}`}>
-                    <b>{x.name}</b> {x.line}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        }
-      >
-        <p class="ui-lede">{f.lede}</p>
-      </PageIntro>
-
-      <Feature id="containment">
-        <p>{f.containment.text}</p>
+function Features({ samples, features }: SiteData): VNode {
+  const demos: Record<Entry['demo'], VNode> = {
+    recording: (
+      <>
         <Recording
           id="containment-rec"
           tracks={['main', 'A', 'B', 'pool']}
           controls={['block-c', 'crash-a']}
           caption={<>{f.containment.caption}</>}
         />
-      </Feature>
-
-      <Feature id="restart">
-        {f.restart.text.map((t) => (
-          <p key={t}>{rich(t)}</p>
-        ))}
+      </>
+    ),
+    'restart-still': (
+      <>
         <figure class="still" aria-labelledby="restart-cap">
           <div class="still-row" aria-hidden="true">
             <span class="still-label">{f.restart.rows.loop}</span>
@@ -108,10 +90,10 @@ function Features({ samples }: SiteData): VNode {
           </ul>
           <figcaption id="restart-cap">{rich(f.restart.caption)}</figcaption>
         </figure>
-      </Feature>
-
-      <Feature id="bus">
-        <p>{rich(f.bus.text)}</p>
+      </>
+    ),
+    bus: (
+      <>
         <figure class="demo" data-demo="bus" aria-labelledby="bus-cap">
           <div class="topics" aria-hidden="true">
             {f.bus.topics.map(([name, from]) => (
@@ -130,10 +112,10 @@ function Features({ samples }: SiteData): VNode {
           <figcaption id="bus-cap">{f.bus.caption}</figcaption>
         </figure>
         <Code>{samples.contracts}</Code>
-      </Feature>
-
-      <Feature id="replay">
-        <p>{rich(f.replay.text)}</p>
+      </>
+    ),
+    replay: (
+      <>
         <figure class="demo" data-demo="replay" aria-labelledby="replay-cap">
           <div class="tape" aria-hidden="true">
             <p class="tape-name">{f.replay.tape}</p>
@@ -149,10 +131,10 @@ function Features({ samples }: SiteData): VNode {
           </div>
           <figcaption id="replay-cap">{f.replay.caption}</figcaption>
         </figure>
-      </Feature>
-
-      <Feature id="durable">
-        <p>{rich(f.durable.text)}</p>
+      </>
+    ),
+    'durable-still': (
+      <>
         <figure class="still" aria-labelledby="durable-cap">
           <div class="ui-table-wrap">
             <table class="ui-table reload">
@@ -205,10 +187,10 @@ function Features({ samples }: SiteData): VNode {
           <figcaption id="durable-cap">{rich(f.durable.caption)}</figcaption>
         </figure>
         <Code>{samples.durable}</Code>
-      </Feature>
-
-      <Feature id="placement">
-        <p>{f.placement.text}</p>
+      </>
+    ),
+    'placement-still': (
+      <>
         <figure class="still layouts" aria-labelledby="placement-cap">
           {f.placement.layouts.map(([name, loops, lanes]) => (
             <div class="layout" key={name}>
@@ -230,10 +212,10 @@ function Features({ samples }: SiteData): VNode {
         <p>
           <a href={POOLS_GUIDE}>{f.placement.more}</a>
         </p>
-      </Feature>
-
-      <Feature id="frameworks">
-        <p>{f.frameworks.text}</p>
+      </>
+    ),
+    'framework-tabs': (
+      <>
         <div class="tabs" data-tabs>
           <div role="tablist" aria-label="Framework" hidden>
             {f.frameworks.tabs.map(([key, label], i) => (
@@ -263,9 +245,10 @@ function Features({ samples }: SiteData): VNode {
             </div>
           ))}
         </div>
-      </Feature>
-
-      <Feature id="safety">
+      </>
+    ),
+    'safety-facts': (
+      <>
         <dl class="facts">
           {f.safety.facts.map(([term, text]) => (
             <div key={term}>
@@ -283,15 +266,46 @@ function Features({ samples }: SiteData): VNode {
           ))}
         </dl>
         <Code>{samples.grants}</Code>
-      </Feature>
-
-      <Feature id="cost">
-        <p>{f.cost.text}</p>
+      </>
+    ),
+    'cost-table': (
+      <>
         <Table caption={home.costs.caption} head={home.costs.head} rows={home.costs.rows} />
         <p>
           <a href={PLANT_RESULTS}>{f.cost.more}</a>
         </p>
-      </Feature>
+      </>
+    ),
+  };
+  return (
+    <main class="ui-shell">
+      <PageIntro
+        title={f.heading}
+        after={
+          <nav class="ui-strip" aria-label="Features">
+            <ul>
+              {features.map((x) => (
+                <li key={x.id} data-part={x.part}>
+                  <a href={`#${x.id}`}>
+                    <b>{x.name}</b> {x.line}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        }
+      >
+        <p class="ui-lede">{f.lede}</p>
+        <p>
+          <a href="/changelog/">{f.changelog}</a>
+        </p>
+      </PageIntro>
+
+      {features.map((entry) => (
+        <Feature key={entry.id} entry={entry}>
+          {demos[entry.demo]}
+        </Feature>
+      ))}
     </main>
   );
 }

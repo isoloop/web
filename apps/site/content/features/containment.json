@@ -1,0 +1,29 @@
+{
+  "id": "containment",
+  "order": 10,
+  "part": "isolate",
+  "name": "Containment.",
+  "line": "A blocked or crashed isolate stops nothing beyond its own worker.",
+  "text": [
+    "Each isolate runs on an event loop in a worker: its own, or one it shares in a pool. When a loop blocks, the kernel stops it and starts it again. When an isolate reports an error, only that isolate restarts, even in a pool. The main thread and the other loops don’t wait for either."
+  ],
+  "demo": "recording",
+  "since": "site-v0.1.0",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/supervisor/machine.ts",
+      "symbol": "step"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/isolation.spec.ts",
+      "test": "I2: blocking C for 3 s, B keeps ticking and the main thread keeps its frame rate"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/pools.spec.ts",
+      "test": "a member that throws in start() fails alone; the rest of its pool keeps running"
+    }
+  ]
+}

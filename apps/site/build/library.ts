@@ -84,3 +84,42 @@ export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): 
   writeFileSync(stamp, `${new Date().toISOString()}\n`);
   return diagrams;
 }
+
+/**
+ * Reads files of isoloop/isoloop at the pin, beyond the diagrams: the feature
+ * entries' proofs (build/features.ts) and the package changelogs
+ * (build/changelog.ts). Uses the clone `ensureLibrary` keeps, so call that
+ * first; its blobs come on demand and are cached there.
+ */
+export interface LibraryReader {
+  /** The file's text at the pin, or undefined if there's no such file. */
+  read(path: string): string | undefined;
+  /** Is there a file or folder at this path at the pin? */
+  has(path: string): boolean;
+  /** Every file path at the pin under `dir` (no trailing slash). */
+  list(dir: string): string[];
+}
+
+export function libraryReader(siteDir: string): LibraryReader {
+  const pin = readPin(siteDir);
+  const repo = join(siteDir, '.library', 'repo');
+  if (!existsSync(join(repo, '.git'))) {
+    throw new Error('the library clone is missing: run ensureLibrary first (build/library.ts)');
+  }
+  // Existence comes from the trees, which the blob-less clone holds, so it needs
+  // no fetch and can't be confused with a network failure. Reading a file
+  // fetches its blob on demand; a failure there throws instead of reading as
+  // "no such file".
+  const typeOf = (path: string): string | undefined => {
+    const clean = path.replace(/\/$/, '');
+    const line = git(['ls-tree', pin, '--', clean], repo).trim();
+    const m = /^\d+ (blob|tree) [0-9a-f]+\t(.+)$/.exec(line);
+    return m && m[2] === clean ? m[1] : undefined;
+  };
+  return {
+    has: (path) => typeOf(path) !== undefined,
+    read: (path) => (typeOf(path) === 'blob' ? git(['show', `${pin}:${path}`], repo) : undefined),
+    list: (dir) =>
+      git(['ls-tree', '-r', '--name-only', pin, '--', dir], repo).split('\n').filter(Boolean),
+  };
+}

@@ -553,3 +553,30 @@
     gap: 0.5rem;
   }
 }
+
+/* /changelog/: one section per release, each entry labelled with its package or app. */
+.release + .release {
+  margin-top: var(--ui-space-6);
+}
+.release h3 {
+  margin: 0 0 var(--ui-space-3);
+}
+.release-date {
+  color: var(--ui-text-muted);
+  font-weight: 400;
+}
+.changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.changes > li {
+  padding: var(--ui-space-3) 0;
+  border-top: 1px solid var(--ui-rule, var(--ui-border));
+}
+.change-source {
+  margin: 0 0 var(--ui-space-2);
+}
+.change-source span {
+  color: var(--ui-text-muted);
+}
