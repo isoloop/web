@@ -121,7 +121,7 @@ Chromium's:
 | Lite, CI runner | 38–103 ms | 20–37 ms | 39–134 ms | 18–20 ms |
 | Normal, CI runner | 170–588 ms | 22–51 ms | 228–642 ms | 17–29 ms |
 | Heavy, CI runner, before web#126 | no answer within 30 s | not reached (measured after Isoloop) | 797 ms or no answer within 30 s | 16 ms |
-| Heavy, CI runner, `markets-v0.6.0` | 217–219 ms | 33–48 ms | 125–240 ms | 34–36 ms |
+| Heavy, CI runner, `markets-v0.6.0` | 217–219 ms | 32–42 ms | 125–240 ms | 34–39 ms |
 | Heavy, 32-core desktop, one page at a time | 166 ms | 8 ms | — | — |
 
 CI runner figures (GitHub-hosted `ubuntu-latest`, 4 cores, no GPU) are the
