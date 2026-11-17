@@ -26,23 +26,27 @@ import { cpuDelta, cpuOf, memory, pageMetrics, pssMb, processes } from 'compare/
 //   still waiting at 2 min, or one whose kind's processors were given up on,
 //   counts too), the processors the kernel gave up on (`failed`), and the
 //   files done twice (at least once is the contract, so a move can repeat
-//   a file).
+//   a file). The processors given up on are listed with their kinds and when
+//   (M3j), and so are the kinds left with every processor given up: their
+//   group has no member left to take its files.
 // - Main-thread CPU (CDP TaskDuration), renderer CPU across all threads, and
 //   renderer memory (PSS, Linux): Chromium only.
 //
 // Mixes: `normal` is files only; `faults` adds, in a thousand files, 2 poison
 // (block their processor 2 s), 100 heavy (ten times the work) and 1 corrupt
 // (crashes its processor). `faults-calm` (M3i) runs 60 s with faults, then
-// stops them: its window is the last 20 s of 60 s calm, so it shows whether
-// the balancer packs its processors back into fewer workers. The rate is the
-// same for every mix (`COMPARE_RATE`).
+// stops them: its window is the last 20 s of 5 minutes calm (M3j; 60 s in
+// M3i, too short for an offender's quiet window and a pack after it), so it
+// shows whether the balancer packs its processors back into fewer workers.
+// The rate is the same for every mix (`COMPARE_RATE`).
 //
 // The balancer runs with `maxWorkers=2` (M3i), what its default gives a
 // 4-core machine: in a container `hardwareConcurrency` can report the host's
-// threads. Every run also records (M3i) a trace, once a second, of each
-// processor's pool, its load as the balancer and the beats see it, and its
-// kind's backlog; every move with its reason and cost; and the spikes the
-// balancer only noted and its `behind` events.
+// threads. Every run also records (M3i) a trace, once a second, of the
+// workers (M3j) and of each processor's pool, its load as the balancer, the
+// beats and its own report see it (M3j), and its kind's backlog; every move
+// with its reason and cost; and the spikes the balancer only noted and its
+// `behind` events.
 // A crash restarts the processor, and the kernel gives up on one that
 // crashes more than 3 times in a minute (it's `failed`); 1 in a thousand
 // keeps under that at 50 files/s, so the figures are about placement, not
@@ -73,11 +77,13 @@ const MIX: Readonly<Record<string, string>> = {
   faults: FAULTS,
   'faults-calm': FAULTS,
 };
-/** `faults-calm`: how long the faults run, and the calm before the window. */
+/** `faults-calm`: how long the faults run, and the calm before the window (5 minutes of calm in all, M3j). */
 const FAULTS_MS = 60_000;
-const CALM_BEFORE_WINDOW_MS = 40_000;
+const CALM_BEFORE_WINDOW_MS = 280_000;
 const VIEWPORT = { width: 1400, height: 900 };
+/** Load, warm-up or faults and calm, the window, typing and up to 2 min of drain. */
 const RUN_CAP_MS = 330_000;
+const CALM_RUN_CAP_MS = 600_000;
 const CLOSE_MS = 15_000;
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 const median = (xs: number[]): number =>
@@ -107,7 +113,8 @@ for (const mix of MIXES) {
         baseURL,
         browserName,
       }) => {
-        test.setTimeout(RUN_CAP_MS + 60_000);
+        const capMs = mix === 'faults-calm' ? CALM_RUN_CAP_MS : RUN_CAP_MS;
+        test.setTimeout(capMs + 60_000);
         const engine = browserName;
         const dir = `${OUT}/${engine}`;
         mkdirSync(dir, { recursive: true });
@@ -130,33 +137,44 @@ for (const mix of MIXES) {
         let stoppedWhy: string | null = null;
         const t0 = Date.now();
         const cap = setTimeout(() => {
-          stoppedWhy = `no result within ${Math.round(RUN_CAP_MS / 1000)} s`;
+          stoppedWhy = `no result within ${Math.round(capMs / 1000)} s`;
           void Promise.race([context.close(), sleep(CLOSE_MS)]).catch(() => {});
-        }, RUN_CAP_MS);
+        }, capMs);
         try {
           await page.goto(url);
           await page.waitForFunction(() => window.files !== undefined, null, { timeout: 30_000 });
           const origin = await page.evaluate(() => performance.now());
           // Once a second from here to the end of the window (M3i).
-          const trace: { t: number; procs: unknown }[] = [];
+          const trace: { t: number; workers: number; procs: unknown }[] = [];
           const tracing = new AbortController();
           const tracer = (async () => {
             while (!tracing.signal.aborted) {
               // oxlint-disable-next-line no-await-in-loop -- sampling once a second
               const row = await page
-                .evaluate(() => ({ t: performance.now(), procs: window.files.trace() }))
+                .evaluate(() => ({
+                  t: performance.now(),
+                  workers: window.files.snapshot().workerCount - 1,
+                  procs: window.files.trace(),
+                }))
                 .catch(() => null);
-              if (row) trace.push({ t: Math.round(row.t - origin), procs: row.procs });
+              if (row)
+                trace.push({
+                  t: Math.round(row.t - origin),
+                  workers: row.workers,
+                  procs: row.procs,
+                });
               // oxlint-disable-next-line no-await-in-loop -- sampling once a second
               await sleep(1_000);
             }
           })();
           let workersAfterFaults: number | null = null;
+          let calmFrom: number | null = null;
           if (mix === 'faults-calm') {
             stage = 'faults';
             await page.waitForTimeout(FAULTS_MS);
             workersAfterFaults =
               (await page.evaluate(() => window.files.snapshot().workerCount)) - 1;
+            calmFrom = Math.round((await page.evaluate(() => performance.now())) - origin);
             await page.evaluate(() => window.files.setDials({ poison: 0, heavy: 0, corrupt: 0 }));
             stage = 'calm';
             await page.waitForTimeout(CALM_BEFORE_WINDOW_MS);
@@ -218,6 +236,7 @@ for (const mix of MIXES) {
           const end = await page.evaluate(() => {
             const s = window.files.snapshot();
             return {
+              givenUp: window.files.givenUp(),
               failed: window.kernel.isolates().filter((i) => i.state === 'failed').length,
               produced: s.produced,
               done: s.done,
@@ -226,6 +245,26 @@ for (const mix of MIXES) {
               corrupt: s.corrupt,
             };
           });
+
+          // A kind whose processors were all given up on has no member left to take its files.
+          const failedNow = new Set(
+            await page.evaluate(() =>
+              window.kernel
+                .isolates()
+                .filter((i) => i.state === 'failed')
+                .map((i) => i.id),
+            ),
+          );
+          const kindsOf = new Map<string, Set<string>>();
+          for (const row of (trace.at(-1)?.procs as { id: string }[] | undefined) ?? []) {
+            const kind = row.id.replace(/-\d+$/, '');
+            kindsOf.set(kind, (kindsOf.get(kind) ?? new Set()).add(row.id));
+          }
+          const givenUpKinds = [...kindsOf.values()].filter((ids) =>
+            [...ids].every((id) => failedNow.has(id)),
+          ).length;
+          const calmWorkers =
+            calmFrom === null ? [] : trace.filter((r) => r.t >= calmFrom).map((r) => r.workers);
 
           write({
             stopped: false,
@@ -248,6 +287,15 @@ for (const mix of MIXES) {
             drainMs,
             lost: end.lost,
             failed: end.failed,
+            givenUpKinds,
+            workersFewestCalm: calmWorkers.length > 0 ? Math.min(...calmWorkers) : null,
+            givenUp: end.givenUp.map(({ at, id, kind, reason, pool }) => ({
+              at: Math.round(at - origin),
+              id,
+              kind,
+              reason,
+              pool: pool ?? null,
+            })),
             duplicates: end.duplicates,
             produced: end.produced,
             done: end.done,
