@@ -25,7 +25,7 @@ On four cores at 2.0 GHz, at 50 files a second:
    - Chromium, faults: 989 files without a result, 6 processors given up on. Firefox, faults: 262 and 2. Chromium, faults then calm: 1,067 and 2.
    - In each, bisects had gathered 5 to 7 of the 8 processors in the quarantine at some point, alongside processors that crash on corrupt files. The runs don't record which processors the kernel gave up on (more than 3 crashes in a minute), or whether restarts of a shared quarantine count against members that didn't crash, so the path to the loss isn't pinned down. The next run should record the given-up processors and their kinds.
    - `own` and `one` lost no file in any run.
-6. **Duplicates come almost all from the group-commit workaround.**
+6. **Duplicates come almost all from the group-commit workaround.** This run, at `0a1f9b9` on `@isoloop/*@0.0.0-next.800569e`, still had the processor's workarounds for [isoloop#211](https://github.com/isoloop/isoloop/issues/211) in place: subscribing `from: 'committed'`, committing by hand below the lowest file held, and putting held files back on stop. `@isoloop/*@0.1.0-next.0` fixes #211, so a later run can drop them; these figures are with them.
    - With faults, the balancer did a median of 458 files twice on Chromium and 1,485 on Firefox, in runs of about 2,100 files; 4 and 54 with no faults.
    - A restart with no workaround repeats at most the file in progress, so at most one file per move. The runs had a median of 13 to 25 moves, which leaves about 440 and 1,460 from the workaround: a stopping processor puts every file it holds back on its topic, because a group's commit can cross a redelivery ([isoloop#211](https://github.com/isoloop/isoloop/issues/211)), and the bus hands its uncommitted files to the group again too.
 7. **A move costs about 0.2 s on Chromium and 1.1 s on Firefox,** from the stop to the processor's first beat in its new pool (medians over the runs).
@@ -219,7 +219,7 @@ On four cores at 2.0 GHz, at 50 files a second:
 ### The machine
 
 - **The same bench server as M3h:** an AMD Ryzen 7 5825U, every core fixed at 2.0 GHz, other containers paused, the container pinned with `--cpuset-cpus=2,4,6,8` to four physical cores.
-- **The code:** `isoloop/web` at `0a1f9b9`, with `@isoloop/*@0.0.0-next.800569e` (isoloop#206, #208, #209 and the M3i balancer, #214).
+- **The code:** `isoloop/web` at `0a1f9b9`, with `@isoloop/*@0.0.0-next.800569e` (isoloop#206, #208, #209 and the M3i balancer, #214). That version doesn't have the #211 fix (isoloop#224) or the stop-then-spawn fix (isoloop#219), which came in `0.1.0-next.0`; the processor ran with its #211 workarounds.
 
 ### To run it again
 
