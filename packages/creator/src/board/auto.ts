@@ -32,9 +32,18 @@ export interface BalancerLike {
  * Why the balancer moved a widget (ADR 0017): one long task (`spike`), the
  * pool's lag stayed high (`sustained`), its members' busy time reached 80 %
  * of a core (`full`), a crash, a search for an unnamed culprit (`bisect`),
- * or back out of quarantine (`steady`).
+ * back out of quarantine (`steady`), a backlog that kept rising (`backlog`),
+ * or joining another pool to free a worker (`pack`).
  */
-export type MoveReason = 'spike' | 'sustained' | 'full' | 'crash' | 'bisect' | 'steady';
+export type MoveReason =
+  | 'spike'
+  | 'sustained'
+  | 'full'
+  | 'crash'
+  | 'bisect'
+  | 'steady'
+  | 'backlog'
+  | 'pack';
 
 /** A move, by widget id, with its pools as the page shows them. */
 export type AutoMove = {
@@ -74,6 +83,8 @@ export function moveText(m: Pick<AutoMove, 'from' | 'to' | 'reason'>): string {
     crash: `moved to ${m.to}: it crashed ${m.from}`,
     bisect: `moved to ${m.to}: finding what blocked ${m.from}`,
     steady: `back in ${m.to}: steady`,
+    backlog: `moved: falling behind in ${m.from}`,
+    pack: `packed into ${m.to}: quiet`,
   };
   return text[m.reason];
 }
