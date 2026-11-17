@@ -64,7 +64,7 @@ test('a poison file sends its processor to the quarantine', async ({ page, brows
   // engine constraint the plant dashboard records too): the balancer reads
   // those as spikes and moves processors before the poison file comes.
   test.skip(browserName === 'webkit', 'Playwright WebKit stalls workers, which the balancer moves');
-  test.setTimeout(90_000);
+  test.setTimeout(180_000);
   await page.evaluate(() => window.files.setDials({ running: true, rate: 20 }));
   // Placed out of the quarantine first.
   await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(8, {
@@ -73,7 +73,7 @@ test('a poison file sends its processor to the quarantine', async ({ page, brows
   // Long enough that a processor gets a second poison file: a first spike is
   // only noted, a second within 60 s quarantines (ADR 0017, amended for M3i).
   await page.evaluate(() => window.files.setDials({ poison: 100 }));
-  await page.waitForTimeout(1_000);
+  await page.waitForTimeout(500);
   await page.evaluate(() => window.files.setDials({ poison: 0 }));
   // The beat names the blocked processor (a spike), or, when the beat can't
   // tell (Playwright's WebKit stalls workers now and then), the balancer
@@ -84,7 +84,10 @@ test('a poison file sends its processor to the quarantine', async ({ page, brows
   await expect(
     page.locator('section.column[data-kind="quarantine"] li.card').first(),
   ).toBeVisible();
-  await drained(page);
+  // Ten poison files hold their processors 2 s each, and a first spike no
+  // longer moves its processor out: on a 2-core runner the backlog takes a
+  // while to drain.
+  await drained(page, 120_000);
 });
 
 for (const mode of ['own', 'one'] as const) {
