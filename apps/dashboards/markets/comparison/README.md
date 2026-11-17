@@ -120,7 +120,8 @@ Chromium's:
 | --- | --- | --- | --- | --- |
 | Lite, CI runner | 38–103 ms | 20–37 ms | 39–134 ms | 18–20 ms |
 | Normal, CI runner | 170–588 ms | 22–51 ms | 228–642 ms | 17–29 ms |
-| Heavy, CI runner | no answer within 30 s | not reached (measured after Isoloop) | 797 ms or no answer within 30 s | 16 ms |
+| Heavy, CI runner, before web#126 | no answer within 30 s | not reached (measured after Isoloop) | 797 ms or no answer within 30 s | 16 ms |
+| Heavy, CI runner, `markets-v0.6.0` | 217–219 ms | 33–48 ms | 125–240 ms | 34–36 ms |
 | Heavy, 32-core desktop, one page at a time | 166 ms | 8 ms | — | — |
 
 CI runner figures (GitHub-hosted `ubuntu-latest`, 4 cores, no GPU) are the
@@ -129,8 +130,11 @@ ranges of the budget check's medians across
 [Weekly run 42465659644](https://github.com/isoloop/examples/actions/runs/42465659644)
 [CI run 42466402993](https://github.com/isoloop/examples/actions/runs/42466402993)
 and [CI run 42467193238](https://github.com/isoloop/examples/actions/runs/42467193238),
-retries included; they vary a lot from run to run. The desktop figure is from
-a diagnostic run with 3 repeats.
+retries included; they vary a lot from run to run. The `markets-v0.6.0` row is
+from that tag's [release run 44118384318](https://github.com/isoloop/web/actions/runs/44118384318)
+(the run and its retry), after the widgets' work was split into 10 ms slices
+(web#126); `matched` at Heavy measured 104–116 ms there. The desktop figure is
+from a diagnostic run with 3 repeats.
 
 **Why:** WebKit presents each frame a worker draws to a transferred
 `OffscreenCanvas` on the page's main thread. A standalone page with no Isoloop
@@ -144,11 +148,12 @@ are in
 [engine constraints](https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md).
 Not yet checked in Safari on macOS or iOS, or on a GPU-backed WebKit.
 
-In the budget check (`e2e/budget.spec.ts`, 200 ms × 2 on CI), both Isoloop
-builds at Heavy on WebKit are marked expected to fail: they still run and
-report, and turn red if WebKit gets within budget. At Normal, WebKit's medians
-fall either side of the budget from run to run, so they're reported only:
-measured and annotated with the range above, not asserted.
+In the budget check (`e2e/budget.spec.ts`, 200 ms × 2 on CI), the Isoloop
+builds at Heavy on WebKit were marked expected to fail until `markets-v0.6.0`,
+whose release run they passed (above), within the 400 ms budget. One run isn't
+enough to assert a budget on WebKit, so from `markets-v0.6.1` they're reported
+only, like Normal: measured and annotated with the range above, not asserted.
+At Normal, WebKit's medians fall either side of the budget from run to run.
 
 ## One chart blocked
 
