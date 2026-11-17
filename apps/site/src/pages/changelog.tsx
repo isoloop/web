@@ -11,13 +11,13 @@ const WEB_TAGS = 'https://github.com/isoloop/web/tags';
 function Blocks({ blocks }: { blocks: Block[] }): VNode {
   return (
     <>
-      {blocks.map((b, i) =>
+      {blocks.map((b) =>
         b.kind === 'p' ? (
-          <p key={String(i)}>{inline(b.text)}</p>
+          <p key={b.text}>{inline(b.text)}</p>
         ) : (
-          <ul key={String(i)}>
-            {b.items.map((item, j) => (
-              <li key={String(j)}>{inline(item)}</li>
+          <ul key={b.items.join('\n')}>
+            {b.items.map((item) => (
+              <li key={item}>{inline(item)}</li>
             ))}
           </ul>
         ),
@@ -30,8 +30,8 @@ function Blocks({ blocks }: { blocks: Block[] }): VNode {
 function Entries({ entries }: { entries: Entry[] }): VNode {
   return (
     <ul class="changes">
-      {entries.map((e, i) => (
-        <li key={String(i)}>
+      {entries.map((e) => (
+        <li key={`${e.source}:${JSON.stringify(e.blocks)}`}>
           <p class="change-source">
             <b>{e.source}</b>
             {e.kind ? <span> · {e.kind.replace(/ Changes$/, '').toLowerCase()}</span> : null}

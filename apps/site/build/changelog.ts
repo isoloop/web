@@ -122,17 +122,18 @@ function absolutise(releases: Release[], base: string, folder: string): Release[
   }));
 }
 
+function parseVersion(v: string): { core: number[]; pre: (string | number)[] } {
+  const [core = '', pre] = v.split('-', 2);
+  return {
+    core: core.split('.').map(Number),
+    pre: pre === undefined ? [] : pre.split('.').map((p) => (/^\d+$/.test(p) ? Number(p) : p)),
+  };
+}
+
 /** Compares two versions, newest first; prerelease parts compare after the release. */
 export function newestFirst(a: string, b: string): number {
-  const parse = (v: string): { core: number[]; pre: (string | number)[] } => {
-    const [core = '', pre] = v.split('-', 2);
-    return {
-      core: core.split('.').map(Number),
-      pre: pre === undefined ? [] : pre.split('.').map((p) => (/^\d+$/.test(p) ? Number(p) : p)),
-    };
-  };
-  const x = parse(a);
-  const y = parse(b);
+  const x = parseVersion(a);
+  const y = parseVersion(b);
   for (let i = 0; i < 3; i++) {
     const d = (y.core[i] ?? 0) - (x.core[i] ?? 0);
     if (d) return d;
@@ -197,7 +198,7 @@ function appFolders(webRoot: string): string[] {
       }
     }
   }
-  return out.sort();
+  return out.toSorted();
 }
 
 function nameOf(pkgJson: string | undefined): { name?: string; private?: boolean } {
@@ -230,7 +231,7 @@ export function loadChangelog(
         .map((p) => /^packages\/([^/]+)\/package\.json$/.exec(p)?.[1])
         .filter((d): d is string => d !== undefined),
     ),
-  ].sort();
+  ].toSorted();
   for (const dir of pkgDirs) {
     const pkg = nameOf(library.read(`packages/${dir}/package.json`));
     if (!pkg.name || pkg.private) continue;
@@ -248,7 +249,7 @@ export function loadChangelog(
     }
   }
   const libraryReleases = [...byVersion.entries()]
-    .sort(([a], [b]) => newestFirst(a, b))
+    .toSorted(([a], [b]) => newestFirst(a, b))
     .map(([version, entries]) => ({ version, entries }));
 
   // The apps: one release per tag, dated by the tag.
@@ -273,7 +274,7 @@ export function loadChangelog(
       });
     }
   }
-  apps.sort((a, b) =>
+  const appReleases = apps.toSorted((a, b) =>
     a.date && b.date
       ? b.date.localeCompare(a.date)
       : a.date
@@ -284,5 +285,5 @@ export function loadChangelog(
             ? newestFirst(a.version, b.version)
             : a.source.localeCompare(b.source),
   );
-  return { library: libraryReleases, libraryUnreleased, apps, appsUnreleased };
+  return { library: libraryReleases, libraryUnreleased, apps: appReleases, appsUnreleased };
 }

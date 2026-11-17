@@ -115,7 +115,7 @@ export function loadFeatures(
   const features: Feature[] = [];
   const files = readdirSync(dir)
     .filter((f) => f.endsWith('.json'))
-    .sort();
+    .toSorted();
   for (const file of files) {
     const where = `apps/site/content/features/${file}`;
     let raw: unknown;
@@ -156,5 +156,5 @@ export function loadFeatures(
   if (problems.length > 0) {
     throw new Error(`Feature entries (ADR 0004, decision 5):\n- ${problems.join('\n- ')}`);
   }
-  return features.sort((a, b) => a.order - b.order);
+  return features.toSorted((a, b) => a.order - b.order);
 }

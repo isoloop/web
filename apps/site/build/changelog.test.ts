@@ -68,7 +68,7 @@ describe('absoluteLinks', () => {
 describe('newestFirst', () => {
   it('orders releases, prereleases and numbered prerelease parts', () => {
     expect(
-      ['0.1.0-next.2', '0.1.0', '0.1.0-next.10', '0.0.9', '0.1.1-rc.1'].sort(newestFirst),
+      ['0.1.0-next.2', '0.1.0', '0.1.0-next.10', '0.0.9', '0.1.1-rc.1'].toSorted(newestFirst),
     ).toEqual(['0.1.1-rc.1', '0.1.0', '0.1.0-next.10', '0.1.0-next.2', '0.0.9']);
   });
 });
