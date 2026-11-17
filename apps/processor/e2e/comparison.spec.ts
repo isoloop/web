@@ -139,9 +139,9 @@ for (const mix of MIXES) {
           const origin = await page.evaluate(() => performance.now());
           // Once a second from here to the end of the window (M3i).
           const trace: { t: number; procs: unknown }[] = [];
-          let tracing = true;
+          const tracing = new AbortController();
           const tracer = (async () => {
-            while (tracing) {
+            while (!tracing.signal.aborted) {
               // oxlint-disable-next-line no-await-in-loop -- sampling once a second
               const row = await page
                 .evaluate(() => ({ t: performance.now(), procs: window.files.trace() }))
@@ -182,7 +182,7 @@ for (const mix of MIXES) {
           const p1 = chromium ? await processes(browser) : [];
           const win = await page.evaluate((t) => window.files.since(t), start);
           const workersEnd = (await page.evaluate(() => window.files.snapshot().workerCount)) - 1;
-          tracing = false;
+          tracing.abort();
           await tracer;
           const moveLog = await page.evaluate((t) => window.files.movesSince(t), origin);
           const events = await page.evaluate(() => window.files.events());
@@ -256,11 +256,11 @@ for (const mix of MIXES) {
             rendererCpuPct: chromium ? r1((cpuDelta(p0, p1, 'renderer') / seconds) * 100) : null,
             rendererPssMb: chromium ? pssMb([...cpuOf(p1, 'renderer').keys()]) : null,
             rendererPssGcMb: mem.pssGc,
-            moveLog: moveLog.map((m) => ({
-              ...m,
-              at: Math.round(m.at - origin),
-              ...(m.costMs === undefined ? {} : { costMs: Math.round(m.costMs) }),
-            })),
+            moveLog: moveLog.map(({ at, id, from, to, reason, costMs }) =>
+              costMs === undefined
+                ? { at: Math.round(at - origin), id, from, to, reason }
+                : { at: Math.round(at - origin), id, from, to, reason, costMs: Math.round(costMs) },
+            ),
             trace,
           });
         } catch (e) {

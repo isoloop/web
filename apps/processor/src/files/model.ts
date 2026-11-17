@@ -372,7 +372,7 @@ export class FileProcessor {
 
   /** The moves since `t` (`performance.now()`), with their cost where known. */
   movesSince(t: number): Move[] {
-    return this.#moves.filter((m) => m.at >= t).map((m) => ({ ...m }));
+    return structuredClone(this.#moves.filter((m) => m.at >= t));
   }
 
   /** Noted spikes and `behind` events so far. */
