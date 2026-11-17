@@ -5,8 +5,10 @@ import { archiveJobs, csvJobs, hashJobs, imageJobs, results } from '../topics';
 // A File processor (M3h decision 29): a headless isolate in its kind's
 // consumer group. Each file the group hands it is queued, processed one at a
 // time in slices of up to SLICE_MS (so its loop keeps turning), and committed
-// only once its result is published: if the balancer moves it, the bus hands
-// what it hadn't finished to the group again, and no file is lost.
+// only once its result is published: if the balancer moves it, or it
+// crashes, the bus hands what it hadn't committed to the group again, and no
+// file is lost. Delivery is at least once: a file whose result went out just
+// before a stop, but whose commit didn't, is done again.
 //
 // A poison file blocks the loop for 2 s in one piece. A corrupt file throws:
 // its result says so and it's committed, then the processor crashes as its
@@ -38,25 +40,12 @@ export default defineIsolate({
     /** A delivered file: the record (to commit) and its job. */
     type Delivered = { rec: Parameters<typeof ctx.bus.commit>[0]; job: Job };
     const queue: Delivered[] = [];
-    // A group's commit covers every offset at or below it that this member
-    // holds, and a file the group redelivers can come after a later one. So
-    // a finished file is committed only up to just below the lowest file
-    // still pending here, never past one that isn't done.
-    const pending = new Map<number, Job>();
-    const finished: Delivered['rec'][] = [];
+    // Files stay queued after the handler returns, so commits are by hand. A
+    // commit settles its record and every one delivered before it (ADR 0016,
+    // point 15); files are done one at a time in the order they arrived, so
+    // a file just done is always the last whose earlier arrivals are done.
     const settle = (rec: Delivered['rec']): void => {
-      pending.delete(rec.offset);
-      finished.push(rec);
-      const lowest = Math.min(...pending.keys());
-      let best: Delivered['rec'] | undefined;
-      for (const f of finished)
-        if (f.offset < lowest && (!best || f.offset > best.offset)) best = f;
-      if (!best) return;
-      ctx.bus.commit(best);
-      const upTo = best.offset;
-      for (let i = finished.length - 1; i >= 0; i--) {
-        if ((finished[i]?.offset ?? Infinity) <= upTo) finished.splice(i, 1);
-      }
+      ctx.bus.commit(rec);
     };
     let busy = false;
     let stopped = false;
@@ -116,12 +105,8 @@ export default defineIsolate({
           },
         });
         settle(rec);
+        // No more files: the ones still queued go back to the group when it crashes.
         stopped = true;
-        // The rest of this processor's files go back on the topic before it
-        // crashes, for the same reason as on a stop.
-        const left = [...pending.values()];
-        pending.clear();
-        await Promise.all(left.map((j) => ctx.bus.publish(topic, { value: j })));
         setTimeout(() => ctx.reportError(e), CRASH_AFTER_MS);
       }
     };
@@ -139,30 +124,19 @@ export default defineIsolate({
       busy = false;
     };
 
-    // From the group's commits: when every member has left (both moved at
-    // once, or the placement switched), the next one resumes where the group
-    // got to, not from the start of the topic.
+    // `earliest` only for the group's first join: a group that has committed
+    // resumes after its commits, even when every member left (both moved at
+    // once, or the placement switched) (ADR 0016, point 14).
     ctx.bus.subscribe(
       topic,
       (r) => {
-        pending.set(r.offset, r.value);
         queue.push({ rec: r, job: r.value });
         void pump();
       },
-      { group: kind, autoCommit: false, from: 'committed' },
+      { group: kind, autoCommit: false, from: 'earliest' },
     );
 
-    // Stopping (a move, a placement switch): the files still here go back on
-    // their topic. A group's commit is cumulative per member, so a commit can
-    // cross a redelivery on its way and cover files this processor hadn't
-    // reached yet; the bus would never hand those out again. Putting them back
-    // keeps every file processed at least once (a few twice, counted as
-    // duplicates). `stopped` first, so no file is worked on while it's put back.
-    ctx.onShutdown(async () => {
-      stopped = true;
-      const left = [...pending.values()];
-      pending.clear();
-      await Promise.all(left.map((job) => ctx.bus.publish(topic, { value: job })));
-    });
+    // Stopping (a move, a placement switch) needs nothing here: what this
+    // processor hadn't committed goes back to the group.
   },
 });
