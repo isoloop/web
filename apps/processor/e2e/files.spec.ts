@@ -70,15 +70,17 @@ test('a poison file sends its processor to the quarantine', async ({ page, brows
   await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(8, {
     timeout: 20_000,
   });
+  // Long enough that a processor gets a second poison file: a first spike is
+  // only noted, a second within 60 s quarantines (ADR 0017, amended for M3i).
   await page.evaluate(() => window.files.setDials({ poison: 100 }));
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(1_000);
   await page.evaluate(() => window.files.setDials({ poison: 0 }));
   // The beat names the blocked processor (a spike), or, when the beat can't
   // tell (Playwright's WebKit stalls workers now and then), the balancer
   // bisects; either way a processor goes to the quarantine.
   await expect(
     page.locator('.log li[data-kind="spike"], .log li[data-kind="bisect"]').first(),
-  ).toBeVisible({ timeout: 15_000 });
+  ).toBeVisible({ timeout: 30_000 });
   await expect(
     page.locator('section.column[data-kind="quarantine"] li.card').first(),
   ).toBeVisible();

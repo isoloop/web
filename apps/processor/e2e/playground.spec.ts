@@ -32,11 +32,18 @@ test('it boots, and five light tasks share one balancer pool', async ({ page }) 
   });
 });
 
-test('a task that blocks its pool goes to quarantine', async ({ page }) => {
+test('a task that blocks once stays; blocking again within 60 s sends it to quarantine', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
   const heavy = await add(page, 30);
   await add(page, 5);
   await expect(columnOf(page, heavy)).toHaveAttribute('data-pool', 'balancer-1');
   await page.waitForTimeout(1_500);
+  // A first spike is only noted (ADR 0017, amended for M3i).
+  await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
+  await page.waitForTimeout(5_000);
+  await expect(columnOf(page, heavy)).toHaveAttribute('data-pool', 'balancer-1');
   await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
   await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'quarantine', {
     timeout: 15_000,
@@ -54,10 +61,13 @@ test('a blocked task leaves quarantine once it has been steady for 30 s', async 
   // engine constraint the plant dashboard records too): in quarantine that
   // counts as a spike and starts the 30 s again, so the test can't finish.
   test.skip(browserName === 'webkit', 'Playwright WebKit stalls workers, restarting the window');
-  test.setTimeout(90_000);
+  test.setTimeout(100_000);
   const heavy = await add(page, 30);
   await add(page, 5);
   await page.waitForTimeout(1_500);
+  // Two blocks: a first spike is only noted.
+  await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
+  await page.waitForTimeout(3_000);
   await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
   await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'quarantine', {
     timeout: 15_000,

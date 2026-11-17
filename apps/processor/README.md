@@ -19,9 +19,9 @@ A new task's dial is given to the balancer as its declared load, so it's placed 
 
 ## Notes
 
-A task or processor stops its own loop in `onShutdown`. In a pool the worker outlives a stopped member, and in `0.0.0-next.g3322248` its timers and ports keep running, so without that every move would leave the old copy burning CPU in the pool it left. The runtime fix (isoloop#206) cancels them on stop; the workaround is harmless and stays until a prerelease with that fix is in the catalog.
+A stopped task or processor needs no clean-up of its own: since isoloop#206, a stopped pool member's timers and ports never run again, so its loop ends with it.
 
-Switching the placement waits until each one the balancer was moving is gone before spawning it again: the balancer's `stop` throws for one it's in the middle of moving, and the kernel won't spawn an id that's still stopping.
+Switching the placement stops every one first: mid-move, the balancer's `stop` cancels the move and resolves once the old copy is gone (isoloop#209), so the next spawn of the same id never meets it.
 
 ```sh
 pnpm --filter processor dev      # http://localhost:5173/ (the File processor at /files/)

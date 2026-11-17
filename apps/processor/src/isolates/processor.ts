@@ -157,11 +157,9 @@ export default defineIsolate({
     // cross a redelivery on its way and cover files this processor hadn't
     // reached yet; the bus would never hand those out again. Putting them back
     // keeps every file processed at least once (a few twice, counted as
-    // duplicates). In a pool the worker also outlives a stopped member, and in
-    // 0.0.0-next.g3322248 so do its ports and timers: stop the loop too.
+    // duplicates). `stopped` first, so no file is worked on while it's put back.
     ctx.onShutdown(async () => {
       stopped = true;
-      port1.close();
       const left = [...pending.values()];
       pending.clear();
       await Promise.all(left.map((job) => ctx.bus.publish(topic, { value: job })));
