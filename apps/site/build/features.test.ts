@@ -128,6 +128,7 @@ describe('loadFeatures', () => {
       'replay',
       'durable',
       'placement',
+      'balancer',
       'frameworks',
       'safety',
       'cost',

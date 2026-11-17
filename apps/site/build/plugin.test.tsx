@@ -39,6 +39,7 @@ const data: SiteData = {
     contracts: 'c',
     durable: 'd',
     placement: 'p',
+    balancer: 'b',
     grants: 'g',
     react: 'r',
     preact: 'pr',
