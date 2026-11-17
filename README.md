@@ -55,6 +55,10 @@ Each app keeps a `CHANGELOG.md`, written by [Changesets](.changeset/README.md) (
 
 Every PR in `isoloop/isoloop` and here ends with a `Site impact:` line. Those merged with `update needed` are listed in one issue, **Publishing queue**, kept by a workflow (`.github/workflows/publishing-queue.yml`) every 6 hours, on pushes to `main` and by hand ([ADR 0004](docs/adr/0004-publishing-and-governance.md), decision 7). An item is ticked when its PR's description says `done in web#N`, or by hand; the `publish` skill takes each one to the site.
 
+## The steward
+
+The **Steward** check (`.github/workflows/steward.yml`) runs the site steward (`isoloop/web` `.claude/agents/steward.md`, [ADR 0004](https://github.com/isoloop/web/blob/main/docs/adr/0004-publishing-and-governance.md) decision 6) on every PR: it reviews the change against the code and the rules, posts one comment that it updates on each push, and fails on must-fix findings. The rules it applies come from the base branch, never from the PR. Drafts, Dependabot and PRs from forks are skipped. The maintainer can set the `steward-override` label to skip it. It needs one Actions secret, added in the repository under **Settings → Secrets and variables → Actions → New repository secret**: `ANTHROPIC_API_KEY` (an API key from the Anthropic Console) or `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`, using a Claude subscription). Until one is set, the check passes with a "steward not configured" notice.
+
 ## License
 
 MIT
