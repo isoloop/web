@@ -1,5 +1,22 @@
 # site
 
+## 0.3.0
+
+### Minor Changes
+
+- e6d0eec: `/features/` gains a tenth feature, **Automatic placement**: `@isoloop/balancer` (experimental), what moves an isolate with the defaults, a type-checked sample, and links to the balancer guide and the processor example. It's on the landing page's strip too, and the install block lists `@isoloop/balancer@next`.
+  
+  Retention and replay, and Restart and catch-up, say that a consumer group that has committed resumes after its commit whatever `from` says (isoloop#224). The library pin moves to isoloop/isoloop `34aeead`, so `/changelog/` lists the library's `0.1.0-next.0` and `0.1.0-next.1`.
+- 774e9c6: The landing page's recording folds out the code behind the demo: basic's setup (`main.ts`, `counter.ts`, `topics.ts`) as tabs, type-checked against the published packages. Every code block on the site is syntax-highlighted at build time, with no script in the browser. The recording's status is a labelled row of its own, C and D's row names no longer sit under their bars, and the caption above it is shorter.
+- c64312b: `/examples/` shows one example per tab, as `/how-it-works/` does: what it is, a full-width screenshot, what it shows, what to try, and its measurements, findings first and then an A/B/Δ table with what it was measured on. Plant has its desktop, phone and interactive-page runs; Markets its main and two-team runs; Basic says why it isn't measured; the processor's new run is marked as in progress. The landing and features pages' costs table now reads the plant's figures from the same place.
+- 3c2093b: `/how-it-works/` is a walkthrough of the runtime instead of a row of diagrams, one step at a time behind a row of step tabs: the overview, the host and its isolates, workers and pools, topics and the bus, rendering from a worker, the supervisor, restarts and catch-up, persistence and bus crashes, and grants. Each step has short type-checked code and, where it helps, the diagram drawn from the library's code, at the page's full width as the drawing alone, sized so all of it shows (Open full size has the viewer's presentation mode and controls), and described in words: its parts, then its arrows in order. The diagrams' own titles now show in their frames' names and links. The landing page's link to it now reads "How it works, part by part". Code inside prose is set as a chip on every page, so it reads apart from the words around it.
+- bf05f42: The landing page says what Isoloop is: an open-source TypeScript library, framework-agnostic with React and Preact adapters, under the headline "Event-loop isolation for JavaScript apps". "What it's for" lists six patterns with an example each. "What it gives" shows behaviour only, with the opt-in `split` placement. "What it costs, and where it helps" is an A/B/Δ table from the desktop run, with both native builds, the native baseline stated, and one table per pair on narrow screens; `/features/` uses the same table. "How it works" explains the host, workers, bus and supervisor, with a link to the diagrams. The Examples section is gone, and Install says Isoloop runs in the browser. The Features strip calls the frameworks line framework-agnostic, and the link-preview cards carry the new headline.
+
+### Patch Changes
+
+- c8dca63: `/changelog/` lists every app's releases back to its first tag: the releases before Changesets, written afterwards from the git history, the tags and their PRs. App releases are in the order their tags were made, so releases tagged the same day appear in the order they shipped.
+- d83023d: The landing page's "What it's for" says "Containing code you don't control" (widgets from other teams, AI-generated components) instead of "Running code you don't fully trust", and the features page's Safety opens with the threat model: isolates share the origin's cookies and storage, so Isoloop contains unreliable code, not hostile code; for that, a cross-origin iframe.
+
 ## 0.2.0
 
 ### Minor Changes
