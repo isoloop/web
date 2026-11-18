@@ -748,10 +748,17 @@ export const howItWorks = {
         isolate: 'alarms.ts',
       },
     },
+    // Sources: isoloop/isoloop README ("Hostile code") and system design §
+    // security (same origin, trusted-but-unreliable, the iframe tier);
+    // matchTopic (packages/protocol/src/grants.ts); ADR 0010 (isTrusted);
+    // ADR 0001 amendment (frozen built-ins in pools).
     safety: {
       heading: 'Grants and safety',
+      threat:
+        'Isolates run on your origin, so they share its cookies and storage: an isolate can `fetch` with the origin’s cookies and read its IndexedDB. Isoloop contains unreliable code (a widget that hangs, throws or leaks), not hostile code. For code you don’t trust at all, use a cross-origin iframe.',
       text: [
-        'Grants are checked by the bus, on every publish and subscription. Topics under `isoloop.` belong to the kernel.',
+        'Grants are checked by the bus, on every publish and subscription. A grant is a topic name or a pattern: `*` matches one or more characters, dots included, so `machine.3.*` covers `machine.3.temp.v1`; without `*` the match is exact. Topics under `isoloop.` belong to the kernel. An isolate also needs `navigate: true` to call `ctx.host.navigate`; plain link clicks need no grant, since the host’s router handles them.',
+        'Events reach the worker with `isTrusted: false`, so code that checks it must not treat forwarded input as the user’s. A pool freezes the built-ins before its first member loads, so one member can’t patch `Array.prototype` under the others; its members still share a document and can reach each other’s ports.',
       ],
       link: 'Safety, on the features page',
     },

@@ -230,6 +230,9 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
       heading: s.safety.heading,
       body: (
         <>
+          <Callout>
+            <p>{rich(s.safety.threat)}</p>
+          </Callout>
           <dl class="facts">
             {featuresPage.safety.facts.map(([term, text]) => (
               <div key={term}>
@@ -239,7 +242,7 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
             ))}
           </dl>
           {paras(s.safety.text)}
-          <Code>{samples.grants}</Code>
+          <Code>{samples.howGrants}</Code>
           <p>
             <a href="/features/#safety">{s.safety.link}</a>
           </p>

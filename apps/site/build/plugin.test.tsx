@@ -56,6 +56,7 @@ const data: SiteData = {
     howPlacement: 'hpl',
     topics: 'tp',
     howPersistence: 'hps',
+    howGrants: 'hg',
   },
 };
 

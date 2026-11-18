@@ -24,6 +24,7 @@ export const SAMPLE_FILES = {
   howPlacement: 'how/placement.ts',
   topics: 'topics.ts',
   howPersistence: 'how/persistence.ts',
+  howGrants: 'how/grants.ts',
 } as const;
 
 export type SampleName = keyof typeof SAMPLE_FILES;
@@ -77,5 +78,6 @@ export function loadSamples(dir: string): Samples {
     howPlacement: read('howPlacement'),
     topics: read('topics'),
     howPersistence: read('howPersistence'),
+    howGrants: read('howGrants'),
   };
 }
