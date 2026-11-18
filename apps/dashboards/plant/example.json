@@ -200,8 +200,8 @@
         "heading": "The inspection feed",
         "findings": [
           "What a reader on `kernel.inspect()` costs the page, as an open devtools panel or the dev MCP would be: `matched` at 5 kHz with the feed open against closed.",
-          "The clearest gap is total CPU on cross-origin isolated Chromium, where the feed also measures memory per isolate: about +1 point, the top of its spread (−7 to +1).",
-          "Memory before garbage collection is 4 MB higher with the feed open on headless Chromium (+2 to +7), higher in every round; after a forced collection the gap crosses zero on both runs.",
+          "Leaning one way: total CPU on cross-origin isolated Chromium, where the feed also measures memory per isolate, is about +1 point at the median, the top of its spread (−7 to +1).",
+          "Memory before garbage collection is 4 MB higher with the feed open on headless Chromium (+2 to +7), higher in every round; after a forced collection the gap crosses zero on both runs. It's the one gap in the table on one side of zero.",
           "The other figures have no gap, or spreads that cross zero. Five rounds can't separate a gap of about a point from the round-to-round spread.",
           "Every run keeps a ring buffer of the last 200 events from the page's start, read or not: about 18 KB as JSON on Chromium and 15 KB on Firefox."
         ],
@@ -233,22 +233,22 @@
               {
                 "label": "CPU, all threads",
                 "cells": [
-                  ["111%", "111%", ["+1 pt (−7 to +1)", "worse"]],
-                  ["112%", "112%", ["−3 pts (−13 to +7)", "better"]]
+                  ["111%", "111%", ["+1 pt (−7 to +1)", "same"]],
+                  ["112%", "112%", ["−3 pts (−13 to +7)", "same"]]
                 ]
               },
               {
                 "label": "Memory, before GC",
                 "cells": [
-                  ["398 MB", "401 MB", ["+3 MB (−3 to +7)", "worse"]],
+                  ["398 MB", "401 MB", ["+3 MB (−3 to +7)", "same"]],
                   ["344 MB", "349 MB", ["+4 MB (+2 to +7)", "worse"]]
                 ]
               },
               {
                 "label": "Memory, after GC",
                 "cells": [
-                  ["327 MB", "326 MB", ["+1 MB (−9 to +4)", "worse"]],
-                  ["274 MB", "273 MB", ["−1 MB (−3 to +10)", "better"]]
+                  ["327 MB", "326 MB", ["+1 MB (−9 to +4)", "same"]],
+                  ["274 MB", "273 MB", ["−1 MB (−3 to +10)", "same"]]
                 ]
               }
             ]
@@ -259,15 +259,15 @@
               {
                 "label": "Typing, median",
                 "cells": [
-                  ["26 ms", "34 ms", ["+8 ms (−9 to +25)", "worse"]],
-                  ["43 ms", "44 ms", ["+1 ms (−10 to +24)", "worse"]]
+                  ["26 ms", "34 ms", ["+8 ms (−9 to +25)", "same"]],
+                  ["43 ms", "44 ms", ["+1 ms (−10 to +24)", "same"]]
                 ]
               },
               {
                 "label": "Back to normal after a 3 s block",
                 "cells": [
-                  ["2.91 s", "2.96 s", ["+75 ms (−63 to +130)", "worse"]],
-                  ["2.90 s", "2.92 s", ["+55 ms (−84 to +88)", "worse"]]
+                  ["2.91 s", "2.96 s", ["+75 ms (−63 to +130)", "same"]],
+                  ["2.90 s", "2.92 s", ["+55 ms (−84 to +88)", "same"]]
                 ]
               },
               {
@@ -282,7 +282,7 @@
         ],
         "firefox": "Firefox (no CPU or memory figures there): late frames +1 (−1 to +2) and typing +16 ms (−33 to +33), both crossing zero; recovery after the 3 s block was 110 ms faster with the feed open (−297 to −4), in all 5 rounds, which isn't explained.",
         "notes": [
-          "The feed is `@experimental` (isoloop/isoloop ADR 0020). Nothing but the ring buffer runs until something reads it."
+          "The feed is `@experimental`, and nothing but the ring buffer runs until something reads it ([ADR 0020](https://github.com/isoloop/isoloop/blob/main/docs/adr/0020-inspection-feed.md), decisions 1 and 5). “No change” marks a gap whose spread crosses zero."
         ],
         "results": "https://github.com/isoloop/isoloop/blob/main/docs/investigations/inspect-feed-cost.md"
       }
