@@ -91,7 +91,14 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
       body: (
         <>
           {paras(s.host.text)}
-          <Code>{samples.howHost}</Code>
+          <CodeTabs
+            id="host"
+            label={s.host.code.label}
+            tabs={[
+              { key: 'main', label: s.host.code.host, code: samples.howHost },
+              { key: 'counter', label: s.host.code.isolate, code: samples.vanilla },
+            ]}
+          />
         </>
       ),
       diagrams: [],
@@ -120,7 +127,7 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
           {paras(s.bus.text)}
           <Code>{samples.contracts}</Code>
           {paras(s.bus.flow)}
-          <Code>{samples.vanilla}</Code>
+          <Code>{samples.howPubSub}</Code>
         </>
       ),
       diagrams: ['bus-publish'],

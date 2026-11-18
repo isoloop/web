@@ -636,8 +636,11 @@ export const howItWorks = {
       heading: 'The host and its isolates',
       text: [
         'The host is your page’s own code. It creates one kernel with `createKernel`, giving it the topics and the worker files that `@isoloop/vite` builds, and starts each isolate with `kernel.spawn`.',
-        'An isolate is a module whose default export is `defineIsolate(…)`: a `start(ctx)` function, or a React or Preact component through an adapter. Its manifest names the module, the element it renders into (its surface) and its grants. An isolate with no surface is headless: it gets the same supervision and bus, and no DOM.',
+        'Importing a module with `?isolate` gives its URL: `@isoloop/vite` builds it to run in a worker, so `src` is a URL, not code the host imports. The topics module goes in twice: as a URL, for the bus worker to import, and as a list the host reads.',
+        'An isolate is a module whose default export is `defineIsolate(…)`: a `start(ctx)` function, or a React or Preact component through an adapter. The object passed to `spawn` is its manifest. It names the module, the element the isolate renders into (its surface) and its grants. An isolate with no surface is headless: it gets the same supervision and bus, and its `ctx.root` is `undefined`.',
+        '`start` gets a context: `ctx.bus` for topics, `ctx.root` to render into, `ctx.host` for host calls (measure, focus, scroll, navigate), and `ctx.reportError` and `ctx.onShutdown`.',
       ],
+      code: { label: 'A host and the isolate it spawns', host: 'main.ts', isolate: 'counter.ts' },
     },
     placement: {
       heading: 'Workers and pools',

@@ -4,9 +4,9 @@ declare const counterEl: Element;
 // #region show
 import { createKernel } from '@isoloop/host';
 import workers from 'virtual:isoloop/workers'; // the worker files @isoloop/vite builds
-import list from '../topics';
-import contractsUrl from '../topics?isolate';
-import counter from '../counter-vanilla?isolate';
+import list from './topics';
+import contractsUrl from './topics?isolate';
+import counter from './counter?isolate';
 
 const kernel = createKernel({ contracts: { url: contractsUrl, list }, workers });
 

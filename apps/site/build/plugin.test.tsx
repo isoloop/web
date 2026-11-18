@@ -52,6 +52,7 @@ const data: SiteData = {
     howHost: 'hh',
     howSupervision: 'hs',
     howCatchUp: 'hc',
+    howPubSub: 'hp',
   },
 };
 
@@ -151,7 +152,7 @@ describe('the pages', () => {
       expect(html).toContain(`${howItWorks.reading.heading}: ${name}`);
     }
     expect(html).toContain('aria-label="Steps"');
-    for (const sample of ['hh', 'hs', 'hc']) expect(html).toContain(`<code>${sample}</code>`);
+    for (const sample of ['hh', 'hs', 'hc', 'hp']) expect(html).toContain(`<code>${sample}</code>`);
   });
 
   it('never claim Isoloop is faster than native', () => {
