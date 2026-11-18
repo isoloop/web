@@ -39,4 +39,22 @@ pnpm --filter ./apps/dashboards/markets build               # every build into d
 pnpm --filter ./apps/dashboards/markets e2e                 # the Playwright suite
 ```
 
+## Tools for agents
+
+The Isoloop builds expose two tools to agents ([ADR 0018](https://github.com/isoloop/isoloop/blob/main/docs/adr/0018-tools-for-agents.md)). Each is a requestable topic in [`src/isoloop/contracts.ts`](src/isoloop/contracts.ts), listed in the kernel's `agents.expose`:
+
+| Tool | Answered by | What it does |
+| --- | --- | --- |
+| `markets.quote.v1` | the aggregator | Read-only. For one symbol: VWAP, cross-market spread and volume over the dashboard's window (`null` with no trades in it), and each exchange's last, bid and ask. |
+| `markets.alerts.create.v1` | the alerts isolate | Consequential. Adds an alert rule, shown in the alerts panel and kept across reloads. The rule's id comes from the request's id, so a request delivered again after a crash adds nothing new. |
+
+In development the page pairs with the `isoloop mcp` dev server, so a coding agent can call them and read the page's isolates, topics and events. Run the CLI with a fixed token, and give the page the same one:
+
+```bash
+ISOLOOP_MCP_TOKEN=some-long-token npx isoloop mcp --allow-write   # what your agent starts, e.g. `claude mcp add isoloop -- …`
+VITE_ISOLOOP_MCP_TOKEN=some-long-token pnpm --filter ./apps/dashboards/markets dev
+```
+
+Without `--allow-write` the CLI lists only the quote. Without `VITE_ISOLOOP_MCP_TOKEN` the page doesn't pair. Production builds don't contain the dev MCP: `@isoloop/vite` fails a build that does. `e2e/dev-mcp.spec.ts` runs both tools through the official MCP SDK client and the real CLI, in Chromium. WebMCP comes later (M4a task 9).
+
 The head-to-head runner is `compare:pairs`: [`comparison/final/`](comparison/final/README.md#how-it-was-measured) has the command that produced the shipped figures.
