@@ -2,6 +2,7 @@
 
 ## Recorded runs, newest first
 
+- [`inspect/`](inspect/README.md): the inspection feed's cost (M4b task 6), `matched` at 5 kHz with a reader on `kernel.inspect()` against without, on the dedicated machine with `isoloop/isoloop` main at `ce4dc9a`.
 - [`interactive/final/`](interactive/final/README.md): the interactive page's head-to-head (M3e), written up, native against Isoloop at 5 kHz, on the dedicated machine at `a5562f0` with `@isoloop/*@0.0.0-next.g3322248`. How it runs is [below](#the-interactive-page-interactivets).
 - [`final/`](final/README.md): the figures that ship with `plant-v0.1.0`, on the dedicated machine with `@isoloop/*@0.0.0-next.b8ffdcf`.
 - [`phone/ikko-mindone-focus156/`](phone/ikko-mindone-focus156/README.md): a mid-range phone, Firefox Focus 156.
