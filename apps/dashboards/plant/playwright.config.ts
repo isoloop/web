@@ -41,7 +41,17 @@ export default defineConfig({
       { name, use: { ...devices[device] }, testIgnore: [LOAD, COMPARISON, INTERACTIVE] },
       { name: `${name}-load`, use: { ...devices[device] }, testMatch: LOAD },
     ]),
-    { name: 'comparison', use: { ...devices['Desktop Chrome'] }, testMatch: COMPARISON },
+    // With `PLANT_COI=1` (the inspection feed's cost, M4b task 6) the run uses
+    // full Chromium rather than the headless shell, which has no
+    // `measureUserAgentSpecificMemory()`, so the feed measures memory.
+    {
+      name: 'comparison',
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(process.env['PLANT_COI'] === '1' ? { channel: 'chromium' } : {}),
+      },
+      testMatch: COMPARISON,
+    },
     {
       name: 'comparison-firefox',
       use: { ...devices['Desktop Firefox'] },

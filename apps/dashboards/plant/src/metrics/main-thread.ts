@@ -85,9 +85,17 @@ export function startMainThreadMetrics(): () => MainThreadMetrics {
   if (!crossOriginIsolated || !measure) memory = 'unavailable';
   else {
     const sample = (): void => {
-      void measure().then((m) => {
-        memory = m.bytes;
-      });
+      // A browser can refuse even when the API exists (Chromium's headless
+      // shell does, on a cross-origin isolated page): the figure is then
+      // unavailable, not an uncaught error.
+      measure().then(
+        (m) => {
+          memory = m.bytes;
+        },
+        () => {
+          memory = 'unavailable';
+        },
+      );
     };
     sample();
     setInterval(sample, 10_000);
