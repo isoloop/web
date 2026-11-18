@@ -2,11 +2,17 @@
   "title": "Processor",
   "tab": "Processor",
   "summary": "Background work with no UI: headless isolates placed by the balancer. In the playground you add tasks, set how much CPU each one uses, and watch the balancer move them between worker pools. The file processor pushes a stream of files through processors that share the work through a consumer group, with poison, heavy and corrupt files mixed in.",
-  "shows": ["balancer", "bus", "restart"],
+  "shows": [
+    "balancer",
+    "bus",
+    "restart"
+  ],
   "try": [
-    "In the playground, add a few tasks and turn one's CPU dial past 80%: the balancer moves it to a pool with room.",
+    "In the playground, add a few tasks and turn their dials up until a pool's tasks add up to 80% of a core: the balancer moves the heaviest one to a pool with room.",
+    "Watch the move log at the bottom of the page: each entry gives the time, the reason, the move, and how long the task was stopped before it ran again.",
     "Block a task twice within a minute: it goes to the quarantine pool until it has been quiet for 30 s.",
-    "In the file processor, raise the share of poison files: each one blocks its processor's loop for 2 s, and the processor restarts without losing a file."
+    "In the file processor, raise the share of corrupt files: each one makes its processor crash; the kernel restarts it, and the files it hadn't finished go to the other processor in its group.",
+    "Raise the share of poison files: each one blocks its processor's loop for 2 s, which the page's 10 s kill timeout lets pass. A processor that blocks twice within a minute goes to the quarantine pool, and its unfinished files go to the other processor in its group."
   ],
   "order": 40,
   "measurements": {
