@@ -823,8 +823,10 @@
   top: var(--ui-bar-h);
   z-index: 5;
   background: var(--ui-bg);
-  border-bottom: 1px solid var(--ui-rule);
 }
+/* The rule is drawn inside the list, under the tabs' borders: a tab pulled
+   over a border below would overflow the list, which scrolls sideways, and
+   give it a vertical scroll too. */
 .hiw-nav ol {
   display: flex;
   gap: 0.25rem;
@@ -832,12 +834,13 @@
   padding: 0;
   list-style: none;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: thin;
+  box-shadow: inset 0 -1px 0 var(--ui-rule);
 }
 .hiw-nav a {
   display: block;
   padding: 0.75rem 0.9rem 0.6rem;
-  margin-bottom: -1px;
   color: var(--ui-text-muted);
   font-weight: 600;
   font-stretch: 87%;

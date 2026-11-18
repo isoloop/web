@@ -357,3 +357,13 @@ test('how it works shows one step at a time, kept in the URL', async ({ page }) 
   await expect(page.locator('#restart')).toBeVisible();
   await expect(page.locator('#restart iframe')).toHaveCount(2);
 });
+
+for (const width of [1440, 390]) {
+  test(`the step tabs never scroll vertically at ${String(width)}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/how-it-works/');
+    const list = page.locator('.hiw-nav ol');
+    const [scroll, client] = await list.evaluate((el) => [el.scrollHeight, el.clientHeight]);
+    expect(scroll).toBeLessThanOrEqual(client);
+  });
+}
