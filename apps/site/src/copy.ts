@@ -438,7 +438,7 @@ export const howItWorks = {
   heading: 'How Isoloop works',
   intro: [
     'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
-    'This page goes through each part in turn.',
+    'Each tab below covers one part, with its code and the diagram drawn from the library’s code.',
   ],
   /** Under Where to go next: where the diagrams come from, then the short sha. */
   pinned:
@@ -446,7 +446,7 @@ export const howItWorks = {
   overview: {
     heading: 'The parts at a glance',
     text: [
-      'The main thread holds the host: your code, the supervisor, the compositor that applies each isolate’s DOM changes, and the bus controller. Beside it, an isolate on a worker of its own, a pool worker shared by several, and the bus worker. Isolates and the bus talk over direct message channels.',
+      'Four threads: the main thread, an isolate on a worker of its own, a pool of three, and the bus worker. The main thread runs your host code and the kernel it creates: the supervisor, the compositor that applies each isolate’s DOM changes, and the bus controller.',
     ],
   },
   open: 'Open full size',
@@ -478,11 +478,11 @@ export const howItWorks = {
     steps: 'Follow the arrows',
     diagrams: {
       'runtime-topology': {
-        lead: 'Each large box is one thread. Cards inside a box are the pieces that run on that thread. Solid lines carry messages, dashed lines are heartbeats.',
+        lead: 'Each large box is one thread. Cards inside a box are the pieces that run on that thread. Solid lines carry messages; dashed lines are heartbeats, and the import of an isolate’s module.',
         parts: [
           [
             'Main thread, along the top',
-            'Your host app, which calls `createKernel`. The supervisor, which starts workers and watches their heartbeats. The compositor, which applies isolates’ DOM changes to their surfaces once per animation frame. The bus controller, which hands out bus ports and supervises the bus worker. The host connection, the host’s own port for `kernel.subscribe`.',
+            'Your host app, which calls `createKernel`, and the kernel it creates. The supervisor, which starts workers and watches their heartbeats. The compositor, which applies isolates’ DOM changes to their surfaces once per animation frame. The bus controller, which hands out bus ports and supervises the bus worker. The host connection, the host’s own port for `kernel.subscribe`.',
           ],
           [
             'Own worker, middle left',
@@ -494,10 +494,15 @@ export const howItWorks = {
           ],
           [
             'Bus worker, along the bottom',
-            'The broker, which checks grants, schemas and duplicates; the log engine, which encodes and stores records; the topics’ logs; and OPFS segments for persistent topics.',
+            'The broker, which checks grants, schemas and duplicates; the log engine, which encodes and stores records; and the topics’ logs.',
+          ],
+          [
+            'Below the bus worker',
+            'OPFS segments, the files persistent topics are written to. Only the tab holding the `isoloop-bus` Web Lock writes them.',
           ],
         ] as [string, string][],
         steps: [
+          'Isolate code never runs on the main thread. The main thread only runs the kernel and applies patches.',
           'The host app calls `spawn`. The supervisor starts a worker and sends it `init`, one per member in a pool, and the worker imports the isolate’s module.',
           'A visual isolate sends patches, its DOM changes, to the compositor, which applies them to the isolate’s surface.',
           'Each isolate has a port of its own to the broker, one per member in a pool. Records never pass through the main thread.',
