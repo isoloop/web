@@ -119,10 +119,14 @@
     stroke-linejoin: round;
     transition: color 0.2s;
   }
+  /* Centred on the icon it sits behind: the icons are 1rem, 0.5rem in from
+     the padding edge, so a 1.5rem knob starts 0.25rem in and moves by the
+     distance between the two icons' centres (the inner width, which the 1px
+     border takes from, less the padding and one icon). */
   .ui-toggle-knob {
     position: absolute;
-    top: 0.2rem;
-    left: 0.2rem;
+    top: calc(50% - 0.75rem);
+    left: 0.25rem;
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
@@ -130,7 +134,7 @@
     transition: transform 0.2s ease;
   }
   .ui-toggle[aria-checked='true'] .ui-toggle-knob {
-    transform: translateX(1.75rem);
+    transform: translateX(calc(3.75rem - 2px - 2rem));
   }
   .ui-toggle[aria-checked='false'] .ui-toggle-sun,
   .ui-toggle[aria-checked='true'] .ui-toggle-moon {

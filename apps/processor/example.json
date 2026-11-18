@@ -2,11 +2,7 @@
   "title": "Processor",
   "tab": "Processor",
   "summary": "Background work with no UI: headless isolates placed by the balancer. In the playground you add tasks, set how much CPU each one uses, and watch the balancer move them between worker pools. The file processor pushes a stream of files through processors that share the work through a consumer group, with poison, heavy and corrupt files mixed in.",
-  "shows": [
-    "balancer",
-    "bus",
-    "restart"
-  ],
+  "shows": ["balancer", "bus", "restart"],
   "try": [
     "In the playground, add a few tasks and turn their dials up until a pool's tasks add up to 80% of a core: the balancer moves the heaviest one to a pool with room.",
     "Watch the move log at the bottom of the page: each entry gives the time, the reason, the move, and how long the task was stopped before it ran again.",
