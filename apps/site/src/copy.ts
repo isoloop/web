@@ -585,7 +585,6 @@ export const howItWorks = {
           'An isolate crashes from Running on a fatal error or a pool crash, from Blocked after 10 s without a heartbeat, and from Loading on a timeout or a version mismatch.',
           'Under 3 restarts within 60 s it goes back to Restarting, after a backoff that starts at 250 ms and doubles each time (at most 4 s). Past the limit it’s Failed.',
           'Some crashes go straight to Failed, because a restart can’t change them: a render format or version the host doesn’t speak, or a bus that couldn’t load its contracts.',
-          'Not a crash: a subscription handler that throws. The isolate keeps running, reports `isolate:error`, and that subscription stops committing, so its records come back on the next start.',
         ],
       },
       'restart-own-worker': {
@@ -694,11 +693,17 @@ export const howItWorks = {
       },
       code: 'The Host tab’s counter, as a component',
     },
+    // Sources: DEFAULT_SUPERVISOR_CONFIG, DEFAULT_BACKOFF, KernelConfig
+    // `heartbeat` and `supervisor`, IsolateManifest `fallback`, Kernel `stop`
+    // and `restart`, the worker's heartbeat timer (packages/runtime/src/bootstrap.ts).
     supervisor: {
       heading: 'The supervisor',
       text: [
-        'Every worker sends a heartbeat, by default every 100 ms. With none for 400 ms, its isolates count as blocked. With none for 10 s, the worker is terminated and its isolates are restarted.',
-        'An isolate also crashes when its code throws a fatal error, when its worker fails, or when it isn’t ready within 10 s of its spawn. Restarts back off from 250 ms, doubling up to 4 s. After 3 restarts within 60 s, the next crash leaves it failed. A visual isolate then shows its fallback, by default a message and a Retry button, and the host gets `isolate:failed`; `kernel.restart` brings it back.',
+        'Every worker sends a heartbeat, by default every 100 ms. The heartbeat is a timer in the worker’s own event loop, so any long task delays it; each beat also reports how late it was (`lagMs` on `isolate:beat`), which the balancer reads. With no heartbeat for 400 ms, the worker’s isolates count as blocked: busy, not dead, and a busy overlay covers their surfaces.',
+        'With no heartbeat for 10 s, the worker is terminated and its isolates are restarted. The default is long on purpose, so a slow but working loop isn’t killed; apps shorten it with `heartbeat.killAfterMs` (the landing page’s demo uses 2 s).',
+        "An isolate also crashes when its code throws a fatal error, when its worker fails, or when it isn’t ready within 10 s of its spawn. Restarts back off from 250 ms, doubling up to 4 s. After 3 restarts within 60 s, the next crash leaves it failed. A visual isolate then shows its fallback, by default a message and a Retry button, or what the manifest’s `fallback` draws, and the host gets `isolate:failed`; `kernel.restart` brings it back. `supervisor: { strategy: 'never' }` turns restarts off, for tests and debugging.",
+        'A subscription handler that throws isn’t a crash. The isolate keeps running and reports `isolate:error`, and that subscription stops committing, so its records come back on the next start.',
+        '`kernel.stop(id)` sends shutdown: the isolate’s `onShutdown` handlers get 1 s, its last commits go out, then its worker goes.',
       ],
     },
     restart: {
