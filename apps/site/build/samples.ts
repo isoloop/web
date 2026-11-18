@@ -21,6 +21,7 @@ export const SAMPLE_FILES = {
   howSupervision: 'how/supervision.ts',
   howCatchUp: 'how/catch-up.ts',
   howPubSub: 'how/pubsub.ts',
+  howPlacement: 'how/placement.ts',
 } as const;
 
 export type SampleName = keyof typeof SAMPLE_FILES;
@@ -71,5 +72,6 @@ export function loadSamples(dir: string): Samples {
     howSupervision: read('howSupervision'),
     howCatchUp: read('howCatchUp'),
     howPubSub: read('howPubSub'),
+    howPlacement: read('howPlacement'),
   };
 }

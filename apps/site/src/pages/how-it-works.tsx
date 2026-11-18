@@ -9,6 +9,8 @@ import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
+const PLANT_MATCHED =
+  'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/matched-v2';
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
 
 type Part = 'host' | 'bus' | 'isolate' | 'pool';
@@ -110,10 +112,17 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
       body: (
         <>
           {paras(s.placement.text)}
-          <Code>{samples.placement}</Code>
-          <p>
-            <a href={POOLS_GUIDE}>{s.placement.link}</a>
-          </p>
+          <Code>{samples.howPlacement}</Code>
+          <ul>
+            <li>
+              <a href={`${POOLS_GUIDE}#when-to-pool-and-when-not-to-the-plant-dashboards-figures`}>
+                {s.placement.link}
+              </a>
+            </li>
+            <li>
+              <a href={PLANT_MATCHED}>{s.placement.results}</a>
+            </li>
+          </ul>
         </>
       ),
       diagrams: ['placement'],

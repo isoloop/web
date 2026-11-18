@@ -529,7 +529,7 @@ export const howItWorks = {
         steps: [
           'On the left the kernel starts three workers and sends each one `init`; on the right, one worker and three `init`s.',
           'Either way the bus sees three ports. Grants, subscriptions and committed offsets stay per isolate, and so do the surface, the frame budget and the restart count.',
-          'What the pool members share: one event loop and its timers, the globals, the document, and their fate when the worker fails. In the library’s own measurements, 20 headless isolates in one worker used 71–86% less memory than on 20 workers of their own, and 8 React widgets in one worker 35–64% less.',
+          'What the pool members share: one event loop and its timers, the globals, the document, and their fate when the worker fails.',
         ],
       },
       'bus-publish': {
@@ -642,14 +642,18 @@ export const howItWorks = {
       ],
       code: { label: 'A host and the isolate it spawns', host: 'main.ts', isolate: 'counter.ts' },
     },
+    // Figures: isoloop/isoloop docs/guide/pools.md, "When to pool", from the
+    // plant's matched comparison (apps/dashboards/plant/comparison/matched-v2).
     placement: {
       heading: 'Workers and pools',
       text: [
-        'Each isolate runs in a worker. By default it gets one of its own. With `pool` in its manifest, it shares one worker with every isolate that names the same pool.',
-        'A pool saves memory and start-up time. In the plant dashboard, a small headless isolate costs about 0.2 MB in a pool, against 2.8 MB on its own worker. Members share an event loop, so they share a fate: one that blocks stalls them all. They also share one document, so they can read each other’s DOM and input. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
-        'The kernel never pools on its own. Placement is the manifest’s choice, or that of the opt-in `@isoloop/balancer`, which moves isolates between pools as their load changes.',
+        'Each isolate runs in a worker: a thread of its own, with its own event loop. By default an isolate gets a worker to itself. With `pool` in its manifest, it shares one worker with every isolate that names the same pool.',
+        'A pool saves memory and start-up time. In the plant dashboard’s matched comparison (Chromium, after GC), a small headless isolate cost about 0.2 MB in a pool, against 2.8 MB on its own worker.',
+        'Members share an event loop. One that blocks stalls them all, and a worker error restarts them all; an error a member reports as its own restarts only that member (the Restarts tab has the details). They also share one document, so they can read each other’s DOM and input, and they can reach each other’s bus ports, so a pool holds all its members’ grants. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
+        'The kernel never pools on its own. Placement is the manifest’s choice, or that of the opt-in, experimental `@isoloop/balancer`, which moves isolates between pools as their load changes.',
       ],
-      link: 'The pools guide',
+      link: 'The pools guide: when to pool, with the plant’s figures',
+      results: 'The plant’s matched comparison',
     },
     bus: {
       heading: 'Topics, records and the bus',
