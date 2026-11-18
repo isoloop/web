@@ -14,7 +14,13 @@ export default defineIsolate({
       (r) => console.log(`#${String(r.offset)} from ${r.producer}: ${String(r.value)}`),
       { from: 'earliest' },
     );
+
+    // Shared with every subscriber in the group `totals`: each record goes to one of them.
+    const share = ctx.bus.subscribe(count, (r) => console.log(r.value), { group: 'totals' });
     // #endregion
-    ctx.onShutdown(() => stop());
+    ctx.onShutdown(() => {
+      stop();
+      share();
+    });
   },
 });

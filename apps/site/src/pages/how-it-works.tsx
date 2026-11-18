@@ -134,7 +134,7 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
       body: (
         <>
           {paras(s.bus.text)}
-          <Code>{samples.contracts}</Code>
+          <Code>{samples.topics}</Code>
           {paras(s.bus.flow)}
           <Code>{samples.howPubSub}</Code>
         </>

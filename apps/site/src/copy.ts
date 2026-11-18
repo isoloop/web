@@ -655,14 +655,21 @@ export const howItWorks = {
       link: 'The pools guide: when to pool, with the plant’s figures',
       results: 'The plant’s matched comparison',
     },
+    // Sources: topic() options (packages/bus/src/topic.ts: retention kinds,
+    // `reply`, `durability`, the 256 KiB size limit), the broker's group
+    // assignment (packages/bus/src/broker.ts: key hash, round-robin keyless),
+    // SubscribeOptions and BusClientOptions (packages/runtime/src/bus-client.ts).
     bus: {
       heading: 'Topics, records and the bus',
       text: [
-        'A topic is declared once, in a contracts module that the host, the bus and every isolate import. It has a name (with its major version, by convention, as in `note.v1`), a schema (from any Standard Schema library; zod here) and a retention: the last n records, the records of the last so many milliseconds, or the latest record per key (`compacted`).',
+        "A topic is declared once, in a contracts module that the host, the bus and every isolate import; its default export, `contracts(…)`, is the list the host passes to `createKernel`. A topic has a name (with its major version, by convention, as in `count.v1`), a schema (from any Standard Schema library; zod here) and a retention: `{ kind: 'last-n', n }` keeps the last n records, `{ kind: 'time', ms }` the records younger than `ms`, and `{ kind: 'compacted' }` the latest record per key.",
+        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Bus crash tab). A topic with a `reply` schema also takes requests: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
       ],
       flow: [
-        'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path. A publish is checked in order: the publisher’s grants and a size limit, then the topic’s schema, and on a persistent topic a duplicate check. Then it’s appended to the topic’s log and gets an offset, and `publish` resolves; on a persistent topic, once the record is written to disk. A rejected one rejects with a `BusError`.',
-        'A subscription starts where its `from` says: `latest` (the default) for new records only, `earliest` for everything the topic retains, or `committed` to read on after its last commit. The bus sends each subscription up to 1,000 records ahead of what it has handled. The subscriber commits each record once its handler settles. The commits go out every 100 ms by default, or sooner once half the credit is used.',
+        'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path.',
+        'A publish is checked in order: the publisher’s grants and the record’s size (256 KiB by default), then the topic’s schema, and on a persistent topic a duplicate check. Then it’s appended to the topic’s log and gets an offset, and `publish` resolves; on a persistent topic, once the record is written to disk. A rejected one rejects with a `BusError`.',
+        'A subscription starts where its `from` says: `latest` (the default) for new records only, `earliest` for everything the topic retains, or `committed` to read on after its last commit. It gets the topic’s records in offset order. Subscribers that name the same `group` share the topic: each record goes to one of them, by its key (round-robin when it has none), so each key’s records stay in order.',
+        'The bus sends each subscription up to 1,000 records ahead of what it has handled. The subscriber commits each record once its handler settles; the commits go out every 100 ms by default, or sooner once half the credit is used. Delivery is at least once: after a crash, up to one commit interval of records can come again, so a handler must be safe to run twice.',
       ],
     },
     render: {
@@ -683,7 +690,7 @@ export const howItWorks = {
     restart: {
       heading: 'Restarts and catch-up',
       text: [
-        'A restart is a new instance. The isolate’s memory is gone, and it rebuilds its state from the bus. Each subscription starts where its `from` says, as on the first start. With `committed`, it reads on after its last commit, so it sees again what it had read but not yet committed. A subscription in a consumer group that has committed resumes after the group’s commit, whatever its `from`.',
+        'A restart is a new instance. The isolate’s memory is gone, and it rebuilds its state from the bus. Each subscription starts where its `from` says, as on the first start. With `committed`, it reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus tab. A subscription in a consumer group that has committed resumes after the group’s commit, whatever its `from`.',
         'On its own worker, a crash restarts that isolate alone. In a pool, it depends on whose the failure is. An error the runtime can pin on one member restarts that member alone: `start()` throwing, an error the member reports with `ctx.reportError`, or a render error the React or Preact adapter catches (the adapters report it that way). A block, or a plain throw from an event handler, a timer or a scheduler the members share, is the worker’s error: the worker goes down, and every member restarts in a new one.',
       ],
     },
