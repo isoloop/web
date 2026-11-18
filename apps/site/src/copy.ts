@@ -252,7 +252,7 @@ export const home = {
     notes: [
       'Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.',
       'The native builds keep their data in a small store written for this app, with no message bus. They don’t contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features.',
-      'On a faster machine the main-thread differences shrink. Phones vary: a mid-range Android phone gains the most, a flagship shows no difference, and an older iPhone draws fewer frames with Isoloop.',
+      'On a faster machine the main-thread differences shrink. Phones vary, measured on plant-v0.1.0’s release candidates with the same Isoloop packages: on a mid-range Android phone (MediaTek MT8781V, Firefox Focus 156) one and matched drew 68–84 frames/s against 45–56 for native; on a flagship (Snapdragon 8 Gen 3, Chrome 157) every build held 60; on an iPhone X (Safari 16.6) at 5 kHz matched drew 51.9 against 60 for native.',
     ],
     more: 'Every recorded run, on every device, with the method',
   },
