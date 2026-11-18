@@ -326,3 +326,24 @@ test('the theme switch changes the page and the diagram frames live', async ({ p
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(frame.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
+
+test('how it works shows one step at a time, kept in the URL', async ({ page }) => {
+  await page.goto('/how-it-works/');
+  const steps = page.locator('[data-step]');
+  const nav = page.getByRole('navigation', { name: 'Steps' });
+  await expect(steps.and(page.locator(':visible'))).toHaveCount(1);
+  await expect(page.locator('#overview')).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'step');
+  await nav.getByRole('link', { name: 'Bus', exact: true }).click();
+  await expect(page).toHaveURL(/#bus$/);
+  await expect(page.locator('#bus')).toBeVisible();
+  await expect(page.locator('#overview')).toBeHidden();
+  await expect(page.locator('#bus iframe[src="/how-it-works/diagrams/bus-publish.html"]')).toHaveCount(1);
+  await page.locator('#bus').getByRole('link', { name: /Next: Rendering/ }).click();
+  await expect(page.locator('#render')).toBeVisible();
+  await page.goBack();
+  await expect(page.locator('#bus')).toBeVisible();
+  await page.goto('/how-it-works/#restart');
+  await expect(page.locator('#restart')).toBeVisible();
+  await expect(page.locator('#restart iframe')).toHaveCount(2);
+});

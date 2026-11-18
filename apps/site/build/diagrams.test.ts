@@ -1,9 +1,14 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   decodeDataUrl,
   extractDataUrls,
   inlineLeftovers,
   patchViewerScript,
+  DIAGRAM_ORDER,
+  readDiagrams,
   rewritePage,
   stylesToClasses,
 } from './diagrams.ts';
@@ -125,5 +130,18 @@ describe('patchViewerScript', () => {
     expect(() =>
       patchViewerScript("var s = document.createElement('style'); s.textContent = x;"),
     ).toThrow(/patchViewerScript/);
+  });
+});
+
+describe('readDiagrams', () => {
+  it('takes each title from the JSON’s meta, falling back to the name', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'diagrams-'));
+    for (const name of DIAGRAM_ORDER) {
+      const json = name === 'placement' ? {} : { meta: { title: `Title of ${name}` } };
+      writeFileSync(join(dir, `${name}.json`), JSON.stringify(json));
+    }
+    const out = readDiagrams(dir);
+    expect(out[0]).toEqual({ name: 'runtime-topology', title: 'Title of runtime-topology' });
+    expect(out.find((d) => d.name === 'placement')?.title).toBe('placement');
   });
 });

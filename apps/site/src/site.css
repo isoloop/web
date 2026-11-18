@@ -809,3 +809,127 @@
   color: var(--ui-text);
   min-height: 0;
 }
+
+/*
+ * /how-it-works/: the step tabs, one step at a time (src/demos/how-it-works.ts),
+ * and the diagrams across the page's full width with how to read them. Without
+ * JS every step shows, and the tabs are a list of contents.
+ */
+.hiw {
+  margin-top: var(--ui-space-7);
+}
+.hiw-nav {
+  position: sticky;
+  top: var(--ui-bar-h);
+  z-index: 5;
+  background: var(--ui-bg);
+  border-bottom: 1px solid var(--ui-rule);
+}
+.hiw-nav ol {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.hiw-nav a {
+  display: block;
+  padding: 0.75rem 0.9rem 0.6rem;
+  margin-bottom: -1px;
+  color: var(--ui-text-muted);
+  font-weight: 600;
+  font-stretch: 87%;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+.hiw-nav a:hover {
+  color: var(--ui-text);
+}
+.hiw-nav a[aria-current] {
+  color: var(--ui-text);
+  border-bottom-color: var(--part, var(--ui-text));
+}
+.hiw-step {
+  padding-top: var(--ui-space-6);
+  /* Below the sticky step tabs, too, when a link lands on a step. */
+  scroll-margin-top: 3.25rem;
+}
+.hiw-step[hidden] {
+  display: none;
+}
+.hiw-step + .hiw-step {
+  margin-top: var(--ui-space-7);
+  border-top: 1px solid var(--ui-rule);
+}
+.steps-on .hiw-step + .hiw-step {
+  margin-top: 0;
+  border-top: 0;
+}
+.hiw-step > h2 {
+  margin: 0 0 1.25rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--part, var(--ui-text));
+}
+.hiw-text {
+  max-width: 52rem;
+}
+.hiw-text > p,
+.hiw-text > dl {
+  max-width: 44rem;
+}
+.hiw-diagram {
+  margin-top: var(--ui-space-7);
+}
+.hiw-read > h3 {
+  margin: var(--ui-space-5) 0 0.5rem;
+}
+.hiw-diagram .ui-frame iframe {
+  height: min(85svh, 60rem);
+}
+.hiw-read-lead {
+  max-width: 52rem;
+}
+.hiw-read-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--ui-space-6);
+}
+.hiw-read h4 {
+  margin: 0 0 0.5rem;
+  font-stretch: 87%;
+}
+.hiw-read dl {
+  margin: 0;
+}
+.hiw-read dt {
+  font-weight: 650;
+}
+.hiw-read dd {
+  margin: 0.15rem 0 0.9rem;
+}
+.hiw-read ol {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+.hiw-read li + li {
+  margin-top: 0.6rem;
+}
+.hiw-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ui-space-4);
+  margin-top: var(--ui-space-7);
+  padding-top: var(--ui-space-4);
+  border-top: 1px solid var(--ui-rule);
+}
+@media (max-width: 760px) {
+  .hiw-read-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hiw-diagram .ui-frame iframe {
+    height: 75svh;
+  }
+}

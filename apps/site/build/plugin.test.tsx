@@ -146,6 +146,10 @@ describe('the pages', () => {
       expect(html).toContain(step.heading);
     }
     expect(html).toContain(howItWorks.overview.heading);
+    for (const name of DIAGRAM_ORDER) {
+      expect(html).toContain(`${howItWorks.reading.heading}: ${name}`);
+    }
+    expect(html).toContain('aria-label="Steps"');
     for (const sample of ['hh', 'hs', 'hc']) expect(html).toContain(`<code>${sample}</code>`);
   });
 

@@ -1,5 +1,5 @@
 /** @jsxImportSource preact */
-import type { ComponentChildren, VNode } from 'preact';
+import type { VNode } from 'preact';
 import { Callout, Frame } from 'ui/components';
 import type { Diagram, DiagramName } from '../../build/diagrams.ts';
 import { featuresPage, howItWorks as h } from '../copy.ts';
@@ -12,48 +12,196 @@ const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/poo
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
 
 type Part = 'host' | 'bus' | 'isolate' | 'pool';
+type StepId = keyof typeof h.nav.names;
 
-/** One step of the walkthrough: its heading in the gutter, with the bar of its part of the system. */
-function Step({
-  id,
-  part,
-  heading,
-  children,
-}: {
-  id: string;
+interface Step {
+  id: StepId;
   part: Part;
   heading: string;
-  children: ComponentChildren;
-}): VNode {
-  return (
-    <section class="ui-gutter" id={id} aria-labelledby={`${id}-h`}>
-      <h2 id={`${id}-h`} data-part={part}>
-        {heading}
-      </h2>
-      <div class="ui-body">{children}</div>
-    </section>
-  );
+  body: VNode;
+  diagrams: DiagramName[];
 }
 
 const paras = (text: readonly string[]): VNode[] => text.map((t) => <p key={t}>{rich(t)}</p>);
 
-function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
-  const byName = new Map<DiagramName, Diagram>(diagrams.map((d) => [d.name, d]));
-  /** A pinned diagram, framed; nothing if the build didn't bring it. */
-  const diagram = (name: DiagramName): VNode | null => {
-    const d = byName.get(name);
-    if (!d) return null;
-    const href = `/how-it-works/diagrams/${d.name}.html`;
-    return (
+/** The step's id in the URL. */
+const anchor = (id: StepId): string => (id === 'busCrash' ? 'bus-crash' : id);
+
+/** A pinned diagram, framed full width, with how to read it in words. */
+function DiagramBlock({ d }: { d: Diagram }): VNode {
+  const href = `/how-it-works/diagrams/${d.name}.html`;
+  const r = h.reading.diagrams[d.name];
+  return (
+    <div class="hiw-diagram">
       <Frame
         src={href}
         title={`Diagram: ${d.title}`}
-        height={560}
+        height={760}
         open={{ href, label: `${h.open}: ${d.title}` }}
       />
-    );
-  };
+      <div class="hiw-read">
+        <h3>
+          {h.reading.heading}: {d.title}
+        </h3>
+        <p class="hiw-read-lead">{rich(r.lead)}</p>
+        <div class="hiw-read-cols">
+          <div>
+            <h4>{h.reading.parts}</h4>
+            <dl>
+              {r.parts.map(([term, text]) => (
+                <div key={term}>
+                  <dt>{term}</dt>
+                  <dd>{rich(text)}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div>
+            <h4>{h.reading.steps}</h4>
+            <ol>
+              {r.steps.map((t) => (
+                <li key={t}>{rich(t)}</li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
+  const byName = new Map<DiagramName, Diagram>(diagrams.map((d) => [d.name, d]));
   const s = h.sections;
+  const steps: Step[] = [
+    {
+      id: 'overview',
+      part: 'host',
+      heading: h.overview.heading,
+      body: <>{paras(h.overview.text)}</>,
+      diagrams: ['runtime-topology'],
+    },
+    {
+      id: 'host',
+      part: 'host',
+      heading: s.host.heading,
+      body: (
+        <>
+          {paras(s.host.text)}
+          <Code>{samples.howHost}</Code>
+        </>
+      ),
+      diagrams: [],
+    },
+    {
+      id: 'placement',
+      part: 'pool',
+      heading: s.placement.heading,
+      body: (
+        <>
+          {paras(s.placement.text)}
+          <Code>{samples.placement}</Code>
+          <p>
+            <a href={POOLS_GUIDE}>{s.placement.link}</a>
+          </p>
+        </>
+      ),
+      diagrams: ['placement'],
+    },
+    {
+      id: 'bus',
+      part: 'bus',
+      heading: s.bus.heading,
+      body: (
+        <>
+          {paras(s.bus.text)}
+          <Code>{samples.contracts}</Code>
+          {paras(s.bus.flow)}
+          <Code>{samples.vanilla}</Code>
+        </>
+      ),
+      diagrams: ['bus-publish'],
+    },
+    {
+      id: 'render',
+      part: 'isolate',
+      heading: s.render.heading,
+      body: (
+        <>
+          {paras(s.render.text)}
+          <CodeTabs
+            id="render"
+            label="The same counter as a component"
+            tabs={[
+              { key: 'react', label: 'React', code: samples.react },
+              { key: 'preact', label: 'Preact', code: samples.preact },
+            ]}
+          />
+        </>
+      ),
+      diagrams: [],
+    },
+    {
+      id: 'supervisor',
+      part: 'host',
+      heading: s.supervisor.heading,
+      body: (
+        <>
+          {paras(s.supervisor.text)}
+          <Code>{samples.howSupervision}</Code>
+        </>
+      ),
+      diagrams: ['isolate-lifecycle'],
+    },
+    {
+      id: 'restart',
+      part: 'isolate',
+      heading: s.restart.heading,
+      body: (
+        <>
+          {paras(s.restart.text)}
+          <Code>{samples.howCatchUp}</Code>
+        </>
+      ),
+      diagrams: ['restart-own-worker', 'restart-pool'],
+    },
+    {
+      id: 'busCrash',
+      part: 'bus',
+      heading: s.busCrash.heading,
+      body: (
+        <>
+          {paras(s.busCrash.text)}
+          <Code>{samples.durable}</Code>
+        </>
+      ),
+      diagrams: ['bus-crash-reattach'],
+    },
+    {
+      id: 'safety',
+      part: 'host',
+      heading: s.safety.heading,
+      body: (
+        <>
+          <dl class="facts">
+            {featuresPage.safety.facts.map(([term, text]) => (
+              <div key={term}>
+                <dt>{term}</dt>
+                <dd>{rich(text)}</dd>
+              </div>
+            ))}
+          </dl>
+          {paras(s.safety.text)}
+          <Code>{samples.grants}</Code>
+          <p>
+            <a href="/features/#safety">{s.safety.link}</a>
+          </p>
+        </>
+      ),
+      diagrams: [],
+    },
+  ];
+
   return (
     <main class="ui-shell">
       <PageIntro title={h.heading}>
@@ -63,79 +211,50 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
           </p>
         ))}
       </PageIntro>
-      <Step id="overview" part="host" heading={h.overview.heading}>
-        {paras(h.overview.text)}
-        {diagram('runtime-topology')}
-      </Step>
 
-      <Step id="host" part="host" heading={s.host.heading}>
-        {paras(s.host.text)}
-        <Code>{samples.howHost}</Code>
-      </Step>
-
-      <Step id="placement" part="pool" heading={s.placement.heading}>
-        {paras(s.placement.text)}
-        <Code>{samples.placement}</Code>
-        {diagram('placement')}
-        <p>
-          <a href={POOLS_GUIDE}>{s.placement.link}</a>
-        </p>
-      </Step>
-
-      <Step id="bus" part="bus" heading={s.bus.heading}>
-        {paras(s.bus.text)}
-        <Code>{samples.contracts}</Code>
-        {paras(s.bus.flow)}
-        <Code>{samples.vanilla}</Code>
-        {diagram('bus-publish')}
-      </Step>
-
-      <Step id="render" part="isolate" heading={s.render.heading}>
-        {paras(s.render.text)}
-        <CodeTabs
-          id="render"
-          label="The same counter as a component"
-          tabs={[
-            { key: 'react', label: 'React', code: samples.react },
-            { key: 'preact', label: 'Preact', code: samples.preact },
-          ]}
-        />
-      </Step>
-
-      <Step id="supervisor" part="host" heading={s.supervisor.heading}>
-        {paras(s.supervisor.text)}
-        <Code>{samples.howSupervision}</Code>
-        {diagram('isolate-lifecycle')}
-      </Step>
-
-      <Step id="restart" part="isolate" heading={s.restart.heading}>
-        {paras(s.restart.text)}
-        <Code>{samples.howCatchUp}</Code>
-        {diagram('restart-own-worker')}
-        {diagram('restart-pool')}
-      </Step>
-
-      <Step id="bus-crash" part="bus" heading={s.busCrash.heading}>
-        {paras(s.busCrash.text)}
-        <Code>{samples.durable}</Code>
-        {diagram('bus-crash-reattach')}
-      </Step>
-
-      <Step id="safety" part="host" heading={s.safety.heading}>
-        <dl class="facts">
-          {featuresPage.safety.facts.map(([term, text]) => (
-            <div key={term}>
-              <dt>{term}</dt>
-              <dd>{rich(text)}</dd>
-            </div>
-          ))}
-        </dl>
-        {paras(s.safety.text)}
-        <Code>{samples.grants}</Code>
-        <p>
-          <a href="/features/#safety">{s.safety.link}</a>
-        </p>
-      </Step>
+      {/* Without JS every step shows, one after another, and the nav is a list of contents (src/demos/how-it-works.ts). */}
+      <div class="hiw" data-steps>
+        <nav class="hiw-nav" aria-label={h.nav.label}>
+          <ol>
+            {steps.map((st) => (
+              <li key={st.id} data-part={st.part}>
+                <a href={`#${anchor(st.id)}`}>{h.nav.names[st.id]}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        {steps.map((st, i) => {
+          const prev = steps[i - 1];
+          const next = steps[i + 1];
+          const id = anchor(st.id);
+          return (
+            <section class="hiw-step" id={id} aria-labelledby={`${id}-h`} data-step key={st.id}>
+              <h2 id={`${id}-h`} data-part={st.part}>
+                {st.heading}
+              </h2>
+              <div class="hiw-text">{st.body}</div>
+              {st.diagrams.map((name) => {
+                const d = byName.get(name);
+                return d ? <DiagramBlock d={d} key={name} /> : null;
+              })}
+              <p class="hiw-pager">
+                {prev ? (
+                  <a href={`#${anchor(prev.id)}`} rel="prev">
+                    ← {h.nav.previous}: {h.nav.names[prev.id]}
+                  </a>
+                ) : (
+                  <span />
+                )}
+                {next ? (
+                  <a href={`#${anchor(next.id)}`} rel="next">
+                    {h.nav.next}: {h.nav.names[next.id]} →
+                  </a>
+                ) : null}
+              </p>
+            </section>
+          );
+        })}
+      </div>
 
       <section class="ui-gutter" aria-labelledby="policy">
         <h2 id="policy">{h.policy.heading}</h2>

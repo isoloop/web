@@ -450,6 +450,182 @@ export const howItWorks = {
     ],
   },
   open: 'Open full size',
+  /** The step tabs: one short name per step, in order. */
+  nav: {
+    label: 'Steps',
+    names: {
+      overview: 'Overview',
+      host: 'Host',
+      placement: 'Pools',
+      bus: 'Bus',
+      render: 'Rendering',
+      supervisor: 'Supervisor',
+      restart: 'Restarts',
+      busCrash: 'Bus crash',
+      safety: 'Safety',
+    },
+    previous: 'Previous',
+    next: 'Next',
+  },
+  /**
+   * How to read each diagram, in words. Sources: each diagram's JSON at the pin
+   * (its components, connections, messages and cards), which the library's
+   * drift test checks against the code.
+   */
+  reading: {
+    heading: 'Reading the diagram',
+    parts: 'What’s in it',
+    steps: 'Follow the arrows',
+    diagrams: {
+      'runtime-topology': {
+        lead: 'Each large box is one thread. Cards inside a box are the pieces that run on that thread. Solid lines carry messages, dashed lines are heartbeats.',
+        parts: [
+          [
+            'Main thread, along the top',
+            'Your host app, which calls `createKernel`. The supervisor, which starts workers and watches their heartbeats. The compositor, which applies isolates’ DOM changes to their surfaces once per animation frame. The bus controller, which hands out bus ports and supervises the bus worker. The host connection, the host’s own port for `kernel.subscribe`.',
+          ],
+          [
+            'Own worker, middle left',
+            'One isolate, with its own JavaScript realm and document. Isolate modules, left of it, are the files the worker imports.',
+          ],
+          [
+            'Pool worker, middle right',
+            'Three isolates on one thread: a headless member and two visual members, each with a root in one shared document.',
+          ],
+          [
+            'Bus worker, along the bottom',
+            'The broker, which checks grants, schemas and duplicates; the log engine, which encodes and stores records; the topics’ logs; and OPFS segments for persistent topics.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'The host app calls `spawn`. The supervisor starts a worker and sends it `init`, one per member in a pool, and the worker imports the isolate’s module.',
+          'A visual isolate sends patches, its DOM changes, to the compositor, which applies them to the isolate’s surface.',
+          'Each isolate has a port of its own to the broker, one per member in a pool. Records never pass through the main thread.',
+          'The broker appends what it accepts through the log engine; persistent topics also go to OPFS.',
+          'The dashed lines back to the main thread are heartbeats: one per worker to the supervisor, and the bus worker’s beat and metrics to the bus controller.',
+        ],
+      },
+      placement: {
+        lead: 'The same three isolates, placed two ways. Each large box is one thread.',
+        parts: [
+          [
+            'Left: own workers',
+            'Isolates A and B (visual) and C (headless), each in a worker of its own: three threads.',
+          ],
+          [
+            'Right: one pool',
+            'The same three as members of the pool `charts`: one thread, one shared document with a root for each visual member.',
+          ],
+          [
+            'Top and bottom',
+            'The kernel, where the manifest’s `pool` decides the placement, and the bus worker.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'On the left the kernel starts three workers and sends each one `init`; on the right, one worker and three `init`s.',
+          'Either way the bus sees three ports. Grants, subscriptions and committed offsets stay per isolate, and so do the surface, the frame budget and the restart count.',
+          'What the pool members share: one event loop and its timers, the globals, the document, and their fate when the worker fails. In the library’s own measurements, 20 headless isolates in one worker used 71–86% less memory than on 20 workers of their own, and 8 React widgets in one worker 35–64% less.',
+        ],
+      },
+      'bus-publish': {
+        lead: 'One record, from left to right, through five columns: Produce, Gate, Order, Log and Consume. Red lines end in a rejection.',
+        parts: [
+          ['Produce', 'An isolate publishing on its own port, or the host with `kernel.publish`.'],
+          [
+            'Gate',
+            'The grants and the size limit, then the schema. Topics under `isoloop.` belong to the kernel.',
+          ],
+          [
+            'Order',
+            'On a persistent topic, the duplicate check: each publish carries its producer, instance and sequence number, so a re-sent one gets its original offset. Anything that fails a gate goes to Rejected, and nothing is appended.',
+          ],
+          [
+            'Log',
+            'The log engine encodes the record, checks the storage quota and appends it. A persistent topic’s batch is written to OPFS first, then acknowledged; records evicted from memory are read back from disk.',
+          ],
+          [
+            'Consume',
+            'Subscribers, a consumer group whose members each get some of the records (by key), and the committed offsets.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'The publisher sends the record; the gates check it in order.',
+          'An accepted record gets an offset in the topic’s log, and the publisher gets its answer: the offset, or the error.',
+          'The bus delivers it to each subscription in order, while the subscription has credit. Delivery is at least once.',
+          'Each subscriber commits what its handlers finished, every 100 ms by default, which also returns credit.',
+        ],
+      },
+      'isolate-lifecycle': {
+        lead: 'The supervisor’s states for one isolate. The main path runs along the middle; failures branch off it.',
+        parts: [
+          [
+            'The main path',
+            'Restarting (a spawn queued, after the backoff), Loading (the worker started and sent `init`; ready within 10 s), Running (a heartbeat every 100 ms), Stopped (`kernel.stop`).',
+          ],
+          [
+            'Blocked',
+            'No heartbeat for 400 ms: the loop is busy but still alive, and a busy overlay covers its surface. A heartbeat brings it back to Running.',
+          ],
+          ['Crashed', 'Passed through on the way to a restart. It emits `isolate:crash`.'],
+          [
+            'Failed',
+            'The restart limit was reached: the fallback shows and the host gets `isolate:failed`.',
+          ],
+          [
+            'Suspended',
+            'Opt-in: an idle isolate’s worker is shut down and its offsets are kept. It wakes back into Loading.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'An isolate crashes from Running on a fatal error or a pool crash, from Blocked after 10 s without a heartbeat, and from Loading on a timeout or a version mismatch.',
+          'Under 3 restarts within 60 s it goes back to Restarting, after a backoff that starts at 250 ms and doubles each time (at most 4 s). Past the limit it’s Failed.',
+          'Some crashes go straight to Failed, because a restart can’t change them: a render format or version the host doesn’t speak, or a bus that couldn’t load its contracts.',
+          'Not a crash: a subscription handler that throws. The isolate keeps running, reports `isolate:error`, and that subscription stops committing, so its records come back on the next start.',
+        ],
+      },
+      'restart-own-worker': {
+        lead: 'A sequence: time runs down the page. The columns are isolate C’s old worker, the kernel, the bus worker and C’s new worker.',
+        parts: [
+          ['Crash', 'C’s old worker reports a fatal error, or fails.'],
+          ['Respawn', 'After the backoff, a new worker for C.'],
+          ['Replay and first paint', 'C reads its topics back and draws again.'],
+        ] as [string, string][],
+        steps: [
+          'The kernel terminates the old worker and detaches C’s port from the bus. C’s committed offsets are kept: they belong to C, not to its worker.',
+          'After the backoff, the kernel attaches a new port for C, then starts the new worker with it.',
+          "The new C subscribes with `from: 'committed'`, and the bus delivers from the record after its last commit. Commits go out every 100 ms, so up to that much of what C had already handled comes back: handlers should be safe to run twice.",
+          'C reports ready, sends its first paint and commits again. Every other isolate kept running throughout.',
+        ],
+      },
+      'restart-pool': {
+        lead: 'A sequence in two parts, with time running down the page. The columns are the pool’s worker with members A, B and C, the kernel, the bus worker and a new pool worker.',
+        parts: [
+          ['Top part', 'A member’s own error: only B restarts.'],
+          ['Bottom part', 'The worker fails: every member restarts.'],
+        ] as [string, string][],
+        steps: [
+          'B reports a fatal error of its own. The kernel shuts B down alone; A and C keep the worker and keep running.',
+          'After B’s backoff, the kernel gives B a new bus port and starts it again in the same worker. B subscribes from its own commits.',
+          'Later, the worker stops sending heartbeats for 10 s, or fails. Every member crashes with that reason, and the kernel terminates the worker.',
+          'The kernel gives all three members new bus ports, starts a new worker and sends each member its `init`. Each one reads on from its own commits.',
+        ],
+      },
+      'bus-crash-reattach': {
+        lead: 'A sequence in three parts, with time running down the page. The columns are an isolate, the kernel’s bus controller, the old bus worker, the new one, and OPFS.',
+        parts: [
+          ['The bus fails', 'The isolates keep running.'],
+          ['New bus, ports moved at once', 'Each isolate gets a port to the new bus.'],
+          ['Restore and resume', 'Persistent topics come back from OPFS.'],
+        ] as [string, string][],
+        steps: [
+          'An isolate publishes and gets no answer: it keeps the publish. The old bus stops beating or fails, and the kernel terminates it.',
+          'The kernel starts a new bus worker and attaches every isolate’s port to it at once; the new bus holds what arrives until it’s ready. Each isolate subscribes again and re-sends its unanswered publishes.',
+          'The new bus takes the storage lock (waiting up to 2 s) and restores the persistent topics’ segments. Their subscriptions resume after the last commit; memory topics send a reset instead.',
+          'The new bus reports ready, and suspended headless isolates wake. If the bus crashes twice while loading, it sets the newest segment aside and starts from the one before.',
+        ],
+      },
+    },
+  },
   sections: {
     host: {
       heading: 'The host and its isolates',

@@ -33,7 +33,7 @@ export type DiagramName = (typeof DIAGRAM_ORDER)[number];
 
 export interface Diagram {
   name: DiagramName;
-  /** The diagram's own title, from its JSON. */
+  /** The diagram's own title, from its JSON's `meta`. */
   title: string;
 }
 
@@ -42,14 +42,20 @@ export const DIAGRAMS_PATH = 'how-it-works/diagrams/';
 const hash = (s: string | Uint8Array): string =>
   createHash('sha256').update(s).digest('hex').slice(0, 10);
 
+/** `o.title` if it's a string. */
+const titleOf = (o: unknown): string | undefined =>
+  typeof o === 'object' && o !== null && 'title' in o && typeof o.title === 'string'
+    ? o.title
+    : undefined;
+
 /** Titles from each diagram's JSON, in reading order. */
 export function readDiagrams(dir: string): Diagram[] {
   return DIAGRAM_ORDER.map((name) => {
     const json: unknown = JSON.parse(readFileSync(join(dir, `${name}.json`), 'utf8'));
-    const title =
-      typeof json === 'object' && json !== null && 'title' in json && typeof json.title === 'string'
-        ? json.title
-        : name;
+    // Archify keeps the title in `meta` (older candidates had it at the top).
+    const meta =
+      typeof json === 'object' && json !== null && 'meta' in json ? json.meta : undefined;
+    const title = titleOf(meta) ?? titleOf(json) ?? name;
     return { name, title };
   });
 }
