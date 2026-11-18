@@ -120,7 +120,8 @@ export const home = {
       ['Keeping one part’s load from stalling the rest.', 'live dashboards on heavy datasets'],
       ['Moving heavy work off the UI’s thread.', 'parsing, search, simulation'],
       ['Keeping state through a crash or a reload.', 'alarms, event logs, drafts'],
-      ['Running code you don’t fully trust.', 'third-party widgets, plugins'],
+      // Unreliable, not hostile: isolates share the origin (isoloop/isoloop README, "Hostile code").
+      ['Containing code you don’t control.', 'widgets from other teams, AI-generated components'],
       ['Combining parts with different owners.', 'micro-frontends from several teams'],
       [
         'Building apps with no server behind them.',
