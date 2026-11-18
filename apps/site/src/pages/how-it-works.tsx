@@ -62,14 +62,6 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
             {t}
           </p>
         ))}
-        <p>
-          <small>
-            {h.pinned}{' '}
-            <a href={`https://github.com/isoloop/isoloop/tree/${pin}/docs/diagrams`}>
-              <code>{pin.slice(0, 7)}</code>
-            </a>
-          </small>
-        </p>
       </PageIntro>
       <Step id="overview" part="host" heading={h.overview.heading}>
         {paras(h.overview.text)}
@@ -167,6 +159,14 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
               </li>
             ))}
           </ul>
+          <p>
+            <small>
+              {h.pinned}{' '}
+              <a href={`https://github.com/isoloop/isoloop/tree/${pin}/docs/diagrams`}>
+                <code>{pin.slice(0, 7)}</code>
+              </a>
+            </small>
+          </p>
         </div>
       </section>
     </main>

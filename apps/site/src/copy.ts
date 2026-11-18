@@ -438,9 +438,11 @@ export const howItWorks = {
   heading: 'How Isoloop works',
   intro: [
     'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
-    'This page goes through each part in turn. The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it.',
+    'This page goes through each part in turn.',
   ],
-  pinned: 'Diagrams drawn from isoloop/isoloop at',
+  /** Under Where to go next: where the diagrams come from, then the short sha. */
+  pinned:
+    'The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it. These are from isoloop/isoloop at',
   overview: {
     heading: 'The parts at a glance',
     text: [
