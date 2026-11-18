@@ -227,6 +227,16 @@ The Examples section is gone: the nav and the introduction link to `/examples/`.
 - **The caption above the recording** is three sentences.
 - **Install stays last,** so a reader reaches it only after the rest of the page.
 
+### Amended: "how it works" as a walkthrough (2026-11-18)
+
+The maintainer's review: `/how-it-works/` was seven diagrams with a paragraph each, and explained little on its own. This changes the pages table's `/how-it-works/` row and decision 6's "the page" points; the diagrams themselves, their pin and their policy rewrite are unchanged.
+
+- **The page is a walkthrough** of the runtime, one section per part: the host and its isolates; workers and pools; topics, records and the bus; rendering from a worker; the supervisor; restarts and catch-up; when the bus crashes; grants and safety; then the hosting policy (the Pages gap, as before) and where to go next.
+- **The diagrams sit in the step they explain.** The runtime topology comes first, under the introduction; rendering from a worker has none. All seven are still copied and shown, and the page still names the pin.
+- **Short code samples,** type-checked in `apps/samples` (`src/how/` for the new ones, reusing the features page's where they fit), highlighted like every other code block.
+- **The numbers are the library's defaults at the pin,** each cited in `copy.ts`: heartbeats, restart limits and backoff, credit and the commit interval, the frame budget.
+- **Safety reuses the features page's three facts,** so the two pages can't say different things.
+
 ## Consequences
 
 **Good**

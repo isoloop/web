@@ -283,7 +283,7 @@ export const home = {
       'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says.',
       'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
     ],
-    link: 'How it works, in seven diagrams drawn from the code',
+    link: 'How it works, part by part',
   },
   install: {
     heading: 'Install',
@@ -424,36 +424,111 @@ export const featuresPage = {
   },
 };
 
+// Sources, at the library pin (apps/site/library.lock): DEFAULT_SUPERVISOR_CONFIG
+// and DEFAULT_BACKOFF (packages/host/src/supervisor), KernelConfig and
+// IsolateManifest (packages/host/src/kernel.ts), SubscribeOptions and
+// BusClientOptions (packages/runtime/src/bus-client.ts), DEFAULT_COMMIT_INTERVAL_MS
+// (packages/protocol/src/commits.ts); ADRs 0007 (the bus crash), 0008 (isolates
+// and surfaces), 0010 and 0011 (the render bridge), 0015 (visual pools);
+// docs/guide/pools.md (start positions, isoloop#186).
 export const howItWorks = {
   title: 'How Isoloop works',
   description:
-    'Seven diagrams of the Isoloop runtime, drawn from the code: the topology, placement, a publish through the bus, the isolate lifecycle, restarts, and a bus crash.',
+    'A walkthrough of the Isoloop runtime: the host and its isolates, workers and pools, the message bus, rendering from a worker, the supervisor, restarts and catch-up, a bus crash, and grants.',
   heading: 'How Isoloop works',
-  intro:
-    'Each diagram is drawn from the library’s code, and a test in the library checks its states, timings and counts against that code. Each one opens full size, with the source files it cites.',
-  pinned: 'Drawn from isoloop/isoloop at',
+  intro: [
+    'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
+    'This page goes through each part in turn. The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it.',
+  ],
+  pinned: 'Diagrams drawn from isoloop/isoloop at',
+  overview: {
+    heading: 'The parts at a glance',
+    text: [
+      'The main thread holds the host: your code, the supervisor, the compositor that applies each isolate’s DOM changes, and the bus controller. Beside it, an isolate on a worker of its own, a pool worker shared by several, and the bus worker. Isolates and the bus talk over direct message channels.',
+    ],
+  },
   open: 'Open full size',
-  /** One paragraph per diagram, in reading order. */
-  diagrams: {
-    'runtime-topology':
-      'The host runs on the main thread: the supervisor, the compositor that applies each isolate’s DOM changes, and the bus controller. Each isolate runs on its own worker or in a pool, and the bus has a worker of its own. Isolates and the bus talk over direct message channels, not through the main thread.',
-    placement:
-      'The same isolates, each on its own worker or together in one pool. A pool saves memory and start-up time. Its members share an event loop, so they also share a fate.',
-    'bus-publish':
-      'One record through the bus. It passes the publisher’s grants and a size limit, its topic’s schema and a duplicate check, then goes into the log. A persistent record is acknowledged once it’s flushed to OPFS. Subscribers get it within their credit and commit their offsets, every 100 ms by default.',
-    'isolate-lifecycle':
-      'The supervisor’s states, with the default timings. An isolate with no heartbeat for 400 ms counts as blocked, and after 10 s it’s stopped and restarted. Restarts back off, up to 3 within 60 s; a crash after that leaves it failed.',
-    'restart-own-worker':
-      'An isolate on its own worker crashes and a new worker starts. Each subscription starts where its `from` says; the diagram shows `committed`, which reads on after the last commit, so the isolate sees again what it had read but not committed.',
-    'restart-pool':
-      'In a pool, a member’s own error restarts that member alone. A pool worker that stops responding, or throws from a timer, takes every member down, and the pool restarts in a new worker.',
-    'bus-crash-reattach':
-      'The bus worker crashes. A new one starts, every isolate reattaches, and persistent topics come back from OPFS.',
-  } as Record<string, string>,
+  sections: {
+    host: {
+      heading: 'The host and its isolates',
+      text: [
+        'The host is your page’s own code. It creates one kernel with `createKernel`, giving it the topics and the worker files that `@isoloop/vite` builds, and starts each isolate with `kernel.spawn`.',
+        'An isolate is a module whose default export is `defineIsolate(…)`: a `start(ctx)` function, or a React or Preact component through an adapter. Its manifest names the module, the element it renders into (its surface) and its grants. An isolate with no surface is headless: it gets the same supervision and bus, and no DOM.',
+      ],
+    },
+    placement: {
+      heading: 'Workers and pools',
+      text: [
+        'Each isolate runs in a worker. By default it gets one of its own. With `pool` in its manifest, it shares one worker with every isolate that names the same pool.',
+        'A pool saves memory and start-up time. In the plant dashboard, a small headless isolate costs about 0.2 MB in a pool, against 2.8 MB on its own worker. Members share an event loop, so they share a fate: one that blocks stalls them all. They also share one document, so they can read each other’s DOM and input. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
+        'The kernel never pools on its own. Placement is the manifest’s choice, or that of the opt-in `@isoloop/balancer`, which moves isolates between pools as their load changes.',
+      ],
+      link: 'The pools guide',
+    },
+    bus: {
+      heading: 'Topics, records and the bus',
+      text: [
+        'A topic is declared once, in a contracts module that the host, the bus and every isolate import. It has a name (with its major version, by convention, as in `note.v1`), a schema (from any Standard Schema library; zod here) and a retention: the last n records, the records of the last so many milliseconds, or the latest record per key (`compacted`).',
+      ],
+      flow: [
+        'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path. A publish is checked in order: the publisher’s grants and a size limit, then the topic’s schema, and on a persistent topic a duplicate check. Then it’s appended to the topic’s log and gets an offset, and `publish` resolves; on a persistent topic, once the record is written to disk. A rejected one rejects with a `BusError`.',
+        'A subscription starts where its `from` says: `latest` (the default) for new records only, `earliest` for everything the topic retains, or `committed` to read on after its last commit. The bus sends each subscription up to 1,000 records ahead of what it has handled. The subscriber commits each record once its handler settles. The commits go out every 100 ms by default, or sooner once half the credit is used.',
+      ],
+    },
+    render: {
+      heading: 'Rendering from a worker',
+      text: [
+        'A worker has no DOM. A visual isolate gets a small DOM subset as its `document`, enough for React, Preact and plain DOM code to run unchanged. The subset records each change (insert, move, remove, text, attribute, listener) and sends the host one batch per microtask.',
+        'On the host, the compositor applies each isolate’s batches to its surface, inside a shadow root, with a budget of 8 ms of DOM work per frame. Every tag, attribute and URL passes the host’s component registry first, so an isolate can’t create a script or an `on*` handler. Input on a surface goes back to the worker as data, and is dispatched there with capture and bubble.',
+        'Functions never cross the boundary. What needs the real page, such as measuring a node, focusing it, scrolling to it or drawing on a canvas, the isolate asks the host for through host calls.',
+      ],
+    },
+    supervisor: {
+      heading: 'The supervisor',
+      text: [
+        'Every worker sends a heartbeat, by default every 100 ms. With none for 400 ms, its isolates count as blocked. With none for 10 s, the worker is terminated and its isolates are restarted.',
+        'An isolate also crashes when its code throws a fatal error, when its worker fails, or when it isn’t ready within 10 s of its spawn. Restarts back off from 250 ms, doubling up to 4 s. After 3 restarts within 60 s, the next crash leaves it failed. A visual isolate then shows its fallback, by default a message and a Retry button, and the host gets `isolate:failed`; `kernel.restart` brings it back.',
+      ],
+    },
+    restart: {
+      heading: 'Restarts and catch-up',
+      text: [
+        'A restart is a new instance. The isolate’s memory is gone, and it rebuilds its state from the bus. Each subscription starts where its `from` says, as on the first start. With `committed`, it reads on after its last commit, so it sees again what it had read but not yet committed. A subscription in a consumer group that has committed resumes after the group’s commit, whatever its `from`.',
+        'On its own worker, a crash restarts that isolate alone. In a pool, it depends on whose the failure is. An error the runtime can pin on one member restarts that member alone: `start()` throwing, an error the member reports with `ctx.reportError`, or a render error the React or Preact adapter catches (the adapters report it that way). A block, or a plain throw from an event handler, a timer or a scheduler the members share, is the worker’s error: the worker goes down, and every member restarts in a new one.',
+      ],
+    },
+    busCrash: {
+      heading: 'When the bus crashes',
+      text: [
+        'The bus is supervised like an isolate, with the same heartbeat and restart limit. When it crashes, a new bus worker starts and every running isolate gets a new channel to it. The isolates keep running. What they publish meanwhile waits in each isolate, up to 1,000 unanswered calls, and goes out once the new bus is there.',
+        "What comes back depends on the topic’s durability. A `persistent` topic writes its records to the origin private file system (OPFS) in small batches, and a publish resolves once its batch is written. After a bus restart, its subscriptions resume after their last commit, with no gap, and re-sent publishes aren’t stored twice. A `memory` topic, the default, starts empty: its subscribers get a reset, and `useTopic` empties and refills. An isolate that can’t handle a reset can ask to be restarted instead, with `bus: { onReset: 'restart' }`.",
+        'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them, persistent topics run in memory and the kernel emits `bus:durability-degraded`. After 3 bus restarts within 60 s, the kernel emits `bus:failed`: isolates keep running, and every publish rejects with `bus_unavailable`.',
+      ],
+    },
+    safety: {
+      heading: 'Grants and safety',
+      text: [
+        'Grants are checked by the bus, on every publish and subscription. Topics under `isoloop.` belong to the kernel.',
+      ],
+      link: 'Safety, on the features page',
+    },
+  },
   policy: {
     heading: 'These pages and their security policy',
     text: "Every page on this site, the diagrams included, runs under the Content-Security-Policy default-src 'self'. GitHub Pages can’t send headers, so here the policy is a meta tag, and a meta tag doesn’t reach workers: basic’s workers run without a policy on this host. In a real deployment the policy goes in the response headers, which cover the workers too.",
     link: 'The hosting guide',
+  },
+  next: {
+    heading: 'Where to go next',
+    links: [
+      ['/features/', 'The features, with live demos'],
+      ['/examples/', 'The examples, running live'],
+      [
+        'https://github.com/isoloop/isoloop/tree/main/docs/guide',
+        'The guides: pools, the balancer, hosting',
+      ],
+      ['https://github.com/isoloop/isoloop', 'The source, on GitHub'],
+    ] as [string, string][],
   },
 };
 
