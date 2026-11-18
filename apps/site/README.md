@@ -30,7 +30,7 @@ pnpm --filter site build          # dist/
 The whole site as deployed, with the examples:
 
 ```bash
-pnpm --filter "./apps/dashboards/*" --filter ./apps/basic --filter ./apps/site build
+pnpm --filter "./apps/dashboards/*" --filter ./apps/basic --filter ./apps/processor --filter ./apps/site build
 pnpm --filter ui build:specimens
 SITE=1 scripts/assemble-site.sh site     # from the repo root; SITE=1 includes the site's pages
 pnpm --filter site linkcheck ../../site

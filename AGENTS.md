@@ -14,7 +14,7 @@ A change is done when all five hold:
 
 ## Copy and claims
 
-- **Positioning:** Isoloop is a complete toolchain: containment, restart and catch-up, a bus with retention, replay and durable history, placement as a switch, with React, Preact or plain DOM. It costs CPU, memory and start-up time, and the site says so plainly.
+- **Positioning:** Isoloop is a complete toolchain: containment, restart and catch-up, a bus with retention, replay and durable history, placement as a switch; framework-agnostic, with React and Preact adapters. It costs CPU, memory and start-up time, and the site says so plainly.
 - **Performance is a measurement:** device, build, tag, and the numbers. Compare Isoloop with native as measured results, in both directions.
 - **Every claim is checked** against the code or a test before it ships. Feature entries carry proof links.
 - **The maintainer reviews copy, ADRs and these rules.** Forks merge their own code and tooling PRs on green.

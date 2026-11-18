@@ -109,6 +109,20 @@ describe('the pages', () => {
     expect(html).toContain('<script type="module" src="/src/demos/features.ts"></script>');
   });
 
+  it('give the landing costs table in both forms, every Δ with its verdict in words', () => {
+    const html = renderDocument(named('home'), data, { csp: CSP });
+    expect(html).toContain('ui-delta-wide');
+    expect(html).toContain('ui-delta-narrow');
+    expect(html.match(/<table class="ui-table ui-delta-table">/g)).toHaveLength(3);
+    const deltas = [...html.matchAll(/<td class="ui-delta"( data-verdict="(\w+)")?>(.*?)<\/td>/g)];
+    expect(deltas.length).toBeGreaterThan(0);
+    for (const [, , verdict, body] of deltas) {
+      if (body === '') continue; // a count, with no Δ
+      expect(['better', 'worse', 'same']).toContain(verdict);
+      expect(body).toMatch(/class="ui-verdict">(better|worse|no change)</);
+    }
+  });
+
   it('show the pin on "how it works"', () => {
     const html = renderDocument(named('how-it-works'), data, { csp: CSP });
     expect(html).toContain('<code>fffffff</code>');

@@ -256,18 +256,22 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    columns: 2 22rem;
+    /* A grid, not CSS columns: the rows line up across the two columns, and
+       no margin is cut at a column's top. */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
     column-gap: 2.5rem;
     border-top: 2px solid var(--ui-text);
   }
   .ui-strip li {
-    break-inside: avoid;
+    display: flex;
+    padding: 0.5rem 0;
     border-bottom: 1px solid var(--ui-rule);
   }
   .ui-strip li a {
     display: block;
+    flex: 1;
     padding: 0.75rem 0 0.75rem 0.9rem;
-    margin: 0.5rem 0;
     border-left: 4px solid var(--part, var(--ui-text));
     color: var(--ui-text);
     text-decoration: none;

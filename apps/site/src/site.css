@@ -580,3 +580,97 @@
 .change-source span {
   color: var(--ui-text-muted);
 }
+
+/* "What it's for": the pattern, then its example, muted. */
+.ui-eg {
+  color: var(--ui-text-muted);
+}
+
+/* The landing's A/B/Δ table (src/pages/delta.tsx): one wide table with the
+   pairs side by side, or one table per pair below 881px. */
+.ui-delta-narrow {
+  display: none;
+}
+/* The wide table first fits at about 870px (measured), so the switch is its
+   own, not the site's 760px. */
+@media (max-width: 880px) {
+  .ui-delta-wide {
+    display: none;
+  }
+  .ui-delta-narrow {
+    display: grid;
+    row-gap: 2rem;
+  }
+}
+.ui-delta-table tbody th[scope='row'] {
+  width: auto;
+  min-width: 10rem;
+}
+.ui-delta-table thead th.ui-delta-pair {
+  border-bottom: 1px solid var(--ui-rule);
+  color: var(--ui-text-muted);
+  font-weight: 600;
+}
+.ui-delta-table .ui-delta-start {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--ui-rule);
+}
+.ui-delta-table .ui-delta-group th {
+  padding-top: 1.4rem;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.ui-delta {
+  white-space: nowrap;
+  font-weight: 650;
+}
+.ui-delta .ui-verdict {
+  display: block;
+  font-size: var(--ui-text-xs);
+  font-weight: 500;
+}
+/* Neutral: the verdict is in words, and costs aren't shown as alarms. */
+.ui-delta .ui-verdict {
+  color: var(--ui-text-muted);
+}
+.ui-notes {
+  margin: 1rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+  max-width: 44rem;
+}
+.ui-notes li {
+  margin-bottom: 0.4rem;
+}
+@media (max-width: 760px) {
+  .ui-delta-narrow .ui-delta-table {
+    font-size: var(--ui-text-s);
+  }
+  .ui-delta-narrow .ui-delta-table th,
+  .ui-delta-narrow .ui-delta-table td {
+    padding-right: 0.6rem;
+  }
+  .ui-delta-narrow .ui-delta-table tbody th[scope='row'] {
+    min-width: 0;
+    width: 38%;
+  }
+  .ui-delta-narrow .ui-delta {
+    white-space: normal;
+  }
+}
+
+.ui-delta-caption {
+  color: var(--ui-text-muted);
+  font-size: 0.9rem;
+  max-width: 44rem;
+  margin: 0;
+}
+.ui-delta-narrow .ui-table caption {
+  padding-bottom: 0.6rem;
+  color: var(--ui-text);
+  font-weight: 600;
+}

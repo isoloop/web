@@ -46,6 +46,28 @@ for (const path of PAGES) {
   });
 }
 
+// The costs table has a second form below 881px (src/pages/delta.tsx), so
+// the pages that show it are checked at a phone's width too.
+for (const path of ['/', '/features/']) {
+  test(`${path} is accessible at a phone's width, with nothing wider than the screen`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(path);
+    await expect(page.locator('.ui-delta-narrow table').first()).toBeVisible();
+    await expect(page.locator('.ui-delta-wide')).toBeHidden();
+    await expectAccessible(page, { exclude: ['iframe'] });
+    const widest = await page.evaluate(() =>
+      Math.max(
+        ...[...document.querySelectorAll('.ui-delta-narrow table')].map(
+          (t) => t.scrollWidth - (t.parentElement?.clientWidth ?? 0),
+        ),
+      ),
+    );
+    expect(widest).toBeLessThanOrEqual(0);
+  });
+}
+
 test('a missing page gets the 404 page', async ({ page }) => {
   const problems = await watch(page);
   const res = await page.goto('/no-such-page/');
