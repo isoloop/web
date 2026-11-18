@@ -163,7 +163,8 @@ test('a task whose backlog keeps growing is moved within about 25 s', async ({
     },
     [a, b] as const,
   );
-  // Two rising 10 s windows (M3j decision 16), after the jobs start to pile up.
+  // Two rising 10 s windows (M3j decision 16) after the jobs start to pile
+  // up: about 25 s, the title's figure. The 35 s timeout allows for slow CI.
   await expect(page.locator('.log li[data-kind="backlog"]').first()).toBeVisible({
     timeout: 35_000,
   });
