@@ -44,6 +44,9 @@ const data: SiteData = {
     react: 'r',
     preact: 'pr',
     vanilla: 'v',
+    demoTopics: 't',
+    demoCounter: 'dc',
+    demoMain: 'dm',
   },
 };
 

@@ -68,6 +68,26 @@ for (const path of ['/', '/features/']) {
   });
 }
 
+test('the code behind the landing demo folds out of the recording, as tabs', async ({ page }) => {
+  await page.goto('/');
+  const fold = page.locator('.ui-recording details.ui-demo-code');
+  const host = page.getByRole('tabpanel', { name: 'main.ts' });
+  await expect(host).toBeHidden();
+  await fold.locator('summary').click();
+  await expect(host).toBeVisible();
+  await expect(host.locator('.tok-keyword').first()).toHaveText('import');
+  await expect(host).toContainText("pool: 'shared'");
+  const counterTab = page.getByRole('tab', { name: 'counter.ts' });
+  await page.getByRole('tab', { name: 'main.ts' }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(counterTab).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel', { name: 'counter.ts' })).toContainText(
+    "from: 'earliest'",
+  );
+  await expect(host).toBeHidden();
+  await expectAccessible(page, { exclude: ['iframe'] });
+});
+
 test('a missing page gets the 404 page', async ({ page }) => {
   const problems = await watch(page);
   const res = await page.goto('/no-such-page/');

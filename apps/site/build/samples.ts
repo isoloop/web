@@ -14,6 +14,9 @@ export const SAMPLE_FILES = {
   react: 'counter-react.tsx',
   preact: 'counter-preact.tsx',
   vanilla: 'counter-vanilla.ts',
+  demoTopics: 'demo/topics.ts',
+  demoCounter: 'demo/counter.ts',
+  demoMain: 'demo/main.ts',
 } as const;
 
 export type SampleName = keyof typeof SAMPLE_FILES;
@@ -53,5 +56,8 @@ export function loadSamples(dir: string): Samples {
     react: read('react'),
     preact: read('preact'),
     vanilla: read('vanilla'),
+    demoTopics: read('demoTopics'),
+    demoCounter: read('demoCounter'),
+    demoMain: read('demoMain'),
   };
 }

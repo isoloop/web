@@ -218,7 +218,14 @@ The maintainer's review of the live landing page: it didn't say what Isoloop is,
 
 The Examples section is gone: the nav and the introduction link to `/examples/`.
 
-**Measurements (decision 7):** the landing page's figures are the desktop run only, the one run that measured every figure for every build in the same interleaved rounds. Each native build sits next to the Isoloop placement shaped like it (native and `one`; native + workers and `matched`), as A, B and Δ, grouped into responsiveness, faults and start-up, and cost. Each Δ says in words whether it's better or worse, without colour, so a cost reads as a measurement, not an alarm. Wide screens get one table; narrow screens one table per pair. Under it: how Δ is computed, what the native baseline lacks (a store written for the app, no bus; no containment, restart, replay, grants, schemas or acknowledged history), and one line on phones, linking every device's results.
+**Measurements (decision 7):** the landing page's figures are the desktop run only, the one run that measured every figure for every build in the same interleaved rounds. Each native build sits next to the Isoloop placement shaped like it (native and `one`; native + workers and `matched`), as A, B and Δ, grouped into responsiveness, faults and start-up, and cost. Each Δ says in words whether it's better or worse, without colour, so a cost reads as a measurement, not an alarm. Wide screens get one table; narrow screens one table per pair. Under it: how Δ is computed, what the native baseline lacks (a store written for the app, no bus; no containment, restart, replay, grants, schemas or acknowledged history); the phone results stay on the results pages, not on the landing page.
+
+**Later the same day, the demo area:**
+- **The demo's code** folds out of the recording's panel ("Show the code behind this demo", closed by default, a native `<details>`), as tabs: `main.ts`, `counter.ts`, `topics.ts`. It's basic's setup without its recording code, kept as type-checked files in `apps/samples/src/demo/`. Not a section of its own: open, it would make the page much longer.
+- **Code is highlighted at build time** by the site's own tokenizer (`src/pages/code.tsx`): spans with token classes, coloured from the palette's hue steps, so no highlighter ships and nothing runs in the browser. Every code block on the site uses it.
+- **The recording's status** is a labelled row of its own under the controls, so a change of text reads as a status, not as text jumping next to the buttons.
+- **The caption above the recording** is three sentences.
+- **Install stays last,** so a reader reaches it only after the rest of the page.
 
 ## Consequences
 

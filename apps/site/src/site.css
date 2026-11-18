@@ -674,3 +674,138 @@
   color: var(--ui-text);
   font-weight: 600;
 }
+
+/* Syntax colours (src/pages/code.tsx), from the palette's hue steps. */
+:root,
+[data-theme='light'] {
+  --code-keyword: var(--ui-violet-1);
+  --code-string: var(--ui-teal-1);
+  --code-number: var(--ui-magenta-1);
+  --code-fn: var(--ui-blue-1);
+  --code-tag: var(--ui-magenta-1);
+}
+[data-theme='dark'] {
+  --code-keyword: var(--ui-violet-2);
+  --code-string: var(--ui-teal-2);
+  --code-number: var(--ui-magenta-2);
+  --code-fn: var(--ui-blue-2);
+  --code-tag: var(--ui-magenta-2);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --code-keyword: var(--ui-violet-2);
+    --code-string: var(--ui-teal-2);
+    --code-number: var(--ui-magenta-2);
+    --code-fn: var(--ui-blue-2);
+    --code-tag: var(--ui-magenta-2);
+  }
+}
+.tok-comment {
+  color: var(--ui-text-muted);
+  font-style: italic;
+}
+.tok-keyword {
+  color: var(--code-keyword);
+}
+.tok-string {
+  color: var(--code-string);
+}
+.tok-number {
+  color: var(--code-number);
+}
+.tok-fn {
+  color: var(--code-fn);
+}
+.tok-tag {
+  color: var(--code-tag);
+}
+
+/* The demo's code: a fold attached under the recording's panel, which
+   extends the panel when opened (src/pages/recording.tsx, \`code\`). */
+.ui-recording[data-code] .ui-panel {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.ui-demo-code {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-rule);
+  border-top: 0;
+  border-radius: 0 0 var(--ui-radius-l) var(--ui-radius-l);
+}
+.ui-demo-code > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-weight: 650;
+  font-stretch: 87%;
+  color: var(--ui-accent);
+  list-style: none;
+}
+.ui-demo-code > summary::-webkit-details-marker {
+  display: none;
+}
+.ui-demo-code > summary::before {
+  content: '›';
+  display: inline-block;
+  font-size: 1.3em;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.ui-demo-code[open] > summary::before {
+  transform: rotate(90deg);
+}
+.ui-demo-code[open] > summary {
+  border-bottom: 1px solid var(--ui-rule);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-demo-code > summary::before {
+    transition: none;
+  }
+}
+.ui-demo-code > :not(summary) {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+.ui-demo-code > p {
+  max-width: 44rem;
+  color: var(--ui-text-muted);
+}
+.ui-demo-code > p:last-child {
+  margin-bottom: 1rem;
+}
+.ui-demo-code .tabs {
+  margin-top: 0.75rem;
+  max-width: none;
+}
+.ui-demo-code .ui-code {
+  max-width: none;
+}
+
+/* The recording's status: a labelled readout on its own full-width row. */
+.ui-status-box {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--ui-rule);
+  border-left: 3px solid var(--ui-accent);
+  border-radius: var(--ui-radius-m);
+  background: var(--ui-surface);
+}
+.ui-status-label {
+  flex: none;
+  font-size: var(--ui-text-xs);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ui-text-muted);
+}
+.ui-status-box .ui-status {
+  margin: 0;
+  width: auto;
+  color: var(--ui-text);
+  min-height: 0;
+}

@@ -52,6 +52,7 @@ export const recording = {
   },
   guard:
     'An isolate that crashes more than 3 times within a minute is marked failed, and the kernel stops restarting it.',
+  statusLabel: 'Status',
   status: {
     waiting: 'Starting basic…',
     running: 'Recording. Everything is running.',
@@ -100,7 +101,17 @@ export const home = {
     primary: 'See the features',
     secondary: 'Examples',
   },
-  try: 'Try it. Four isolates on three event loops: A and B have a worker each, C and D share a pool. Block or crash one, or block the main thread, and watch what keeps running. This is basic, the smallest example, running in this page on Isoloop. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
+  try: 'Try it. This is basic, the smallest example, running in this page: four isolates on three event loops. A and B have a worker each; C and D share a pool and read A’s count. Block or crash one, or block the main thread, and watch what keeps running.',
+  code: {
+    summary: 'Show the code behind this demo',
+    intro:
+      'basic’s setup, without its recording code. A restart needs no code of its own; A catches up by reading its topic from the earliest record it keeps. Type-checked against the published packages.',
+    label: 'Files',
+    files: { topics: 'topics.ts', isolate: 'counter.ts', host: 'main.ts' },
+    more: 'basic’s full source',
+    source: 'https://github.com/isoloop/web/tree/main/apps/basic',
+  },
+
   uses: {
     heading: 'What it’s for',
     // Patterns, not examples (2026-11-18): the core promise first, then from
@@ -155,8 +166,6 @@ export const home = {
     // Source: apps/dashboards/plant/comparison/final/responsiveness/summary.md,
     // Chromium 5 kHz, at plant-v0.1.0 (@isoloop/*@0.0.0-next.b8ffdcf). Δ is the
     // median of the per-round gaps, so it isn't always B − A of the medians.
-    // Phones: comparison/phone/ikko-mindone-focus156/, galaxy-fold6-chrome157/,
-    // iphone-x-safari16/.
     caption:
       'The plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured at plant-v0.1.0, November 2026. Each native build is measured against the Isoloop placement shaped like it.',
     pairs: [
@@ -252,9 +261,8 @@ export const home = {
     notes: [
       'Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.',
       'The native builds keep their data in a small store written for this app, with no message bus. They don’t contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features.',
-      'On a faster machine the main-thread differences shrink. Phones vary, measured on plant-v0.1.0’s release candidates with the same Isoloop packages: on a mid-range Android phone (MediaTek MT8781V, Firefox Focus 156) one and matched drew 68–84 frames/s against 45–56 for native; on a flagship (Snapdragon 8 Gen 3, Chrome 157) every build held 60; on an iPhone X (Safari 16.6) at 5 kHz matched drew 51.9 against 60 for native.',
     ],
-    more: 'Every recorded run, on every device, with the method',
+    more: 'Every recorded run, with the method',
   },
   limits: {
     heading: 'What Isoloop can’t hide',

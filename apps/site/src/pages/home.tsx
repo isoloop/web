@@ -2,6 +2,7 @@
 import type { VNode } from 'preact';
 import { Table } from 'ui/components';
 import { home, site } from '../copy.ts';
+import { Code, CodeTabs } from './code.tsx';
 import { DeltaTable } from './delta.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
@@ -10,7 +11,7 @@ import type { Page, SiteData } from './types.ts';
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
 
 /** The landing page, in the order ADR 0002's amendments set. */
-function Home({ features }: SiteData): VNode {
+function Home({ features, samples }: SiteData): VNode {
   return (
     <main class="ui-shell">
       <PageIntro title={home.intro.heading} id="intro">
@@ -23,12 +24,30 @@ function Home({ features }: SiteData): VNode {
         </p>
       </PageIntro>
 
-      <section class="ui-try-section" aria-label="Try it">
+      <section class="ui-try-section" id="try" aria-label="Try it">
         <p class="ui-try">{home.try}</p>
         <Recording
           id="rec"
           tracks={['main', 'bus', 'A', 'B', 'pool']}
           controls={['block-c', 'crash-a', 'block-main']}
+          code={
+            <details class="ui-demo-code" id="code">
+              <summary>{home.code.summary}</summary>
+              <p>{home.code.intro}</p>
+              <CodeTabs
+                id="code"
+                label={home.code.label}
+                tabs={[
+                  { key: 'host', label: home.code.files.host, code: samples.demoMain },
+                  { key: 'isolate', label: home.code.files.isolate, code: samples.demoCounter },
+                  { key: 'topics', label: home.code.files.topics, code: samples.demoTopics },
+                ]}
+              />
+              <p>
+                <a href={home.code.source}>{home.code.more}</a>
+              </p>
+            </details>
+          }
         />
       </section>
 
@@ -123,15 +142,12 @@ function Home({ features }: SiteData): VNode {
           </p>
         </div>
       </section>
-
       <section class="ui-gutter" id="install" aria-labelledby="install-h">
         <h2 id="install-h">{home.install.heading}</h2>
         <div class="ui-body">
           <p>{home.install.platform}</p>
           <p>{home.install.label}</p>
-          <pre class="ui-code" tabindex={0}>
-            <code>{home.install.command}</code>
-          </pre>
+          <Code lang="sh">{home.install.command}</Code>
           <p>
             <a href="https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md">
               {home.install.guide}
