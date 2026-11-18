@@ -4,6 +4,7 @@ import { Table } from 'ui/components';
 import type { Feature as Entry } from '../../build/features.ts';
 import { featuresPage as f, home } from '../copy.ts';
 import { Recording } from './recording.tsx';
+import { Code, CodeTabs } from './code.tsx';
 import { DeltaTable } from './delta.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
@@ -29,14 +30,6 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
         {children}
       </div>
     </section>
-  );
-}
-
-function Code({ children }: { children: string }): VNode {
-  return (
-    <pre class="ui-code" tabindex={0}>
-      <code>{children}</code>
-    </pre>
   );
 }
 
@@ -231,35 +224,15 @@ function Features({ samples, features }: SiteData): VNode {
     ),
     'framework-tabs': (
       <>
-        <div class="tabs" data-tabs>
-          <div role="tablist" aria-label="Framework" hidden>
-            {f.frameworks.tabs.map(([key, label], i) => (
-              <button
-                key={key}
-                role="tab"
-                type="button"
-                id={`tab-${key}`}
-                aria-controls={`panel-${key}`}
-                aria-selected={i === 0 ? 'true' : 'false'}
-                tabindex={i === 0 ? 0 : -1}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {f.frameworks.tabs.map(([key, label]) => (
-            <div key={key} role="tabpanel" id={`panel-${key}`} aria-labelledby={`tab-${key}`}>
-              <p class="tab-title">{label}</p>
-              <Code>
-                {key === 'react'
-                  ? samples.react
-                  : key === 'preact'
-                    ? samples.preact
-                    : samples.vanilla}
-              </Code>
-            </div>
-          ))}
-        </div>
+        <CodeTabs
+          label="Framework"
+          tabs={f.frameworks.tabs.map(([key, label]) => ({
+            key,
+            label,
+            code:
+              key === 'react' ? samples.react : key === 'preact' ? samples.preact : samples.vanilla,
+          }))}
+        />
       </>
     ),
     'safety-facts': (

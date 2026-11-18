@@ -13,11 +13,14 @@ export function Recording({
   tracks,
   controls,
   caption,
+  code,
 }: {
   id: string;
   tracks: ('main' | 'bus' | 'A' | 'B' | 'pool')[];
   controls: ('block-c' | 'crash-a' | 'block-main')[];
   caption?: VNode;
+  /** A fold attached under the panel, e.g. the demo's code (a <details>). */
+  code?: VNode;
 }): VNode {
   const part = { main: 'host', bus: 'bus', A: 'isolate', B: 'accent', pool: 'pool' } as const;
   const label = {
@@ -26,7 +29,12 @@ export function Recording({
     'block-main': recording.controls.blockMain,
   } as const;
   return (
-    <figure class="ui-recording" data-demo="recording" aria-labelledby={`${id}-h`}>
+    <figure
+      class="ui-recording"
+      data-demo="recording"
+      data-code={code ? '' : undefined}
+      aria-labelledby={`${id}-h`}
+    >
       <h2 id={`${id}-h`} class="visually-hidden">
         {recording.heading}
       </h2>
@@ -51,6 +59,7 @@ export function Recording({
           <canvas class="ui-trace" role="img" aria-label={recording.label} />
         </div>
       </div>
+      {code ?? null}
       <ul class="ui-legend" aria-label="How to read the recording">
         <li data-mark="task">{recording.legend.task}</li>
         <li data-mark="stuck">{recording.legend.stuck}</li>
@@ -71,6 +80,11 @@ export function Recording({
             {label[c]}
           </button>
         ))}
+      </div>
+      <div class="ui-status-box">
+        <span class="ui-status-label" aria-hidden="true">
+          {recording.statusLabel}
+        </span>
         <p class="ui-status" role="status" aria-live="polite">
           {recording.status.waiting}
         </p>
