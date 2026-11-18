@@ -1,6 +1,6 @@
 import { defineIsolate } from '@isoloop/runtime';
 import { CorruptFile, isKind, work, type Job } from '../files/kinds';
-import { archiveJobs, csvJobs, hashJobs, imageJobs, results } from '../topics';
+import { archiveJobs, busy as busyTopic, csvJobs, hashJobs, imageJobs, results } from '../topics';
 
 // A File processor (M3h decision 29): a headless isolate in its kind's
 // consumer group. Each file the group hands it is queued, processed one at a
@@ -13,12 +13,18 @@ import { archiveJobs, csvJobs, hashJobs, imageJobs, results } from '../topics';
 // A poison file blocks the loop for 2 s in one piece. A corrupt file throws:
 // its result says so and it's committed, then the processor crashes as its
 // own error, a moment later so the commit has gone out.
+//
+// It times its own work and publishes the running total (M3j): each slice
+// after the first runs after `await`, which the runtime's busy time doesn't
+// see, so the page reports this figure to the balancer.
 
 const TOPICS = { csv: csvJobs, image: imageJobs, archive: archiveJobs, hash: hashJobs };
 const SLICE_MS = 8;
 const POISON_MS = 2_000;
 /** Commits go out every 100 ms (the bus default); crash after that. */
 const CRASH_AFTER_MS = 250;
+/** How often it publishes its measured busy time, while that grows. */
+const BUSY_MS = 500;
 
 const now = (): number => performance.timeOrigin + performance.now();
 
@@ -49,6 +55,14 @@ export default defineIsolate({
     };
     let busy = false;
     let stopped = false;
+    /** Its own measured work since it started, ms (M3j). */
+    let worked = 0;
+    let workedSent = 0;
+    setInterval(() => {
+      if (worked === workedSent) return;
+      workedSent = worked;
+      void ctx.bus.publish(busyTopic, { key: ctx.id, value: { busyMs: Math.round(worked) } });
+    }, BUSY_MS);
 
     // Slices hand back to the loop through a port: no 4 ms timer floor.
     const { port1, port2 } = new MessageChannel();
@@ -63,20 +77,34 @@ export default defineIsolate({
 
     const processOne = async ({ rec, job }: Delivered): Promise<void> => {
       const started = performance.now();
-      if (job.poison) spin(POISON_MS);
+      /** The current slice's start: each one counts toward `worked` as it ends. */
+      let sliceStart = started;
+      const sliceDone = (): void => {
+        worked += performance.now() - sliceStart;
+      };
+      // A fault, not work: the kernel sees it as a long task (a spike), and it
+      // stays out of the reported busy time, or one poison file would read as
+      // a full pool.
+      if (job.poison) {
+        spin(POISON_MS);
+        sliceStart = performance.now();
+      }
       try {
         const steps = work(job);
         let sliceEnd = performance.now() + SLICE_MS;
         let step = steps.next();
         while (!step.done) {
           if (performance.now() >= sliceEnd) {
+            sliceDone();
             // oxlint-disable-next-line eslint/no-await-in-loop -- a slice ends: the loop turns before the next
             await yieldToLoop();
             if (stopped) return;
-            sliceEnd = performance.now() + SLICE_MS;
+            sliceStart = performance.now();
+            sliceEnd = sliceStart + SLICE_MS;
           }
           step = steps.next();
         }
+        sliceDone();
         await ctx.bus.publish(results, {
           value: {
             id: job.id,
@@ -92,6 +120,7 @@ export default defineIsolate({
         settle(rec);
       } catch (e) {
         if (!(e instanceof CorruptFile)) throw e;
+        sliceDone();
         await ctx.bus.publish(results, {
           value: {
             id: job.id,

@@ -3,7 +3,7 @@
 // second; every change goes through the kernel or the balancer.
 import type { Balancer, MoveReason, Placement } from '@isoloop/balancer';
 import type { Kernel } from '@isoloop/host';
-import { control, done as doneTopic, tasks } from '../contracts';
+import { busy as busyTopic, control, done as doneTopic, tasks } from '../contracts';
 
 export type Mode = 'balancer' | 'own' | 'one';
 
@@ -16,11 +16,22 @@ const KEEP = 60;
 const BADGE_MS = 6_000;
 /** Kernel states in which an isolate holds a worker. */
 const LIVE = new Set(['loading', 'running', 'blocked', 'crashed', 'restarting']);
-/** How often the page tells the balancer each task's backlog (it goes stale after 10 s). */
+/** How often the page tells the balancer each task's backlog and busy time (stale after 10 s). */
 const REPORT_MS = 1_000;
 
-/** A task's dials: its CPU, and its jobs (M3i). */
-type Dial = { load: number; rate: number; hidden: boolean; base: number; since: number };
+/**
+ * A task's dials: its CPU, and its jobs (M3i). `reports`: the page passes the
+ * task's own busy time to the balancer (M3j); off, the balancer has only the
+ * kernel's busy time and the backlog.
+ */
+type Dial = {
+  load: number;
+  rate: number;
+  hidden: boolean;
+  reports: boolean;
+  base: number;
+  since: number;
+};
 
 type Beat = { at: number; busy: number; dur: number };
 
@@ -31,12 +42,16 @@ export type TaskView = {
   load: number;
   /** Jobs a second; 0 when it just burns its share. */
   rate: number;
-  /** Its jobs' work is out of the busy time's sight. */
+  /** It works after `await`, out of the busy time's sight. */
   hidden: boolean;
+  /** The page reports its own busy time to the balancer. */
+  reports: boolean;
   /** Jobs arrived and not yet done; undefined when it takes no jobs. */
   backlog: number | undefined;
   /** Measured over the last second of beats, 0–100; undefined before two beats. */
   measured: number | undefined;
+  /** The share of a core from the task's own reported busy time, as the balancer has it (M3j). */
+  reported: number | undefined;
   state: string;
   placement: Placement | undefined;
   /** Why it last moved, while that's recent. */
@@ -56,7 +71,7 @@ export type ColumnView = {
 export type LogEntry = {
   at: number;
   text: string;
-  kind: MoveReason | 'crash' | 'mode' | 'noted' | 'behind';
+  kind: MoveReason | 'crash' | 'mode' | 'noted' | 'behind' | 'failed';
   /** A move's cost, once the moved task has beaten in its new place (`arrived`). */
   costMs?: number;
   id?: string;
@@ -91,6 +106,8 @@ export class Playground {
   readonly #dials = new Map<string, Dial>();
   /** Jobs each task has done, from playground.done.v1. */
   readonly #done = new Map<string, number>();
+  /** Each task's own busy time so far, ms, from processor.busy.v1 (M3j). */
+  readonly #busy = new Map<string, number>();
   readonly #beats = new Map<string, { last: number; beats: Beat[] }>();
   readonly #lags = new Map<string, { last: number; lags: number[] }>();
   readonly #moved = new Map<string, { reason: MoveReason | 'restart'; from: string; at: number }>();
@@ -127,6 +144,14 @@ export class Playground {
     this.#balancer.on('behind', (e) => {
       this.#entry('behind', `${e.id}: ${e.backlog} jobs waiting, nowhere with more CPU`, e.id);
     });
+    // The kernel gave up on it (M3j): the balancer leaves it where it is.
+    this.#balancer.on('failed', (e) => {
+      this.#entry(
+        'failed',
+        `${e.id}: given up by the kernel (${e.reason}), left in ${e.pool}`,
+        e.id,
+      );
+    });
     this.#kernel.subscribe(
       doneTopic,
       (r) => {
@@ -134,12 +159,26 @@ export class Playground {
       },
       { from: 'earliest' },
     );
-    // The backlog goes to the balancer as a report (M3i); only it can place them.
+    this.#kernel.subscribe(
+      busyTopic,
+      (r) => {
+        if (r.key && this.#dials.has(r.key)) this.#busy.set(r.key, r.value.busyMs);
+      },
+      { from: 'latest' },
+    );
+    // The backlog (M3i) and the task's own busy time (M3j) go to the balancer
+    // as a report; only it can place them.
     setInterval(() => {
       if (this.#mode !== 'balancer') return;
       for (const [id, d] of this.#dials) {
-        if (d.rate > 0 || (this.backlog(id) ?? 0) > 0)
-          this.#balancer.report(id, { backlog: this.backlog(id) ?? 0 });
+        const backlog =
+          d.rate > 0 || (this.backlog(id) ?? 0) > 0 ? (this.backlog(id) ?? 0) : undefined;
+        const busyMs = d.reports ? this.#busy.get(id) : undefined;
+        if (backlog === undefined && busyMs === undefined) continue;
+        this.#balancer.report(id, {
+          ...(backlog === undefined ? {} : { backlog }),
+          ...(busyMs === undefined ? {} : { busyMs }),
+        });
       }
     }, REPORT_MS);
     // Every heartbeat as it arrives (ADR 0017): each task's busy time, and
@@ -171,10 +210,10 @@ export class Playground {
     return this.#dials.size;
   }
 
-  add(load: number, rate = 0, hidden = false): string | undefined {
+  add(load: number, rate = 0, hidden = false, reports = true): string | undefined {
     if (this.#dials.size >= MAX_TASKS) return undefined;
     const id = `task-${this.#next++}`;
-    this.#dials.set(id, { load, rate, hidden, base: 0, since: Date.now() });
+    this.#dials.set(id, { load, rate, hidden, reports, base: 0, since: Date.now() });
     // The dial is the task's declared load until the balancer has measured
     // it, so it's placed at once instead of waiting in quarantine.
     this.#loads.set(id, load);
@@ -187,6 +226,7 @@ export class Playground {
     if (!this.#dials.delete(id)) return;
     this.#beats.delete(id);
     this.#done.delete(id);
+    this.#busy.delete(id);
     this.#moved.delete(id);
     await (this.#mode === 'balancer' ? this.#balancer.stop(id) : this.#kernel.stop(id));
   }
@@ -213,6 +253,12 @@ export class Playground {
     if (!d) return;
     d.hidden = hidden;
     this.#publish(id);
+  }
+
+  /** Whether the page reports the task's own busy time to the balancer (M3j). */
+  setReports(id: string, reports: boolean): void {
+    const d = this.#dials.get(id);
+    if (d) d.reports = reports;
   }
 
   /** Every slider back to idle: no CPU and no jobs, to watch tasks pack back. */
@@ -256,6 +302,7 @@ export class Playground {
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
+    this.#busy.clear();
     this.#entry('mode', `placement: ${mode}`);
     for (const id of ids) if (this.#dials.has(id)) this.#spawn(id);
   }
@@ -297,9 +344,14 @@ export class Playground {
         load: dial.load,
         rate: dial.rate,
         hidden: dial.hidden,
+        reports: dial.reports,
         backlog: this.backlog(id),
         measured: dur > 0 ? Math.min(100, (busy / dur) * 100) : undefined,
-        state: placement?.state === 'moving' ? 'moving' : (snap?.state ?? 'starting'),
+        reported: placement?.reportedPct,
+        state:
+          placement?.state === 'moving' || placement?.state === 'failed'
+            ? placement.state
+            : (snap?.state ?? 'starting'),
         placement,
         moved:
           moved && now - moved.at < BADGE_MS
@@ -330,7 +382,10 @@ export class Playground {
     const manifest = {
       id,
       src: this.#src,
-      grants: { publish: [doneTopic.name], subscribe: [tasks.name, control.name, doneTopic.name] },
+      grants: {
+        publish: [doneTopic.name, busyTopic.name],
+        subscribe: [tasks.name, control.name, doneTopic.name],
+      },
     };
     if (this.#mode === 'balancer') this.#balancer.spawn(manifest);
     else if (this.#mode === 'one') this.#kernel.spawn({ ...manifest, pool: ONE });

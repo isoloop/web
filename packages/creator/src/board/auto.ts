@@ -150,3 +150,12 @@ export function autoPlacer(
     forget: (id) => loads.delete(isolateIdOf('spec', id)),
   };
 }
+
+/** What an `auto` widget's header says: "Auto 2", "Quarantine · kept apart: repeated blocking". */
+export function autoWhere(p: AutoPlacement | undefined): string {
+  if (!p) return 'Automatic';
+  if (p.state === 'kept-apart') return `${p.label} · kept apart: repeated blocking`;
+  if (p.state === 'failed') return `${p.label} · stopped: crashed too often`;
+  if (p.atCap) return `${p.label} · over budget, at worker cap`;
+  return p.label;
+}

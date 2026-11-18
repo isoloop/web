@@ -90,6 +90,39 @@ test('a poison file sends its processor to the quarantine', async ({ page, brows
   await drained(page, 120_000);
 });
 
+// Faults on the balancer (M3j decision 10): poison, heavy and corrupt files,
+// with the balancer's moves, quarantines and the kernel's restarts. Every file
+// made still gets a result.
+test('with faults on the balancer, no file is left without a result', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName === 'webkit', 'Playwright WebKit stalls workers, which the balancer moves');
+  test.setTimeout(300_000);
+  await page.goto('./files/?maxWorkers=2');
+  await page.waitForFunction(() => window.files !== undefined);
+  await page.evaluate(() =>
+    window.files.setDials({ running: true, rate: 20, poison: 1, heavy: 10, corrupt: 1 }),
+  );
+  await page.waitForTimeout(45_000);
+  await page.evaluate(() => window.files.setDials({ poison: 0, heavy: 0, corrupt: 0 }));
+  try {
+    await drained(page, 180_000);
+  } catch (e) {
+    // What the kernel gave up on, and what's left, for the diagnosis.
+    const left = await page.evaluate(() => ({
+      givenUp: window.files.givenUp(),
+      outstanding: window.files.outstanding().length,
+      kinds: window.files.snapshot().kinds,
+    }));
+    test.info().annotations.push({ type: 'left', description: JSON.stringify(left) });
+    throw e;
+  }
+  const s = await page.evaluate(() => window.files.snapshot());
+  expect(s.produced).toBeGreaterThan(500);
+  expect(s.done).toBe(s.produced);
+});
+
 for (const mode of ['own', 'one'] as const) {
   test(`in "${mode}" placement nothing moves, poison or not`, async ({ page }) => {
     test.setTimeout(60_000);

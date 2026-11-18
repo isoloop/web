@@ -26,9 +26,10 @@ export const tasks = topic('playground.tasks.v1', {
     base: z.number().nonnegative(),
     since: z.number(),
     /**
-     * Do the jobs' work in promise continuations, which the runtime's busy
-     * time doesn't see (ADR 0017's "what busyMs can't see"): the balancer
-     * then knows the task is behind only from its backlog.
+     * Do the work after `await`, in promise continuations, which the
+     * runtime's busy time doesn't see (ADR 0017's "what busyMs can't see").
+     * The task still times its own work and reports it (busy.v1), so the
+     * balancer sees it through the page's report (M3j).
      */
     hidden: z.boolean(),
   }),
@@ -42,6 +43,18 @@ export const tasks = topic('playground.tasks.v1', {
  */
 export const done = topic('playground.done.v1', {
   schema: z.object({ done: z.number().int().nonnegative() }),
+  retention: { kind: 'compacted' },
+});
+
+/**
+ * Each isolate's own measured work time (M3j), keyed by its id: a running
+ * total in ms since it started, published by the task or processor every
+ * half second while it changes. The page passes it to the balancer as
+ * `report(id, { busyMs })`, for work the runtime's busy time misses, such as
+ * slices resumed after `await`. It starts at 0 again after a move.
+ */
+export const busy = topic('processor.busy.v1', {
+  schema: z.object({ busyMs: z.number().nonnegative() }),
   retention: { kind: 'compacted' },
 });
 
@@ -121,6 +134,7 @@ export const dials = topic('files.dials.v1', {
 export default contracts(
   tasks,
   done,
+  busy,
   control,
   csvJobs,
   imageJobs,

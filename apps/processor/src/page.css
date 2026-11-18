@@ -209,7 +209,8 @@
 }
 .badge[data-reason='spike'],
 .badge[data-reason='crash'],
-.badge[data-reason='bisect'] {
+.badge[data-reason='bisect'],
+.badge[data-reason='failed'] {
   background: var(--ui-bad);
 }
 .badge[data-reason='mode'] {
@@ -249,6 +250,12 @@
   background: var(--ui-part-isolate);
   height: 50%;
   top: 25%;
+}
+/* The task's own reported busy time (M3j): a thin line under the kernel's figure. */
+.meter .reported {
+  background: var(--ui-text);
+  height: 20%;
+  top: 80%;
 }
 .card-foot {
   display: flex;
@@ -362,7 +369,7 @@
   color: var(--ui-bad);
 }
 
-/* A task's "hide work from busy time" switch (M3i) */
+/* A task's "after await" and "report its busy time" switches (M3i, M3j) */
 .hidden-work {
   display: flex;
   align-items: center;

@@ -5,7 +5,14 @@ import type { WidgetSpec } from '../spec/types';
 import { SCALARS, spec } from '../test-fixtures';
 import { placementRecordSchema, uiRecordSchema } from '../topics';
 import { PLACEMENT_TOPIC, SPECS_TOPIC, TOMBSTONE, UI_TOPIC, specRecord } from '../widget/records';
-import { autoPlacer, balancerLabel, moveText, type BalancerLike, type MoveReason } from './auto';
+import {
+  autoPlacer,
+  autoWhere,
+  balancerLabel,
+  moveText,
+  type BalancerLike,
+  type MoveReason,
+} from './auto';
 import { BoardController, MOVE_BADGE_MS, SYNC_KEY } from './controller';
 import { isoloopRuntime } from './isoloop';
 import { LOADS_SYNC_KEY, placementLoads, type PlacementLoads } from './loads';
@@ -126,6 +133,19 @@ describe('balancer labels and badges', () => {
   });
 });
 
+describe('autoWhere', () => {
+  it('says where an automatic widget is, and why when it is kept apart, over budget or stopped', () => {
+    const p = { id: 'w1', pool: 'balancer-2', label: 'Auto 2', state: 'placed' } as const;
+    expect(autoWhere(undefined)).toBe('Automatic');
+    expect(autoWhere(p)).toBe('Auto 2');
+    expect(autoWhere({ ...p, atCap: true })).toBe('Auto 2 · over budget, at worker cap');
+    expect(autoWhere({ ...p, label: 'Quarantine', state: 'kept-apart' })).toBe(
+      'Quarantine · kept apart: repeated blocking',
+    );
+    expect(autoWhere({ ...p, state: 'failed' })).toBe('Auto 2 · stopped: crashed too often');
+  });
+});
+
 describe('autoPlacer', () => {
   it('maps isolates to widgets, holds by widget, and stores a preview’s load as the widget’s', async () => {
     const b = fakeBalancer();
@@ -135,6 +155,7 @@ describe('autoPlacer', () => {
       { id: 'widget-w1', pool: 'balancer-1', state: 'placed' },
       { id: 'preview-d1', pool: 'x', state: 'placed' },
       { id: 'widget-w2', pool: 'balancer-quarantine-1', state: 'kept-apart', atCap: true },
+      { id: 'widget-w3', pool: 'balancer-2', state: 'failed' },
     ]);
     expect([...placer.placements().values()]).toEqual([
       { id: 'w1', pool: 'balancer-1', label: 'Auto 1', state: 'placed' },
@@ -145,6 +166,7 @@ describe('autoPlacer', () => {
         state: 'kept-apart',
         atCap: true,
       },
+      { id: 'w3', pool: 'balancer-2', label: 'Auto 2', state: 'failed' },
     ]);
     const release = placer.hold('w1');
     expect([...b.held]).toEqual(['widget-w1']);

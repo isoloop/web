@@ -7,6 +7,7 @@ import type { Balancer } from '@isoloop/balancer';
 import type { Kernel } from '@isoloop/host';
 import {
   archiveJobs,
+  busy as busyTopic,
   csvJobs,
   dials as dialsTopic,
   hashJobs,
@@ -29,7 +30,7 @@ const RATE_WINDOW_MS = 5_000;
 const LATENCY_KEEP = 500;
 const RECENT_KEEP = 200;
 const LIVE = new Set(['loading', 'running', 'blocked', 'crashed', 'restarting']);
-/** How often the page tells the balancer each group's backlog (it goes stale after 10 s). */
+/** How often the page tells the balancer each group's backlog and each processor's busy time (stale after 10 s). */
 const REPORT_MS = 1_000;
 
 /** A move, with what it cost once the moved processor beat again (`arrived`). */
@@ -42,12 +43,23 @@ export type Move = {
   costMs?: number;
 };
 
+/** A processor the kernel gave up on (past its restart limit), for the comparison (M3j). */
+export type GivenUp = {
+  at: number;
+  id: string;
+  kind: Kind;
+  reason: string;
+  pool: string | undefined;
+};
+
 /** One processor at one moment, for the comparison's trace (M3i). */
 export type TraceRow = {
   id: string;
   pool: string;
   /** The balancer's figure, over 3 s; undefined when it doesn't place this processor. */
   loadPct: number | undefined;
+  /** The share of a core from the processor's own reported busy time, as the balancer has it (M3j). */
+  reportedPct: number | undefined;
   /** From the last second of beats. */
   measuredPct: number | undefined;
   /** Its kind's files made and not done. */
@@ -174,6 +186,10 @@ export class FileProcessor {
   readonly #log: LogEntry[] = [];
   readonly #movesAt: number[] = [];
   readonly #moves: Move[] = [];
+  /** Each processor's own busy time so far, ms, from processor.busy.v1 (M3j). */
+  readonly #busy = new Map<string, number>();
+  /** Processors the kernel gave up on, in order (M3j). */
+  readonly #givenUp: GivenUp[] = [];
   /** Noted spikes and `behind` events, counted for the comparison (M3i). */
   #noted = 0;
   #behind = 0;
@@ -295,15 +311,41 @@ export class FileProcessor {
       this.#behind++;
       this.#entry('behind', `${e.id}: ${e.backlog} files waiting, nowhere with more CPU`);
     });
+    this.#balancer?.on('failed', (e) => {
+      this.#entry('failed', `${e.id}: given up by the kernel (${e.reason}), left in ${e.pool}`);
+    });
+    this.#kernel.subscribe(
+      busyTopic,
+      (r) => {
+        if (r.key && this.#kinds.has(r.key)) this.#busy.set(r.key, r.value.busyMs);
+      },
+      { from: 'latest' },
+    );
     // Each kind's backlog, reported on every processor of its group (M3i):
-    // a group's files belong to the group, not to one member.
+    // a group's files belong to the group, not to one member. With it, each
+    // processor's own busy time (M3j): its slices after the first run after
+    // `await`, which the runtime's busy time doesn't see.
     setInterval(() => {
       const b = this.#balancer;
       if (this.#mode !== 'balancer' || !b) return;
-      for (const [id, kind] of this.#kinds) b.report(id, { backlog: this.#backlogOf(kind) });
+      for (const [id, kind] of this.#kinds) {
+        const busyMs = this.#busy.get(id);
+        b.report(id, {
+          backlog: this.#backlogOf(kind),
+          ...(busyMs === undefined ? {} : { busyMs }),
+        });
+      }
     }, REPORT_MS);
     this.#kernel.on('isolate:crash', (e) => {
       if (this.#ids.includes(e.id)) this.#entry('crash', `${e.id} crashed (${e.reason})`);
+    });
+    this.#kernel.on('isolate:failed', (e) => {
+      const kind = this.#kinds.get(e.id);
+      if (!kind) return;
+      this.#givenUp.push({ at: performance.now(), id: e.id, kind, reason: e.reason, pool: e.pool });
+      // Without a balancer, the page logs it itself.
+      if (this.#mode !== 'balancer')
+        this.#entry('failed', `${e.id}: given up by the kernel (${e.reason})`);
     });
   }
 
@@ -349,6 +391,7 @@ export class FileProcessor {
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
+    this.#busy.clear();
     this.#entry('mode', `placement: ${mode}`);
     for (const id of this.#ids) this.#spawn(id);
   }
@@ -375,6 +418,11 @@ export class FileProcessor {
     return structuredClone(this.#moves.filter((m) => m.at >= t));
   }
 
+  /** The processors the kernel gave up on so far, with their kinds (M3j). */
+  givenUp(): GivenUp[] {
+    return structuredClone(this.#givenUp);
+  }
+
   /** Noted spikes and `behind` events so far. */
   events(): { noted: number; behind: number } {
     return { noted: this.#noted, behind: this.#behind };
@@ -394,6 +442,8 @@ export class FileProcessor {
         id,
         pool: placement?.pool ?? isolates.get(id)?.pool ?? id,
         loadPct: placement?.loadPct === undefined ? undefined : Math.round(placement.loadPct),
+        reportedPct:
+          placement?.reportedPct === undefined ? undefined : Math.round(placement.reportedPct),
         measuredPct: dur > 0 ? Math.round(Math.min(100, (busy / dur) * 100)) : undefined,
         backlog: this.#backlogOf(this.#kinds.get(id) ?? 'csv'),
       };
@@ -444,7 +494,10 @@ export class FileProcessor {
       w.processors.push({
         id,
         kind: this.#kinds.get(id) ?? 'csv',
-        state: placement?.state === 'moving' ? 'moving' : (snap?.state ?? 'starting'),
+        state:
+          placement?.state === 'moving' || placement?.state === 'failed'
+            ? placement.state
+            : (snap?.state ?? 'starting'),
         load: dur > 0 ? Math.min(100, (busy / dur) * 100) : undefined,
         done: this.#doneBy.get(id) ?? 0,
         moved:
@@ -506,7 +559,7 @@ export class FileProcessor {
       src: this.#src,
       config: { kind },
       grants: {
-        publish: [resultsTopic.name],
+        publish: [resultsTopic.name, busyTopic.name],
         subscribe: [TOPICS[kind].name],
       },
     };

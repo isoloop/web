@@ -26,6 +26,8 @@ export const REASONS: Record<string, string> = {
   noted: 'spike noted',
   /** Falling behind with nowhere to give it more CPU (M3i). */
   behind: 'behind',
+  /** The kernel gave up on it (past its restart limit); the balancer leaves it be (M3j). */
+  failed: 'given up',
 };
 
 /** A move or crash, as both pages log it. */
