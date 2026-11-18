@@ -31,10 +31,12 @@ const SHOTS: {
   waitMs: number;
   /** A button to press first, so the shot shows the app at work. */
   press?: string;
+  /** Leave the site's header out: on /examples/ the image sits under the site's own. */
+  noHeader?: true;
   /** Apps with one look in both themes: one shot, screenshot.webp. */
   oneTheme?: true;
 }[] = [
-  { id: 'basic', path: '/examples/basic/', waitMs: 4_000 },
+  { id: 'basic', path: '/examples/basic/', waitMs: 4_000, noHeader: true },
   { id: 'dashboards/plant', path: '/examples/dashboards/plant/', waitMs: 10_000, oneTheme: true },
   {
     id: 'dashboards/markets',
@@ -42,7 +44,13 @@ const SHOTS: {
     waitMs: 10_000,
     oneTheme: true,
   },
-  { id: 'processor', path: '/examples/processor/', waitMs: 8_000, press: 'Add 5 light tasks' },
+  {
+    id: 'processor',
+    path: '/examples/processor/',
+    waitMs: 8_000,
+    press: 'Add 5 light tasks',
+    noHeader: true,
+  },
 ];
 const THEMES = ['light', 'dark'] as const;
 type Theme = (typeof THEMES)[number];
@@ -76,6 +84,14 @@ async function take(shot: (typeof SHOTS)[number], theme: Theme): Promise<void> {
   await page.goto(`http://localhost:${PORT}${shot.path}`);
   if (shot.press) await page.getByRole('button', { name: shot.press }).click();
   await page.waitForTimeout(shot.waitMs);
+  if (shot.noHeader) {
+    // Through the CSSOM, which the page's policy allows (an injected <style> it wouldn't).
+    await page.evaluate(() => {
+      for (const el of document.querySelectorAll<HTMLElement>('.ui-header')) {
+        el.style.display = 'none';
+      }
+    });
+  }
   const png = await page.screenshot({ type: 'png' });
   await page.close();
   // Encoded on a blank page: the app's own policy might not allow a data: image.
