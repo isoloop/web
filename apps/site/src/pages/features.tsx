@@ -2,10 +2,10 @@
 import type { ComponentChildren, VNode } from 'preact';
 import { Table } from 'ui/components';
 import type { Feature as Entry } from '../../build/features.ts';
-import { featuresPage as f } from '../copy.ts';
+import { featuresPage as f, home } from '../copy.ts';
 import { Recording } from './recording.tsx';
 import { Code, CodeTabs } from './code.tsx';
-import { BlockTable, findBlock } from './measurements.tsx';
+import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
@@ -258,7 +258,12 @@ function Features({ samples, features, examples }: SiteData): VNode {
     ),
     'cost-table': (
       <>
-        <BlockTable block={findBlock(examples, 'dashboards/plant', 'desktop')} />
+        <MeasuredBlock
+          block={findBlock(examples, 'dashboards/plant', 'desktop')}
+          findings={home.costs.findings}
+          more={home.costs.more}
+          level={3}
+        />
         <p>
           <a href={PLANT_RESULTS}>{f.cost.more}</a>
         </p>

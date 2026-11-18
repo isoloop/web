@@ -47,18 +47,23 @@ export function MeasuredBlock({
   block,
   findings,
   more,
+  level = 4,
 }: {
   block: Block;
   findings: string;
   more: string;
+  /** Its heading's level, so the page's outline stays in order (3 under a section's h2). */
+  level?: 3 | 4;
 }): VNode {
+  const H = level === 3 ? 'h3' : 'h4';
+  const L = level === 3 ? 'h4' : 'h5';
   return (
     <div class="ex-block">
       <header class="ex-block-head">
-        <h4>{block.heading}</h4>
+        <H>{block.heading}</H>
         <p class="ex-caption">{block.caption}</p>
       </header>
-      <h5 class="ex-label">{findings}</h5>
+      <L class="ex-label">{findings}</L>
       <ul class="ex-findings">
         {block.findings.map((f) => (
           <li key={f}>{rich(f)}</li>

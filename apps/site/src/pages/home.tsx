@@ -3,7 +3,7 @@ import type { VNode } from 'preact';
 import { Table } from 'ui/components';
 import { home, site } from '../copy.ts';
 import { Code, CodeTabs } from './code.tsx';
-import { BlockTable, findBlock } from './measurements.tsx';
+import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
@@ -102,10 +102,12 @@ function Home({ features, samples, examples }: SiteData): VNode {
       <section class="ui-gutter" id="costs" aria-labelledby="costs-h">
         <h2 id="costs-h">{home.costs.heading}</h2>
         <div class="ui-body">
-          <BlockTable block={findBlock(examples, 'dashboards/plant', 'desktop')} />
-          <p>
-            <a href={`${PLANT_SOURCE}/comparison`}>{home.costs.more}</a>
-          </p>
+          <MeasuredBlock
+            block={findBlock(examples, 'dashboards/plant', 'desktop')}
+            findings={home.costs.findings}
+            more={home.costs.more}
+            level={3}
+          />
         </div>
       </section>
 

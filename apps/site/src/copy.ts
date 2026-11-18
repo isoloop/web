@@ -168,7 +168,8 @@ export const home = {
     // (apps/dashboards/plant/example.json), shared with /examples/.
     delta: 'Δ',
     verdicts: { better: 'better', worse: 'worse', same: 'no change' } as Record<Verdict, string>,
-    more: 'Every recorded run, with the method',
+    findings: 'Findings',
+    more: 'The full results, with the method',
   },
   limits: {
     heading: 'What Isoloop can’t hide',
@@ -326,7 +327,7 @@ export const featuresPage = {
     ] as [string, string][],
   },
   cost: {
-    more: 'The full results, per device and build',
+    more: 'Every recorded run, per device and build',
   },
 };
 
