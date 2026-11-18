@@ -16,7 +16,7 @@
 // `on…=` handler, a `data:` URL left in a page) fails the build, so a re-render
 // that brings a new one is caught here, not in a visitor's console.
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /** The diagrams in reading order (the library's docs/diagrams/README.md). */
@@ -35,6 +35,8 @@ export interface Diagram {
   name: DiagramName;
   /** The diagram's own title, from its JSON's `meta`. */
   title: string;
+  /** Width over height of the drawing (its SVG's viewBox), when the page has one. */
+  ratio?: number;
 }
 
 export const DIAGRAMS_PATH = 'how-it-works/diagrams/';
@@ -48,7 +50,7 @@ const titleOf = (o: unknown): string | undefined =>
     ? o.title
     : undefined;
 
-/** Titles from each diagram's JSON, in reading order. */
+/** Titles from each diagram's JSON and proportions from its page, in reading order. */
 export function readDiagrams(dir: string): Diagram[] {
   return DIAGRAM_ORDER.map((name) => {
     const json: unknown = JSON.parse(readFileSync(join(dir, `${name}.json`), 'utf8'));
@@ -56,8 +58,22 @@ export function readDiagrams(dir: string): Diagram[] {
     const meta =
       typeof json === 'object' && json !== null && 'meta' in json ? json.meta : undefined;
     const title = titleOf(meta) ?? titleOf(json) ?? name;
-    return { name, title };
+    const page = join(dir, `${name}.html`);
+    const ratio = existsSync(page) ? viewBoxRatio(readFileSync(page, 'utf8')) : undefined;
+    return ratio === undefined ? { name, title } : { name, title, ratio };
   });
+}
+
+/** Width over height of the drawing: the viewBox of the first SVG in the diagram's container. */
+export function viewBoxRatio(html: string): number | undefined {
+  const at = html.indexOf('class="diagram-container');
+  if (at < 0) return undefined;
+  const box = /<svg\b[^>]*\bviewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"/.exec(
+    html.slice(at),
+  );
+  const w = Number(box?.[1]);
+  const h = Number(box?.[2]);
+  return w > 0 && h > 0 ? w / h : undefined;
 }
 
 // A start tag, with quoted attribute values that may hold `>`.

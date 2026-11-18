@@ -9,6 +9,7 @@ import {
   patchViewerScript,
   DIAGRAM_ORDER,
   readDiagrams,
+  viewBoxRatio,
   rewritePage,
   stylesToClasses,
 } from './diagrams.ts';
@@ -143,5 +144,15 @@ describe('readDiagrams', () => {
     const out = readDiagrams(dir);
     expect(out[0]).toEqual({ name: 'runtime-topology', title: 'Title of runtime-topology' });
     expect(out.find((d) => d.name === 'placement')?.title).toBe('placement');
+  });
+});
+
+describe('viewBoxRatio', () => {
+  it('reads the drawing’s viewBox, not an icon’s before it', () => {
+    const html =
+      '<svg viewBox="0 0 16 16"></svg><div class="diagram-container" id="d"><svg class="x" viewBox="0 0 1422 846"></svg></div>';
+    expect(viewBoxRatio(html)).toBeCloseTo(1422 / 846);
+    expect(viewBoxRatio('<div class="diagram-container"><svg></svg></div>')).toBeUndefined();
+    expect(viewBoxRatio('<svg viewBox="0 0 2 1"></svg>')).toBeUndefined();
   });
 });

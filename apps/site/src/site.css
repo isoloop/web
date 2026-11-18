@@ -889,6 +889,14 @@
 .hiw-diagram .ui-frame iframe {
   height: min(85svh, 60rem);
 }
+/* Sized by its drawing (src/demos/how-it-works.ts): as wide as the page
+   allows, at most min(85svh, 60rem) tall, centred. */
+.hiw-diagram.fit .ui-frame iframe {
+  width: min(100%, calc(min(85svh, 60rem) * var(--ratio)));
+  height: auto;
+  aspect-ratio: var(--ratio);
+  margin-inline: auto;
+}
 .hiw-read-lead {
   max-width: 52rem;
 }
@@ -929,7 +937,7 @@
   .hiw-read-cols {
     grid-template-columns: minmax(0, 1fr);
   }
-  .hiw-diagram .ui-frame iframe {
+  .hiw-diagram:not(.fit) .ui-frame iframe {
     height: 75svh;
   }
 }

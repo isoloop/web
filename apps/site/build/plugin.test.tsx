@@ -140,7 +140,8 @@ describe('the pages', () => {
     const all = { ...data, diagrams: DIAGRAM_ORDER.map((name) => ({ name, title: name })) };
     const html = renderDocument(named('how-it-works'), all, { csp: CSP });
     for (const name of DIAGRAM_ORDER) {
-      expect(html.split(`src="/how-it-works/diagrams/${name}.html?present=1"`)).toHaveLength(2);
+      expect(html.split(`src="/how-it-works/diagrams/${name}.html?embed=1"`)).toHaveLength(2);
+      expect(html).toContain(`href="/how-it-works/diagrams/${name}.html?present=1"`);
     }
     for (const step of Object.values(howItWorks.sections)) {
       expect(html).toContain(step.heading);
