@@ -86,7 +86,14 @@ function Measurements({ example }: { example: Example }): VNode {
           </footer>
         </div>
       ) : (
-        <p>{rich(m.note)}</p>
+        <>
+          <p>{rich(m.note)}</p>
+          {m.see ? (
+            <p>
+              <a href={m.see.href}>{m.see.label}</a>
+            </p>
+          ) : null}
+        </>
       )}
     </section>
   );

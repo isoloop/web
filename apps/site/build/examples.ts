@@ -101,7 +101,17 @@ export const exampleSchema = z.strictObject({
       note: text,
       previous: z.strictObject({ href: https, label: text }),
     }),
-    z.strictObject({ status: z.literal('none'), note: text }),
+    z.strictObject({
+      status: z.literal('none'),
+      note: text,
+      /** Where the figures are instead: another tab (`#plant`) or a page. */
+      see: z
+        .strictObject({
+          href: z.string().regex(/^(#|\/)[^\s]*$/, 'a #tab or a root path'),
+          label: text,
+        })
+        .optional(),
+    }),
   ]),
   links: z.strictObject({
     live: rootPath,

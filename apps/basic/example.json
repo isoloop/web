@@ -1,18 +1,22 @@
 {
   "title": "Basic",
   "tab": "Basic",
-  "summary": "The smallest example: four isolates on three event loops. A and B each have a worker of their own; C and D share one, a pool. Every isolate has a Block and a Crash button, so you can break any part and watch what keeps running. It's the demo the landing page records.",
+  "summary": "The smallest example: four isolates on three event loops. A and B each have a worker of their own; C and D share one, a pool. Every isolate has a Block and a Crash button, so you can break any part and watch what keeps running. The landing page runs it live.",
   "shows": ["containment", "placement", "restart"],
   "try": [
-    "Block C for 3 s: D stalls with it, since they share a worker, and after 2 s both restart. A and B keep counting.",
+    "Block C for 3 s: D stalls with it, since they share a worker, and after 2 s both restart. A and B keep running.",
     "Crash D: only D restarts, even in the pool, because it reports the error as its own.",
     "Crash A three times within a minute: the kernel stops restarting it, and its pane offers Restart A. B, C and D carry on.",
-    "Block the main thread: every surface freezes on screen while the loops behind them keep running."
+    "Block the main thread: every surface freezes on screen while the loops behind them keep running; when it ends, the surfaces show where the loops got to."
   ],
   "order": 10,
   "measurements": {
     "status": "none",
-    "note": "No measurements: Basic is for watching containment and restarts, not for measuring their cost. The dashboards measure that."
+    "note": "No measurements: Basic is for watching containment and restarts, not for measuring their cost. The dashboards measure that.",
+    "see": {
+      "href": "#plant",
+      "label": "The Plant tab, with its measurements"
+    }
   },
   "links": {
     "live": "/examples/basic/",
