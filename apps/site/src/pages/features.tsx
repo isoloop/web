@@ -4,6 +4,7 @@ import { Table } from 'ui/components';
 import type { Feature as Entry } from '../../build/features.ts';
 import { featuresPage as f, home } from '../copy.ts';
 import { Recording } from './recording.tsx';
+import { DeltaTable } from './delta.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
@@ -33,7 +34,7 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
 
 function Code({ children }: { children: string }): VNode {
   return (
-    <pre class="ui-code">
+    <pre class="ui-code" tabindex={0}>
       <code>{children}</code>
     </pre>
   );
@@ -284,7 +285,18 @@ function Features({ samples, features }: SiteData): VNode {
     ),
     'cost-table': (
       <>
-        <Table caption={home.costs.caption} head={home.costs.head} rows={home.costs.rows} />
+        <DeltaTable
+          caption={home.costs.caption}
+          pairs={home.costs.pairs}
+          delta={home.costs.delta}
+          groups={home.costs.groups}
+          verdicts={home.costs.verdicts}
+        />
+        <ul class="ui-notes">
+          {home.costs.notes.map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
         <p>
           <a href={PLANT_RESULTS}>{f.cost.more}</a>
         </p>

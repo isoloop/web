@@ -13,7 +13,7 @@ type Row = [string, ...string[]];
 
 export const site = {
   description:
-    'Event-loop isolation for web apps. Each part of your app runs on its own worker or in a shared pool, talks through a message bus that keeps its records, and is restarted when it fails. React, Preact or plain DOM.',
+    'Event-loop isolation for JavaScript apps. An open-source TypeScript library that lets you run the parts of your app in isolated workers, connected by a message bus and kept running by a supervisor. Framework-agnostic, with React and Preact adapters.',
 };
 
 // The features themselves (their strip line, heading and section text, with
@@ -75,118 +75,186 @@ export const recording = {
   open: 'Open basic on its own page',
 };
 
-/** A use: the lead, its sentence, and optionally a link to the figures behind it. */
-type Use = [lead: string, text: string, link?: { text: string; href: string }];
+/** A use: the pattern, then an example of it. */
+type Use = [pattern: string, example: string];
+
+/** Whether a Δ is better or worse for the reader; `same` for no change. */
+export type Verdict = 'better' | 'worse' | 'same';
+/** One pair's cells in a row: A, B, and the Δ with its verdict (none for counts). */
+export type PairCells = [a: string, b: string, delta?: [string, Verdict]];
+export interface DeltaRow {
+  label: string;
+  /** One entry per pair, in the order of `pairs`. */
+  cells: PairCells[];
+}
+export interface DeltaGroup {
+  heading: string;
+  rows: DeltaRow[];
+}
 
 export const home = {
-  title: 'Isoloop: event-loop isolation for web apps',
+  title: 'Isoloop: event-loop isolation for JavaScript apps',
   intro: {
-    heading: 'Event-loop isolation for web apps',
-    text: 'Each part of your app runs on its own worker or in a shared pool, talks through a message bus that keeps its records, and is restarted when it fails. React, Preact or plain DOM.',
+    heading: 'Event-loop isolation for JavaScript apps',
+    text: 'An open-source TypeScript library that lets you run the parts of your app in isolated workers, connected by a message bus and kept running by a supervisor. Framework-agnostic, with React and Preact adapters.',
     primary: 'See the features',
     secondary: 'Examples',
   },
   try: 'Try it. Four isolates on three event loops: A and B have a worker each, C and D share a pool. Block or crash one, or block the main thread, and watch what keeps running. This is basic, the smallest example, running in this page on Isoloop. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
   uses: {
     heading: 'What it’s for',
-    items: [
+    // Patterns, not examples (2026-11-18): the core promise first, then from
+    // the broadest need to the narrowest. Figures live on the examples.
+    items: <Use[]>[
+      ['Keeping one part’s load from stalling the rest.', 'live dashboards on heavy datasets'],
+      ['Moving heavy work off the UI’s thread.', 'parsing, search, simulation'],
+      ['Keeping state through a crash or a reload.', 'alarms, event logs, drafts'],
+      ['Running code you don’t fully trust.', 'third-party widgets, plugins'],
+      ['Combining parts with different owners.', 'micro-frontends from several teams'],
       [
-        'Live dashboards and data-heavy UIs.',
-        'Many widgets on fast data, and one slow widget doesn’t freeze the rest.',
+        'Building apps with no server behind them.',
+        'data pipelines over public APIs, on a static host',
       ],
-      [
-        'Apps built from many teams’ parts.',
-        'Isolates built and deployed apart, with a version floor so an old host or an old isolate says so instead of breaking. On the markets dashboard, when one team’s part blocks for 3 s, the other team’s widgets keep 91–98% of their updates with a pool per team, against none on a native build that loads the part at run time; a crashed part is back in 1.3–1.8 s, for 61 KB more JavaScript and 34–49 MB more memory.',
-        {
-          text: 'The measurements',
-          href: 'https://github.com/isoloop/web/tree/main/apps/dashboards/markets/comparison/federated',
-        },
-      ],
-      [
-        'Third-party or less-trusted widgets.',
-        'Each isolate gets only the grants you give it, and its DOM is sanitised on the way to the page.',
-      ],
-      [
-        'Backend-less apps.',
-        'Headless pipelines over public APIs, all in the visitor’s tab, served from a static host.',
-      ],
-      [
-        'Heavy work next to a UI.',
-        'Parsing, search or simulation off the main thread, restarted if it hangs.',
-      ],
-    ] as Use[],
+    ],
   },
   strip: { heading: 'Features', all: 'All features, with live demos' },
   gives: {
     heading: 'What it gives',
     // Source: apps/dashboards/plant/README.md, "What each build does when
-    // something goes wrong" (comparison/final/, Chromium, 1 kHz).
+    // something goes wrong", and e2e/placements.spec.ts. Behaviour only: the
+    // figures are in the costs table below.
     caption:
-      'The plant dashboard: 72 widgets on 8 machines, built three ways from the same code and data. One widget blocks for 3 s. Chromium at 1 kHz on the desktop machine, measured at plant-v0.1.0, November 2026.',
-    head: ['', 'Native', 'Native + workers', 'Isoloop (matched, the default)'],
+      'The plant dashboard: 72 widgets on 8 machines, built three ways from the same code and data. What each build does when something goes wrong, at plant-v0.1.0.',
+    head: ['', 'Native', 'Native + workers', 'Isoloop'],
     rows: <Row[]>[
       [
-        'What stalls while the widget blocks',
-        'The whole page',
-        'The whole page',
-        'The 72 widgets in its pool; the data pools keep running',
+        'One widget blocks for 3 s',
+        'Whole page stalls',
+        'Whole page stalls',
+        'Its pool stalls; data keeps flowing',
       ],
-      ['Data lost during the block', '3.8 s on every machine', 'None', 'None'],
-      ['Until every widget updates again', '3.2 s', '3.1 s', '2.9 s'],
+      ['With a pool per machine (split, opt-in)', '—', '—', 'Only that machine’s 8 widgets stall'],
       [
         'After the block',
-        'The page carries on; nothing restarts',
-        'The page carries on; nothing restarts',
-        'The pool restarts and catches up from the retained topics',
+        'Nothing restarts',
+        'Nothing restarts',
+        'The pool restarts and catches up',
       ],
+      ['A widget throws', 'Down until reload', 'Down until reload', 'Restarted'],
       [
-        'A widget throws while rendering',
-        'It shows “crashed” until a reload',
-        'The same; a data worker that errors restarts with an empty store',
-        'The isolate is restarted',
-      ],
-      [
-        'Alarms and events across a reload',
-        'localStorage, written at most once a second',
-        'The same',
-        'Persistent topics in OPFS: every acknowledged record',
+        'Alarms and events after a reload',
+        'Saved at most once a second',
+        'Saved at most once a second',
+        'Every acknowledged record',
       ],
     ],
     more: 'Every build and placement, with sources',
   },
   costs: {
     heading: 'What it costs, and where it helps',
-    // Sources: apps/dashboards/plant/README.md ("Responsiveness" and "What it
-    // costs"); comparison/final/ (desktop, at plant-v0.1.0);
-    // comparison/phone/ikko-mindone-focus156/ and galaxy-fold6-chrome157/
-    // (at plant-v0.1.0-rc.3); comparison/phone/iphone-x-safari16/ (at
-    // plant-v0.1.0-rc.5). All on @isoloop/*@0.0.0-next.b8ffdcf.
+    // Source: apps/dashboards/plant/comparison/final/responsiveness/summary.md,
+    // Chromium 5 kHz, at plant-v0.1.0 (@isoloop/*@0.0.0-next.b8ffdcf). Δ is the
+    // median of the per-round gaps, so it isn't always B − A of the medians.
+    // Phones: comparison/phone/ikko-mindone-focus156/, galaxy-fold6-chrome157/,
+    // iphone-x-safari16/.
     caption:
-      'The plant dashboard, Isoloop (one and matched) against native (alone and with workers). Measured at plant-v0.1.0, November 2026; the phones on its release candidates, with the same Isoloop packages.',
-    head: ['Device', 'What was measured', 'What it costs'],
-    rows: <Row[]>[
-      [
-        'Desktop machine, 4 cores fixed at 2.0 GHz',
-        'At 1 kHz every build keeps up in Chromium. At 5 kHz the main thread is 23–27% busy against 79–84%, and the median keystroke takes 21–41 ms against 62–82 ms. Firefox drops 0–1 frames of about 600 against 89–126.',
-        '+7 to +19 points of CPU across all threads, +36 to +51 MB after garbage collection, and +0.2 to +0.3 s to first data.',
-      ],
-      [
-        'Mid-range Android phone (MediaTek MT8781V, Firefox Focus 156)',
-        'One and matched draw 68–84 frames/s against 45–56, with a median keystroke of 15–23 ms against 32–64 ms. Split, with 18 workers on 8 cores, is the slowest build here.',
-        'First data after 1.2–2.0 s, against 0.4–0.9 s.',
-      ],
-      [
-        'Flagship Android phone (Snapdragon 8 Gen 3, Chrome 157)',
-        'No difference. Every build holds 60 frames/s, with a median keystroke of 9–13 ms.',
-        'The extra CPU and memory, for no difference in responsiveness.',
-      ],
-      [
-        'Older iPhone (iPhone X, Safari 16.6)',
-        'Native does as well or better. At 5 kHz native holds 60 frames/s, one 59.5, matched 51.9 and split 11.1: the more workers, the lower.',
-        'A known limitation. The cause isn’t established yet.',
-      ],
+      'The plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured at plant-v0.1.0, November 2026. Each native build is measured against the Isoloop placement shaped like it.',
+    pairs: [
+      { a: 'Native', b: 'Isoloop one', label: 'Native against Isoloop one (one pool)' },
+      {
+        a: 'Native + workers',
+        b: 'Isoloop matched',
+        label: 'Native + workers against Isoloop matched (the default)',
+      },
     ],
-    more: 'Every recorded run, with the method',
+    delta: 'Δ',
+    groups: <DeltaGroup[]>[
+      {
+        heading: 'Responsiveness',
+        rows: [
+          {
+            label: 'Main thread busy',
+            cells: [
+              ['84%', '23%', ['−60 pts', 'better']],
+              ['79%', '27%', ['−53 pts', 'better']],
+            ],
+          },
+          {
+            label: 'Typing, median',
+            cells: [
+              ['82 ms', '21 ms', ['−55 ms', 'better']],
+              ['62 ms', '41 ms', ['−28 ms', 'better']],
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Faults and start-up',
+        rows: [
+          {
+            label: 'Data lost on the other machines during a 3 s block',
+            cells: [
+              ['3.0 s', '2.6 s', ['−0.5 s', 'better']],
+              ['0 s', '0 s', ['0', 'same']],
+            ],
+          },
+          {
+            label: 'Back to normal after the block',
+            cells: [
+              ['3.2 s', '3.5 s', ['+0.3 s', 'worse']],
+              ['3.2 s', '2.9 s', ['−0.2 s', 'better']],
+            ],
+          },
+          {
+            label: 'All 72 widgets with data',
+            cells: [
+              ['1.2 s', '2.4 s', ['+1.2 s', 'worse']],
+              ['2.3 s', '1.5 s', ['−0.7 s', 'better']],
+            ],
+          },
+          {
+            label: 'First data',
+            cells: [
+              ['0.29 s', '0.47 s', ['+0.19 s', 'worse']],
+              ['0.35 s', '0.68 s', ['+0.29 s', 'worse']],
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Cost',
+        rows: [
+          {
+            label: 'CPU, all threads',
+            cells: [
+              ['95%', '107%', ['+11 pts', 'worse']],
+              ['97%', '116%', ['+19 pts', 'worse']],
+            ],
+          },
+          {
+            label: 'Memory after GC, at 16 s',
+            cells: [
+              ['164 MB', '203 MB', ['+40 MB', 'worse']],
+              ['222 MB', '275 MB', ['+51 MB', 'worse']],
+            ],
+          },
+          {
+            label: 'Workers',
+            cells: [
+              ['0', '1 + bus'],
+              ['9', '10 + bus'],
+            ],
+          },
+        ],
+      },
+    ],
+    verdicts: { better: 'better', worse: 'worse', same: 'no change' } as Record<Verdict, string>,
+    notes: [
+      'Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.',
+      'The native builds keep their data in a small store written for this app, with no message bus. They don’t contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features.',
+      'On a faster machine the main-thread differences shrink. Phones vary, measured on plant-v0.1.0’s release candidates with the same Isoloop packages: on a mid-range Android phone (MediaTek MT8781V, Firefox Focus 156) one and matched drew 68–84 frames/s against 45–56 for native; on a flagship (Snapdragon 8 Gen 3, Chrome 157) every build held 60; on an iPhone X (Safari 16.6) at 5 kHz matched drew 51.9 against 60 for native.',
+    ],
+    more: 'Every recorded run, on every device, with the method',
   },
   limits: {
     heading: 'What Isoloop can’t hide',
@@ -200,15 +268,18 @@ export const home = {
   },
   how: {
     heading: 'How it works',
-    text: 'The host runs on the main thread, each isolate on its own worker or in a pool, and the bus in a worker between them. Seven diagrams are drawn from the code and checked against it.',
-    link: 'All seven diagrams',
-  },
-  examples: {
-    heading: 'Examples',
-    all: 'All examples',
+    // Sources: isoloop/isoloop docs/diagrams (runtime topology, restarts),
+    // ADR 0015 (pools), docs/guide/pools.md (start positions, isoloop#186).
+    text: [
+      'Your app’s host runs on the page’s main thread. Each isolate runs in a worker, either one of its own or a pool it shares with others.',
+      'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says.',
+      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
+    ],
+    link: 'How it works, in seven diagrams drawn from the code',
   },
   install: {
     heading: 'Install',
+    platform: 'Isoloop runs in the browser.',
     label:
       'Isoloop isn’t at 0.1 yet, and the API may change. These are prereleases from the main branch, published under the next tag.',
     command:

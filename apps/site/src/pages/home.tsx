@@ -2,15 +2,15 @@
 import type { VNode } from 'preact';
 import { Table } from 'ui/components';
 import { home, site } from '../copy.ts';
-import { ExampleList } from './examples.tsx';
+import { DeltaTable } from './delta.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
 
-/** The landing page, in the order ADR 0002's amendment sets. */
-function Home({ examples, features }: SiteData): VNode {
+/** The landing page, in the order ADR 0002's amendments set. */
+function Home({ features }: SiteData): VNode {
   return (
     <main class="ui-shell">
       <PageIntro title={home.intro.heading} id="intro">
@@ -19,7 +19,7 @@ function Home({ examples, features }: SiteData): VNode {
           <a class="ui-button" data-primary href="/features/">
             {home.intro.primary}
           </a>
-          <a href="#examples">{home.intro.secondary}</a>
+          <a href="/examples/">{home.intro.secondary}</a>
         </p>
       </PageIntro>
 
@@ -36,15 +36,9 @@ function Home({ examples, features }: SiteData): VNode {
         <h2 id="for-h">{home.uses.heading}</h2>
         <div class="ui-body">
           <ul class="ui-uses">
-            {home.uses.items.map(([b, t, link]) => (
-              <li key={b}>
-                <b>{b}</b> {t}
-                {link ? (
-                  <>
-                    {' '}
-                    <a href={link.href}>{link.text}</a>
-                  </>
-                ) : null}
+            {home.uses.items.map(([pattern, example]) => (
+              <li key={pattern}>
+                <b>{pattern}</b> <span class="ui-eg">e.g. {example}</span>
               </li>
             ))}
           </ul>
@@ -89,7 +83,18 @@ function Home({ examples, features }: SiteData): VNode {
       <section class="ui-gutter" id="costs" aria-labelledby="costs-h">
         <h2 id="costs-h">{home.costs.heading}</h2>
         <div class="ui-body">
-          <Table caption={home.costs.caption} head={home.costs.head} rows={home.costs.rows} />
+          <DeltaTable
+            caption={home.costs.caption}
+            pairs={home.costs.pairs}
+            delta={home.costs.delta}
+            groups={home.costs.groups}
+            verdicts={home.costs.verdicts}
+          />
+          <ul class="ui-notes">
+            {home.costs.notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
           <p>
             <a href={`${PLANT_SOURCE}/comparison`}>{home.costs.more}</a>
           </p>
@@ -110,19 +115,11 @@ function Home({ examples, features }: SiteData): VNode {
       <section class="ui-gutter" id="how" aria-labelledby="how-h">
         <h2 id="how-h">{home.how.heading}</h2>
         <div class="ui-body">
-          <p>{home.how.text}</p>
+          {home.how.text.map((t) => (
+            <p key={t}>{t}</p>
+          ))}
           <p>
             <a href="/how-it-works/">{home.how.link}</a>
-          </p>
-        </div>
-      </section>
-
-      <section class="ui-gutter" id="examples" aria-labelledby="examples-h">
-        <h2 id="examples-h">{home.examples.heading}</h2>
-        <div class="ui-body">
-          <ExampleList examples={examples} level={3} images={false} />
-          <p>
-            <a href="/examples/">{home.examples.all}</a>
           </p>
         </div>
       </section>
@@ -130,8 +127,9 @@ function Home({ examples, features }: SiteData): VNode {
       <section class="ui-gutter" id="install" aria-labelledby="install-h">
         <h2 id="install-h">{home.install.heading}</h2>
         <div class="ui-body">
+          <p>{home.install.platform}</p>
           <p>{home.install.label}</p>
-          <pre class="ui-code">
+          <pre class="ui-code" tabindex={0}>
             <code>{home.install.command}</code>
           </pre>
           <p>

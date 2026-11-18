@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14))
+- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18))
 - **Answers:** what `apps/site` is built with, which pages it has, what may run on them, how it shows the examples and the library's diagrams, and what its copy may claim. Where it lives and how it deploys is [ADR 0001](0001-what-this-repo-is.md); its look is [ADR 0003](0003-design-system.md).
 
 ## Context
@@ -199,6 +199,26 @@ The principle "Code that shares data shouldn't share an event loop" opens `/feat
 **Measurements (decision 7):** the markets figures are left out until M3f (markets parity) measures markets against native with workers and pooled placements, as the plant was. Until then the markets card says so.
 
 **CI (decision 11):** the smoke test also covers `/features/`, and checks that the recording receives basic's activity: a track draws, Block C produces a stuck span for C and D and then a restart, and a message from another origin or in another shape is ignored.
+
+### Amended: the landing page refined (2026-11-18)
+
+The maintainer's review of the live landing page: it didn't say what Isoloop is, it tied Isoloop to the browser and to three render options, its uses mixed in figures, its tables were sentences rather than comparisons, and its "how it works" said little. This changes decisions 3 and 7, and the 2026-11-14 amendment's landing order. Where this section and those disagree, this section wins.
+
+**The landing page (decision 3),** in this order:
+1. **Introduction:** the headline "Event-loop isolation for JavaScript apps", and one sentence on what Isoloop is: an open-source TypeScript library that lets you run the parts of an app in isolated workers, connected by a message bus and kept running by a supervisor; framework-agnostic, with React and Preact adapters. No platform in the headline or the sentence. Actions unchanged.
+2. **The recording:** unchanged.
+3. **What it's for:** six patterns, each with a short example and no figures, from the core promise to the narrowest need. Figures belong to the examples.
+4. **Features:** unchanged.
+5. **What it gives:** behaviour only, in short cells; the figures moved to the next table. It shows the opt-in `split` placement next to the default, because only there does a block visibly stall fewer widgets.
+6. **What it costs, and where it helps:** decision 7 below.
+7. **Limits:** unchanged.
+8. **How it works:** a short explanation (host, workers and pools, the bus, the supervisor and what a restart reads back) and a link to `/how-it-works/`. No diagram on the landing page: framed at that width it reads poorly.
+9. **Install:** with one line saying Isoloop runs in the browser. Nothing about later platforms until there is a public roadmap.
+10. **Footer.**
+
+The Examples section is gone: the nav and the introduction link to `/examples/`.
+
+**Measurements (decision 7):** the landing page's figures are the desktop run only, the one run that measured every figure for every build in the same interleaved rounds. Each native build sits next to the Isoloop placement shaped like it (native and `one`; native + workers and `matched`), as A, B and Δ, grouped into responsiveness, faults and start-up, and cost. Each Δ says in words whether it's better or worse, without colour, so a cost reads as a measurement, not an alarm. Wide screens get one table; narrow screens one table per pair. Under it: how Δ is computed, what the native baseline lacks (a store written for the app, no bus; no containment, restart, replay, grants, schemas or acknowledged history), and one line on phones, linking every device's results.
 
 ## Consequences
 
