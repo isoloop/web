@@ -145,7 +145,11 @@ for (const mix of MIXES) {
           await page.waitForFunction(() => window.files !== undefined, null, { timeout: 30_000 });
           const origin = await page.evaluate(() => performance.now());
           // Once a second from here to the end of the window (M3i).
-          const trace: { t: number; workers: number; procs: unknown }[] = [];
+          const trace: {
+            t: number;
+            workers: number;
+            procs: ReturnType<Window['files']['trace']>;
+          }[] = [];
           const tracing = new AbortController();
           const tracer = (async () => {
             while (!tracing.signal.aborted) {
@@ -256,7 +260,7 @@ for (const mix of MIXES) {
             ),
           );
           const kindsOf = new Map<string, Set<string>>();
-          for (const row of (trace.at(-1)?.procs as { id: string }[] | undefined) ?? []) {
+          for (const row of trace.at(-1)?.procs ?? []) {
             const kind = row.id.replace(/-\d+$/, '');
             kindsOf.set(kind, (kindsOf.get(kind) ?? new Set()).add(row.id));
           }
