@@ -672,13 +672,27 @@ export const howItWorks = {
         'The bus sends each subscription up to 1,000 records ahead of what it has handled. The subscriber commits each record once its handler settles; the commits go out every 100 ms by default, or sooner once half the credit is used. Delivery is at least once: after a crash, up to one commit interval of records can come again, so a handler must be safe to run twice.',
       ],
     },
+    // Sources: ADRs 0010, 0011 and 0015 (the render bridge, pools' portal
+    // roots); packages/host/src/events.ts (forwarded events, submit, links);
+    // KernelConfig `styles`, `components`, `compositor` and IsolateContext
+    // `styles`, `portalRoot`, `host` (requestCanvas) at the pin.
     render: {
       heading: 'Rendering from a worker',
       text: [
         'A worker has no DOM. A visual isolate gets a small DOM subset as its `document`, enough for React, Preact and plain DOM code to run unchanged. The subset records each change (insert, move, remove, text, attribute, listener) and sends the host one batch per microtask.',
-        'On the host, the compositor applies each isolate’s batches to its surface, inside a shadow root, with a budget of 8 ms of DOM work per frame. Every tag, attribute and URL passes the host’s component registry first, so an isolate can’t create a script or an `on*` handler. Input on a surface goes back to the worker as data, and is dispatched there with capture and bubble.',
-        'Functions never cross the boundary. What needs the real page, such as measuring a node, focusing it, scrolling to it or drawing on a canvas, the isolate asks the host for through host calls.',
+        "On the host, the compositor applies each isolate’s batches to its surface, with a budget of 8 ms of DOM work per frame. Every tag, attribute and URL passes the host’s component registry first, so an isolate can’t create a script or an `on*` handler. The same registry lets isolates render the host’s own design-system elements by name: with `components: { 'iso-button': { tag: 'ds-button', attributes: ['variant'] } }`, an isolate’s `<iso-button>` becomes a `<ds-button>` on the page.",
+        'Each surface is a shadow root, so the page’s stylesheets don’t reach it; inherited properties, such as the font, still do. The kernel’s `styles` are adopted into every surface, and an isolate adds its own with `ctx.styles(css)`. Modals, tooltips and menus that libraries render into `document.body` go into `ctx.portalRoot`, inside the isolate’s own surface.',
+        'Input on a surface goes back to the worker as data, and is dispatched there with capture and bubble. Functions never cross the boundary. What needs the real page, the isolate asks the host for through host calls: `ctx.host.measure`, `focus` and `scrollIntoView` for a node, and `requestCanvas`, which hands the isolate an `OffscreenCanvas` to draw on from the worker, as charts do.',
       ],
+      differs: {
+        heading: 'What changes for your code',
+        items: [
+          'Layout reads are asynchronous: `await ctx.host.measure(node)` instead of `getBoundingClientRect()`.',
+          'An isolate can’t call `preventDefault` in time. The host always prevents `submit`, and same-origin link clicks go to the router.',
+          'Only these events reach the worker: click, dblclick, input, change, keydown, keyup, submit, focusin, focusout, pointerdown and pointerup, and pointer moves, at most one per frame. There’s no wheel, scroll or drag yet.',
+        ],
+      },
+      code: 'The Host tab’s counter, as a component',
     },
     supervisor: {
       heading: 'The supervisor',

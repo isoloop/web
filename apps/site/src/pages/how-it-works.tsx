@@ -148,9 +148,16 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
       body: (
         <>
           {paras(s.render.text)}
+          <h3>{s.render.differs.heading}</h3>
+          <ul>
+            {s.render.differs.items.map((t) => (
+              <li key={t}>{rich(t)}</li>
+            ))}
+          </ul>
+          <p>{s.render.code}:</p>
           <CodeTabs
             id="render"
-            label="The same counter as a component"
+            label={s.render.code}
             tabs={[
               { key: 'react', label: 'React', code: samples.react },
               { key: 'preact', label: 'Preact', code: samples.preact },
