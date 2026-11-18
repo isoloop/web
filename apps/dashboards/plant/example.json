@@ -2,11 +2,17 @@
   "title": "Plant dashboard",
   "tab": "Plant",
   "summary": "A telemetry dashboard for a fictional plant: 8 machines, 72 widgets, and vibration data sampled at up to 5 kHz, with spectra, percentiles, correlations and persistent alarms. The same widgets are built three ways, native, native with workers, and on Isoloop in six placements, so you can switch between them and compare. An interactive page lets you build your own widgets from a drawer.",
-  "shows": ["containment", "placement", "restart", "durable", "cost"],
+  "shows": [
+    "containment",
+    "placement",
+    "restart",
+    "durable",
+    "cost"
+  ],
   "try": [
-    "Press a widget's block button: on the native builds the whole page stalls; on Isoloop only its pool does, and after 2 s the pool restarts and catches up.",
+    "Press a widget's block button. On the native builds the whole page stalls. On Isoloop's default placement all 72 widgets share a pool, so they all stall, but no data is lost and the pool restarts after 2 s. Switch to `split` and only that machine's 8 widgets stall.",
     "Switch between Native and Isoloop in the header, and between placements, and block the same widget again.",
-    "Reload the page: the alarms and events are still there, every acknowledged record up to 10,000.",
+    "On the Isoloop build, reload the page: the alarms and events are still there, every acknowledged record up to 10,000.",
     "Open the interactive page and add widgets from the drawer: each one is an isolate."
   ],
   "order": 20,
@@ -18,7 +24,7 @@
         "heading": "Desktop",
         "findings": [
           "Isoloop moves the widgets off the main thread: it's 23–27% busy against 79–84% on the native builds, and typing answers 28–55 ms sooner.",
-          "In the default placement, `matched`, a 3 s block loses no data on the other machines, as with native + workers, and the page is back to normal 0.2 s sooner.",
+          "In the default placement, `matched`, against native + workers: a 3 s block loses no data on the other machines on either build, and the page is back to normal 0.2 s sooner.",
           "It costs CPU, memory and start-up: +11 to +19 points of CPU across threads, +40 to +51 MB after GC, and first data 0.19–0.29 s later."
         ],
         "caption": "The plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured at plant-v0.1.0, November 2026. Each native build is measured against the Isoloop placement shaped like it.",
@@ -42,15 +48,43 @@
               {
                 "label": "Main thread busy",
                 "cells": [
-                  ["84%", "23%", ["−60 pts", "better"]],
-                  ["79%", "27%", ["−53 pts", "better"]]
+                  [
+                    "84%",
+                    "23%",
+                    [
+                      "−60 pts",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "79%",
+                    "27%",
+                    [
+                      "−53 pts",
+                      "better"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Typing, median",
                 "cells": [
-                  ["82 ms", "21 ms", ["−55 ms", "better"]],
-                  ["62 ms", "41 ms", ["−28 ms", "better"]]
+                  [
+                    "82 ms",
+                    "21 ms",
+                    [
+                      "−55 ms",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "62 ms",
+                    "41 ms",
+                    [
+                      "−28 ms",
+                      "better"
+                    ]
+                  ]
                 ]
               }
             ]
@@ -61,29 +95,85 @@
               {
                 "label": "Data lost on the other machines during a 3 s block",
                 "cells": [
-                  ["3.0 s", "2.6 s", ["−0.5 s", "better"]],
-                  ["0 s", "0 s", ["0", "same"]]
+                  [
+                    "3.0 s",
+                    "2.6 s",
+                    [
+                      "−0.5 s",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "0 s",
+                    "0 s",
+                    [
+                      "0",
+                      "same"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Back to normal after the block",
                 "cells": [
-                  ["3.2 s", "3.5 s", ["+0.3 s", "worse"]],
-                  ["3.2 s", "2.9 s", ["−0.2 s", "better"]]
+                  [
+                    "3.2 s",
+                    "3.5 s",
+                    [
+                      "+0.3 s",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "3.2 s",
+                    "2.9 s",
+                    [
+                      "−0.2 s",
+                      "better"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "All 72 widgets with data",
                 "cells": [
-                  ["1.2 s", "2.4 s", ["+1.2 s", "worse"]],
-                  ["2.3 s", "1.5 s", ["−0.7 s", "better"]]
+                  [
+                    "1.2 s",
+                    "2.4 s",
+                    [
+                      "+1.2 s",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "2.3 s",
+                    "1.5 s",
+                    [
+                      "−0.7 s",
+                      "better"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "First data",
                 "cells": [
-                  ["0.29 s", "0.47 s", ["+0.19 s", "worse"]],
-                  ["0.35 s", "0.68 s", ["+0.29 s", "worse"]]
+                  [
+                    "0.29 s",
+                    "0.47 s",
+                    [
+                      "+0.19 s",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "0.35 s",
+                    "0.68 s",
+                    [
+                      "+0.29 s",
+                      "worse"
+                    ]
+                  ]
                 ]
               }
             ]
@@ -94,22 +184,56 @@
               {
                 "label": "CPU, all threads",
                 "cells": [
-                  ["95%", "107%", ["+11 pts", "worse"]],
-                  ["97%", "116%", ["+19 pts", "worse"]]
+                  [
+                    "95%",
+                    "107%",
+                    [
+                      "+11 pts",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "97%",
+                    "116%",
+                    [
+                      "+19 pts",
+                      "worse"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Memory after GC, at 16 s",
                 "cells": [
-                  ["164 MB", "203 MB", ["+40 MB", "worse"]],
-                  ["222 MB", "275 MB", ["+51 MB", "worse"]]
+                  [
+                    "164 MB",
+                    "203 MB",
+                    [
+                      "+40 MB",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "222 MB",
+                    "275 MB",
+                    [
+                      "+51 MB",
+                      "worse"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Workers",
                 "cells": [
-                  ["0", "1 + bus"],
-                  ["9", "10 + bus"]
+                  [
+                    "0",
+                    "1 + bus"
+                  ],
+                  [
+                    "9",
+                    "10 + bus"
+                  ]
                 ]
               }
             ]
@@ -121,19 +245,6 @@
           "The native builds keep their data in a small store written for this app, with no message bus. They don't contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features."
         ],
         "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/final"
-      },
-      {
-        "id": "phones",
-        "heading": "Phones",
-        "findings": [
-          "A flagship Android phone, in Chrome: every build holds 60 frames/s with no long tasks at both rates, so there's no responsiveness difference to report.",
-          "A mid-range Android phone (8 cores, a 96 Hz screen), in Firefox: both native builds run short, at 45–56 of a possible 96 frames/s. `matched` draws 68–77 and `one` 80–84, and typing answers in 15–23 ms against 50–64 ms at 5 kHz. Isoloop takes 1.2–2.0 s to first data, against 0.4–0.9 s.",
-          "A 2017 iPhone, in Safari: Isoloop doesn't run ahead of native. At 5 kHz native holds 60 frames/s (3 late), native + workers 58.5 (33 late) and `matched` 51.9 (93 late); the more workers a placement has, the further it drops.",
-          "CPU and memory weren't recorded on the phones."
-        ],
-        "caption": "Recorded by hand with each page's Record 10 s panel, one round per build, at plant-v0.1.0-rc.3 and rc.5, November 2026, so these are observations rather than interleaved medians.",
-        "tag": "plant-v0.1.0-rc.5",
-        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/phone"
       },
       {
         "id": "interactive",
@@ -158,11 +269,29 @@
             "rows": [
               {
                 "label": "Typing, median",
-                "cells": [["7 ms", "43 ms", ["+36 ms", "worse"]]]
+                "cells": [
+                  [
+                    "7 ms",
+                    "43 ms",
+                    [
+                      "+36 ms",
+                      "worse"
+                    ]
+                  ]
+                ]
               },
               {
                 "label": "Clicks, median",
-                "cells": [["12 ms", "47 ms", ["+36 ms", "worse"]]]
+                "cells": [
+                  [
+                    "12 ms",
+                    "47 ms",
+                    [
+                      "+36 ms",
+                      "worse"
+                    ]
+                  ]
+                ]
               }
             ]
           },
@@ -171,29 +300,87 @@
             "rows": [
               {
                 "label": "First draw",
-                "cells": [["5.39 s", "4.33 s", ["−1.06 s", "better"]]]
+                "cells": [
+                  [
+                    "5.39 s",
+                    "4.33 s",
+                    [
+                      "−1.06 s",
+                      "better"
+                    ]
+                  ]
+                ]
               },
               {
                 "label": "Frames over 25 ms",
-                "cells": [["25", "0", ["−25", "better"]]]
+                "cells": [
+                  [
+                    "25",
+                    "0",
+                    [
+                      "−25",
+                      "better"
+                    ]
+                  ]
+                ]
               },
               {
                 "label": "Main thread busy",
-                "cells": [["93%", "3%", ["−90 pts", "better"]]]
+                "cells": [
+                  [
+                    "93%",
+                    "3%",
+                    [
+                      "−90 pts",
+                      "better"
+                    ]
+                  ]
+                ]
               },
               {
                 "label": "CPU, all threads",
-                "cells": [["100%", "127%", ["+27 pts", "worse"]]]
+                "cells": [
+                  [
+                    "100%",
+                    "127%",
+                    [
+                      "+27 pts",
+                      "worse"
+                    ]
+                  ]
+                ]
               },
               {
                 "label": "Typing, median",
-                "cells": [["9 ms", "44 ms", ["+35 ms", "worse"]]]
+                "cells": [
+                  [
+                    "9 ms",
+                    "44 ms",
+                    [
+                      "+35 ms",
+                      "worse"
+                    ]
+                  ]
+                ]
               }
             ]
           }
         ],
         "firefox": "Firefox: native drops 138 frames under the heavy preview and runs at 26 fps; Isoloop drops none, and its preview draws 0.7 s sooner.",
         "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/interactive/final"
+      },
+      {
+        "id": "phones",
+        "heading": "Phones",
+        "findings": [
+          "A flagship Android phone, in Chrome: every build holds 60 frames/s with no long tasks at both rates, so there's no responsiveness difference to report.",
+          "A mid-range Android phone (8 cores, a 96 Hz screen), in Firefox: both native builds run short, at 45–56 of a possible 96 frames/s. `matched` draws 68–77 and `one` 80–84, and typing answers in 15–23 ms against 50–64 ms at 5 kHz. Isoloop takes 1.2–2.0 s to first data, against 0.4–0.9 s.",
+          "A 2017 iPhone, in Safari: Isoloop doesn't run ahead of native. At 5 kHz native holds 60 frames/s (3 late), native + workers 58.5 (33 late) and `matched` 51.9 (93 late); the more workers a placement has, the further it drops.",
+          "CPU and memory weren't recorded on the phones."
+        ],
+        "caption": "Recorded by hand with each page's Record 10 s panel, one round per build, at plant-v0.1.0-rc.3 and rc.5, November 2026, so these are observations rather than interleaved medians.",
+        "tag": "plant-v0.1.0-rc.5",
+        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/phone"
       }
     ]
   },
