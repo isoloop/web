@@ -709,7 +709,7 @@ export const howItWorks = {
     // Sources: SubscribeOptions `from` and `group` (packages/runtime/src/bus-client.ts),
     // the compositor's `reset` on restart (packages/host/src/compositor.ts), ADR 0015
     // decision 8; the replay cost: isoloop/isoloop docs/guide/pools.md,
-    // "When to pool" (plant matched comparison, Chromium).
+    // "When to pool", the `one` row.
     restart: {
       heading: 'Restarts and catch-up',
       text: [
