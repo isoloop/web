@@ -253,7 +253,7 @@
 }
 /* The task's own reported busy time (M3j): a thin line under the kernel's figure. */
 .meter .reported {
-  background: var(--ui-part-host);
+  background: var(--ui-text);
   height: 20%;
   top: 80%;
 }
@@ -369,7 +369,7 @@
   color: var(--ui-bad);
 }
 
-/* A task's "after await" switch (M3i, M3j) */
+/* A task's "after await" and "report its busy time" switches (M3i, M3j) */
 .hidden-work {
   display: flex;
   align-items: center;

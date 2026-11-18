@@ -207,7 +207,7 @@ function TaskCard({ task, playground }: { task: TaskView; playground: Playground
         <input
           type="checkbox"
           checked={task.reports}
-          aria-label={`${task.name} reports its busy time`}
+          aria-label={`${task.name}: report its busy time`}
           onChange={(e) => playground.setReports(task.id, e.currentTarget.checked)}
         />
         report its busy time

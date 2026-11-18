@@ -19,7 +19,7 @@ import type { Catalog } from '../catalog';
 import type { WidgetSpec } from '../spec/types';
 import css from '../styles.css?inline';
 import { SIZE } from '../views/size';
-import { moveText, type AutoMove } from './auto';
+import { autoWhere, moveText, type AutoMove } from './auto';
 import { BoardController, WIDGET_CAP, type BoardWidget } from './controller';
 import type { BoardRuntime } from './runtime';
 import type { AutoPlacement } from './ui';
@@ -62,15 +62,6 @@ function useMoving(body: RefObject<HTMLDivElement | null>, move: AutoMove | unde
     };
   }, [body, move]);
   return moving;
-}
-
-/** What an `auto` widget's header says: "Auto 2", "Quarantine · kept apart: repeated blocking". */
-function autoWhere(p: AutoPlacement | undefined): string {
-  if (!p) return 'Automatic';
-  if (p.state === 'kept-apart') return `${p.label} · kept apart: repeated blocking`;
-  if (p.state === 'failed') return `${p.label} · stopped: crashed too often`;
-  if (p.atCap) return `${p.label} · over budget, at worker cap`;
-  return p.label;
 }
 
 /** Adds the creator's stylesheet to the document once (every rule is under `.creator-*`). */

@@ -289,8 +289,9 @@ test('an offender leaves the quarantine within 2 minutes', async ({ page, browse
   await expect(page.locator('.log li').first().locator('.badge')).toHaveText('steady again');
 });
 
-// The kernel gives up on an isolate past its restart limit (4 crashes in a
-// minute). The balancer then leaves it where it is (M3j): no move brings it
+// The kernel gives up on an isolate past its restart limit (3 restarts in
+// 60 s, counted per spawn: a move starts the count again, so the quarantine
+// move after the first crash means four more crashes). The balancer then leaves it where it is (M3j): no move brings it
 // back, though an offender in quarantine would otherwise leave after 30 s.
 test('a task the kernel gives up on stays failed, and no move brings it back', async ({
   page,

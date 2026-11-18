@@ -5,7 +5,14 @@ import type { WidgetSpec } from '../spec/types';
 import { SCALARS, spec } from '../test-fixtures';
 import { placementRecordSchema, uiRecordSchema } from '../topics';
 import { PLACEMENT_TOPIC, SPECS_TOPIC, TOMBSTONE, UI_TOPIC, specRecord } from '../widget/records';
-import { autoPlacer, balancerLabel, moveText, type BalancerLike, type MoveReason } from './auto';
+import {
+  autoPlacer,
+  autoWhere,
+  balancerLabel,
+  moveText,
+  type BalancerLike,
+  type MoveReason,
+} from './auto';
 import { BoardController, MOVE_BADGE_MS, SYNC_KEY } from './controller';
 import { isoloopRuntime } from './isoloop';
 import { LOADS_SYNC_KEY, placementLoads, type PlacementLoads } from './loads';
@@ -123,6 +130,19 @@ describe('balancer labels and badges', () => {
     expect(moveText({ from: 'Quarantine', to: 'Auto 1', reason: 'steady' })).toBe(
       'back in Auto 1: steady',
     );
+  });
+});
+
+describe('autoWhere', () => {
+  it('says where an automatic widget is, and why when it is kept apart, over budget or stopped', () => {
+    const p = { id: 'w1', pool: 'balancer-2', label: 'Auto 2', state: 'placed' } as const;
+    expect(autoWhere(undefined)).toBe('Automatic');
+    expect(autoWhere(p)).toBe('Auto 2');
+    expect(autoWhere({ ...p, atCap: true })).toBe('Auto 2 · over budget, at worker cap');
+    expect(autoWhere({ ...p, label: 'Quarantine', state: 'kept-apart' })).toBe(
+      'Quarantine · kept apart: repeated blocking',
+    );
+    expect(autoWhere({ ...p, state: 'failed' })).toBe('Auto 2 · stopped: crashed too often');
   });
 });
 
