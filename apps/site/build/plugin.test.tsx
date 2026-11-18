@@ -1,10 +1,12 @@
 /** @jsxImportSource preact */
 import { describe, expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
+import { DIAGRAM_ORDER } from './diagrams.ts';
 import { loadFeatures } from './features.ts';
 import { CSP, renderDocument } from './plugin.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
 import { PAGES } from '../src/pages/index.ts';
+import { howItWorks } from '../src/copy.ts';
 
 function named(name: string): Page {
   const page = PAGES[name];
@@ -47,6 +49,14 @@ const data: SiteData = {
     demoTopics: 't',
     demoCounter: 'dc',
     demoMain: 'dm',
+    howHost: 'hh',
+    howSupervision: 'hs',
+    howCatchUp: 'hc',
+    howPubSub: 'hp',
+    howPlacement: 'hpl',
+    topics: 'tp',
+    howPersistence: 'hps',
+    howGrants: 'hg',
   },
 };
 
@@ -129,6 +139,25 @@ describe('the pages', () => {
   it('show the pin on "how it works"', () => {
     const html = renderDocument(named('how-it-works'), data, { csp: CSP });
     expect(html).toContain('<code>fffffff</code>');
+  });
+
+  it('walk "how it works" step by step, framing every diagram once', () => {
+    const all = { ...data, diagrams: DIAGRAM_ORDER.map((name) => ({ name, title: name })) };
+    const html = renderDocument(named('how-it-works'), all, { csp: CSP });
+    for (const name of DIAGRAM_ORDER) {
+      expect(html.split(`src="/how-it-works/diagrams/${name}.html?embed=1"`)).toHaveLength(2);
+      expect(html).toContain(`href="/how-it-works/diagrams/${name}.html?present=1"`);
+    }
+    for (const step of Object.values(howItWorks.sections)) {
+      expect(html).toContain(step.heading);
+    }
+    expect(html).toContain(howItWorks.overview.heading);
+    for (const name of DIAGRAM_ORDER) {
+      expect(html).toContain(`${howItWorks.reading.heading}: ${name}`);
+    }
+    expect(html).toContain('aria-label="Steps"');
+    for (const sample of ['hh', 'hs', 'hc', 'hp', 'hpl'])
+      expect(html).toContain(`<code>${sample}</code>`);
   });
 
   it('never claim Isoloop is faster than native', () => {

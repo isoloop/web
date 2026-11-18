@@ -1,10 +1,10 @@
-// The code on /features/ (ADR 0002, as amended): read at build time from
+// The code on /features/, /how-it-works/ and the landing page (ADR 0002, as amended): read at build time from
 // apps/samples, where `tsc` checks every file against the published @isoloop
 // packages, so a sample can't drift from the API. The site imports nothing
 // from Isoloop; it only reads the text.
 import { readFileSync } from 'node:fs';
 
-/** The samples the features page shows, by name, as files under apps/samples/src. */
+/** The samples the pages show, by name, as files under apps/samples/src. */
 export const SAMPLE_FILES = {
   contracts: 'contracts.ts',
   durable: 'durable.ts',
@@ -17,6 +17,14 @@ export const SAMPLE_FILES = {
   demoTopics: 'demo/topics.ts',
   demoCounter: 'demo/counter.ts',
   demoMain: 'demo/main.ts',
+  howHost: 'how/host.ts',
+  howSupervision: 'how/supervision.ts',
+  howCatchUp: 'how/catch-up.ts',
+  howPubSub: 'how/pubsub.ts',
+  howPlacement: 'how/placement.ts',
+  topics: 'topics.ts',
+  howPersistence: 'how/persistence.ts',
+  howGrants: 'how/grants.ts',
 } as const;
 
 export type SampleName = keyof typeof SAMPLE_FILES;
@@ -25,7 +33,7 @@ export type Samples = Record<SampleName, string>;
 /**
  * The part of a file to show: the lines between `// #region show` and
  * `// #endregion`, or the whole file without a leading JSX pragma. Trailing
- * blank lines go; indentation is kept.
+ * blank lines go; the common indentation goes, the rest is kept.
  */
 export function shown(source: string): string {
   const lines = source.replace(/\r\n/g, '\n').split('\n');
@@ -40,7 +48,11 @@ export function shown(source: string): string {
   }
   while (body.length > 0 && (body.at(-1) ?? '').trim() === '') body.pop();
   while (body.length > 0 && (body[0] ?? '').trim() === '') body.shift();
-  return body.join('\n');
+  // A region inside a function shows at the left margin.
+  const indent = Math.min(
+    ...body.filter((l) => l.trim() !== '').map((l) => l.length - l.trimStart().length),
+  );
+  return body.map((l) => l.slice(Number.isFinite(indent) ? indent : 0)).join('\n');
 }
 
 /** Every sample, read from `dir` (apps/samples/src). */
@@ -59,5 +71,13 @@ export function loadSamples(dir: string): Samples {
     demoTopics: read('demoTopics'),
     demoCounter: read('demoCounter'),
     demoMain: read('demoMain'),
+    howHost: read('howHost'),
+    howSupervision: read('howSupervision'),
+    howCatchUp: read('howCatchUp'),
+    howPubSub: read('howPubSub'),
+    howPlacement: read('howPlacement'),
+    topics: read('topics'),
+    howPersistence: read('howPersistence'),
+    howGrants: read('howGrants'),
   };
 }

@@ -16,7 +16,7 @@
 // `on…=` handler, a `data:` URL left in a page) fails the build, so a re-render
 // that brings a new one is caught here, not in a visitor's console.
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /** The diagrams in reading order (the library's docs/diagrams/README.md). */
@@ -33,8 +33,10 @@ export type DiagramName = (typeof DIAGRAM_ORDER)[number];
 
 export interface Diagram {
   name: DiagramName;
-  /** The diagram's own title, from its JSON. */
+  /** The diagram's own title, from its JSON's `meta`. */
   title: string;
+  /** Width over height of the drawing (its SVG's viewBox), when the page has one. */
+  ratio?: number;
 }
 
 export const DIAGRAMS_PATH = 'how-it-works/diagrams/';
@@ -42,16 +44,36 @@ export const DIAGRAMS_PATH = 'how-it-works/diagrams/';
 const hash = (s: string | Uint8Array): string =>
   createHash('sha256').update(s).digest('hex').slice(0, 10);
 
-/** Titles from each diagram's JSON, in reading order. */
+/** `o.title` if it's a string. */
+const titleOf = (o: unknown): string | undefined =>
+  typeof o === 'object' && o !== null && 'title' in o && typeof o.title === 'string'
+    ? o.title
+    : undefined;
+
+/** Titles from each diagram's JSON and proportions from its page, in reading order. */
 export function readDiagrams(dir: string): Diagram[] {
   return DIAGRAM_ORDER.map((name) => {
     const json: unknown = JSON.parse(readFileSync(join(dir, `${name}.json`), 'utf8'));
-    const title =
-      typeof json === 'object' && json !== null && 'title' in json && typeof json.title === 'string'
-        ? json.title
-        : name;
-    return { name, title };
+    // Archify keeps the title in `meta` (older candidates had it at the top).
+    const meta =
+      typeof json === 'object' && json !== null && 'meta' in json ? json.meta : undefined;
+    const title = titleOf(meta) ?? titleOf(json) ?? name;
+    const page = join(dir, `${name}.html`);
+    const ratio = existsSync(page) ? viewBoxRatio(readFileSync(page, 'utf8')) : undefined;
+    return ratio === undefined ? { name, title } : { name, title, ratio };
   });
+}
+
+/** Width over height of the drawing: the viewBox of the first SVG in the diagram's container. */
+export function viewBoxRatio(html: string): number | undefined {
+  const at = html.indexOf('class="diagram-container');
+  if (at < 0) return undefined;
+  const box = /<svg\b[^>]*\bviewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"/.exec(
+    html.slice(at),
+  );
+  const w = Number(box?.[1]);
+  const h = Number(box?.[2]);
+  return w > 0 && h > 0 ? w / h : undefined;
 }
 
 // A start tag, with quoted attribute values that may hold `>`.

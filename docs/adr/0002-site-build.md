@@ -227,6 +227,19 @@ The Examples section is gone: the nav and the introduction link to `/examples/`.
 - **The caption above the recording** is three sentences.
 - **Install stays last,** so a reader reaches it only after the rest of the page.
 
+### Amended: "how it works" as a walkthrough (2026-11-18)
+
+The maintainer's review: `/how-it-works/` was seven diagrams with a paragraph each, and explained little on its own. This changes the pages table's `/how-it-works/` row and decision 6's "the page" points; the diagrams themselves, their pin and their policy rewrite are unchanged.
+
+- **The page is a walkthrough** of the runtime, one section per part: the host and its isolates; workers and pools; topics, records and the bus; rendering from a worker; the supervisor; restarts and catch-up; persistence and bus crashes; grants and safety; then the hosting policy (the Pages gap, as before) and where to go next.
+- **One step at a time.** A row of step tabs (short names: Overview, Host, Pools, Bus, Rendering, Supervisor, Restarts, Persistence, Safety) sits under the introduction and stays below the header while scrolling. Each tab is a link to the step's `#id`, so links, the back button and reloads keep the step; Previous and Next close each step. Without JS every step shows in order and the tabs are a list of contents. The hosting policy and where to go next stay below the steps, always shown.
+- **The diagrams sit in the step they explain, at the page's full width** and nearly a screen tall (`min(85svh, 60rem)`), not in the prose column. The runtime topology is the overview's; rendering from a worker has none. All seven are still copied and shown; the pin moves to the end of the page.
+- **On the page, a diagram is the drawing alone** (`?embed=1`: none of the viewer's controls, title or cards), its frame sized to the drawing's proportions (its SVG's `viewBox`, read at build time) so all of it shows, at most `min(85svh, 60rem)` tall. **"Open full size" opens the viewer's presentation stage** (`?present=1`), with every control: theme, style, motion, export, route, lens, zoom.
+- **Each diagram is described in words** under it: what its regions or columns are, then its arrows in order, from the diagram's JSON at the pin (the parts the library's drift test checks). A reader who can't make out the drawing still gets all of it.
+- **Short code samples,** type-checked in `apps/samples` (`src/how/` for the new ones, reusing the features page's where they fit), highlighted like every other code block.
+- **The numbers are the library's defaults at the pin,** each cited in `copy.ts`: heartbeats, restart limits and backoff, credit and the commit interval, the frame budget.
+- **Safety reuses the features page's three facts,** so the two pages can't say different things.
+
 ## Consequences
 
 **Good**

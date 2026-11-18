@@ -15,12 +15,18 @@ describe('shown', () => {
     );
   });
 
+  it('moves a region inside a function to the left margin, keeping its nesting', () => {
+    const src =
+      'f(() => {\n    // #region show\n    a();\n\n    if (b) {\n      c();\n    }\n    // #endregion\n});\n';
+    expect(shown(src)).toBe('a();\n\nif (b) {\n  c();\n}');
+  });
+
   it('refuses a region that never ends', () => {
     expect(() => shown('// #region show\nconst a = 1;\n')).toThrow(/#endregion/);
   });
 });
 
-it('reads every sample the features page shows', () => {
+it('reads every sample the pages show', () => {
   const samples = loadSamples(fileURLToPath(new URL('../../samples/src', import.meta.url)));
   expect(samples.contracts).toContain("topic('note.v1'");
   expect(samples.react).toContain("from '@isoloop/react'");
