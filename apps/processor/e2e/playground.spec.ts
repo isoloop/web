@@ -142,7 +142,7 @@ test('a task working after await that reports its busy time is moved', async ({
 // Jobs whose work the busy time can't see (promise continuations), and no
 // busy-time report: the pool is short of CPU, but neither its lag nor its
 // measured load says so. Only the backlog the page reports does (M3i).
-test('a task whose backlog keeps growing is moved within about 15 s', async ({
+test('a task whose backlog keeps growing is moved within about 25 s', async ({
   page,
   browserName,
 }) => {
@@ -163,8 +163,9 @@ test('a task whose backlog keeps growing is moved within about 15 s', async ({
     },
     [a, b] as const,
   );
+  // Two rising 10 s windows (M3j decision 16), after the jobs start to pile up.
   await expect(page.locator('.log li[data-kind="backlog"]').first()).toBeVisible({
-    timeout: 25_000,
+    timeout: 35_000,
   });
   await expect(page.locator('.log li[data-kind="backlog"]').first()).toContainText(
     /balancer-1 → balancer-/,
