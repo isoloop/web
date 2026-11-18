@@ -23,6 +23,7 @@ export const SAMPLE_FILES = {
   howPubSub: 'how/pubsub.ts',
   howPlacement: 'how/placement.ts',
   topics: 'topics.ts',
+  howPersistence: 'how/persistence.ts',
 } as const;
 
 export type SampleName = keyof typeof SAMPLE_FILES;
@@ -75,5 +76,6 @@ export function loadSamples(dir: string): Samples {
     howPubSub: read('howPubSub'),
     howPlacement: read('howPlacement'),
     topics: read('topics'),
+    howPersistence: read('howPersistence'),
   };
 }

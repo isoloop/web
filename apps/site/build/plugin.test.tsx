@@ -55,6 +55,7 @@ const data: SiteData = {
     howPubSub: 'hp',
     howPlacement: 'hpl',
     topics: 'tp',
+    howPersistence: 'hps',
   },
 };
 

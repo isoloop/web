@@ -434,7 +434,7 @@ export const featuresPage = {
 export const howItWorks = {
   title: 'How Isoloop works',
   description:
-    'A walkthrough of the Isoloop runtime: the host and its isolates, workers and pools, the message bus, rendering from a worker, the supervisor, restarts and catch-up, a bus crash, and grants.',
+    'A walkthrough of the Isoloop runtime: the host and its isolates, workers and pools, the message bus, rendering from a worker, the supervisor, restarts and catch-up, persistence and bus crashes, and grants.',
   heading: 'How Isoloop works',
   intro: [
     'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
@@ -461,7 +461,7 @@ export const howItWorks = {
       render: 'Rendering',
       supervisor: 'Supervisor',
       restart: 'Restarts',
-      busCrash: 'Bus crash',
+      busCrash: 'Persistence',
       safety: 'Safety',
     },
     previous: 'Previous',
@@ -662,7 +662,7 @@ export const howItWorks = {
       heading: 'Topics, records and the bus',
       text: [
         "A topic is declared once, in a contracts module that the host, the bus and every isolate import; its default export, `contracts(…)`, is the list the host passes to `createKernel`. A topic has a name (with its major version, by convention, as in `count.v1`), a schema (from any Standard Schema library; zod here) and a retention: `{ kind: 'last-n', n }` keeps the last n records, `{ kind: 'time', ms }` the records younger than `ms`, and `{ kind: 'compacted' }` the latest record per key.",
-        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Bus crash tab). A topic with a `reply` schema also takes requests: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
+        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence tab). A topic with a `reply` schema also takes requests: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
       ],
       flow: [
         'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path.',
@@ -725,13 +725,28 @@ export const howItWorks = {
       costLink: 'The pools guide, with the plant’s figures',
       pool: 'On its own worker, a crash restarts that isolate alone. In a pool, what restarts depends on who failed. An error the runtime can pin on one member restarts that member alone: `start()` throwing, an error the member reports with `ctx.reportError`, or a render error the React or Preact adapter catches (the adapters report it that way). A block, or a plain throw from an event handler, a timer or a scheduler the members share, is the worker’s error: the worker goes down, and every member restarts in a new one.',
     },
+    // Sources: ADR 0007 (durability, group commit, reattach, dedup, safe mode),
+    // KernelEvents `bus:*` and IsolateManifest `bus.onReset` (packages/host/src/kernel.ts),
+    // SubscribeOptions `onReset`, the broker's `quota_exceeded`.
     busCrash: {
-      heading: 'When the bus crashes',
+      heading: 'Persistence and bus crashes',
       text: [
-        'The bus is supervised like an isolate, with the same heartbeat and restart limit. When it crashes, a new bus worker starts and every running isolate gets a new channel to it. The isolates keep running. What they publish meanwhile waits in each isolate, up to 1,000 unanswered calls, and goes out once the new bus is there.',
-        "What comes back depends on the topic’s durability. A `persistent` topic writes its records to the origin private file system (OPFS) in small batches, and a publish resolves once its batch is written. After a bus restart, its subscriptions resume after their last commit, with no gap, and re-sent publishes aren’t stored twice. A `memory` topic, the default, starts empty: its subscribers get a reset, and `useTopic` empties and refills. An isolate that can’t handle a reset can ask to be restarted instead, with `bus: { onReset: 'restart' }`.",
-        'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them, persistent topics run in memory and the kernel emits `bus:durability-degraded`. After 3 bus restarts within 60 s, the kernel emits `bus:failed`: isolates keep running, and every publish rejects with `bus_unavailable`.',
+        "A topic with `durability: 'persistent'` writes its records to the origin private file system (OPFS), batched every 5 ms or 256 records, so a persistent publish resolves a few milliseconds later than a memory one. After a page reload the new bus loads them from disk, and each subscription starts where its `from` says: `committed` reads on after its last commit, `earliest` from what the topic retains. A `memory` topic, the default, starts empty after a reload.",
+        'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability-degraded`. When the origin’s storage is full, publishes reject with `quota_exceeded`; the kernel reports usage with `bus:quota`.',
       ],
+      crash: {
+        heading: 'When the bus crashes',
+        text: [
+          'The bus is supervised like an isolate, with the same heartbeat and restart limit. When it crashes, a new bus worker starts and every running isolate gets a new channel to it. The isolates keep running. What they publish meanwhile waits in each isolate, up to 1,000 unanswered calls, and goes out once the new bus is there.',
+          "Persistent topics come back from disk: their subscriptions resume after their last commit, whatever their `from`, with no gap, and re-sent publishes aren’t stored twice. Memory topics are gone: their subscribers get a reset. `useTopic` empties and refills, a plain `ctx.bus.subscribe` gets its `onReset` callback, and an isolate that can’t handle a reset can ask to be restarted instead, with `bus: { onReset: 'restart' }` in its manifest.",
+          'If the bus crashes twice while loading, a persisted record is the likely cause: it sets the newest segment of each persistent topic aside (renamed, not deleted), starts from the one before, and the kernel emits `bus:recovered` with what it set aside. After 3 bus restarts within 60 s, the kernel emits `bus:failed`: isolates keep running, and every publish rejects with `bus_unavailable`. A contracts module that fails to load fails the bus with a code, and every isolate with it, with no retry.',
+        ],
+      },
+      code: {
+        label: 'A persistent topic and a subscriber',
+        topics: 'topics.ts',
+        isolate: 'alarms.ts',
+      },
     },
     safety: {
       heading: 'Grants and safety',

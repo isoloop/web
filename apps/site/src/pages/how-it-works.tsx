@@ -27,7 +27,7 @@ interface Step {
 const paras = (text: readonly string[]): VNode[] => text.map((t) => <p key={t}>{rich(t)}</p>);
 
 /** The step's id in the URL. */
-const anchor = (id: StepId): string => (id === 'busCrash' ? 'bus-crash' : id);
+const anchor = (id: StepId): string => (id === 'busCrash' ? 'persistence' : id);
 
 /** A pinned diagram, framed full width, with how to read it in words. */
 function DiagramBlock({ d }: { d: Diagram }): VNode {
@@ -210,7 +210,16 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
       body: (
         <>
           {paras(s.busCrash.text)}
-          <Code>{samples.durable}</Code>
+          <CodeTabs
+            id="persistence"
+            label={s.busCrash.code.label}
+            tabs={[
+              { key: 'topics', label: s.busCrash.code.topics, code: samples.durable },
+              { key: 'alarms', label: s.busCrash.code.isolate, code: samples.howPersistence },
+            ]}
+          />
+          <h3>{s.busCrash.crash.heading}</h3>
+          {paras(s.busCrash.crash.text)}
         </>
       ),
       diagrams: ['bus-crash-reattach'],
