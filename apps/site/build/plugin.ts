@@ -17,6 +17,7 @@ import { render } from 'ui/render';
 import { uiAssets } from 'ui/vite';
 import type { Plugin, ViteDevServer } from 'vite';
 import { buildDiagramFiles, DIAGRAMS_PATH, type EmittedFile } from './diagrams.ts';
+import { imagesOf } from './examples.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
 import { PAGE_MARK } from '../src/pages/intro.tsx';
 
@@ -121,7 +122,7 @@ export function site(opts: SiteOptions): Plugin {
         } else if (path === PREVIEW && existsSync(previewFile())) {
           file = { source: readFileSync(previewFile()), type: 'image/png' };
         } else {
-          const shot = opts.data.examples.find((e) => e.image?.src === path)?.image;
+          const shot = opts.data.examples.flatMap((e) => imagesOf(e)).find((i) => i.src === path);
           if (shot) file = { source: readFileSync(shot.file), type: 'image/webp' };
         }
         if (!file) {
@@ -154,13 +155,8 @@ export function site(opts: SiteOptions): Plugin {
       for (const [path, source] of Object.entries(MARKS)) {
         this.emitFile({ type: 'asset', fileName: path.slice(1), source: readFileSync(source) });
       }
-      for (const e of opts.data.examples) {
-        if (!e.image) continue;
-        this.emitFile({
-          type: 'asset',
-          fileName: e.image.src.slice(1),
-          source: readFileSync(e.image.file),
-        });
+      for (const i of opts.data.examples.flatMap((e) => imagesOf(e))) {
+        this.emitFile({ type: 'asset', fileName: i.src.slice(1), source: readFileSync(i.file) });
       }
       for (const f of diagramFiles(opts.diagramsDir)) {
         this.emitFile({ type: 'asset', fileName: DIAGRAMS_PATH + f.fileName, source: f.source });

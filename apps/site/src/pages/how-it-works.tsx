@@ -6,6 +6,7 @@ import { featuresPage, howItWorks as h } from '../copy.ts';
 import { Code, CodeTabs } from './code.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
+import { StepTabs, type Part } from './steps.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
@@ -13,7 +14,6 @@ const PLANT_MATCHED =
   'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/matched-v2';
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
 
-type Part = 'host' | 'bus' | 'isolate' | 'pool';
 type StepId = keyof typeof h.nav.names;
 
 interface Step {
@@ -262,49 +262,26 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
         ))}
       </PageIntro>
 
-      {/* Without JS every step shows, one after another, and the nav is a list of contents (src/demos/how-it-works.ts). */}
-      <div class="hiw" data-steps>
-        <nav class="hiw-nav" aria-label={h.nav.label}>
-          <ol>
-            {steps.map((st) => (
-              <li key={st.id} data-part={st.part}>
-                <a href={`#${anchor(st.id)}`}>{h.nav.names[st.id]}</a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-        {steps.map((st, i) => {
-          const prev = steps[i - 1];
-          const next = steps[i + 1];
-          const id = anchor(st.id);
-          return (
-            <section class="hiw-step" id={id} aria-labelledby={`${id}-h`} data-step key={st.id}>
-              <h2 id={`${id}-h`} data-part={st.part}>
-                {st.heading}
-              </h2>
+      <StepTabs
+        label={h.nav.label}
+        previous={h.nav.previous}
+        next={h.nav.next}
+        steps={steps.map((st) => ({
+          id: anchor(st.id),
+          name: h.nav.names[st.id],
+          heading: st.heading,
+          part: st.part,
+          children: (
+            <>
               <div class="hiw-text">{st.body}</div>
               {st.diagrams.map((name) => {
                 const d = byName.get(name);
                 return d ? <DiagramBlock d={d} key={name} /> : null;
               })}
-              <p class="hiw-pager">
-                {prev ? (
-                  <a href={`#${anchor(prev.id)}`} rel="prev">
-                    ← {h.nav.previous}: {h.nav.names[prev.id]}
-                  </a>
-                ) : (
-                  <span />
-                )}
-                {next ? (
-                  <a href={`#${anchor(next.id)}`} rel="next">
-                    {h.nav.next}: {h.nav.names[next.id]} →
-                  </a>
-                ) : null}
-              </p>
-            </section>
-          );
-        })}
-      </div>
+            </>
+          ),
+        }))}
+      />
 
       <section class="ui-gutter" aria-labelledby="policy">
         <h2 id="policy">{h.policy.heading}</h2>

@@ -164,106 +164,12 @@ export const home = {
   },
   costs: {
     heading: 'What it costs, and where it helps',
-    // Source: apps/dashboards/plant/comparison/final/responsiveness/summary.md,
-    // Chromium 5 kHz, at plant-v0.1.0 (@isoloop/*@0.0.0-next.b8ffdcf). Δ is the
-    // median of the per-round gaps, so it isn't always B − A of the medians.
-    caption:
-      'The plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured at plant-v0.1.0, November 2026. Each native build is measured against the Isoloop placement shaped like it.',
-    pairs: [
-      { a: 'Native', b: 'Isoloop one', label: 'Native against Isoloop one (one pool)' },
-      {
-        a: 'Native + workers',
-        b: 'Isoloop matched',
-        label: 'Native + workers against Isoloop matched (the default)',
-      },
-    ],
+    // The table, its caption and notes are plant's `desktop` block
+    // (apps/dashboards/plant/example.json), shared with /examples/.
     delta: 'Δ',
-    groups: <DeltaGroup[]>[
-      {
-        heading: 'Responsiveness',
-        rows: [
-          {
-            label: 'Main thread busy',
-            cells: [
-              ['84%', '23%', ['−60 pts', 'better']],
-              ['79%', '27%', ['−53 pts', 'better']],
-            ],
-          },
-          {
-            label: 'Typing, median',
-            cells: [
-              ['82 ms', '21 ms', ['−55 ms', 'better']],
-              ['62 ms', '41 ms', ['−28 ms', 'better']],
-            ],
-          },
-        ],
-      },
-      {
-        heading: 'Faults and start-up',
-        rows: [
-          {
-            label: 'Data lost on the other machines during a 3 s block',
-            cells: [
-              ['3.0 s', '2.6 s', ['−0.5 s', 'better']],
-              ['0 s', '0 s', ['0', 'same']],
-            ],
-          },
-          {
-            label: 'Back to normal after the block',
-            cells: [
-              ['3.2 s', '3.5 s', ['+0.3 s', 'worse']],
-              ['3.2 s', '2.9 s', ['−0.2 s', 'better']],
-            ],
-          },
-          {
-            label: 'All 72 widgets with data',
-            cells: [
-              ['1.2 s', '2.4 s', ['+1.2 s', 'worse']],
-              ['2.3 s', '1.5 s', ['−0.7 s', 'better']],
-            ],
-          },
-          {
-            label: 'First data',
-            cells: [
-              ['0.29 s', '0.47 s', ['+0.19 s', 'worse']],
-              ['0.35 s', '0.68 s', ['+0.29 s', 'worse']],
-            ],
-          },
-        ],
-      },
-      {
-        heading: 'Cost',
-        rows: [
-          {
-            label: 'CPU, all threads',
-            cells: [
-              ['95%', '107%', ['+11 pts', 'worse']],
-              ['97%', '116%', ['+19 pts', 'worse']],
-            ],
-          },
-          {
-            label: 'Memory after GC, at 16 s',
-            cells: [
-              ['164 MB', '203 MB', ['+40 MB', 'worse']],
-              ['222 MB', '275 MB', ['+51 MB', 'worse']],
-            ],
-          },
-          {
-            label: 'Workers',
-            cells: [
-              ['0', '1 + bus'],
-              ['9', '10 + bus'],
-            ],
-          },
-        ],
-      },
-    ],
     verdicts: { better: 'better', worse: 'worse', same: 'no change' } as Record<Verdict, string>,
-    notes: [
-      'Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.',
-      'The native builds keep their data in a small store written for this app, with no message bus. They don’t contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features.',
-    ],
-    more: 'Every recorded run, with the method',
+    findings: 'Findings',
+    more: 'The full results, with the method',
   },
   limits: {
     heading: 'What Isoloop can’t hide',
@@ -421,7 +327,7 @@ export const featuresPage = {
     ] as [string, string][],
   },
   cost: {
-    more: 'The full results, per device and build',
+    more: 'Every recorded run, per device and build',
   },
 };
 
@@ -784,15 +690,21 @@ export const howItWorks = {
 };
 
 export const examplesPage = {
-  // Shown where an example has no measured result yet (its example.json `note`).
   title: 'Examples',
   description:
-    'Isoloop examples: basic, the processor, and the plant and markets dashboards. Each one runs live, with its measured results.',
+    'Isoloop examples: Basic, the plant and markets dashboards, and the processor. Each one runs live, with what it shows, what to try, and its measured results.',
   heading: 'Examples',
   intro:
-    'Each example runs live in your browser on the published @isoloop packages. The dashboards come as a native build and an Isoloop build of the same code, so you can compare them side by side.',
-  measuredAt: 'measured at',
+    'Each example runs live in your browser on the published @isoloop packages. The dashboards come as native builds and Isoloop builds of the same code, so you can compare them side by side.',
+  nav: { label: 'Examples', previous: 'Previous', next: 'Next' },
   links: { live: 'Open live', source: 'Source', results: 'Results', architecture: 'Architecture' },
+  shows: 'What it shows',
+  try: 'What to try',
+  measurements: 'Measurements',
+  findings: 'Findings',
+  inProgress: 'Work in progress',
+  more: 'The full results, with the method',
+  shot: 'a screenshot',
   support: 'They need Safari 16.4 or later, or a recent Chrome, Edge or Firefox.',
 };
 

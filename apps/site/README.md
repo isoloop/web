@@ -53,9 +53,19 @@ Anything else inline fails the build, so a re-render that brings something new i
 
 ## The hub
 
-Each app has an `example.json` next to its `package.json`: `title`, `summary`, `order`, an optional `result` (`line` and the `tag` it was measured at), `links` (`live`, `source`, and optionally `results` and `architecture`) and an optional `screenshot`. The schema is in `build/examples.ts`; unknown fields fail, so a typo can't slip through.
+`/examples/` shows one example per tab (the step tabs `/how-it-works/` also uses: `src/pages/steps.tsx`, `src/demos/steps.ts`). Each app has an `example.json` next to its `package.json`; the schema is in `build/examples.ts`, and unknown fields fail, so a typo can't slip through:
 
-Screenshots: after building and assembling the site (above), `pnpm --filter site screenshots` writes each app's `screenshot.webp` (960×600) at a fixed state. Run it when an app's look changes, check the images, and commit them. It isn't in CI: the dashboards' live data makes every run's images differ.
+- `title`, `tab` (its tab's short name), `summary` (what it is), `order`.
+- `shows`: feature ids from `content/features/`, shown as the landing page's features strip. An id that isn't a feature fails the build.
+- `try`: what to do in it, and what to watch.
+- `measurements`, one of:
+  - `measured`: blocks, each with an `id`, a `heading`, `findings`, a `caption` (device, browser, rounds, date), the `tag` the figures ship with, the run's `results` link, an optional `firefox` line and `notes`, and a table as `pairs` and `groups` (rows of A, B and Δ with its verdict, copied from the run's summary as written). A block of findings alone, for runs recorded by hand in one round, has no table. Plant's `desktop` block is also the landing and features pages' costs.
+  - `in-progress`: a `note` and the `previous` run's link, while a new run is underway.
+  - `none`: a `note`, and optionally `see`, a link to where the figures are.
+- `links`: `live`, `source`, and optionally `results` and `architecture`.
+- `screenshot`: `{ light, dark? }`, WebPs next to `example.json`. With both, the page shows the one for its theme (`data-theme`), switching live; an app that looks the same in both themes (the dashboards) has only `light`.
+
+Screenshots: after building and assembling the site (above), `pnpm --filter site screenshots` writes each app's screenshots at 1280×800 and 2× density, at a fixed state: `screenshot-light.webp` and `screenshot-dark.webp` for apps that follow the theme (Basic, Processor; without the site header, and the processor after adding tasks), and one `screenshot.webp` for the dashboards. It serves the site on port 4798, or `SCREENSHOTS_PORT`, and stops if that port is taken. Run it when an app's look changes, check the images, and commit them. It isn't in CI: the dashboards' live data makes every run's images differ.
 
 ## Accessibility
 
