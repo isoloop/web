@@ -72,6 +72,20 @@ docker run --rm --init --cpuset-cpus=2,4,6,8 --shm-size=2g \
 - The results land in `apps/dashboards/plant/comparison/matched/results/`, owned by root, because the container runs as root.
 - `run.json` there records the arguments and the CPUs the run was allowed.
 
+## The inspection feed's cost
+
+M4b task 6 ([ADR 0020](https://github.com/isoloop/isoloop/blob/main/docs/adr/0020-inspection-feed.md)): what an open devtools panel or dev MCP costs the page. The configuration `isoloop:matched+inspect` is `matched` with `?inspect=1`, which keeps a reader on `kernel.inspect()` for the whole run ([`src/isoloop/inspect.ts`](../src/isoloop/inspect.ts)), so a pair against plain `isoloop:matched` gives the feed's cost. Every Isoloop run also records the ring buffer's size as JSON (`ringJsonKb`, with the feed's message counts under `inspect`), since the kernel keeps it whether anyone reads it.
+
+`PLANT_COI=1` makes the preview server cross-origin isolated (COOP/COEP) and runs the Chromium project in full Chromium instead of the headless shell, so the feed also measures memory per isolate. Both sides of the pair then run isolated, so it measures the feed, not the headers.
+
+```bash
+PLANT_COI=1 pnpm --filter ./apps/dashboards/plant compare:pairs \
+  --pair isoloop:matched=isoloop:matched+inspect --rates 5 --rounds 3 --hold 0 \
+  --engines chromium --out comparison/inspect/results
+```
+
+CI runs it in the *Comparison (plant)* workflow's `inspect` job (Chromium isolated, Firefox without the headers), report-only.
+
 ## The interactive page (`interactive.ts`)
 
 M3e decision 22: on plant's interactive page (`/interactive/native/` against `/interactive/isoloop/`, at 5 kHz), whether work in the drawer reaches the dashboard, and whether the dashboard's load reaches the drawer. [`e2e/interactive-compare.spec.ts`](../e2e/interactive-compare.spec.ts) runs one page per run:

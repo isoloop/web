@@ -40,7 +40,12 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       browserCheck(build === 'isoloop' ? 'isoloop' : build),
-      ...(kind === 'isoloop' ? [isoloop()] : []),
+      // `PLANT_COI=1` makes the preview and dev servers cross-origin isolated
+      // (COOP/COEP), so `?inspect=1` also measures memory per isolate (M4b
+      // task 6). Off by default; the deployed pages never get these headers.
+      ...(kind === 'isoloop'
+        ? [isoloop({ crossOriginIsolated: process.env['PLANT_COI'] === '1' })]
+        : []),
       // The thin bar back to the site, fixed dark (ADR 0003, decision 7).
       ui({ bar: true }),
     ],

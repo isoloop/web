@@ -50,6 +50,7 @@ export const PLANT: PairsApp = {
     { key: 'recoveryMs', label: 'Recovery after a 3 s block', unit: ' ms' },
     { key: 'dataGapT3S', label: 'Data gap, T3', unit: ' s', digits: 1 },
     { key: 'dataGapOthersS', label: 'Data gap, other machines', unit: ' s', digits: 1 },
+    { key: 'ringJsonKb', label: 'Ring buffer, as JSON (Isoloop only)', unit: ' KB', digits: 1 },
   ],
 };
 

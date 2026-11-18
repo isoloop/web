@@ -201,7 +201,11 @@ for (const rate of RATES) {
         const cdp = chromium ? await context.newCDPSession(page) : null;
         await cdp?.send('Performance.enable', { timeDomain: 'timeTicks' });
         const isoloop = build === 'isoloop';
-        const url = `/${build}/?rate=${rate}&seed=7${placement ? `&placement=${placement}` : ''}`;
+        // `isoloop:matched+inspect` is the same placement with a reader on the
+        // inspection feed for the whole run (M4b task 6, `?inspect=1`).
+        const [where, ...flags] = (placement ?? '').split('+');
+        const inspect = flags.includes('inspect');
+        const url = `/${build}/?rate=${rate}&seed=7${where ? `&placement=${where}` : ''}${inspect ? '&inspect=1' : ''}`;
         let stage = 'load';
         let stoppedWhy: string | null = null;
         const t0 = Date.now();
@@ -266,6 +270,8 @@ for (const rate of RATES) {
           const memAtMs = Date.now() - t0;
           const mem = chromium ? await memory(browser) : { pss: null, pssGc: null };
           const categories = await page.evaluate(() => window.categories());
+          // The feed's counts and the ring buffer, at the end of the window.
+          const inspectStats = await page.evaluate(() => window.inspectStats?.() ?? null);
           const seconds = cdp
             ? (m1['Timestamp'] ?? 0) - (m0['Timestamp'] ?? 0) || WINDOW_MS / 1000
             : WINDOW_MS / 1000;
@@ -329,6 +335,9 @@ for (const rate of RATES) {
             dataGapT3S: dataGaps['T3'] ?? null,
             dataGapOthersS: others.length > 0 ? Math.max(...others) : null,
             categories,
+            crossOriginIsolated: await page.evaluate(() => crossOriginIsolated),
+            inspect: inspectStats,
+            ringJsonKb: inspectStats ? r1(inspectStats.ringJsonBytes / 1024) : null,
             bundle: await metric(page, 'bundle'),
           });
         } catch (e) {
