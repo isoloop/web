@@ -1,5 +1,21 @@
 # markets
 
+## 0.7.0
+
+### Minor Changes
+
+- d0c7a19: Tools for agents (M4a): `markets.quote.v1`, a read-only quote for one symbol answered by the aggregator, and `markets.alerts.create.v1`, which adds an alert rule through the alerts isolate, once per request id. In development the page pairs with `isoloop mcp` when `VITE_ISOLOOP_MCP_TOKEN` is set, so a coding agent can call them and read the page's isolates and events. Production builds don't contain the dev MCP.
+
+### Patch Changes
+
+- On the interactive pages, an automatic widget that crashes past the kernel's restart limit is labelled "stopped: crashed too often" in its header. The balancer leaves it where it is and doesn't move or restart it.
+- On `@isoloop/*@0.1.0-next.2`, with three balancer fixes from M3j:
+  
+  - A never-measured isolate's first way out of the quarantine, where it starts, no longer counts toward its move budget.
+  - A quiet pool of several isolates packs back into another, one isolate a minute.
+  - A backlog has to rise over two 10 s windows in a row before anything moves.
+- On `@isoloop/*@0.1.0-next.3`. A consumer-group member that crashes partway through a batched delivery keeps the records it settled, so they aren't sent to the next member again (ADR 0016, point 17). Before, a corrupt file that crashed its processor after the files before it in the batch were settled came back until the kernel gave up on every processor of its kind.
+
 ## 0.6.1
 
 ### Patch Changes
