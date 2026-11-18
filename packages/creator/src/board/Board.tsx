@@ -68,6 +68,7 @@ function useMoving(body: RefObject<HTMLDivElement | null>, move: AutoMove | unde
 function autoWhere(p: AutoPlacement | undefined): string {
   if (!p) return 'Automatic';
   if (p.state === 'kept-apart') return `${p.label} · kept apart: repeated blocking`;
+  if (p.state === 'failed') return `${p.label} · stopped: crashed too often`;
   if (p.atCap) return `${p.label} · over budget, at worker cap`;
   return p.label;
 }

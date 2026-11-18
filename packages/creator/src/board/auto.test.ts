@@ -135,6 +135,7 @@ describe('autoPlacer', () => {
       { id: 'widget-w1', pool: 'balancer-1', state: 'placed' },
       { id: 'preview-d1', pool: 'x', state: 'placed' },
       { id: 'widget-w2', pool: 'balancer-quarantine-1', state: 'kept-apart', atCap: true },
+      { id: 'widget-w3', pool: 'balancer-2', state: 'failed' },
     ]);
     expect([...placer.placements().values()]).toEqual([
       { id: 'w1', pool: 'balancer-1', label: 'Auto 1', state: 'placed' },
@@ -145,6 +146,7 @@ describe('autoPlacer', () => {
         state: 'kept-apart',
         atCap: true,
       },
+      { id: 'w3', pool: 'balancer-2', label: 'Auto 2', state: 'failed' },
     ]);
     const release = placer.hold('w1');
     expect([...b.held]).toEqual(['widget-w1']);

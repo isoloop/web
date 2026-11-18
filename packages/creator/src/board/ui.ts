@@ -31,7 +31,8 @@ export type AutoPlacement = {
   readonly pool: string;
   /** "Auto 2", "Quarantine". */
   readonly label: string;
-  readonly state: 'placed' | 'quarantined' | 'kept-apart' | 'moving';
+  /** `failed`: the kernel gave up restarting it (ADR 0017, M3j); no move revives it. */
+  readonly state: 'placed' | 'quarantined' | 'kept-apart' | 'moving' | 'failed';
   /** Over budget, with nowhere to go: the worker cap is reached. */
   readonly atCap?: boolean;
 };

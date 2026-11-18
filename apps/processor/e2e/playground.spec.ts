@@ -275,10 +275,13 @@ test('an offender leaves the quarantine within 2 minutes', async ({ page, browse
   const a = await add(page, 10);
   await add(page, 10);
   for (let n = 1; n <= 3; n++) {
+    // oxlint-disable-next-line no-await-in-loop -- each crash follows the last restart
     await crash(page, a, n);
+    // oxlint-disable-next-line no-await-in-loop -- each crash follows the last restart
     await expect(columnOf(page, a)).toHaveAttribute('data-kind', 'quarantine', {
       timeout: 15_000,
     });
+    // oxlint-disable-next-line no-await-in-loop -- each crash follows the last restart
     await expect(card(page, a)).toHaveAttribute('data-state', 'running', { timeout: 15_000 });
   }
   await expect(columnOf(page, a)).toHaveAttribute('data-kind', 'pool', { timeout: 150_000 });
@@ -302,17 +305,17 @@ test('a task the kernel gives up on stays failed, and no move brings it back', a
   await expect(card(page, a)).toHaveAttribute('data-state', 'running', { timeout: 15_000 });
   // Held, its next crashes don't add offences or move it: the kernel's count
   // alone reaches the limit.
-  await page.evaluate((x) => {
-    Object.assign(window, { release: window.balancer.hold(x) });
-  }, a);
+  const release = await page.evaluateHandle((x) => window.balancer.hold(x), a);
   for (let n = 2; n <= 4; n++) {
+    // oxlint-disable-next-line no-await-in-loop -- each crash follows the last restart
     await crash(page, a, n);
+    // oxlint-disable-next-line no-await-in-loop -- each crash follows the last restart
     await expect(card(page, a)).toHaveAttribute('data-state', 'running', { timeout: 15_000 });
   }
   await crash(page, a, 5);
   await expect(card(page, a)).toHaveAttribute('data-state', 'failed', { timeout: 10_000 });
   await expect(page.locator('.log li[data-kind="failed"]').first()).toContainText(a);
-  await page.evaluate(() => (Reflect.get(window, 'release') as () => void)());
+  await release.evaluate((f) => f());
   // One offence: 30 s of quiet would let a live member out of the quarantine.
   await page.waitForTimeout(45_000);
   await expect(card(page, a)).toHaveAttribute('data-state', 'failed');
