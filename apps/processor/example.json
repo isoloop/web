@@ -1,14 +1,42 @@
 {
   "title": "Processor",
-  "summary": "Background work as headless isolates, placed by the balancer: a playground where you set each task's CPU and watch it move between worker pools, and a simulated file processor whose processors share their work through consumer groups.",
+  "tab": "Processor",
+  "summary": "Background work as headless isolates, placed by the balancer. The playground lets you add tasks, turn each one's CPU dial and watch them move between worker pools. The file processor runs a stream of files through processors that share their work through consumer groups, with poison, heavy and corrupt files mixed in.",
+  "shows": [
+    {
+      "text": "Automatic placement: the balancer moves busy tasks and packs quiet ones",
+      "href": "/features/#balancer"
+    },
+    {
+      "text": "Consumer groups sharing a topic's work",
+      "href": "/how-it-works/#bus"
+    },
+    {
+      "text": "Headless isolates, with no surface",
+      "href": "/how-it-works/#host"
+    },
+    {
+      "text": "Restarts, and the quarantine for a task that keeps blocking",
+      "href": "/how-it-works/#restart"
+    }
+  ],
+  "try": [
+    "In the playground, add a few tasks and turn one's CPU dial past 80%: the balancer moves it to a pool with room.",
+    "Block a task twice within a minute: it goes to the quarantine pool until it has been quiet for 30 s.",
+    "In the file processor, raise the share of poison files: each one blocks its processor's loop for 2 s, and the processor restarts without losing a file."
+  ],
   "order": 40,
-  "result": {
-    "line": "On 4 cores at 2.0 GHz, 50 files a second and at most 2 workers, the balancer moves processors whose queue keeps growing into a second pool. On Chromium that's 3 workers against a worker each's 9, at a p95 latency of 83 ms against 39 ms and one pool's 153 ms. On Firefox it gets through 49.5 files a second against one pool's 43.8 and a worker each's 50.1, but its p95 reaches 15.5 s. With faults it gets through 46.3 and 33.4 files a second against one pool's 26.8 and 19.7, on 4 workers against 9. It never packed processors back together after the faults, and 3 of 23 runs with faults lost files, and in each the kernel had given up on processors (on @isoloop/*@0.0.0-next.800569e). Not measured since: 0.1.0-next.0 fixes a group commit that could cover a redelivered file before it was handled (isoloop#211), the likely but unproven cause of the loss, and 0.1.0-next.1 packs while a backlog holds steady and leaves a processor the kernel gave up on to the app.",
-    "tag": "processor-v0.2.0"
+  "measurements": {
+    "status": "in-progress",
+    "note": "A new comparison is running on the fixed libraries, 0.1.0-next.0's group-commit fix and 0.1.0-next.1's balancer changes. Its figures will replace the previous run's here.",
+    "previous": {
+      "href": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.2.0",
+      "label": "The previous run, before those fixes (processor-v0.2.0)"
+    }
   },
   "links": {
     "live": "/examples/processor/",
     "source": "https://github.com/isoloop/web/tree/main/apps/processor",
-    "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.2.0"
+    "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison"
   }
 }

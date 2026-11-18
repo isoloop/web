@@ -811,14 +811,14 @@
 }
 
 /*
- * /how-it-works/: the step tabs, one step at a time (src/demos/how-it-works.ts),
- * and the diagrams across the page's full width with how to read them. Without
+ * The step tabs (src/pages/steps.tsx, src/demos/steps.ts), on /how-it-works/
+ * and /examples/; then how it works' diagrams across the page's full width with how to read them. Without
  * JS every step shows, and the tabs are a list of contents.
  */
-.hiw {
+.steps {
   margin-top: var(--ui-space-7);
 }
-.hiw-nav {
+.steps-nav {
   position: sticky;
   top: var(--ui-bar-h);
   z-index: 5;
@@ -827,7 +827,7 @@
 /* The rule is drawn inside the list, under the tabs' borders: a tab pulled
    over a border below would overflow the list, which scrolls sideways, and
    give it a vertical scroll too. */
-.hiw-nav ol {
+.steps-nav ol {
   display: flex;
   gap: 0.25rem;
   margin: 0;
@@ -838,7 +838,7 @@
   scrollbar-width: thin;
   box-shadow: inset 0 -1px 0 var(--ui-rule);
 }
-.hiw-nav a {
+.steps-nav a {
   display: block;
   padding: 0.75rem 0.9rem 0.6rem;
   color: var(--ui-text-muted);
@@ -848,30 +848,30 @@
   white-space: nowrap;
   border-bottom: 3px solid transparent;
 }
-.hiw-nav a:hover {
+.steps-nav a:hover {
   color: var(--ui-text);
 }
-.hiw-nav a[aria-current] {
+.steps-nav a[aria-current] {
   color: var(--ui-text);
   border-bottom-color: var(--part, var(--ui-text));
 }
-.hiw-step {
+.steps-step {
   padding-top: var(--ui-space-6);
   /* Below the sticky step tabs, too, when a link lands on a step. */
   scroll-margin-top: 3.25rem;
 }
-.hiw-step[hidden] {
+.steps-step[hidden] {
   display: none;
 }
-.hiw-step + .hiw-step {
+.steps-step + .steps-step {
   margin-top: var(--ui-space-7);
   border-top: 1px solid var(--ui-rule);
 }
-.steps-on .hiw-step + .hiw-step {
+.steps-on .steps-step + .steps-step {
   margin-top: 0;
   border-top: 0;
 }
-.hiw-step > h2 {
+.steps-step > h2 {
   margin: 0 0 1.25rem;
   padding-left: 0.75rem;
   border-left: 4px solid var(--part, var(--ui-text));
@@ -955,7 +955,7 @@
   color: var(--ui-text-muted);
   font-weight: 650;
 }
-.hiw-pager {
+.steps-pager {
   display: flex;
   justify-content: space-between;
   gap: var(--ui-space-4);
@@ -972,5 +972,89 @@
   }
   .hiw-diagram:not(.fit) .ui-frame iframe {
     height: 75svh;
+  }
+}
+
+/*
+ * /examples/: one example per tab (the step tabs above). The screenshot runs
+ * the page's width; with one per theme, the page's data-theme picks it.
+ */
+.ex-text {
+  max-width: 52rem;
+}
+.ex-text > p {
+  max-width: 44rem;
+}
+.ex-shot {
+  display: block;
+  margin: var(--ui-space-5) 0;
+}
+.ex-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ui-rule);
+  border-radius: var(--ui-radius-l);
+}
+:root[data-theme='dark'] .ex-shot-light,
+:root:not([data-theme='dark']) .ex-shot-dark {
+  display: none;
+}
+.ex-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--ui-space-6);
+  margin-top: var(--ui-space-6);
+}
+.ex-cols h3,
+.ex-measurements > h3 {
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ui-rule);
+}
+.ex-cols ul,
+.ex-cols ol {
+  margin: 0;
+  padding-left: 1.3rem;
+}
+.ex-cols li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--ui-rule);
+}
+.ex-cols li:last-child {
+  border-bottom: 0;
+}
+.ex-measurements {
+  margin-top: var(--ui-space-7);
+}
+.ex-block {
+  margin-top: var(--ui-space-5);
+}
+.ex-block > h4 {
+  margin: 0 0 0.5rem;
+}
+.ex-findings {
+  max-width: 52rem;
+  margin: 0 0 var(--ui-space-4);
+  padding-left: 1.3rem;
+}
+.ex-findings li + li {
+  margin-top: 0.4rem;
+}
+.ex-block > p,
+.ex-caption {
+  max-width: 52rem;
+}
+.ex-caption {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+}
+.ex-wip {
+  max-width: 52rem;
+  margin-top: var(--ui-space-4);
+}
+@media (max-width: 760px) {
+  .ex-cols {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

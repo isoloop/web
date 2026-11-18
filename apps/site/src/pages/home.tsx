@@ -3,7 +3,7 @@ import type { VNode } from 'preact';
 import { Table } from 'ui/components';
 import { home, site } from '../copy.ts';
 import { Code, CodeTabs } from './code.tsx';
-import { DeltaTable } from './delta.tsx';
+import { BlockTable, findBlock } from './measurements.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
@@ -11,7 +11,7 @@ import type { Page, SiteData } from './types.ts';
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
 
 /** The landing page, in the order ADR 0002's amendments set. */
-function Home({ features, samples }: SiteData): VNode {
+function Home({ features, samples, examples }: SiteData): VNode {
   return (
     <main class="ui-shell">
       <PageIntro title={home.intro.heading} id="intro">
@@ -102,18 +102,7 @@ function Home({ features, samples }: SiteData): VNode {
       <section class="ui-gutter" id="costs" aria-labelledby="costs-h">
         <h2 id="costs-h">{home.costs.heading}</h2>
         <div class="ui-body">
-          <DeltaTable
-            caption={home.costs.caption}
-            pairs={home.costs.pairs}
-            delta={home.costs.delta}
-            groups={home.costs.groups}
-            verdicts={home.costs.verdicts}
-          />
-          <ul class="ui-notes">
-            {home.costs.notes.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
+          <BlockTable block={findBlock(examples, 'dashboards/plant', 'desktop')} />
           <p>
             <a href={`${PLANT_SOURCE}/comparison`}>{home.costs.more}</a>
           </p>

@@ -1,10 +1,41 @@
 {
   "title": "Basic",
-  "summary": "Four isolates on three event loops: two on their own workers, two sharing a pool. Block or crash any of them and watch what keeps running.",
+  "tab": "Basic",
+  "summary": "Four isolates on three event loops: A and B on workers of their own, C and D sharing a pool. Each has a Block and a Crash button, so you can see what a failure takes down and what keeps running. The landing page runs it live, as the recording.",
+  "shows": [
+    {
+      "text": "Containment: a blocked loop stalls only what shares it",
+      "href": "/features/#containment"
+    },
+    {
+      "text": "Pools: C and D share a worker, so they stall and restart together",
+      "href": "/how-it-works/#placement"
+    },
+    {
+      "text": "Restarts, and a member's own error restarting it alone",
+      "href": "/how-it-works/#restart"
+    },
+    {
+      "text": "The crash-loop guard: three crashes within a minute and the kernel stops",
+      "href": "/how-it-works/#supervisor"
+    }
+  ],
+  "try": [
+    "Block C for 3 s: D stalls with it, since they share a worker, and after 2 s both restart. A and B keep counting.",
+    "Crash D: only D restarts, even in the pool, because it reports the error as its own.",
+    "Crash A three times within a minute: the kernel stops restarting it, and its pane offers Restart A. B, C and D carry on.",
+    "Block the main thread: every surface freezes on screen while the loops behind them keep running."
+  ],
+  "order": 10,
+  "measurements": {
+    "status": "none",
+    "note": "No measurements: Basic is for watching containment and restarts, not for measuring their cost. The dashboards measure that."
+  },
   "links": {
     "live": "/examples/basic/",
     "source": "https://github.com/isoloop/web/tree/main/apps/basic"
   },
-  "order": 10,
-  "screenshot": "screenshot.webp"
+  "screenshot": {
+    "light": "screenshot.webp"
+  }
 }

@@ -2,10 +2,10 @@
 import type { ComponentChildren, VNode } from 'preact';
 import { Table } from 'ui/components';
 import type { Feature as Entry } from '../../build/features.ts';
-import { featuresPage as f, home } from '../copy.ts';
+import { featuresPage as f } from '../copy.ts';
 import { Recording } from './recording.tsx';
 import { Code, CodeTabs } from './code.tsx';
-import { DeltaTable } from './delta.tsx';
+import { BlockTable, findBlock } from './measurements.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
@@ -33,7 +33,7 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
   );
 }
 
-function Features({ samples, features }: SiteData): VNode {
+function Features({ samples, features, examples }: SiteData): VNode {
   const demos: Record<Entry['demo'], VNode> = {
     recording: (
       <>
@@ -258,18 +258,7 @@ function Features({ samples, features }: SiteData): VNode {
     ),
     'cost-table': (
       <>
-        <DeltaTable
-          caption={home.costs.caption}
-          pairs={home.costs.pairs}
-          delta={home.costs.delta}
-          groups={home.costs.groups}
-          verdicts={home.costs.verdicts}
-        />
-        <ul class="ui-notes">
-          {home.costs.notes.map((n) => (
-            <li key={n}>{n}</li>
-          ))}
-        </ul>
+        <BlockTable block={findBlock(examples, 'dashboards/plant', 'desktop')} />
         <p>
           <a href={PLANT_RESULTS}>{f.cost.more}</a>
         </p>

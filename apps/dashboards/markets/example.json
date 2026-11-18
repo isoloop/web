@@ -1,15 +1,259 @@
 {
   "title": "Markets dashboard",
-  "summary": "A backend-less markets dashboard on public exchange feeds: aggregates and alerts in the visitor's tab, built native, native with workers, and on Isoloop in three placements, with React and with Preact, in Lite, Normal and Heavy sizes. A React and Preact build runs both ways too: native with workers, the Preact part shipped apart and loaded at run time, and on Isoloop with a pool per team. An interactive page adds widgets from a drawer, each one its own isolate, placed automatically by the balancer.",
+  "tab": "Markets",
+  "summary": "A backend-less markets dashboard on public exchange feeds: the aggregates and alerts run in the visitor's tab. It's built native, native with workers and on Isoloop, with React and with Preact, in Lite, Normal and Heavy sizes. A second build combines two teams' parts, the Preact one shipped apart and loaded at run time. An interactive page adds widgets from a drawer, placed by the balancer.",
+  "shows": [
+    {
+      "text": "Placement as a switch: own, matched, one, and a pool per team",
+      "href": "/how-it-works/#placement"
+    },
+    {
+      "text": "Parts from two teams, built apart, in one page",
+      "href": "/features/#frameworks"
+    },
+    {
+      "text": "Automatic placement by the balancer, on the interactive page",
+      "href": "/features/#balancer"
+    },
+    {
+      "text": "The cost, measured against two native builds",
+      "href": "/features/#cost"
+    }
+  ],
+  "try": [
+    "Switch the size to Heavy and compare Native and Isoloop: watch the frame rate and how typing in the search answers.",
+    "Switch the placement between own, matched and one, block a chart, and see how much stalls with it.",
+    "On the two-team build, block the Preact team's alerts panel: in `teams` the React widgets keep updating; in `matched` they stall.",
+    "Open the interactive page, add widgets from the drawer, and watch the balancer place them."
+  ],
   "order": 30,
-  "result": {
-    "line": "At Heavy on 4 cores, both native builds fill the main thread and drop about a third of their frames; with every widget in one pool, Isoloop keeps them and types in 41 ms against 156 ms on Chromium. That placement costs +29 points of CPU and +52 MB against native with workers, and +4 points and +33 MB at Normal, where neither drops frames on Chromium.",
-    "tag": "markets-v0.3.0"
+  "measurements": {
+    "status": "measured",
+    "blocks": [
+      {
+        "id": "main",
+        "heading": "Normal and Heavy",
+        "findings": [
+          "At Heavy both native builds fill the main thread and drop about a third of their frames; Isoloop keeps every frame and types in 41 ms against 156 ms.",
+          "At Normal every build keeps every frame on Chromium, and Isoloop types 4–7 ms slower.",
+          "It costs +4 to +29 points of CPU across threads, +33 to +52 MB after GC and 0.1–0.2 s more to first data."
+        ],
+        "caption": "Native + workers against Isoloop matched (one pool for the widgets), on the desktop machine (4 cores fixed at 2.0 GHz), Chromium, 5 interleaved rounds, measured at markets-v0.3.0, November 2026.",
+        "tag": "markets-v0.3.0",
+        "pairs": [
+          {
+            "a": "Native + workers",
+            "b": "Isoloop matched",
+            "label": "Normal size"
+          },
+          {
+            "a": "Native + workers",
+            "b": "Isoloop matched",
+            "label": "Heavy size"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "Responsiveness",
+            "rows": [
+              {
+                "label": "Late frames, of about 600",
+                "cells": [
+                  ["0", "0", ["0", "same"]],
+                  ["205", "0", ["−205", "better"]]
+                ]
+              },
+              {
+                "label": "Typing",
+                "cells": [
+                  ["35 ms", "41 ms", ["+7 ms", "worse"]],
+                  ["156 ms", "41 ms", ["−115 ms", "better"]]
+                ]
+              },
+              {
+                "label": "Main thread busy",
+                "cells": [
+                  ["86%", "21%", ["−65 pts", "better"]],
+                  ["100%", "23%", ["−77 pts", "better"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Faults and start-up",
+            "rows": [
+              {
+                "label": "Back to normal after a 3 s block",
+                "cells": [
+                  ["3.14 s", "3.09 s", ["−62 ms", "better"]],
+                  ["3.26 s", "3.14 s", ["−112 ms", "better"]]
+                ]
+              },
+              {
+                "label": "First data",
+                "cells": [
+                  ["249 ms", "383 ms", ["+125 ms", "worse"]],
+                  ["362 ms", "527 ms", ["+212 ms", "worse"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Cost",
+            "rows": [
+              {
+                "label": "CPU, all threads",
+                "cells": [
+                  ["103%", "108%", ["+4 pts", "worse"]],
+                  ["114%", "143%", ["+29 pts", "worse"]]
+                ]
+              },
+              {
+                "label": "Memory after GC, at 16 s",
+                "cells": [
+                  ["188 MB", "222 MB", ["+33 MB", "worse"]],
+                  ["246 MB", "301 MB", ["+52 MB", "worse"]]
+                ]
+              },
+              {
+                "label": "Workers",
+                "cells": [
+                  ["6", "7 + bus"],
+                  ["6", "7 + bus"]
+                ]
+              }
+            ]
+          }
+        ],
+        "firefox": "Firefox: at Normal the native builds drop 5–10 frames and Isoloop 0–1, and Isoloop types 16–44 ms faster; first data is 0.4–0.5 s later.",
+        "notes": [
+          "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
+          "Recovery is close to a tie: markets sets no kill timeout, so every build waits out the full block."
+        ],
+        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/markets/comparison/final"
+      },
+      {
+        "id": "teams",
+        "heading": "Two teams",
+        "findings": [
+          "When the Preact team's alerts panel blocks for 3 s, the React team's widgets get none of their updates on native + workers or in `matched`, where they share the panel's pool; with a pool per team (`teams`) they keep 94–98%.",
+          "When the panel crashes, native's error boundary keeps it down until a reload; Isoloop brings it back in 1.3–1.4 s.",
+          "Isoloop loads 61 KB more JavaScript, gzipped, and costs +49 MB after GC and +29 points of CPU at Heavy."
+        ],
+        "caption": "Native + workers with the Preact part loaded at run time, against Isoloop with one pool for the widgets (matched) and with a pool per team (teams), at Heavy, on the desktop machine (4 cores fixed at 2.0 GHz), Chromium, 5 interleaved rounds, measured at markets-v0.5.0, November 2026.",
+        "tag": "markets-v0.5.0",
+        "pairs": [
+          {
+            "a": "Native + workers",
+            "b": "Isoloop matched",
+            "label": "Native + workers against Isoloop matched"
+          },
+          {
+            "a": "Native + workers",
+            "b": "Isoloop teams",
+            "label": "Native + workers against Isoloop teams (a pool per team)"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "Faults",
+            "rows": [
+              {
+                "label": "Blocked panel: the other widgets' updates kept",
+                "cells": [
+                  ["0%", "0%", ["0 pts", "same"]],
+                  ["0%", "94%"]
+                ]
+              },
+              {
+                "label": "Blocked panel: the other widgets' longest silence",
+                "cells": [
+                  ["4.00 s", "3.90 s", ["−83 ms", "better"]],
+                  ["4.00 s", "1.04 s"]
+                ]
+              },
+              {
+                "label": "Crashed panel: back after",
+                "cells": [
+                  ["not back", "1.41 s"],
+                  ["not back", "1.30 s"]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Responsiveness",
+            "rows": [
+              {
+                "label": "Late frames, of about 600",
+                "cells": [
+                  ["207", "0", ["−207", "better"]],
+                  ["207", "0"]
+                ]
+              },
+              {
+                "label": "Typing",
+                "cells": [
+                  ["149 ms", "43 ms", ["−106 ms", "better"]],
+                  ["149 ms", "37 ms"]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Cost",
+            "rows": [
+              {
+                "label": "JS loaded, gzipped",
+                "cells": [
+                  ["151 KB", "212 KB", ["+61 KB", "worse"]],
+                  ["151 KB", "212 KB"]
+                ]
+              },
+              {
+                "label": "CPU, all threads",
+                "cells": [
+                  ["115%", "144%", ["+29 pts", "worse"]],
+                  ["115%", "145%"]
+                ]
+              },
+              {
+                "label": "Memory after GC, at 16 s",
+                "cells": [
+                  ["251 MB", "298 MB", ["+49 MB", "worse"]],
+                  ["251 MB", "304 MB"]
+                ]
+              },
+              {
+                "label": "First data",
+                "cells": [
+                  ["315 ms", "581 ms", ["+267 ms", "worse"]],
+                  ["315 ms", "531 ms"]
+                ]
+              },
+              {
+                "label": "Workers",
+                "cells": [
+                  ["6", "7 + bus"],
+                  ["6", "8 + bus"]
+                ]
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "Δ is measured for the matched pair only; `teams` was measured alongside, so its column shows medians without a Δ."
+        ],
+        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/markets/comparison/federated"
+      }
+    ]
   },
   "links": {
     "live": "/examples/dashboards/markets/",
     "source": "https://github.com/isoloop/web/tree/main/apps/dashboards/markets",
-    "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/markets/comparison/final"
+    "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/markets/comparison"
   },
-  "screenshot": "screenshot.webp"
+  "screenshot": {
+    "light": "screenshot.webp"
+  }
 }

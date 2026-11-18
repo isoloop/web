@@ -240,6 +240,15 @@ The maintainer's review: `/how-it-works/` was seven diagrams with a paragraph ea
 - **The numbers are the library's defaults at the pin,** each cited in `copy.ts`: heartbeats, restart limits and backoff, credit and the commit interval, the frame budget.
 - **Safety reuses the features page's three facts,** so the two pages can't say different things.
 
+### Amended: the examples hub as tabs (2026-11-18)
+
+The maintainer's review of `/examples/`: a narrow column of long result paragraphs, small screenshots, and nothing on what to try. This changes decision 5's hub; the page is otherwise as the earlier amendments set it.
+
+- **One example per tab,** with the same step tabs as "how it works" (`src/pages/steps.tsx`, `src/demos/steps.ts`, shared): `#basic`, `#plant`, `#markets`, `#processor`. No overview tab. Without JS every example shows in order.
+- **Each tab:** its links, what it is, its screenshot at the page's width (one per theme where the app has both, shown by `data-theme`), what it shows (features, each linked to where the site explains it), what to try, and its measurements.
+- **Measurements are data in each app's `example.json`** (`measurements`), so the app's own PR keeps them true: measured blocks (findings first, then an A/B/Δ table, a caption with device, browser, rounds and tag, the other engine in words, a link to the run), a block of findings alone for runs recorded by hand in one round (the phones), a run in progress with the previous one linked (the processor), or none, with why (Basic). Δ is copied as written, since it's the median of per-round gaps. The hub's build validates every field.
+- **One source for the plant's desktop figures:** the landing page's and the features page's costs table read plant's `desktop` block, so the three pages can't disagree.
+
 ## Consequences
 
 **Good**

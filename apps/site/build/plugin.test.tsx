@@ -33,8 +33,63 @@ const data: SiteData = {
     {
       id: 'basic',
       title: 'Basic <b>',
+      tab: 'Basic',
       summary: 'Four isolates.',
+      shows: [{ text: 'Containment', href: '/features/#containment' }],
+      try: ['Block C.'],
+      measurements: { status: 'none', note: 'Not measured.' },
       links: { live: '/examples/basic/', source: 'https://github.com/isoloop/web' },
+    },
+    {
+      id: 'dashboards/plant',
+      title: 'Plant',
+      tab: 'Plant',
+      summary: '72 widgets.',
+      shows: [{ text: 'Cost', href: '/features/#cost' }],
+      try: ['Block a widget.'],
+      measurements: {
+        status: 'measured',
+        blocks: [
+          {
+            id: 'desktop',
+            heading: 'Desktop',
+            findings: ['Main thread freed.'],
+            caption: 'Chromium, 4 cores.',
+            tag: 'plant-v0.1.0',
+            pairs: [
+              { a: 'Native', b: 'Isoloop one', label: 'Native against Isoloop one' },
+              {
+                a: 'Native + workers',
+                b: 'Isoloop matched',
+                label: 'Native + workers against matched',
+              },
+            ],
+            groups: [
+              {
+                heading: 'Cost',
+                rows: [
+                  {
+                    label: 'CPU',
+                    cells: [
+                      ['95%', '107%', ['+11 pts', 'worse']],
+                      ['97%', '116%', ['+19 pts', 'worse']],
+                    ],
+                  },
+                  {
+                    label: 'Workers',
+                    cells: [
+                      ['0', '1 + bus'],
+                      ['9', '10 + bus'],
+                    ],
+                  },
+                ],
+              },
+            ],
+            results: 'https://github.com/isoloop/web',
+          },
+        ],
+      },
+      links: { live: '/examples/dashboards/plant/', source: 'https://github.com/isoloop/web' },
     },
   ],
   samples: {
@@ -139,6 +194,17 @@ describe('the pages', () => {
   it('show the pin on "how it works"', () => {
     const html = renderDocument(named('how-it-works'), data, { csp: CSP });
     expect(html).toContain('<code>fffffff</code>');
+  });
+
+  it('give /examples/ a tab per example: links, what it shows, what to try, measurements', () => {
+    const html = renderDocument(named('examples'), data, { csp: CSP });
+    expect(html).toContain('aria-label="Examples"');
+    expect(html).toContain('href="#plant"');
+    expect(html).toContain('id="plant"');
+    expect(html).toContain('Block a widget.');
+    expect(html).toContain('Main thread freed.');
+    expect(html).toContain('Not measured.');
+    expect(html.match(/<table class="ui-table ui-delta-table">/g)).toHaveLength(3);
   });
 
   it('walk "how it works" step by step, framing every diagram once', () => {

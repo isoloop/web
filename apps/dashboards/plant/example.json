@@ -1,10 +1,218 @@
 {
   "title": "Plant dashboard",
-  "summary": "Telemetry from a fictional plant: 8 machines, 72 widgets on high-rate sensor data, built native, native with workers, and on Isoloop in several placements, plus an interactive page with a drawer that adds widgets to the dashboard.",
+  "tab": "Plant",
+  "summary": "Telemetry from a fictional plant: 8 machines and 72 widgets on vibration sampled at 1, 2 or 5 kHz, with spectra, percentiles, correlations and persistent alarms. It's built native, native with workers, and on Isoloop in several placements from the same widgets, so each build can be compared with the others. An interactive page adds widgets from a drawer.",
+  "shows": [
+    {
+      "text": "Containment by placement: a blocked widget stalls exactly its pool",
+      "href": "/how-it-works/#placement"
+    },
+    {
+      "text": "Restart and catch-up from retained topics",
+      "href": "/how-it-works/#restart"
+    },
+    {
+      "text": "Durable history: alarms and events kept across a reload",
+      "href": "/how-it-works/#persistence"
+    },
+    {
+      "text": "The cost, measured against two native builds",
+      "href": "/features/#cost"
+    }
+  ],
+  "try": [
+    "Press a widget's block button: on the native builds the whole page stalls; on Isoloop only its pool does, and after 2 s the pool restarts and catches up.",
+    "Switch between Native and Isoloop in the header, and between placements, and block the same widget again.",
+    "Reload the page: the alarms and events are still there, every acknowledged record up to 10,000.",
+    "Open the interactive page and add widgets from the drawer: each one is an isolate."
+  ],
   "order": 20,
-  "result": {
-    "line": "Blocking one widget for 3 s stalls the whole native page and loses 3.8 s of data; in Isoloop's default placement the widgets' pool restarts and no data is lost. On a desktop that placement costs +11 to +19 points of CPU and +41 to +51 MB against native with workers.",
-    "tag": "plant-v0.1.0"
+  "measurements": {
+    "status": "measured",
+    "blocks": [
+      {
+        "id": "desktop",
+        "heading": "Desktop",
+        "findings": [
+          "Isoloop moves the widgets off the main thread: it's 23–27% busy against 79–84% on the native builds, and typing answers 28–55 ms sooner.",
+          "In the default placement, `matched`, a 3 s block loses no data on the other machines, as with native + workers, and the page is back to normal 0.2 s sooner.",
+          "It costs CPU, memory and start-up: +11 to +19 points of CPU across threads, +40 to +51 MB after GC, and first data 0.19–0.29 s later."
+        ],
+        "caption": "The plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured at plant-v0.1.0, November 2026. Each native build is measured against the Isoloop placement shaped like it.",
+        "tag": "plant-v0.1.0",
+        "pairs": [
+          {
+            "a": "Native",
+            "b": "Isoloop one",
+            "label": "Native against Isoloop one (one pool)"
+          },
+          {
+            "a": "Native + workers",
+            "b": "Isoloop matched",
+            "label": "Native + workers against Isoloop matched (the default)"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "Responsiveness",
+            "rows": [
+              {
+                "label": "Main thread busy",
+                "cells": [
+                  ["84%", "23%", ["−60 pts", "better"]],
+                  ["79%", "27%", ["−53 pts", "better"]]
+                ]
+              },
+              {
+                "label": "Typing, median",
+                "cells": [
+                  ["82 ms", "21 ms", ["−55 ms", "better"]],
+                  ["62 ms", "41 ms", ["−28 ms", "better"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Faults and start-up",
+            "rows": [
+              {
+                "label": "Data lost on the other machines during a 3 s block",
+                "cells": [
+                  ["3.0 s", "2.6 s", ["−0.5 s", "better"]],
+                  ["0 s", "0 s", ["0", "same"]]
+                ]
+              },
+              {
+                "label": "Back to normal after the block",
+                "cells": [
+                  ["3.2 s", "3.5 s", ["+0.3 s", "worse"]],
+                  ["3.2 s", "2.9 s", ["−0.2 s", "better"]]
+                ]
+              },
+              {
+                "label": "All 72 widgets with data",
+                "cells": [
+                  ["1.2 s", "2.4 s", ["+1.2 s", "worse"]],
+                  ["2.3 s", "1.5 s", ["−0.7 s", "better"]]
+                ]
+              },
+              {
+                "label": "First data",
+                "cells": [
+                  ["0.29 s", "0.47 s", ["+0.19 s", "worse"]],
+                  ["0.35 s", "0.68 s", ["+0.29 s", "worse"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Cost",
+            "rows": [
+              {
+                "label": "CPU, all threads",
+                "cells": [
+                  ["95%", "107%", ["+11 pts", "worse"]],
+                  ["97%", "116%", ["+19 pts", "worse"]]
+                ]
+              },
+              {
+                "label": "Memory after GC, at 16 s",
+                "cells": [
+                  ["164 MB", "203 MB", ["+40 MB", "worse"]],
+                  ["222 MB", "275 MB", ["+51 MB", "worse"]]
+                ]
+              },
+              {
+                "label": "Workers",
+                "cells": [
+                  ["0", "1 + bus"],
+                  ["9", "10 + bus"]
+                ]
+              }
+            ]
+          }
+        ],
+        "firefox": "Firefox drops 89–126 fewer late frames on Isoloop, where Chromium drops none on either build; its first data is 0.4–0.5 s later.",
+        "notes": [
+          "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
+          "The native builds keep their data in a small store written for this app, with no message bus. They don't contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features."
+        ],
+        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/final"
+      },
+      {
+        "id": "phones",
+        "heading": "Phones",
+        "findings": [
+          "Galaxy Z Fold6, Chrome 157: every build holds 60 frames/s with no long tasks at both rates, so there's no responsiveness difference to report.",
+          "iKKO MindOne (mid-range, 8 cores), Firefox Focus 156: both native builds run short, at 45–56 of a possible 96 frames/s. `matched` draws 68–77 and `one` 80–84, and typing answers in 15–23 ms against 50–64 ms at 5 kHz. Isoloop takes 1.2–2.0 s to first data, against 0.4–0.9 s.",
+          "iPhone X, Safari 16.6: Isoloop doesn't run ahead of native. At 5 kHz native holds 60 frames/s (3 late), native + workers 58.5 (33 late) and `matched` 51.9 (93 late); the more workers a placement has, the further it drops.",
+          "CPU and memory weren't recorded on the phones."
+        ],
+        "caption": "Recorded by hand with each page's Record 10 s panel, one round per build, at plant-v0.1.0-rc.3 (the iPhone at rc.5), November 2026, so these are observations rather than interleaved medians.",
+        "tag": "plant-v0.1.0-rc.5",
+        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/phone"
+      },
+      {
+        "id": "interactive",
+        "heading": "The interactive page",
+        "findings": [
+          "A heavy preview in the drawer fills the native main thread (93% busy, 25 frames over 25 ms); on Isoloop it runs on the preview's own worker, the main thread is 3% busy and no frame is dropped.",
+          "The heavy preview draws 1.1 s sooner on Isoloop, and uses more CPU in total: 127% of a core against 100%.",
+          "The drawer answers slower on Isoloop: typing takes 43 ms against 7 ms on a light draft, because each keystroke goes to the drawer's worker and back."
+        ],
+        "caption": "Native against Isoloop, the plant's interactive page on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured at plant-v0.2.0, November 2026.",
+        "tag": "plant-v0.2.0",
+        "pairs": [
+          {
+            "a": "Native",
+            "b": "Isoloop",
+            "label": "Native against Isoloop"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "Light draft",
+            "rows": [
+              {
+                "label": "Typing, median",
+                "cells": [["7 ms", "43 ms", ["+36 ms", "worse"]]]
+              },
+              {
+                "label": "Clicks, median",
+                "cells": [["12 ms", "47 ms", ["+36 ms", "worse"]]]
+              }
+            ]
+          },
+          {
+            "heading": "Heavy preview",
+            "rows": [
+              {
+                "label": "First draw",
+                "cells": [["5.39 s", "4.33 s", ["−1.06 s", "better"]]]
+              },
+              {
+                "label": "Frames over 25 ms",
+                "cells": [["25", "0", ["−25", "better"]]]
+              },
+              {
+                "label": "Main thread busy",
+                "cells": [["93%", "3%", ["−90 pts", "better"]]]
+              },
+              {
+                "label": "CPU, all threads",
+                "cells": [["100%", "127%", ["+27 pts", "worse"]]]
+              },
+              {
+                "label": "Typing, median",
+                "cells": [["9 ms", "44 ms", ["+35 ms", "worse"]]]
+              }
+            ]
+          }
+        ],
+        "firefox": "Firefox: native drops 138 frames under the heavy preview and runs at 26 fps; Isoloop drops none, and its preview draws 0.7 s sooner.",
+        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/interactive/final"
+      }
+    ]
   },
   "links": {
     "live": "/examples/dashboards/plant/",
@@ -12,5 +220,7 @@
     "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison",
     "architecture": "/examples/dashboards/plant/architecture/"
   },
-  "screenshot": "screenshot.webp"
+  "screenshot": {
+    "light": "screenshot.webp"
+  }
 }
