@@ -708,7 +708,7 @@ export const howItWorks = {
     },
     // Sources: SubscribeOptions `from` and `group` (packages/runtime/src/bus-client.ts),
     // the compositor's `reset` on restart (packages/host/src/compositor.ts), ADR 0015
-    // decision 8; the `one` recovery figures: isoloop/isoloop docs/guide/pools.md,
+    // decision 8; the replay cost: isoloop/isoloop docs/guide/pools.md,
     // "When to pool" (plant matched comparison, Chromium).
     restart: {
       heading: 'Restarts and catch-up',
@@ -721,9 +721,8 @@ export const howItWorks = {
         '`earliest`: state rebuilt from what the topic retains, as the counter does.',
         '`committed`: work done once per record, such as jobs or alerts. It reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus tab.',
       ],
-      cost: 'With `earliest`, every restart replays everything the topic retains, and in a pool every member replays on the pool’s one thread. In the plant dashboard’s `one` placement, all its widgets in one pool, recovery from a 3 s block took 5.5 s after a 10-minute run, against 3.4–3.5 s early in a run (its matched comparison: `@isoloop/*@0.0.0-next.d028bc1`, Chromium, 4 physical cores fixed at 2.0 GHz, medians of 5 rounds). Keep retention to what a restart needs.',
+      cost: 'With `earliest`, every restart replays everything the topic retains, and in a pool every member replays on the pool’s one thread. So the longer a topic’s retention, the longer such a restart takes to catch up, and the pools guide measured it growing over a long run. Keep retention to what a restart needs.',
       costLink: 'The pools guide, with the plant’s figures',
-      results: 'The plant’s matched comparison',
       pool: 'On its own worker, a crash restarts that isolate alone. In a pool, what restarts depends on who failed. An error the runtime can pin on one member restarts that member alone: `start()` throwing, an error the member reports with `ctx.reportError`, or a render error the React or Preact adapter catches (the adapters report it that way). A block, or a plain throw from an event handler, a timer or a scheduler the members share, is the worker’s error: the worker goes down, and every member restarts in a new one.',
     },
     // Sources: ADR 0007 (durability, group commit, reattach, dedup, safe mode),
