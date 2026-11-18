@@ -597,7 +597,7 @@ export const howItWorks = {
         steps: [
           'The kernel terminates the old worker and detaches C’s port from the bus. C’s committed offsets are kept: they belong to C, not to its worker.',
           'After the backoff, the kernel attaches a new port for C, then starts the new worker with it.',
-          "The new C subscribes with `from: 'committed'`, and the bus delivers from the record after its last commit. Commits go out every 100 ms, so up to that much of what C had already handled comes back: handlers should be safe to run twice.",
+          "The new C subscribes with `from: 'committed'`, and the bus delivers from the record after its last commit; up to one commit interval of what C had handled comes back.",
           'C reports ready, sends its first paint and commits again. Every other isolate kept running throughout.',
         ],
       },
@@ -706,12 +706,24 @@ export const howItWorks = {
         '`kernel.stop(id)` sends shutdown: the isolate’s `onShutdown` handlers get 1 s, its last commits go out, then its worker goes.',
       ],
     },
+    // Sources: SubscribeOptions `from` and `group` (packages/runtime/src/bus-client.ts),
+    // the compositor's `reset` on restart (packages/host/src/compositor.ts), ADR 0015
+    // decision 8; the `one` recovery figures: isoloop/isoloop docs/guide/pools.md,
+    // "When to pool" (plant matched comparison, Chromium).
     restart: {
       heading: 'Restarts and catch-up',
       text: [
-        'A restart is a new instance. The isolate’s memory is gone, and it rebuilds its state from the bus. Each subscription starts where its `from` says, as on the first start. With `committed`, it reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus tab. A subscription in a consumer group that has committed resumes after the group’s commit, whatever its `from`.',
-        'On its own worker, a crash restarts that isolate alone. In a pool, it depends on whose the failure is. An error the runtime can pin on one member restarts that member alone: `start()` throwing, an error the member reports with `ctx.reportError`, or a render error the React or Preact adapter catches (the adapters report it that way). A block, or a plain throw from an event handler, a timer or a scheduler the members share, is the worker’s error: the worker goes down, and every member restarts in a new one.',
+        'Keep what must survive a restart in a topic: anything else in the isolate’s memory is lost. A restart is a new instance, and it rebuilds its state from the bus. Meanwhile its surface is blank, and it fills again on the new instance’s first paint.',
+        'Each subscription starts where its `from` says, as on the first start. A subscription in a consumer group that has committed resumes after the group’s commit, whatever its `from`.',
       ],
+      from: [
+        '`latest`, the default: live values where only the newest matters, such as a ticker or a status.',
+        '`earliest`: state rebuilt from what the topic retains, as the counter does.',
+        '`committed`: work done once per record, such as jobs or alerts. It reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus tab.',
+      ],
+      cost: 'With `earliest`, every restart replays everything the topic retains, and in a pool every member replays on the pool’s one thread. In the plant dashboard’s `one` placement, all its widgets in one pool, recovery took 5.5 s after a 10-minute run, against 3.4–3.5 s early in a run. Keep retention to what a restart needs.',
+      costLink: 'The pools guide, with the plant’s figures',
+      pool: 'On its own worker, a crash restarts that isolate alone. In a pool, what restarts depends on who failed. An error the runtime can pin on one member restarts that member alone: `start()` throwing, an error the member reports with `ctx.reportError`, or a render error the React or Preact adapter catches (the adapters report it that way). A block, or a plain throw from an event handler, a timer or a scheduler the members share, is the worker’s error: the worker goes down, and every member restarts in a new one.',
     },
     busCrash: {
       heading: 'When the bus crashes',

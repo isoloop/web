@@ -186,7 +186,19 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
       body: (
         <>
           {paras(s.restart.text)}
+          <ul>
+            {s.restart.from.map((t) => (
+              <li key={t}>{rich(t)}</li>
+            ))}
+          </ul>
           <Code>{samples.howCatchUp}</Code>
+          <p>
+            {rich(s.restart.cost)}{' '}
+            <a href={`${POOLS_GUIDE}#when-to-pool-and-when-not-to-the-plant-dashboards-figures`}>
+              {s.restart.costLink}
+            </a>
+          </p>
+          <p>{rich(s.restart.pool)}</p>
         </>
       ),
       diagrams: ['restart-own-worker', 'restart-pool'],
