@@ -700,6 +700,7 @@ export const examplesPage = {
   shows: 'What it shows',
   try: 'What to try',
   measurements: 'Measurements',
+  findings: 'Findings',
   inProgress: 'Work in progress',
   more: 'The full results, with the method',
   shot: 'a screenshot',

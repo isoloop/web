@@ -37,21 +37,40 @@ export function BlockTable({ block }: { block: Block }): VNode | null {
   );
 }
 
-/** A measured block on /examples/: its findings, then its table (or its caption alone), the other engine, the link. */
-export function MeasuredBlock({ block, more }: { block: Block; more: string }): VNode {
+/**
+ * A measured block on /examples/, as a panel like how it works' "Reading the
+ * diagram": its name and what it was measured on, the findings under a label
+ * with a rule between them, the table (none for a run recorded by hand), and
+ * the other engine and the link in its footer.
+ */
+export function MeasuredBlock({
+  block,
+  findings,
+  more,
+}: {
+  block: Block;
+  findings: string;
+  more: string;
+}): VNode {
   return (
     <div class="ex-block">
-      <h4>{block.heading}</h4>
+      <header class="ex-block-head">
+        <h4>{block.heading}</h4>
+        <p class="ex-caption">{block.caption}</p>
+      </header>
+      <h5 class="ex-label">{findings}</h5>
       <ul class="ex-findings">
         {block.findings.map((f) => (
           <li key={f}>{rich(f)}</li>
         ))}
       </ul>
-      {block.pairs ? <BlockTable block={block} /> : <p class="ex-caption">{block.caption}</p>}
-      {block.firefox ? <p>{rich(block.firefox)}</p> : null}
-      <p>
-        <a href={block.results}>{more}</a>
-      </p>
+      {block.pairs ? <BlockTable block={block} /> : null}
+      <footer class="ex-block-foot">
+        {block.firefox ? <p>{rich(block.firefox)}</p> : null}
+        <p>
+          <a href={block.results}>{more}</a>
+        </p>
+      </footer>
     </div>
   );
 }

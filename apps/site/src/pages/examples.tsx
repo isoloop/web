@@ -70,15 +70,20 @@ function Measurements({ example }: { example: Example }): VNode {
     <section class="ex-measurements" aria-labelledby={`${tabId(example)}-m`}>
       <h3 id={`${tabId(example)}-m`}>{t.measurements}</h3>
       {m.status === 'measured' ? (
-        m.blocks.map((b) => <MeasuredBlock block={b} more={t.more} key={b.id} />)
+        m.blocks.map((b) => (
+          <MeasuredBlock block={b} findings={t.findings} more={t.more} key={b.id} />
+        ))
       ) : m.status === 'in-progress' ? (
-        <div class="ui-callout ex-wip">
-          <p>
-            <b>{t.inProgress}.</b> {rich(m.note)}
-          </p>
-          <p>
-            <a href={m.previous.href}>{m.previous.label}</a>
-          </p>
+        <div class="ex-block ex-wip">
+          <header class="ex-block-head">
+            <h4>{t.inProgress}</h4>
+          </header>
+          <p>{rich(m.note)}</p>
+          <footer class="ex-block-foot">
+            <p>
+              <a href={m.previous.href}>{m.previous.label}</a>
+            </p>
+          </footer>
         </div>
       ) : (
         <p>{rich(m.note)}</p>
