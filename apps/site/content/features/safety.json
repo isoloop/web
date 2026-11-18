@@ -4,10 +4,16 @@
   "part": "host",
   "name": "Safety.",
   "line": "Grants per isolate, a sanitised DOM, no inline scripts.",
-  "text": [],
+  "text": [
+    "Isolates run on your origin, so they share its cookies and storage. Isoloop contains unreliable code (a widget that hangs, throws or leaks), not hostile code: for code you don’t trust at all, use a cross-origin iframe."
+  ],
   "demo": "safety-facts",
   "since": "site-v0.1.0",
   "proof": [
+    {
+      "repo": "isoloop",
+      "path": "README.md"
+    },
     {
       "repo": "isoloop",
       "path": "packages/protocol/src/grants.ts",
