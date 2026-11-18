@@ -2,7 +2,11 @@
   "title": "Processor",
   "tab": "Processor",
   "summary": "Background work with no UI: headless isolates placed by the balancer. In the playground you add tasks, set how much CPU each one uses, and watch the balancer move them between worker pools. The file processor pushes a stream of files through processors that share the work through a consumer group, with poison, heavy and corrupt files mixed in.",
-  "shows": ["balancer", "bus", "restart"],
+  "shows": [
+    "balancer",
+    "bus",
+    "restart"
+  ],
   "try": [
     "In the playground, add a few tasks and turn their dials up until a pool's tasks add up to 80% of a core: the balancer moves the heaviest one to a pool with room.",
     "Watch the move log at the bottom of the page: each entry gives the time, the reason, the move, and how long the task was stopped before it ran again.",
@@ -13,7 +17,7 @@
   "order": 40,
   "measurements": {
     "status": "in-progress",
-    "note": "A new comparison is running on the fixed libraries, 0.1.0-next.0's group-commit fix and 0.1.0-next.1's balancer changes. Its figures will replace the previous run's here.",
+    "note": "A new comparison is running on the libraries with the fixes made since the last run: the group-commit fix (0.1.0-next.0), the balancer's changes (0.1.0-next.1) and the partial-delivery commit fix (0.1.0-next.3). Its figures will replace the previous run's here.",
     "previous": {
       "href": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.2.0",
       "label": "The previous run, before those fixes (processor-v0.2.0)"
