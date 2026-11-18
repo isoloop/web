@@ -197,6 +197,8 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
             <a href={`${POOLS_GUIDE}#when-to-pool-and-when-not-to-the-plant-dashboards-figures`}>
               {s.restart.costLink}
             </a>
+            {' · '}
+            <a href={PLANT_MATCHED}>{s.restart.results}</a>
           </p>
           <p>{rich(s.restart.pool)}</p>
         </>
