@@ -1,25 +1,8 @@
 {
   "title": "Markets dashboard",
   "tab": "Markets",
-  "summary": "A backend-less markets dashboard on public exchange feeds: the aggregates and alerts run in the visitor's tab. It's built native, native with workers and on Isoloop, with React and with Preact, in Lite, Normal and Heavy sizes. A second build combines two teams' parts, the Preact one shipped apart and loaded at run time. An interactive page adds widgets from a drawer, placed by the balancer.",
-  "shows": [
-    {
-      "text": "Placement as a switch: own, matched, one, and a pool per team",
-      "href": "/how-it-works/#placement"
-    },
-    {
-      "text": "Parts from two teams, built apart, in one page",
-      "href": "/features/#frameworks"
-    },
-    {
-      "text": "Automatic placement by the balancer, on the interactive page",
-      "href": "/features/#balancer"
-    },
-    {
-      "text": "The cost, measured against two native builds",
-      "href": "/features/#cost"
-    }
-  ],
+  "summary": "A markets dashboard on public exchange feeds, with no server of its own: trades, prices and alerts are aggregated in your tab. It's built native, native with workers and on Isoloop, in React and in Preact, at three sizes. A second build combines two teams' parts, one shipped separately and loaded at run time, and an interactive page adds widgets that the balancer places.",
+  "shows": ["containment", "placement", "frameworks", "balancer", "cost"],
   "try": [
     "Switch the size to Heavy and compare Native and Isoloop: watch the frame rate and how typing in the search answers.",
     "Switch the placement between own, matched and one, block a chart, and see how much stalls with it.",

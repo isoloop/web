@@ -35,7 +35,7 @@ const data: SiteData = {
       title: 'Basic <b>',
       tab: 'Basic',
       summary: 'Four isolates.',
-      shows: [{ text: 'Containment', href: '/features/#containment' }],
+      shows: ['containment'],
       try: ['Block C.'],
       measurements: { status: 'none', note: 'Not measured.' },
       links: { live: '/examples/basic/', source: 'https://github.com/isoloop/web' },
@@ -45,7 +45,7 @@ const data: SiteData = {
       title: 'Plant',
       tab: 'Plant',
       summary: '72 widgets.',
-      shows: [{ text: 'Cost', href: '/features/#cost' }],
+      shows: ['cost'],
       try: ['Block a widget.'],
       measurements: {
         status: 'measured',
@@ -205,6 +205,15 @@ describe('the pages', () => {
     expect(html).toContain('Main thread freed.');
     expect(html).toContain('Not measured.');
     expect(html.match(/<table class="ui-table ui-delta-table">/g)).toHaveLength(3);
+  });
+
+  it('refuse an example that shows a feature that doesn’t exist', () => {
+    const [first, ...rest] = data.examples;
+    if (!first) throw new Error('no example in the fixture');
+    const bad = { ...data, examples: [{ ...first, shows: ['nope'] }, ...rest] };
+    expect(() => renderDocument(named('examples'), bad, { csp: CSP })).toThrow(
+      /shows "nope", which isn't a feature/,
+    );
   });
 
   it('walk "how it works" step by step, framing every diagram once', () => {

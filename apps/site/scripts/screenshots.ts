@@ -20,15 +20,29 @@ const repo = fileURLToPath(new URL('../../../', import.meta.url));
 const PORT = Number(process.env['SCREENSHOTS_PORT'] ?? 4798);
 const WIDTH = 1280;
 const HEIGHT = 800;
-/** The served size: half resolution, for the hub's cards. */
-const OUT = { width: 960, height: 600 };
+/** Pixel density: 2×, so the full-width image on /examples/ stays sharp on high-density screens. */
+const SCALE = 2;
+const OUT = { width: WIDTH * SCALE, height: HEIGHT * SCALE };
 
 /** Where each example opens, and how long it fills before the shot. */
-const SHOTS: { id: string; path: string; waitMs: number }[] = [
+const SHOTS: {
+  id: string;
+  path: string;
+  waitMs: number;
+  /** A button to press first, so the shot shows the app at work. */
+  press?: string;
+  /** Apps with one look in both themes: one shot, screenshot.webp. */
+  oneTheme?: true;
+}[] = [
   { id: 'basic', path: '/examples/basic/', waitMs: 4_000 },
-  { id: 'dashboards/plant', path: '/examples/dashboards/plant/', waitMs: 10_000 },
-  { id: 'dashboards/markets', path: '/examples/dashboards/markets/', waitMs: 10_000 },
-  { id: 'processor', path: '/examples/processor/', waitMs: 8_000 },
+  { id: 'dashboards/plant', path: '/examples/dashboards/plant/', waitMs: 10_000, oneTheme: true },
+  {
+    id: 'dashboards/markets',
+    path: '/examples/dashboards/markets/',
+    waitMs: 10_000,
+    oneTheme: true,
+  },
+  { id: 'processor', path: '/examples/processor/', waitMs: 8_000, press: 'Add 5 light tasks' },
 ];
 const THEMES = ['light', 'dark'] as const;
 type Theme = (typeof THEMES)[number];
@@ -39,12 +53,17 @@ const server = spawn(
   { stdio: 'inherit' },
 );
 await new Promise((r) => setTimeout(r, 500));
+// Its own server, or nothing: a port another server holds would give blank shots.
+if (server.exitCode !== null) {
+  throw new Error(`the server couldn't start on ${String(PORT)}: set SCREENSHOTS_PORT`);
+}
 
 const browser = await chromium.launch();
 
 async function take(shot: (typeof SHOTS)[number], theme: Theme): Promise<void> {
   const page = await browser.newPage({
     viewport: { width: WIDTH, height: HEIGHT },
+    deviceScaleFactor: SCALE,
     colorScheme: theme,
   });
   await page.addInitScript((t) => {
@@ -55,6 +74,7 @@ async function take(shot: (typeof SHOTS)[number], theme: Theme): Promise<void> {
     }
   }, theme);
   await page.goto(`http://localhost:${PORT}${shot.path}`);
+  if (shot.press) await page.getByRole('button', { name: shot.press }).click();
   await page.waitForTimeout(shot.waitMs);
   const png = await page.screenshot({ type: 'png' });
   await page.close();
@@ -69,19 +89,21 @@ async function take(shot: (typeof SHOTS)[number], theme: Theme): Promise<void> {
       c.width = out.width;
       c.height = out.height;
       c.getContext('2d')?.drawImage(img, 0, 0, out.width, out.height);
-      return c.toDataURL('image/webp', 0.82).split(',')[1] ?? '';
+      return c.toDataURL('image/webp', 0.86).split(',')[1] ?? '';
     },
     { data: png.toString('base64'), out: OUT },
   );
   await blank.close();
-  const file = `${repo}apps/${shot.id}/screenshot-${theme}.webp`;
+  const file = `${repo}apps/${shot.id}/${shot.oneTheme ? 'screenshot' : `screenshot-${theme}`}.webp`;
   writeFileSync(file, Buffer.from(webp, 'base64'));
   console.log(`${file} (${Math.round(readFileSync(file).byteLength / 1024)} KB)`);
 }
 
 try {
   // One app at a time: each fills its own page, and they'd compete for the CPU.
-  const jobs = SHOTS.flatMap((shot) => THEMES.map((theme) => [shot, theme] as const));
+  const jobs = SHOTS.flatMap((shot) =>
+    (shot.oneTheme ? (['dark'] as const) : THEMES).map((theme) => [shot, theme] as const),
+  );
   await jobs.reduce((done, [shot, theme]) => done.then(() => take(shot, theme)), Promise.resolve());
 } finally {
   await browser.close();

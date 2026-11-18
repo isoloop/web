@@ -1,25 +1,8 @@
 {
   "title": "Basic",
   "tab": "Basic",
-  "summary": "Four isolates on three event loops: A and B on workers of their own, C and D sharing a pool. Each has a Block and a Crash button, so you can see what a failure takes down and what keeps running. The landing page runs it live, as the recording.",
-  "shows": [
-    {
-      "text": "Containment: a blocked loop stalls only what shares it",
-      "href": "/features/#containment"
-    },
-    {
-      "text": "Pools: C and D share a worker, so they stall and restart together",
-      "href": "/how-it-works/#placement"
-    },
-    {
-      "text": "Restarts, and a member's own error restarting it alone",
-      "href": "/how-it-works/#restart"
-    },
-    {
-      "text": "The crash-loop guard: three crashes within a minute and the kernel stops",
-      "href": "/how-it-works/#supervisor"
-    }
-  ],
+  "summary": "The smallest example: four isolates on three event loops. A and B each have a worker of their own; C and D share one, a pool. Every isolate has a Block and a Crash button, so you can break any part and watch what keeps running. It's the demo the landing page records.",
+  "shows": ["containment", "placement", "restart"],
   "try": [
     "Block C for 3 s: D stalls with it, since they share a worker, and after 2 s both restart. A and B keep counting.",
     "Crash D: only D restarts, even in the pool, because it reports the error as its own.",
@@ -36,6 +19,7 @@
     "source": "https://github.com/isoloop/web/tree/main/apps/basic"
   },
   "screenshot": {
-    "light": "screenshot.webp"
+    "light": "screenshot-light.webp",
+    "dark": "screenshot-dark.webp"
   }
 }

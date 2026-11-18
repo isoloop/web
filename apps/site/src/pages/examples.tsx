@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
 import type { Example } from '../../build/examples.ts';
+import type { Feature } from '../../build/features.ts';
 import { examplesPage as t } from '../copy.ts';
 import { PageIntro } from './intro.tsx';
 import { MeasuredBlock } from './measurements.tsx';
@@ -86,10 +87,44 @@ function Measurements({ example }: { example: Example }): VNode {
   );
 }
 
+/**
+ * The features an example shows, as the features strip on the landing page:
+ * each feature's name and line, with its part's bar, linked to its section on
+ * /features/. An id that isn't a feature fails the build.
+ */
+function FeatureStrip({
+  ids,
+  features,
+  where,
+}: {
+  ids: string[];
+  features: Feature[];
+  where: string;
+}): VNode {
+  const shown = ids.map((id) => {
+    const f = features.find((x) => x.id === id);
+    if (!f) throw new Error(`apps/${where}/example.json: shows "${id}", which isn't a feature`);
+    return f;
+  });
+  return (
+    <div class="ui-strip">
+      <ul>
+        {shown.map((f) => (
+          <li key={f.id} data-part={f.part}>
+            <a href={`/features/#${f.id}`}>
+              <b>{f.name}</b> {f.line}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** The tab's id in the URL: the app's last folder name (`plant` for dashboards/plant). */
 const tabId = (e: Example): string => e.id.split('/').pop() ?? e.id;
 
-function Examples({ examples }: SiteData): VNode {
+function Examples({ examples, features }: SiteData): VNode {
   return (
     <main class="ui-shell">
       <PageIntro title={t.heading}>
@@ -113,25 +148,17 @@ function Examples({ examples }: SiteData): VNode {
                 <p>{rich(e.summary)}</p>
               </div>
               <Shot example={e} />
-              <div class="ex-cols">
-                <div>
-                  <h3>{t.shows}</h3>
-                  <ul>
-                    {e.shows.map((s) => (
-                      <li key={s.href + s.text}>
-                        <a href={s.href}>{rich(s.text)}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3>{t.try}</h3>
-                  <ol>
-                    {e.try.map((x) => (
-                      <li key={x}>{rich(x)}</li>
-                    ))}
-                  </ol>
-                </div>
+              <div class="ex-shows">
+                <h3>{t.shows}</h3>
+                <FeatureStrip ids={e.shows} features={features} where={e.id} />
+              </div>
+              <div class="ex-try">
+                <h3>{t.try}</h3>
+                <ol>
+                  {e.try.map((x) => (
+                    <li key={x}>{rich(x)}</li>
+                  ))}
+                </ol>
               </div>
               <Measurements example={e} />
             </>

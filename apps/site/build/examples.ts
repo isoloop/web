@@ -84,8 +84,8 @@ export const exampleSchema = z.strictObject({
   tab: text,
   /** What the example is, in a short paragraph. */
   summary: z.string().min(1),
-  /** The features it demonstrates, each linked to where the site explains it. */
-  shows: z.array(z.strictObject({ text, href: rootPath })).min(1),
+  /** The features it demonstrates, by id in apps/site/content/features/, shown as the features strip. */
+  shows: z.array(z.string().regex(/^[a-z][a-z0-9-]*$/, 'a feature id, e.g. containment')).min(1),
   /** Concrete things to do in it, and what to watch. */
   try: z.array(text).min(1),
   /** Where it sits on the hub; lower first. */

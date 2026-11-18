@@ -1,25 +1,8 @@
 {
   "title": "Processor",
   "tab": "Processor",
-  "summary": "Background work as headless isolates, placed by the balancer. The playground lets you add tasks, turn each one's CPU dial and watch them move between worker pools. The file processor runs a stream of files through processors that share their work through consumer groups, with poison, heavy and corrupt files mixed in.",
-  "shows": [
-    {
-      "text": "Automatic placement: the balancer moves busy tasks and packs quiet ones",
-      "href": "/features/#balancer"
-    },
-    {
-      "text": "Consumer groups sharing a topic's work",
-      "href": "/how-it-works/#bus"
-    },
-    {
-      "text": "Headless isolates, with no surface",
-      "href": "/how-it-works/#host"
-    },
-    {
-      "text": "Restarts, and the quarantine for a task that keeps blocking",
-      "href": "/how-it-works/#restart"
-    }
-  ],
+  "summary": "Background work with no UI: headless isolates placed by the balancer. In the playground you add tasks, set how much CPU each one uses, and watch the balancer move them between worker pools. The file processor pushes a stream of files through processors that share the work through a consumer group, with poison, heavy and corrupt files mixed in.",
+  "shows": ["balancer", "bus", "restart"],
   "try": [
     "In the playground, add a few tasks and turn one's CPU dial past 80%: the balancer moves it to a pool with room.",
     "Block a task twice within a minute: it goes to the quarantine pool until it has been quiet for 30 s.",
@@ -38,5 +21,9 @@
     "live": "/examples/processor/",
     "source": "https://github.com/isoloop/web/tree/main/apps/processor",
     "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison"
+  },
+  "screenshot": {
+    "light": "screenshot-light.webp",
+    "dark": "screenshot-dark.webp"
   }
 }

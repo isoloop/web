@@ -1000,28 +1000,25 @@
 :root:not([data-theme='dark']) .ex-shot-dark {
   display: none;
 }
-.ex-cols {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--ui-space-6);
+.ex-shows,
+.ex-try {
   margin-top: var(--ui-space-6);
 }
-.ex-cols h3,
+.ex-shows > h3,
+.ex-try > h3,
 .ex-measurements > h3 {
-  margin: 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--ui-rule);
+  margin: 0 0 0.75rem;
 }
-.ex-cols ul,
-.ex-cols ol {
+.ex-try ol {
+  max-width: 52rem;
   margin: 0;
   padding-left: 1.3rem;
 }
-.ex-cols li {
+.ex-try li {
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--ui-rule);
 }
-.ex-cols li:last-child {
+.ex-try li:last-child {
   border-bottom: 0;
 }
 .ex-measurements {
@@ -1052,9 +1049,4 @@
 .ex-wip {
   max-width: 52rem;
   margin-top: var(--ui-space-4);
-}
-@media (max-width: 760px) {
-  .ex-cols {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }

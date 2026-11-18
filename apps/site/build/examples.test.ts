@@ -19,7 +19,7 @@ const valid = {
   title: 'Basic',
   tab: 'Basic',
   summary: 'Four isolates.',
-  shows: [{ text: 'Containment', href: '/features/#containment' }],
+  shows: ['containment'],
   try: ['Block C.'],
   measurements: { status: 'none', note: 'Not measured.' },
   links: { live: '/examples/basic/', source: 'https://github.com/isoloop/web' },

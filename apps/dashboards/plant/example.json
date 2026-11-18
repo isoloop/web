@@ -1,25 +1,8 @@
 {
   "title": "Plant dashboard",
   "tab": "Plant",
-  "summary": "Telemetry from a fictional plant: 8 machines and 72 widgets on vibration sampled at 1, 2 or 5 kHz, with spectra, percentiles, correlations and persistent alarms. It's built native, native with workers, and on Isoloop in several placements from the same widgets, so each build can be compared with the others. An interactive page adds widgets from a drawer.",
-  "shows": [
-    {
-      "text": "Containment by placement: a blocked widget stalls exactly its pool",
-      "href": "/how-it-works/#placement"
-    },
-    {
-      "text": "Restart and catch-up from retained topics",
-      "href": "/how-it-works/#restart"
-    },
-    {
-      "text": "Durable history: alarms and events kept across a reload",
-      "href": "/how-it-works/#persistence"
-    },
-    {
-      "text": "The cost, measured against two native builds",
-      "href": "/features/#cost"
-    }
-  ],
+  "summary": "A telemetry dashboard for a fictional plant: 8 machines, 72 widgets, and vibration data sampled at up to 5 kHz, with spectra, percentiles, correlations and persistent alarms. The same widgets are built three ways, native, native with workers, and on Isoloop in six placements, so you can switch between them and compare. An interactive page lets you build your own widgets from a drawer.",
+  "shows": ["containment", "placement", "restart", "durable", "cost"],
   "try": [
     "Press a widget's block button: on the native builds the whole page stalls; on Isoloop only its pool does, and after 2 s the pool restarts and catches up.",
     "Switch between Native and Isoloop in the header, and between placements, and block the same widget again.",
@@ -143,12 +126,12 @@
         "id": "phones",
         "heading": "Phones",
         "findings": [
-          "Galaxy Z Fold6, Chrome 157: every build holds 60 frames/s with no long tasks at both rates, so there's no responsiveness difference to report.",
-          "iKKO MindOne (mid-range, 8 cores), Firefox Focus 156: both native builds run short, at 45–56 of a possible 96 frames/s. `matched` draws 68–77 and `one` 80–84, and typing answers in 15–23 ms against 50–64 ms at 5 kHz. Isoloop takes 1.2–2.0 s to first data, against 0.4–0.9 s.",
-          "iPhone X, Safari 16.6: Isoloop doesn't run ahead of native. At 5 kHz native holds 60 frames/s (3 late), native + workers 58.5 (33 late) and `matched` 51.9 (93 late); the more workers a placement has, the further it drops.",
+          "A flagship Android phone, in Chrome: every build holds 60 frames/s with no long tasks at both rates, so there's no responsiveness difference to report.",
+          "A mid-range Android phone (8 cores, a 96 Hz screen), in Firefox: both native builds run short, at 45–56 of a possible 96 frames/s. `matched` draws 68–77 and `one` 80–84, and typing answers in 15–23 ms against 50–64 ms at 5 kHz. Isoloop takes 1.2–2.0 s to first data, against 0.4–0.9 s.",
+          "A 2017 iPhone, in Safari: Isoloop doesn't run ahead of native. At 5 kHz native holds 60 frames/s (3 late), native + workers 58.5 (33 late) and `matched` 51.9 (93 late); the more workers a placement has, the further it drops.",
           "CPU and memory weren't recorded on the phones."
         ],
-        "caption": "Recorded by hand with each page's Record 10 s panel, one round per build, at plant-v0.1.0-rc.3 (the iPhone at rc.5), November 2026, so these are observations rather than interleaved medians.",
+        "caption": "Recorded by hand with each page's Record 10 s panel, one round per build, at plant-v0.1.0-rc.3 and rc.5, November 2026, so these are observations rather than interleaved medians.",
         "tag": "plant-v0.1.0-rc.5",
         "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/phone"
       },
