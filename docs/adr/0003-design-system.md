@@ -203,6 +203,10 @@ The first round of directions changed only colours on one layout, and read as ge
 - **The look:** a sun and a moon inside a pill, and a knob that slides behind the active one.
 - **It's operated** by click, Space and Enter. Its state comes from `theme.js`, as before.
 
+### Amended: inline code (2026-11-18)
+
+Code inside prose was set in the mono font only, and the maintainer couldn't tell it from the words around it on "how it works", where steps name many options. Inline code (`code` not inside `pre`) is now a chip in `base.css`: a 7% tint of the text colour, a hairline in `--ui-rule`, the small radius and a slightly smaller size, kept whole across line breaks (`box-decoration-break: clone`). Code blocks keep their frame. It applies on every page that uses `ui`.
+
 ## Consequences
 
 **Good**

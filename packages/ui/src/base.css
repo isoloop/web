@@ -67,6 +67,17 @@
     font-family: var(--ui-font-mono);
     font-size: 0.92rem;
   }
+  /* Code inside prose: a chip, so it reads apart from the words around it.
+     Code blocks (pre) keep their own frame. */
+  :not(pre) > code {
+    padding: 0.05em 0.35em;
+    border: 1px solid var(--ui-rule);
+    border-radius: 0.3rem;
+    background: color-mix(in oklch, var(--ui-text) 7%, transparent);
+    font-size: 0.86em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
 
   [data-embed] body {
     background: transparent;
