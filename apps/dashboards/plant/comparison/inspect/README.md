@@ -20,7 +20,9 @@
 
 Each cell is the median of the 5 per-round gaps, B − A, with the lowest and highest round in brackets. Firefox reports no CPU or memory figures (Chromium on Linux only).
 
-- **Spreads that straddle zero:** main-thread CPU, memory, late frames and Chromium's recovery, on every engine; all-thread CPU on headless Chromium; typing on every engine.
+- **Spreads that straddle zero:** main-thread CPU on isolated Chromium (−2 to +1 pp), memory after GC, late frames on Firefox, Chromium's recovery, all-thread CPU on headless Chromium, and typing on every engine.
+- **No gap at all:** main-thread CPU on headless Chromium (0 to +0 pp) and late frames on Chromium (0 to 0).
+- **Memory, first reading (before GC):** +3 MB (−3 to +7) on isolated Chromium and +4 MB (+2 to +7) on headless Chromium, where every round had the feed side higher; after a forced GC both straddle zero (see the summaries).
 - **Leaning one way:** on isolated Chromium, all-thread CPU's median gap is +1 pp, the top of its spread (−7 to +1): most rounds had B at about +1 pp. Typing there is +8 ms (+31%) at the median, though its spread is −9 to +25 ms.
 - **The other way, not explained:** on Firefox, recovery after the 3 s block was faster with the feed open in all 5 rounds (−297 to −4 ms, median −110 ms).
 
