@@ -22,6 +22,10 @@ export class AlertEngine {
     this.#holding.add(ruleId);
   }
 
+  has(id: string): boolean {
+    return this.#rules.has(id);
+  }
+
   rules(): Rule[] {
     return [...this.#rules.values()];
   }

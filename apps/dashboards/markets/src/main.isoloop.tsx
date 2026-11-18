@@ -49,21 +49,46 @@ kernel.subscribe(
   },
   { from: 'latest' },
 );
+// Both also answer the page's agent tools (`tools: true`, M4a).
 kernel.spawn({
   id: 'aggregator',
   src: aggregator,
-  grants: { publish: ['aggregates.v1'], subscribe: ['trades.v1', 'prices.v1', 'filters.v1'] },
+  config: { tools: true },
+  grants: {
+    publish: ['aggregates.v1'],
+    subscribe: ['trades.v1', 'prices.v1', 'filters.v1', 'markets.quote.v1'],
+  },
   ...placed,
 });
 kernel.spawn({
   id: 'alerts',
   src: alertsIsolate,
+  config: { tools: true },
   grants: {
-    publish: ['alerts.v1'],
-    subscribe: ['alert-rules.v1', 'alerts.v1', 'prices.v1', 'aggregates.v1'],
+    publish: ['alerts.v1', 'alert-rules.v1'],
+    subscribe: [
+      'alert-rules.v1',
+      'alerts.v1',
+      'prices.v1',
+      'aggregates.v1',
+      'markets.alerts.create.v1',
+    ],
   },
   ...placed,
 });
+
+// In development only, the page pairs with `isoloop mcp`, so a coding agent
+// can see the isolates and call the tools above (M4a, ADR 0018 decision 8).
+// @isoloop/vite fails a production build that still contains it.
+if (import.meta.env.DEV) {
+  const token = import.meta.env.VITE_ISOLOOP_MCP_TOKEN;
+  const url = import.meta.env.VITE_ISOLOOP_MCP_URL;
+  if (token) {
+    void import('@isoloop/host/dev-mcp').then(({ connectDevMCP }) => {
+      connectDevMCP(kernel, { token, title: 'markets', ...(url ? { url } : {}) });
+    });
+  }
+}
 
 // The size's shared engines, as headless isolates (M3c decision 6).
 for (const name of specFrom(params).engines) {
