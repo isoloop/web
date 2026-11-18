@@ -9,7 +9,7 @@
 //     --pair isoloop:own=isoloop:balancer --pair isoloop:one=isoloop:balancer \
 //     --pair isoloop:one-off=isoloop:one --mixes normal,faults,faults-calm --rounds 5 \
 //     --hold 0 --warm 20 --window 20 --engines chromium,firefox \
-//     --out comparison/v0.2.0/results
+//     --out comparison/v0.3.0/results
 //
 // `COMPARE_RATE` sets the generator's files per second (default 50).
 import { resolve } from 'node:path';
@@ -39,6 +39,11 @@ export const PROCESSOR: PairsApp = {
     { key: 'moves', label: 'Moves in the window', unit: '' },
     { key: 'workersAfterFaults', label: 'Workers after the faults (faults, then calm)', unit: '' },
     { key: 'workersEnd', label: 'Workers at the end of the window', unit: '' },
+    {
+      key: 'workersFewestCalm',
+      label: 'Fewest workers in the calm (faults, then calm)',
+      unit: '',
+    },
     { key: 'movesTotal', label: 'Moves in the whole run', unit: '' },
     { key: 'backlogMoves', label: 'Moves for a rising backlog', unit: '' },
     { key: 'packs', label: 'Packs back', unit: '' },
@@ -49,6 +54,7 @@ export const PROCESSOR: PairsApp = {
     { key: 'drainMs', label: 'Drain after the generator stops', unit: ' ms' },
     { key: 'lost', label: 'Files without a result 2 min after the generator stops', unit: '' },
     { key: 'failed', label: 'Processors the kernel gave up on', unit: '' },
+    { key: 'givenUpKinds', label: 'Kinds with every processor given up on', unit: '' },
     { key: 'duplicates', label: 'Files done twice', unit: '' },
     { key: 'mainThreadCpuPct', label: 'Main-thread CPU', unit: '%' },
     { key: 'rendererCpuPct', label: 'CPU, all threads', unit: '%' },
