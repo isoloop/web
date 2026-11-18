@@ -29,7 +29,8 @@ const anchor = (id: StepId): string => (id === 'busCrash' ? 'bus-crash' : id);
 
 /** A pinned diagram, framed full width, with how to read it in words. */
 function DiagramBlock({ d }: { d: Diagram }): VNode {
-  const href = `/how-it-works/diagrams/${d.name}.html`;
+  // `?present=1`: the viewer opens in its presentation stage (Escape or F leaves it).
+  const href = `/how-it-works/diagrams/${d.name}.html?present=1`;
   const r = h.reading.diagrams[d.name];
   return (
     <div class="hiw-diagram">

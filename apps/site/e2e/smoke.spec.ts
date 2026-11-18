@@ -338,11 +338,19 @@ test('how it works shows one step at a time, kept in the URL', async ({ page }) 
   await expect(page).toHaveURL(/#bus$/);
   await expect(page.locator('#bus')).toBeVisible();
   await expect(page.locator('#overview')).toBeHidden();
-  await expect(page.locator('#bus iframe[src="/how-it-works/diagrams/bus-publish.html"]')).toHaveCount(1);
-  await page.locator('#bus').getByRole('link', { name: /Next: Rendering/ }).click();
+  await expect(
+    page.locator('#bus iframe[src="/how-it-works/diagrams/bus-publish.html?present=1"]'),
+  ).toHaveCount(1);
+  await page
+    .locator('#bus')
+    .getByRole('link', { name: /Next: Rendering/ })
+    .click();
   await expect(page.locator('#render')).toBeVisible();
   await page.goBack();
   await expect(page.locator('#bus')).toBeVisible();
+  // Every diagram opens in the viewer's presentation stage.
+  const frame = page.locator('#bus iframe').contentFrame();
+  await expect(frame.locator('html')).toHaveAttribute('data-present', 'true');
   await page.goto('/how-it-works/#restart');
   await expect(page.locator('#restart')).toBeVisible();
   await expect(page.locator('#restart iframe')).toHaveCount(2);
