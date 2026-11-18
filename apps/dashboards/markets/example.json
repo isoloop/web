@@ -2,10 +2,17 @@
   "title": "Markets dashboard",
   "tab": "Markets",
   "summary": "A markets dashboard on public exchange feeds, with no server of its own: trades, prices and alerts are aggregated in your tab. It's built native, native with workers and on Isoloop, in React and in Preact, at three sizes. A second build combines two teams' parts, one shipped separately and loaded at run time, and an interactive page adds widgets that the balancer places.",
-  "shows": ["containment", "placement", "frameworks", "balancer", "cost"],
+  "shows": [
+    "containment",
+    "placement",
+    "frameworks",
+    "balancer",
+    "cost"
+  ],
   "try": [
-    "Switch the size to Heavy and compare Native and Isoloop: watch the frame rate and how typing in the search answers.",
-    "Switch the placement between own, matched and one, block a chart, and see how much stalls with it.",
+    "Switch the size to Heavy and compare Native and Isoloop: watch the frame rate, and how fast the Type here box answers.",
+    "The live page starts in `own`: block a chart and only it stalls. In `matched` a block stalls every widget while the data keeps flowing, and in `one` everything stalls until the block ends.",
+    "Crash a widget: on the native builds its error boundary keeps it down until a reload; on Isoloop it restarts on its own.",
     "On the two-team build, block the Preact team's alerts panel: in `teams` the React widgets keep updating; in `matched` they stall.",
     "Open the interactive page, add widgets from the drawer, and watch the balancer place them."
   ],
@@ -21,7 +28,7 @@
           "At Normal every build keeps every frame on Chromium, and Isoloop types 4–7 ms slower.",
           "It costs +4 to +29 points of CPU across threads, +33 to +52 MB after GC and 0.1–0.2 s more to first data."
         ],
-        "caption": "Native + workers against Isoloop matched (one pool for the widgets), on the desktop machine (4 cores fixed at 2.0 GHz), Chromium, 5 interleaved rounds, measured at markets-v0.3.0, November 2026.",
+        "caption": "Native + workers against Isoloop matched (one pool for the widgets: the placement measured, not the live page's default, own), on the desktop machine (4 cores fixed at 2.0 GHz), Chromium, 5 interleaved rounds, measured at markets-v0.3.0, November 2026.",
         "tag": "markets-v0.3.0",
         "pairs": [
           {
@@ -42,22 +49,64 @@
               {
                 "label": "Late frames, of about 600",
                 "cells": [
-                  ["0", "0", ["0", "same"]],
-                  ["205", "0", ["−205", "better"]]
+                  [
+                    "0",
+                    "0",
+                    [
+                      "0",
+                      "same"
+                    ]
+                  ],
+                  [
+                    "205",
+                    "0",
+                    [
+                      "−205",
+                      "better"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Typing",
                 "cells": [
-                  ["35 ms", "41 ms", ["+7 ms", "worse"]],
-                  ["156 ms", "41 ms", ["−115 ms", "better"]]
+                  [
+                    "35 ms",
+                    "41 ms",
+                    [
+                      "+7 ms",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "156 ms",
+                    "41 ms",
+                    [
+                      "−115 ms",
+                      "better"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Main thread busy",
                 "cells": [
-                  ["86%", "21%", ["−65 pts", "better"]],
-                  ["100%", "23%", ["−77 pts", "better"]]
+                  [
+                    "86%",
+                    "21%",
+                    [
+                      "−65 pts",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "100%",
+                    "23%",
+                    [
+                      "−77 pts",
+                      "better"
+                    ]
+                  ]
                 ]
               }
             ]
@@ -68,15 +117,43 @@
               {
                 "label": "Back to normal after a 3 s block",
                 "cells": [
-                  ["3.14 s", "3.09 s", ["−62 ms", "better"]],
-                  ["3.26 s", "3.14 s", ["−112 ms", "better"]]
+                  [
+                    "3.14 s",
+                    "3.09 s",
+                    [
+                      "−62 ms",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "3.26 s",
+                    "3.14 s",
+                    [
+                      "−112 ms",
+                      "better"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "First data",
                 "cells": [
-                  ["249 ms", "383 ms", ["+125 ms", "worse"]],
-                  ["362 ms", "527 ms", ["+212 ms", "worse"]]
+                  [
+                    "249 ms",
+                    "383 ms",
+                    [
+                      "+125 ms",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "362 ms",
+                    "527 ms",
+                    [
+                      "+212 ms",
+                      "worse"
+                    ]
+                  ]
                 ]
               }
             ]
@@ -87,22 +164,56 @@
               {
                 "label": "CPU, all threads",
                 "cells": [
-                  ["103%", "108%", ["+4 pts", "worse"]],
-                  ["114%", "143%", ["+29 pts", "worse"]]
+                  [
+                    "103%",
+                    "108%",
+                    [
+                      "+4 pts",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "114%",
+                    "143%",
+                    [
+                      "+29 pts",
+                      "worse"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Memory after GC, at 16 s",
                 "cells": [
-                  ["188 MB", "222 MB", ["+33 MB", "worse"]],
-                  ["246 MB", "301 MB", ["+52 MB", "worse"]]
+                  [
+                    "188 MB",
+                    "222 MB",
+                    [
+                      "+33 MB",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "246 MB",
+                    "301 MB",
+                    [
+                      "+52 MB",
+                      "worse"
+                    ]
+                  ]
                 ]
               },
               {
                 "label": "Workers",
                 "cells": [
-                  ["6", "7 + bus"],
-                  ["6", "7 + bus"]
+                  [
+                    "6",
+                    "7 + bus"
+                  ],
+                  [
+                    "6",
+                    "7 + bus"
+                  ]
                 ]
               }
             ]
@@ -119,7 +230,7 @@
         "id": "teams",
         "heading": "Two teams",
         "findings": [
-          "When the Preact team's alerts panel blocks for 3 s, the React team's widgets get none of their updates on native + workers or in `matched`, where they share the panel's pool; with a pool per team (`teams`) they keep 94–98%.",
+          "When the Preact team's alerts panel blocks for 3 s, the React team's widgets get none of their updates on native + workers or in `matched`, where they share the panel's pool; with a pool per team (`teams`) they keep 94% of their updates at Heavy (98% at Normal).",
           "When the panel crashes, native's error boundary keeps it down until a reload; Isoloop brings it back in 1.3–1.4 s.",
           "Isoloop loads 61 KB more JavaScript, gzipped, and costs +49 MB after GC and +29 points of CPU at Heavy."
         ],
@@ -144,22 +255,48 @@
               {
                 "label": "Blocked panel: the other widgets' updates kept",
                 "cells": [
-                  ["0%", "0%", ["0 pts", "same"]],
-                  ["0%", "94%"]
+                  [
+                    "0%",
+                    "0%",
+                    [
+                      "0 pts",
+                      "same"
+                    ]
+                  ],
+                  [
+                    "0%",
+                    "94%"
+                  ]
                 ]
               },
               {
                 "label": "Blocked panel: the other widgets' longest silence",
                 "cells": [
-                  ["4.00 s", "3.90 s", ["−83 ms", "better"]],
-                  ["4.00 s", "1.04 s"]
+                  [
+                    "4.00 s",
+                    "3.90 s",
+                    [
+                      "−83 ms",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "4.00 s",
+                    "1.04 s"
+                  ]
                 ]
               },
               {
                 "label": "Crashed panel: back after",
                 "cells": [
-                  ["not back", "1.41 s"],
-                  ["not back", "1.30 s"]
+                  [
+                    "not back",
+                    "1.41 s"
+                  ],
+                  [
+                    "not back",
+                    "1.30 s"
+                  ]
                 ]
               }
             ]
@@ -170,15 +307,35 @@
               {
                 "label": "Late frames, of about 600",
                 "cells": [
-                  ["207", "0", ["−207", "better"]],
-                  ["207", "0"]
+                  [
+                    "207",
+                    "0",
+                    [
+                      "−207",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "207",
+                    "0"
+                  ]
                 ]
               },
               {
                 "label": "Typing",
                 "cells": [
-                  ["149 ms", "43 ms", ["−106 ms", "better"]],
-                  ["149 ms", "37 ms"]
+                  [
+                    "149 ms",
+                    "43 ms",
+                    [
+                      "−106 ms",
+                      "better"
+                    ]
+                  ],
+                  [
+                    "149 ms",
+                    "37 ms"
+                  ]
                 ]
               }
             ]
@@ -189,36 +346,82 @@
               {
                 "label": "JS loaded, gzipped",
                 "cells": [
-                  ["151 KB", "212 KB", ["+61 KB", "worse"]],
-                  ["151 KB", "212 KB"]
+                  [
+                    "151 KB",
+                    "212 KB",
+                    [
+                      "+61 KB",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "151 KB",
+                    "212 KB"
+                  ]
                 ]
               },
               {
                 "label": "CPU, all threads",
                 "cells": [
-                  ["115%", "144%", ["+29 pts", "worse"]],
-                  ["115%", "145%"]
+                  [
+                    "115%",
+                    "144%",
+                    [
+                      "+29 pts",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "115%",
+                    "145%"
+                  ]
                 ]
               },
               {
                 "label": "Memory after GC, at 16 s",
                 "cells": [
-                  ["251 MB", "298 MB", ["+49 MB", "worse"]],
-                  ["251 MB", "304 MB"]
+                  [
+                    "251 MB",
+                    "298 MB",
+                    [
+                      "+49 MB",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "251 MB",
+                    "304 MB"
+                  ]
                 ]
               },
               {
                 "label": "First data",
                 "cells": [
-                  ["315 ms", "581 ms", ["+267 ms", "worse"]],
-                  ["315 ms", "531 ms"]
+                  [
+                    "315 ms",
+                    "581 ms",
+                    [
+                      "+267 ms",
+                      "worse"
+                    ]
+                  ],
+                  [
+                    "315 ms",
+                    "531 ms"
+                  ]
                 ]
               },
               {
                 "label": "Workers",
                 "cells": [
-                  ["6", "7 + bus"],
-                  ["6", "8 + bus"]
+                  [
+                    "6",
+                    "7 + bus"
+                  ],
+                  [
+                    "6",
+                    "8 + bus"
+                  ]
                 ]
               }
             ]
