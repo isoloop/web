@@ -158,16 +158,20 @@
     color: var(--ui-text);
   }
 
+  /* Its rule spans the content column, as the sections' rules do (the page's
+     width less its side padding); the links are centred under it. */
   .ui-footer {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: var(--ui-space-2) var(--ui-space-5);
-    max-width: var(--ui-page);
+    width: min(calc(100% - 2 * var(--ui-space-5)), calc(var(--ui-page) - 2 * var(--ui-space-5)));
     margin: 6rem auto 0;
-    padding: var(--ui-space-5);
+    padding: var(--ui-space-5) 0;
     color: var(--ui-text-muted);
     font-size: var(--ui-text-s);
     font-stretch: 87%;
+    text-align: center;
     border-top: 1px solid var(--ui-rule);
   }
   .ui-footer a {
