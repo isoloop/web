@@ -30,4 +30,4 @@ So at this load the open feed's cost is small next to the round-to-round spread 
 
 **The ring buffer**, which every Isoloop run keeps whether anyone reads it: 200 events, about 18 KB as JSON on Chromium and 15 KB on Firefox, full within the first seconds of the page (plant's start-up alone sends more than 200 events).
 
-The write-up is in review as [isoloop/isoloop#262](https://github.com/isoloop/isoloop/pull/262).
+The write-up is [`docs/investigations/inspect-feed-cost.md`](https://github.com/isoloop/isoloop/blob/main/docs/investigations/inspect-feed-cost.md) in isoloop/isoloop ([#262](https://github.com/isoloop/isoloop/pull/262)).

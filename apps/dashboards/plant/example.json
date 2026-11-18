@@ -194,6 +194,97 @@
         "caption": "Recorded by hand with each page's Record 10 s panel, one round per build, at plant-v0.1.0-rc.3 and rc.5, November 2026, so these are observations rather than interleaved medians.",
         "tag": "plant-v0.1.0-rc.5",
         "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/phone"
+      },
+      {
+        "id": "inspect",
+        "heading": "The inspection feed",
+        "findings": [
+          "What a reader on `kernel.inspect()` costs the page, as an open devtools panel or the dev MCP would be: `matched` at 5 kHz with the feed open against closed.",
+          "The clearest gap is total CPU on cross-origin isolated Chromium, where the feed also measures memory per isolate: about +1 point, the top of its spread (−7 to +1).",
+          "Memory before garbage collection is 4 MB higher with the feed open on headless Chromium (+2 to +7), higher in every round; after a forced collection the gap crosses zero on both runs.",
+          "The other figures have no gap, or spreads that cross zero. Five rounds can't separate a gap of about a point from the round-to-round spread.",
+          "Every run keeps a ring buffer of the last 200 events from the page's start, read or not: about 18 KB as JSON on Chromium and 15 KB on Firefox."
+        ],
+        "caption": "Isoloop `matched` with the inspection feed closed against open, the plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), at 5 kHz, 5 interleaved rounds, November 2026, library at isoloop/isoloop `ce4dc9a` (the same code as `0.1.0-next.3`). Δ is the median of the per-round gaps, with the lowest and highest round in brackets.",
+        "tag": "plant-v0.3.0",
+        "pairs": [
+          {
+            "a": "Closed",
+            "b": "Open",
+            "label": "Chromium, cross-origin isolated (measures memory per isolate)"
+          },
+          {
+            "a": "Closed",
+            "b": "Open",
+            "label": "Chromium, headless, not isolated"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "CPU and memory",
+            "rows": [
+              {
+                "label": "Main thread busy",
+                "cells": [
+                  ["24%", "24%", ["0 pts (−2 to +1)", "same"]],
+                  ["25%", "25%", ["0 pts (0 to 0)", "same"]]
+                ]
+              },
+              {
+                "label": "CPU, all threads",
+                "cells": [
+                  ["111%", "111%", ["+1 pt (−7 to +1)", "worse"]],
+                  ["112%", "112%", ["−3 pts (−13 to +7)", "better"]]
+                ]
+              },
+              {
+                "label": "Memory, before GC",
+                "cells": [
+                  ["398 MB", "401 MB", ["+3 MB (−3 to +7)", "worse"]],
+                  ["344 MB", "349 MB", ["+4 MB (+2 to +7)", "worse"]]
+                ]
+              },
+              {
+                "label": "Memory, after GC",
+                "cells": [
+                  ["327 MB", "326 MB", ["+1 MB (−9 to +4)", "worse"]],
+                  ["274 MB", "273 MB", ["−1 MB (−3 to +10)", "better"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Responsiveness and faults",
+            "rows": [
+              {
+                "label": "Typing, median",
+                "cells": [
+                  ["26 ms", "34 ms", ["+8 ms (−9 to +25)", "worse"]],
+                  ["43 ms", "44 ms", ["+1 ms (−10 to +24)", "worse"]]
+                ]
+              },
+              {
+                "label": "Back to normal after a 3 s block",
+                "cells": [
+                  ["2.91 s", "2.96 s", ["+75 ms (−63 to +130)", "worse"]],
+                  ["2.90 s", "2.92 s", ["+55 ms (−84 to +88)", "worse"]]
+                ]
+              },
+              {
+                "label": "Ring buffer, as JSON",
+                "cells": [
+                  ["18.0 KB", "18.0 KB"],
+                  ["17.7 KB", "17.7 KB"]
+                ]
+              }
+            ]
+          }
+        ],
+        "firefox": "Firefox (no CPU or memory figures there): late frames +1 (−1 to +2) and typing +16 ms (−33 to +33), both crossing zero; recovery after the 3 s block was 110 ms faster with the feed open (−297 to −4), in all 5 rounds, which isn't explained.",
+        "notes": [
+          "The feed is `@experimental` (isoloop/isoloop ADR 0020). Nothing but the ring buffer runs until something reads it."
+        ],
+        "results": "https://github.com/isoloop/isoloop/blob/main/docs/investigations/inspect-feed-cost.md"
       }
     ]
   },
