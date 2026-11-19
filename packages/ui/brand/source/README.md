@@ -12,6 +12,8 @@ they were measured from, kept as a record ([docs/brand.md](../../../../docs/bran
 | `dark-source.webp` | Higgsfield variation 10 (dark mode): the social style |
 | `app-tile-source.webp` | Higgsfield variation 16: the app tile |
 
+Every other candidate, from all rounds, with its prompt, is in [`explorations/`](explorations/README.md).
+
 The variations were generated on 2026-11-14 with Higgsfield, model GPT Image 2.6 (`gpt_image_2_6`, high quality), each with `reference.webp` as the reference image. The prompts:
 
 - **3 (everyday):** "Variation of the reference logo without the outer circular arrow: only the isometric cube with the ribbon loop woven in and out of it, bigger and bolder, indigo to teal gradient, centred on white, no text."
