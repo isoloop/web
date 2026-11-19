@@ -13,7 +13,7 @@ type Row = [string, ...string[]];
 
 export const site = {
   description:
-    'Event-loop isolation for JavaScript apps. An open-source TypeScript library that lets you run the parts of your app in isolated workers, connected by a message bus and kept running by a supervisor. Framework-agnostic, with React and Preact adapters.',
+    'Event-loop isolation for JavaScript apps. An open-source TypeScript library: each part of your app runs on its own worker or in a shared pool, talks over a message bus, and is restarted when it fails, while the rest keeps running.',
 };
 
 // The features themselves (their strip line, heading and section text, with
@@ -97,7 +97,7 @@ export const home = {
   title: 'Isoloop: event-loop isolation for JavaScript apps',
   intro: {
     heading: 'Event-loop isolation for JavaScript apps',
-    text: 'An open-source TypeScript library that lets you run the parts of your app in isolated workers, connected by a message bus and kept running by a supervisor. Framework-agnostic, with React and Preact adapters.',
+    text: 'An open-source TypeScript library. Each part of your app runs on its own worker or in a shared pool, talks only through a message bus that keeps its records, and is restarted by a supervisor when it fails. A block or a crash stays in its part, and the rest of the app keeps running. React, Preact or plain DOM.',
     primary: 'See the features',
     secondary: 'Examples',
   },
