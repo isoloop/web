@@ -1,5 +1,12 @@
 # site
 
+## 0.4.0
+
+### Minor Changes
+
+- 3d8aa6b: `/features/` gains an eleventh feature, **Tools for agents** (experimental): a requestable topic with a `tool` description, listed in `agents.expose`, becomes a tool a coding agent calls through `npx isoloop mcp` in development, or a browser's agent through `@isoloop/webmcp` where the browser has WebMCP (Chromium 158 and Firefox 159, both behind a flag). It has a type-checked sample, links to the Agents guide and to the markets dashboard's two tools, and says what the hints don't do and what Firefox's agent doesn't see. The landing page's strip lists it too, and the install block gains `@isoloop/webmcp@next`. The library pin moves to isoloop/isoloop `c8279f6`, which has the Agents guide.
+- 9551bb6: `/features/` gains a twelfth feature, **Devtools** (experimental): `connectDevtools` from `@isoloop/devtools` adds a panel in the page with the isolates and their controls, the bus, and a live record log, drawn by an isolate of its own that keeps working through a bus restart and lists itself. It says where memory per isolate is measured, that nothing gates the controls in production, and what the feed costs unread, with a type-checked sample, the devtools guide, and a link to the plant dashboard with the panel open. The landing page's strip lists it, the install block gains `@isoloop/devtools@next`, and the plant and markets tabs on `/examples/` list it with a step to try.
+
 ## 0.3.1
 
 ### Patch Changes
