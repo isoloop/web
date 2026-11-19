@@ -1,5 +1,12 @@
 # site
 
+## 0.5.1
+
+### Patch Changes
+
+- 210babe: `/features/` opens with sticky notes in place of the blueprint: one column per tab, one note per feature in its tab's colour, the Experimental pill on the notes that need it. A column's title opens its tab; a note opens its feature.
+- 4abda7f: The landing intro and the meta description say what Isoloop is in the shared message (docs/brand.md, Messaging): each part of your app runs on its own worker or in a shared pool, talks over a message bus, and is restarted when it fails, while the rest keeps running. The link-preview card's line says the same.
+
 ## 0.5.0
 
 ### Minor Changes
