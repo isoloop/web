@@ -33,7 +33,8 @@ export interface BalancerLike {
  * pool's lag stayed high (`sustained`), its members' busy time reached 80 %
  * of a core (`full`), a crash, a search for an unnamed culprit (`bisect`),
  * back out of quarantine (`steady`), a backlog that kept rising (`backlog`),
- * or joining another pool to free a worker (`pack`).
+ * joining another pool to free a worker (`pack`), or a second quarantine
+ * folding into the first so a widget falling behind gets its worker (`room`).
  */
 export type MoveReason =
   | 'spike'
@@ -43,7 +44,8 @@ export type MoveReason =
   | 'bisect'
   | 'steady'
   | 'backlog'
-  | 'pack';
+  | 'pack'
+  | 'room';
 
 /** A move, by widget id, with its pools as the page shows them. */
 export type AutoMove = {
@@ -85,6 +87,7 @@ export function moveText(m: Pick<AutoMove, 'from' | 'to' | 'reason'>): string {
     steady: `back in ${m.to}: steady`,
     backlog: `moved: falling behind in ${m.from}`,
     pack: `packed into ${m.to}: quiet`,
+    room: `moved to ${m.to}: making room for a widget falling behind`,
   };
   return text[m.reason];
 }
