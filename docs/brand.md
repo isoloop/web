@@ -6,6 +6,30 @@ The logo, the wordmark, and where each version goes. Decided 2026-11-14 with the
 
 An isometric cube (*iso*) with a ribbon woven through it, running in and out of it. The cube is an isolate, contained on its own. The ribbon is the loop and the messages passing through. In the expressive version a cycle arrow goes around both: the loop running, and an isolate restarting.
 
+## Messaging
+
+Every text that says what Isoloop is tells the same four things, in this order, in its own words and at the length it has room for. Agreed with the maintainer on 2026-11-19.
+
+1. **Category:** event-loop isolation for JavaScript apps.
+2. **What:** an open-source TypeScript library. Each part of your app, UI or headless, runs on its own worker or in a shared pool.
+3. **How:** parts talk only through a message bus that keeps its records. A supervisor restarts a part that fails, and it catches up from the bus.
+4. **Outcome:** a block or a crash stays in its part, and the rest of the app keeps running.
+
+Where there's room, add the frameworks: React, Preact or plain DOM. Short texts, like the org and repo descriptions, carry points 1 to 3 condensed, and point 4 when it fits. Long texts, like the landing intro and the READMEs, carry all four.
+
+**Words:**
+- **Parts and isolates:** say "parts" in short texts. Long texts may say *isolate*, defined as a part on first use.
+- **Placement:** "on its own worker or in a shared pool". Not "in isolated workers": parts in a pool share one worker and one event loop.
+- **No runtime terms:** no "browser", "web app", "front-end" or "Web Worker" in these texts. Isoloop is meant to run in other JavaScript runtimes later. Guides and limits may name what the code uses today.
+- **Erlang/OTP:** "an Erlang/OTP-style kernel" only in long texts, never in the tagline or a description.
+- **No cost line in showcase texts** (the profile, the descriptions, bios). The cost belongs where things are measured: the site's costs table, the library README's limits, the docs and posts.
+
+**Where it's said:**
+- the GitHub org description and `isoloop/.github` `profile/README.md`
+- the `isoloop/isoloop` repo description and README intro
+- the site: the landing intro (`home.intro.text`) and the meta description (`site.description`) in `apps/site/src/copy.ts`, and the link-preview card (`packages/ui/brand/social/cards.html`)
+- the social repo's `VOICE.md`, which points here
+
 ## Two marks, one identity
 
 The logo is **responsive**: a compact mark for small places, and a fuller one where there's room. Both share the same cube and ribbon. The ring only appears where there's space for it.
