@@ -16,6 +16,8 @@ const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/h
 const BALANCER_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/balancer.md';
 const PROCESSOR = '/examples/processor/';
 const AGENTS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/agents.md';
+const DEVTOOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/devtools.md';
+const PLANT_DEVTOOLS = '/examples/dashboards/plant/isoloop/?devtools=1';
 const MARKETS_TOOLS =
   'https://github.com/isoloop/web/blob/main/apps/dashboards/markets/src/isoloop/contracts.ts';
 
@@ -233,6 +235,17 @@ function Features({ samples, features, examples }: SiteData): VNode {
         </p>
         <p>
           <a href={MARKETS_TOOLS}>{f.agents.example}</a>
+        </p>
+      </>
+    ),
+    'devtools-code': (
+      <>
+        <Code>{samples.devtools}</Code>
+        <p>
+          <a href={DEVTOOLS_GUIDE}>{f.devtools.guide}</a>
+        </p>
+        <p>
+          <a href={PLANT_DEVTOOLS}>{f.devtools.example}</a>
         </p>
       </>
     ),
