@@ -2,15 +2,6 @@
 
 The Isoloop website (`isoloop.dev`), the examples, and the design system, built on the published `@isoloop` packages. What this repo is: [ADR 0001](docs/adr/0001-what-this-repo-is.md). How changes get published and checked: [ADR 0004](docs/adr/0004-publishing-and-governance.md).
 
-## Where things are
-
-- **`apps/site`:** isoloop.dev; feature entries in `apps/site/content/features`, code samples in `apps/samples`.
-- **`apps/basic`, `apps/dashboards/{plant,markets}`, `apps/processor`:** the examples. Each has its `example.json` (the examples page), its `e2e/`, and, where measured, `comparison/` with the results.
-- **`packages/ui`:** the design system. **`packages/compare`:** the dashboards' comparison. **`packages/creator`:** the interactive pages' widget creator.
-- **`docs/adr`**, **`docs/plans`**, **`docs/brand.md`**. The library, its guides and its milestones are in [`isoloop/isoloop`](https://github.com/isoloop/isoloop).
-- **`.claude/skills/publish`:** site copy for a shipped change. **`.claude/agents/steward.md`:** the PR review CI runs.
-- **A running app:** markets pairs with `isoloop mcp` in development, so an agent can read its isolates and call its tools ([its README](apps/dashboards/markets/README.md)).
-
 ## Definition of done
 
 A change is done when all five hold:
