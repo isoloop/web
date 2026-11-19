@@ -310,8 +310,8 @@ test('/features/ shows one tab of features at a time, and a feature link opens i
   );
   await expect(page.locator('#containment')).toBeVisible();
   await expect(page.locator('#balancer')).toBeHidden();
-  // From the blueprint: a feature in another tab opens that tab.
-  await page.locator('.fmap a[href="#balancer"]').click();
+  // From the notes: a feature in another tab opens that tab.
+  await page.locator('.fnotes a[href="#balancer"]').click();
   await expect(page.locator('#balancer')).toBeVisible();
   await expect(page.locator('#containment')).toBeHidden();
   await expect(tabs.getByRole('link', { name: 'Placement' })).toHaveAttribute(

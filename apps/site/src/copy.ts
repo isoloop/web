@@ -208,17 +208,7 @@ export const featuresPage = {
   description:
     'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, tools for agents, devtools, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
-  map: {
-    label: 'The features, on the part of the system each belongs to',
-    boxes: {
-      host: ['Main thread', 'the kernel'],
-      bus: ['Bus', 'its own worker'],
-      isolate: ['Isolate', 'its own worker'],
-      pool: ['Pool', 'one worker, several isolates'],
-      devtools: ['Devtools', 'an isolate of its own'],
-    },
-    costNote: 'CPU, memory, start-up',
-  },
+  notes: { label: 'The features, one note each, by tab' },
   tabs: {
     label: 'Features, by group',
     names: {

@@ -58,45 +58,27 @@ The dashboards' bar is unchanged.
 - **The tab is data:** each feature entry carries `tab`, validated by the schema in `build/features.ts`. The schema's list of tabs sets their order. A tab added there fails the type check until `src/pages/features.tsx` gives it a colour.
 - **The tab anchors differ from every feature id** (`#messaging`, not `#bus`), so a link names either a tab or a feature, never both.
 - **Each panel holds its features' gutter sections** as before, with their headings sticky below the header and the tab row.
-- **The list of all 12 features at the top of the page is gone.** The tabs and the blueprint (decision 3) cover the same ground. The landing page keeps its strip.
+- **The list of all 12 features at the top of the page is gone.** The tabs and the sticky notes (decision 3) cover the same ground. The landing page keeps its strip.
 
-### 3. The page opens with a blueprint
+### 3. The page opens with sticky notes
 
-In place of the lede and the changelog link, `/features/` opens with a blueprint of the system (`src/pages/feature-map.tsx`), drawn on a grid with dashed boxes in the part colours:
+_Amended 2026-11-19: the notes replace the blueprint this decision first chose; the blueprint is kept under the alternatives for later._
 
-- **main thread, the kernel:** safety, tools for agents
-- **bus, its own worker:** the message bus, retention and replay, durable history, joined to the main thread by a dashed wire
-- **isolate, its own worker:** containment, restart and catch-up, your framework
-- **pool, one worker and several isolates:** placement, automatic placement
-- **devtools, an isolate of its own:** devtools
-- **along the bottom,** as a dimension line, "CPU, memory, start-up" leading to "What it costs"
+In place of the lede and the changelog link, `/features/` opens with a board of sticky notes (`src/pages/feature-notes.tsx`):
 
-Every title links to its feature. The layout is CSS grid:
-
-| Screen | Layout | Height |
-| --- | --- | --- |
-| Wide | two rows | about 270 px at 1400 px wide |
-| About 1000 px | two columns | |
-| Phone | one column | |
-
-At 1400 px wide, the title, the blueprint, the tabs and the start of the first feature fit on the first screen.
-
-- **Where a feature sits is data:** each entry carries `blueprint` (`host`, `bus`, `isolate`, `pool`, `devtools` or `cost`), validated by the schema. Each box draws the features that name it, so a new feature can't be left off. A test checks that every feature appears on the blueprint exactly once.
-- **The placements were checked against each entry's proofs** at the library pin:
-  - Safety's DOM registry (`createRegistry`, which sanitises every write) is in `@isoloop/host`, on the main thread. The grants it enforces are declared in `@isoloop/protocol`.
-  - Tools for agents are built by the host's `buildTools`.
-  - Framework adapters are `defineIsolate`, which runs inside the isolate.
-  - Devtools "restarts after a crash, like any isolate" (its test).
-
-  Restart and catch-up sits on the isolate, as its `part` already says. The kernel's supervisor drives it from the main thread, but it's the isolate that restarts and catches up.
-- **The lede goes, principle line included.** "Code that shares data shouldn't share an event loop" isn't moved anywhere else: the maintainer's call is that a slogan narrows the page to a sales pitch, and the blueprint says more. The changelog stays one click away in the footer.
+- **One column per tab,** in the tabs' order, titled with the tab's name in its colour. The title opens that tab.
+- **One note per feature,** tinted in its tab's colour and slightly tilted, with the Experimental pill where it applies. A note opens its feature.
+- **Six columns on wide screens, three at about 1000 px, two on a phone.** At 1400 px the title, the notes, the tabs and the start of the first feature fit on the first screen.
+- **Where a feature's note goes is its `tab` field,** so a new feature can't be left off. A test checks that every feature has exactly one note.
+- **The pill sits on the page's background inside a note.** On the note's tint alone, `--ui-experimental` falls short of AA.
+- **The lede goes, principle line included.** "Code that shares data shouldn't share an event loop" isn't moved anywhere else: the maintainer's call is that a slogan narrows the page to a sales pitch. The changelog stays one click away in the footer.
 
 ### 4. Experimental is a pill, from data
 
 - **A feature entry carries `experimental: true`.** It's set today on `balancer`, `agents` and `devtools`. Their strip lines drop the "Experimental:" prefix. The sentence in their text that says so, and why, stays.
 - **The pill shows wherever a feature's name does:**
   - the landing strip
-  - the blueprint
+  - the sticky notes
   - the section heading on `/features/`
   - "What it shows" on each `/examples/` tab
 
@@ -125,8 +107,7 @@ At 1400 px wide, the title, the blueprint, the tabs and the start of the first f
 ## Consequences
 
 - One script and one look for every long page. A fix to the tabs, like this one's to the scrolling, reaches all three pages.
-- `/features/` opens on a picture of the whole toolchain and its first feature. Each group of features is a tab away, not a long scroll.
-- The blueprint is a second explanation of where things run, next to how it works's diagrams. It must stay true, which is why each entry's place is data and checked by a test, not drawn by hand.
+- `/features/` opens on every feature at a glance, by group, and its first feature. Each group of features is a tab away, not a long scroll.
 - Experimental is now said once, in data, and shown the same way on every page. When a feature becomes stable, its entry drops the field and the pill goes everywhere at once.
 - (Bad) Find-in-page no longer finds a feature in a hidden tab, as on the other two pages. A reader who wants every feature at once has the no-JS view, or the landing strip.
 - (Bad) The 4.60:1 light contrast leaves little room. A later change to `--ui-bg` could break it, though the test would catch that.
@@ -142,10 +123,10 @@ At 1400 px wide, the title, the blueprint, the tabs and the start of the first f
   - But it costs 12 more pages to build and keep up, and a click per feature.
 - **5 tabs, with safety inside "Tools and frameworks"** (prototyped): it mixes tools you add with a property the kernel always enforces. Safety reads as its own subject.
 - **Keeping the list of all 12 features above the tabs** (prototyped): it repeats the tabs and pushed the first feature off the first screen.
-- **Sticky notes in place of the blueprint** (prototyped as `?intro=notes`, not kept in code):
-  - A board of tinted, slightly tilted notes, one column per tab.
-  - The maintainer liked them too, and they may come back.
-  - The blueprint was chosen because it says where each feature runs as well as naming it.
+- **A blueprint of the system** (shipped first in web#188, then replaced by the notes):
+  - The system drawn on a grid with dashed boxes in the part colours, each feature in the part it runs in: the main thread (safety, tools for agents), the bus worker (bus, retention and replay, durable history), an isolate (containment, restart and catch-up, your framework), the pool (placement, automatic placement), devtools' own isolate, and the cost as a dimension line along the bottom.
+  - Each placement was checked against the feature's proofs: safety's DOM registry is the host's `createRegistry`; tools for agents are the host's `buildTools`; framework adapters are `defineIsolate`, inside the isolate.
+  - The maintainer liked it and may bring it back. Its code, and the `blueprint` field that placed each feature, are in web#188 (`9d6989b`).
 - **"Experimental" in prose only:** that was the status quo, and it's easy to miss when skimming names.
 
 ## Not in this ADR

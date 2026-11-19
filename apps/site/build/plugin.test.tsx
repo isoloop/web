@@ -179,9 +179,9 @@ describe('the pages', () => {
     expect(html).toContain('<script type="module" src="/src/demos/features.ts"></script>');
   });
 
-  it('put every feature on the /features/ blueprint and in one tab, the experimental ones with a pill', () => {
+  it('put every feature on one /features/ note and in one tab, the experimental ones with a pill', () => {
     const html = renderDocument(named('features'), data, { csp: CSP });
-    const from = html.indexOf('<figure class="fmap"');
+    const from = html.indexOf('<figure class="fnotes"');
     const map = html.slice(from, html.indexOf('</figure>', from));
     for (const x of data.features) {
       expect(map.split(`href="#${x.id}"`)).toHaveLength(2);
