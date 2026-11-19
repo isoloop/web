@@ -65,7 +65,7 @@ describe('uiPartials', () => {
   });
 
   it('keeps GitHub out of the site nav, beside the theme switch', () => {
-    const { header } = uiPartials({ header: {} });
+    const header = uiPartials({ header: {} }).header ?? '';
     const nav = header.slice(header.indexOf('<nav'), header.indexOf('</nav>'));
     expect(nav).not.toContain('github.com');
     const end = header.slice(header.indexOf('class="ui-header-end"'));
