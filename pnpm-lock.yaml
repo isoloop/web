@@ -213,6 +213,9 @@ catalogs:
     '@isoloop/codec':
       specifier: 0.1.0-next.5
       version: 0.1.0-next.5
+    '@isoloop/devtools':
+      specifier: 0.1.0-next.5
+      version: 0.1.0-next.5
     '@isoloop/host':
       specifier: 0.1.0-next.5
       version: 0.1.0-next.5
@@ -323,6 +326,9 @@ importers:
       '@isoloop/bus':
         specifier: catalog:isoloop
         version: 0.1.0-next.5
+      '@isoloop/devtools':
+        specifier: catalog:isoloop
+        version: 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
       '@isoloop/host':
         specifier: catalog:isoloop
         version: 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
@@ -336,6 +342,9 @@ importers:
         specifier: catalog:isoloop
         version: 0.1.0-next.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
       '@isoloop/runtime':
+        specifier: catalog:isoloop
+        version: 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
+      '@isoloop/webmcp':
         specifier: catalog:isoloop
         version: 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
       preact:
@@ -396,6 +405,9 @@ importers:
       '@isoloop/bus':
         specifier: catalog:isoloop
         version: 0.1.0-next.5
+      '@isoloop/devtools':
+        specifier: catalog:isoloop
+        version: 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
       '@isoloop/host':
         specifier: catalog:isoloop
         version: 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
@@ -778,6 +790,9 @@ packages:
 
   '@isoloop/codec@0.1.0-next.5':
     resolution: {integrity: sha512-bqjztc0j8EUFHqT0VgrL22cUTkoRalZCXgJFZqBU9Ifh6ULl6moUjduOrRyumDHzUgH4NF8VgMywL+yaBOTBLA==}
+
+  '@isoloop/devtools@0.1.0-next.5':
+    resolution: {integrity: sha512-OyREhogGZoWnpSY5f08+JK1buJKYfF+aqQng4NQtK0ZXL+pr7UJfZhrGdfoTUm6+oBAyh2hr9WP7t5qIPvZCrg==}
 
   '@isoloop/dom@0.1.0-next.5':
     resolution: {integrity: sha512-kqvEsUFBAG6goBi8hqrXnJLVk9nX8UMIfi3eFdpARGUGVwZYVNnQwMvjSqxXN8uhRtBnVBQeIie4n7MxQId4tA==}
@@ -2302,6 +2317,12 @@ snapshots:
       '@isoloop/protocol': 0.1.0-next.5
 
   '@isoloop/codec@0.1.0-next.5': {}
+
+  '@isoloop/devtools@0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))':
+    dependencies:
+      '@isoloop/host': 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
+    transitivePeerDependencies:
+      - vitest
 
   '@isoloop/dom@0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))':
     optionalDependencies:

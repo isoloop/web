@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { headlessJobs } from './isoloop/headless';
 import { kernel } from './isoloop/kernel';
+import './isoloop/devtools';
 import './isoloop/inspect';
 import { poolOf } from './isoloop/placement';
 import { Page } from './page';
