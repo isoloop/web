@@ -6,6 +6,7 @@ import { Code, CodeTabs } from './code.tsx';
 import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
+import { StripItem } from './pill.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
@@ -70,11 +71,7 @@ function Home({ features, samples, examples }: SiteData): VNode {
           <nav class="ui-strip" aria-labelledby="features-h">
             <ul>
               {features.map((f) => (
-                <li key={f.id} data-part={f.part}>
-                  <a href={`/features/#${f.id}`}>
-                    <b>{f.name}</b> {f.line}
-                  </a>
-                </li>
+                <StripItem key={f.id} feature={f} href={`/features/#${f.id}`} />
               ))}
             </ul>
             <a href="/features/">{home.strip.all}</a>

@@ -2,8 +2,11 @@
   "id": "balancer",
   "order": 65,
   "part": "pool",
+  "tab": "placement",
+  "blueprint": "pool",
   "name": "Automatic placement.",
-  "line": "Experimental: a balancer picks the pool from measured load, and moves an isolate that blocks or falls behind.",
+  "experimental": true,
+  "line": "A balancer picks the pool from measured load, and moves an isolate that blocks or falls behind.",
   "text": [
     "`@isoloop/balancer` is experimental and opt-in. Spawn through it instead of naming a pool, and it puts each isolate in a pool where its measured load fits, within a cap on workers. The kernel never moves anything on its own, and the balancer moves only the isolates spawned through it.",
     "It reads every isolate’s heartbeat: its worker’s lag and the isolate’s own busy time. For work the runtime can’t attribute, such as code that resumes after `await`, the app can report its own busy time and how much work is queued. An isolate that blocks twice within a minute, or crashes, waits in a quarantine pool until it has been quiet; the fourth time, it’s kept apart for good. An isolate the kernel has given up on is left alone until the app restarts it.",

@@ -291,6 +291,23 @@
     font-weight: 700;
     font-stretch: 87%;
   }
+  /* A status mark next to a name: an outlined pill, e.g. "Experimental". */
+  .ui-pill {
+    display: inline-block;
+    margin-left: 0.2em;
+    padding: 0.05em 0.55em 0.1em;
+    border: 1px solid var(--ui-experimental);
+    border-radius: 999px;
+    color: var(--ui-experimental);
+    font-size: 0.72rem;
+    font-weight: 650;
+    font-stretch: 87%;
+    letter-spacing: 0.03em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    vertical-align: 0.2em;
+    white-space: nowrap;
+  }
   .ui-strip > a {
     display: inline-block;
     margin-top: 1.2rem;

@@ -9,6 +9,8 @@ const entry = {
   id: 'bus',
   order: 30,
   part: 'bus',
+  tab: 'bus',
+  blueprint: 'bus',
   name: 'The message bus.',
   line: 'Typed topics.',
   text: ['The bus runs in a worker.'],

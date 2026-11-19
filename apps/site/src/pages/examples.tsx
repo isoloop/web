@@ -7,6 +7,7 @@ import { PageIntro } from './intro.tsx';
 import { MeasuredBlock } from './measurements.tsx';
 import { rich } from './rich.tsx';
 import { StepTabs } from './steps.tsx';
+import { StripItem } from './pill.tsx';
 import type { Page, SiteData } from './types.ts';
 
 /** An example's links: live first, then source, results and architecture. */
@@ -122,11 +123,7 @@ function FeatureStrip({
     <div class="ui-strip">
       <ul>
         {shown.map((f) => (
-          <li key={f.id} data-part={f.part}>
-            <a href={`/features/#${f.id}`}>
-              <b>{f.name}</b> {f.line}
-            </a>
-          </li>
+          <StripItem key={f.id} feature={f} href={`/features/#${f.id}`} />
         ))}
       </ul>
     </div>

@@ -2,8 +2,11 @@
   "id": "agents",
   "order": 67,
   "part": "host",
+  "tab": "tools",
+  "blueprint": "host",
   "name": "Tools for agents.",
-  "line": "Experimental: topics you choose become tools that a coding agent, or a browser’s agent, can call.",
+  "experimental": true,
+  "line": "Topics you choose become tools that a coding agent, or a browser’s agent, can call.",
   "text": [
     "Tools for agents are experimental. A requestable topic, one with a `reply`, can carry a `tool` description, and the kernel’s `agents.expose` lists which of them agents may call. Each becomes a tool whose input and output JSON Schemas come from the topic’s own schemas. The isolate that answers it replies as it does to any request, whichever agent asked.",
     "In development, `npx isoloop mcp` serves the tools to a coding agent over MCP, with tools of its own for reading the page: its isolates, topics, records and events. The page pairs only with the CLI’s token and from an allowed origin. Tools that change something, and the CLI’s restart, kill, block, publish and request, are listed only with `--allow-write`. `@isoloop/vite` fails a production build that still contains the dev MCP.",

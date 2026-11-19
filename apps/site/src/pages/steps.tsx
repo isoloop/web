@@ -18,7 +18,8 @@ export interface Step {
  * Steps as tabs (src/demos/steps.ts): a row of links to each step's `#id`,
  * sticky under the header, one step shown at a time, Previous and Next under
  * each. Without JS every step shows, one after another, and the tabs are a
- * list of contents. Used by /how-it-works/ and /examples/.
+ * list of contents. Used by /how-it-works/ and /examples/; /features/ uses
+ * the same script (src/demos/steps.ts) with its own panels (ADR 0005).
  */
 export function StepTabs({
   label,

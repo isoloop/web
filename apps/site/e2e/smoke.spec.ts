@@ -53,7 +53,8 @@ for (const path of ['/', '/features/']) {
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(path);
+    // On /features/ the costs table is in the Cost tab (ADR 0005).
+    await page.goto(path === '/features/' ? '/features/#costs' : path);
     await expect(page.locator('.ui-delta-narrow table').first()).toBeVisible();
     await expect(page.locator('.ui-delta-wide')).toBeHidden();
     await expectAccessible(page, { exclude: ['iframe'] });
@@ -271,7 +272,8 @@ test('/features/ shows basic’s real records, reads and a replay after a crash'
   page,
 }) => {
   const problems = await watch(page);
-  await page.goto('/features/');
+  // The bus and the replay are in the Bus tab (ADR 0005).
+  await page.goto('/features/#messaging');
   const bus = page.locator('[data-demo="bus"]');
   await bus.scrollIntoViewIfNeeded();
   await expect(bus.locator('.topic[data-topic="count.v1"] .rec').first()).toBeVisible({
@@ -295,6 +297,32 @@ test('/features/ shows basic’s real records, reads and a replay after a crash'
   await expect(status).toContainText(/D read \d+ notes? again/, { timeout: 10_000 });
   await expect(replay.locator('.tape-cells li.again').first()).toBeVisible();
   expect((await problems()).filter((e) => !/crash/i.test(e))).toEqual([]);
+});
+
+test('/features/ shows one tab of features at a time, and a feature link opens its tab', async ({
+  page,
+}) => {
+  await page.goto('/features/');
+  const tabs = page.getByRole('navigation', { name: 'Features, by group' });
+  await expect(tabs.getByRole('link', { name: 'Isolation' })).toHaveAttribute(
+    'aria-current',
+    'step',
+  );
+  await expect(page.locator('#containment')).toBeVisible();
+  await expect(page.locator('#balancer')).toBeHidden();
+  // From the blueprint: a feature in another tab opens that tab.
+  await page.locator('.fmap a[href="#balancer"]').click();
+  await expect(page.locator('#balancer')).toBeVisible();
+  await expect(page.locator('#containment')).toBeHidden();
+  await expect(tabs.getByRole('link', { name: 'Placement' })).toHaveAttribute(
+    'aria-current',
+    'step',
+  );
+  await expect(
+    page.getByRole('heading', { name: 'Automatic placement Experimental' }),
+  ).toBeVisible();
+  await page.goBack();
+  await expect(page.locator('#containment')).toBeVisible();
 });
 
 test('the framework tabs work with the keyboard', async ({ page }) => {

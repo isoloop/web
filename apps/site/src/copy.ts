@@ -208,8 +208,37 @@ export const featuresPage = {
   description:
     'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, tools for agents, devtools, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
-  lede: 'Code that shares data shouldn’t share an event loop. That idea runs through twelve parts of one toolchain. Three run live below, on basic, the smallest example, running in this page; the rest are shown as code or as a still.',
-  changelog: 'What changed, release by release',
+  map: {
+    label: 'The features, on the part of the system each belongs to',
+    boxes: {
+      host: ['Main thread', 'the kernel'],
+      bus: ['Bus', 'its own worker'],
+      isolate: ['Isolate', 'its own worker'],
+      pool: ['Pool', 'one worker, several isolates'],
+      devtools: ['Devtools', 'an isolate of its own'],
+    },
+    costNote: 'CPU, memory, start-up',
+  },
+  tabs: {
+    label: 'Features, by group',
+    names: {
+      isolation: 'Isolation',
+      bus: 'Bus',
+      placement: 'Placement',
+      tools: 'Tools and frameworks',
+      safety: 'Safety',
+      cost: 'Cost',
+    },
+    /** The tabs' anchors; a feature's own id is its section's, so these differ from every one. */
+    ids: {
+      isolation: 'isolation',
+      bus: 'messaging',
+      placement: 'pools',
+      tools: 'tools',
+      safety: 'security',
+      cost: 'costs',
+    },
+  },
   containment: {
     caption:
       'A bar is work on that loop, and time moves to the left. Hatched means the loop is stuck. A line across a track means that isolate was stopped and started again. C and D share one loop; placement decides that. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
@@ -777,4 +806,9 @@ export const notFound = {
   description: 'This page doesn’t exist.',
   heading: 'This page doesn’t exist',
   text: 'It may have moved. Try one of these:',
+};
+
+/** Status marks next to a name (src/pages/pill.tsx). */
+export const marks = {
+  experimental: 'Experimental',
 };
