@@ -36,6 +36,6 @@
 
 - **Lockup spacing:** the gap between the mark and "isoloop" is about one mark wide; `docs/brand.md` says half.
 - **`--ui-rule`:** the build added a token for decorative rules, because `--ui-border` at `#d5dae2` is 1.31:1 and decision 8 asks 3:1 for borders. ADR 0003's amendment should mention it.
-- **Markets figures** come back with M3f (markets parity), before M4.
-- **Two deploy tags on one commit:** Pages names a deployment after its commit, so the second deploy of the same commit doesn't replace the first. `basic-v0.1.0` and `site-v0.1.0` both pointed at `2f03806`, and the site only went live after a later commit was deployed by hand. Tag a new commit for each deploy, or deploy `main` afterwards.
+- **Markets figures:** done; they came back with M3f (`markets-v0.3.0`, 2026-11-15).
+- **Two deploy tags on one commit:** done; it's now a release rule in [`AGENTS.md`](../../AGENTS.md) (each deploy tag on its own commit). `basic-v0.1.0` and `site-v0.1.0` both pointed at `2f03806`, and the site only went live after a later commit was deployed by hand.
 
