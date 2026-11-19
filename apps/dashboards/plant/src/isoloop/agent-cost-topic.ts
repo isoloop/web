@@ -14,6 +14,9 @@ export function agentCostTopic() {
   return topic('plant.bench.ping.v1', {
     schema: ping,
     reply: ping,
-    retention: { kind: 'last-n', n: 100 },
+    // Room for the run's burst of 1,000 calls issued back to back: with
+    // `last-n` 100 (markets' tools), calls past the 100th were evicted before
+    // the ping isolate read them and timed out.
+    retention: { kind: 'last-n', n: 2_000 },
   });
 }
