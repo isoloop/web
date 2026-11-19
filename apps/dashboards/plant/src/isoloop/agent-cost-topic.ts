@@ -6,7 +6,6 @@
 import { topic } from '@isoloop/bus';
 import { z } from 'zod';
 
-//
 // A function, not a constant: a module-level `topic(...)` call would stay in
 // every build's contracts chunk even where nothing uses it.
 export function agentCostTopic() {
