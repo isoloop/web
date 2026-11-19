@@ -1,5 +1,4 @@
 import { defineConfig, devices } from '@playwright/test';
-import { DEV_PORT, DEV_URL } from './e2e/dev-server';
 
 // The three builds, served by `vite preview` from dist/ (/isoloop/, /native/,
 // /native-workers/), in all three engines.
@@ -26,21 +25,12 @@ export default defineConfig({
   ...(LIVE
     ? {}
     : {
-        webServer: [
-          {
-            command: 'pnpm build && pnpm preview --port 4792 --strictPort',
-            timeout: 180_000,
-            url: 'http://localhost:4792',
-            reuseExistingServer: !process.env['CI'],
-          },
-          // The devtools dev smoke test's development server (M4b task 11).
-          {
-            command: `pnpm dev --port ${DEV_PORT} --strictPort`,
-            timeout: 120_000,
-            url: DEV_URL,
-            reuseExistingServer: !process.env['CI'],
-          },
-        ],
+        webServer: {
+          command: 'pnpm build && pnpm preview --port 4792 --strictPort',
+          timeout: 180_000,
+          url: 'http://localhost:4792',
+          reuseExistingServer: !process.env['CI'],
+        },
       }),
   // As in the markets app: `<engine>-load` holds the tests that measure timing
   // under load; CI runs it alone with --workers=1 after the rest. `comparison`
