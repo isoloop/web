@@ -113,6 +113,53 @@ test('lists both tools, answers a quote, and keeps create behind --allow-write',
   }
 });
 
+type Tapped = {
+  records: { topic: string; offset: number; producer: string; bytes: number; preview: string }[];
+  skipped: number;
+  ms: number;
+};
+
+test('isoloop_tap samples live trades, capped, and stops at max', async ({ page }) => {
+  const client = await startCli(false);
+  try {
+    await open(page, client);
+    expect((await client.listTools()).tools.map((t) => t.name)).toContain('isoloop_tap');
+
+    // A 2 s sample of the trades stream at 10×: records arrive, all from the
+    // topic asked for, at most the tap's 50 in each second (ADR 0020,
+    // decision 3). It ends at ms or at max (100), whichever comes first.
+    const sample = json<Tapped>(
+      await call(client, 'isoloop_tap', { topics: ['trades.v1'], ms: 2_000 }),
+    );
+    expect(sample.records.length).toBeGreaterThan(0);
+    expect(sample.records.length).toBeLessThanOrEqual(50 * Math.ceil(sample.ms / 1_000));
+    if (sample.records.length < 100) expect(sample.ms).toBeGreaterThanOrEqual(1_900);
+    expect(sample.ms).toBeLessThan(3_000);
+    expect(sample.skipped).toBeGreaterThanOrEqual(0);
+    for (const r of sample.records) {
+      expect(r.topic).toBe('trades.v1');
+      expect(r.producer.length).toBeGreaterThan(0);
+      expect(r.bytes).toBeGreaterThan(0);
+      expect(r.preview.length).toBeGreaterThan(0);
+    }
+    const offsets = sample.records.map((r) => r.offset);
+    expect(offsets).toEqual(offsets.toSorted((a, b) => a - b));
+
+    // max ends the sample early.
+    const few = json<Tapped>(
+      await call(client, 'isoloop_tap', { topics: ['trades.v1'], ms: 10_000, max: 3 }),
+    );
+    expect(few.records).toHaveLength(3);
+    expect(few.ms).toBeLessThan(10_000);
+
+    // A bad argument is the tool's error, not a crash.
+    const bad = await call(client, 'isoloop_tap', { topics: ['trades.v1'], ms: 60_000 });
+    expect(bad.isError).toBe(true);
+  } finally {
+    await client.close();
+  }
+});
+
 test('creates an alert rule that shows in the panel and fires', async ({ page }) => {
   const client = await startCli(true);
   try {
