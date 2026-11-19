@@ -29,7 +29,12 @@ export default defineConfig(({ mode }) => {
   const kind = build === 'isoloop' ? 'isoloop' : 'native';
   return {
     oxc: { jsx: { runtime: 'automatic', importSource: 'react' } },
-    define: { 'import.meta.env.PLANT_BUILD': JSON.stringify(build) },
+    define: {
+      'import.meta.env.PLANT_BUILD': JSON.stringify(build),
+      // `PLANT_AGENT_COST=1` (M4a task 13): the agent-call cost's ping topic,
+      // isolate and runner. A constant, so every other build drops them.
+      'import.meta.env.PLANT_AGENT_COST': JSON.stringify(process.env['PLANT_AGENT_COST'] === '1'),
+    },
     resolve: {
       alias: [
         { find: '#main', replacement: src(`main.${build}.tsx`) },

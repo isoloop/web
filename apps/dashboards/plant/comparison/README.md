@@ -2,6 +2,7 @@
 
 ## Recorded runs, newest first
 
+- [`agent-cost/`](agent-cost/README.md): one `kernel.request`'s cost (M4a task 13), on an idle page and at 5 kHz, on the dedicated machine with `@isoloop/*@0.1.0-next.5`.
 - [`inspect/`](inspect/README.md): the inspection feed's cost (M4b task 6), `matched` at 5 kHz with a reader on `kernel.inspect()` against without, on the dedicated machine with `isoloop/isoloop` main at `ce4dc9a`.
 - [`interactive/final/`](interactive/final/README.md): the interactive page's head-to-head (M3e), written up, native against Isoloop at 5 kHz, on the dedicated machine at `a5562f0` with `@isoloop/*@0.0.0-next.g3322248`. How it runs is [below](#the-interactive-page-interactivets).
 - [`final/`](final/README.md): the figures that ship with `plant-v0.1.0`, on the dedicated machine with `@isoloop/*@0.0.0-next.b8ffdcf`.
@@ -86,6 +87,18 @@ PLANT_COI=1 pnpm --filter ./apps/dashboards/plant compare:pairs \
 ```
 
 CI runs it in the *Comparison (plant)* workflow's `inspect` job (Chromium isolated, Firefox without the headers), report-only.
+
+## The agent-call cost
+
+M4a task 13 ([decision 20](https://github.com/isoloop/isoloop/blob/main/docs/plans/m4a-agents.md)): what one `kernel.request` from the main thread costs, the call every agent transport makes (the dev MCP and WebMCP add their own hop, which isn't measured here). Plant has no requestable topic, so a build made with `PLANT_AGENT_COST=1` adds one, `plant.bench.ping.v1`, and a headless isolate that answers each call with its own value: the round trip is host → bus → isolate → bus → host with no handler work. Without the flag the topic, the isolate and the runner are compiled out; the Isoloop, native and interactive builds are byte for byte what they were before ([`src/isoloop/agent-cost.ts`](../src/isoloop/agent-cost.ts)).
+
+[`e2e/agent-cost.spec.ts`](../e2e/agent-cost.spec.ts) runs two pages per round, interleaved, one at a time: `?agent=idle` (the kernel, the bus and the ping isolate only) and the Isoloop build at 5 kHz in `matched`. Per page, with 1 call in flight and then 8, it records each call's round trip; on Chromium, the main thread's time per call (CDP `TaskDuration` over the calls, less the page's own rate in the quiet windows beside them); and on both engines the time issuing one call holds the main thread, from 1,000 calls issued back to back.
+
+```bash
+AGENT_COST_ROUNDS=5 AGENT_COST_OUT=comparison/agent-cost/results \
+  pnpm --filter ./apps/dashboards/plant compare:agent-cost
+node apps/dashboards/plant/comparison/agent-cost.ts apps/dashboards/plant/comparison/agent-cost/results
+```
 
 ## The interactive page (`interactive.ts`)
 
