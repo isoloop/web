@@ -2,7 +2,7 @@
 
 - **Status:** Proposed
 - **Date:** 2026-11-19
-- **Answers:** how a reader moves through a long page on the site, and how a feature that isn't stable yet is marked. Grilled 2026-11-19 (Q1–Q12), after a local prototype the maintainer reviewed. Amends [ADR 0002](0002-site-build.md) (the features page, the step tabs) and [ADR 0003](0003-design-system.md) (a status colour, the pill).
+- **Answers:** how a reader moves through a long page on the site, and how a feature that isn't stable yet is marked. Grilled 2026-11-19 (Q1–Q12), after a local prototype the maintainer reviewed. Amends [ADR 0002](0002-site-build.md) (the features page, the step tabs) and [ADR 0003](0003-design-system.md) (a status colour, the pill, the header's GitHub link).
 
 ## Context
 
@@ -34,6 +34,15 @@ All three run one script, `src/demos/steps.ts`. It gains two things:
 
 - **A hash that names something inside a panel**, such as `/features/#balancer`, opens that panel and scrolls to the target. So the landing page's strip and the examples' "What it shows" keep linking straight to a feature.
 - **The tab row scrolls sideways only.** Marking the current tab no longer moves the page.
+
+### 1a. The header: pages, then what isn't a page (amends ADR 0003, decision 7)
+
+The header's nav lists only the site's pages: Home, Features, How it works, Examples. GitHub isn't one of them, so it moves to the far end, beside the theme switch:
+- GitHub's mark and "GitHub"; the mark alone below 760px.
+- Its accessible name is "Isoloop on GitHub".
+- The mark is Octicons' `mark-github` (MIT), inline as an SVG path.
+
+The dashboards' bar is unchanged.
 
 ### 2. Features in six tabs
 
