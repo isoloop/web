@@ -121,6 +121,9 @@ test('with faults on the balancer, no file is left without a result', async ({
   const s = await page.evaluate(() => window.files.snapshot());
   expect(s.produced).toBeGreaterThan(500);
   expect(s.done).toBe(s.produced);
+  // Every crash is recorded with its reason: corrupt files crash their processor.
+  const crashes = await page.evaluate(() => window.files.crashes());
+  expect(crashes.some((c) => c.reason === 'error' && /corrupt/.test(c.message ?? ''))).toBe(true);
 });
 
 for (const mode of ['own', 'one'] as const) {

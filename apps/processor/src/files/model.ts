@@ -52,6 +52,15 @@ export type GivenUp = {
   pool: string | undefined;
 };
 
+/** A processor crash as the kernel reported it (M3j): what came before a give-up. */
+export type Crash = {
+  at: number;
+  id: string;
+  reason: string;
+  pool: string | undefined;
+  message: string | undefined;
+};
+
 /** One processor at one moment, for the comparison's trace (M3i). */
 export type TraceRow = {
   id: string;
@@ -190,6 +199,8 @@ export class FileProcessor {
   readonly #busy = new Map<string, number>();
   /** Processors the kernel gave up on, in order (M3j). */
   readonly #givenUp: GivenUp[] = [];
+  /** Every processor crash, in order (M3j). */
+  readonly #crashes: Crash[] = [];
   /** Noted spikes and `behind` events, counted for the comparison (M3i). */
   #noted = 0;
   #behind = 0;
@@ -337,7 +348,15 @@ export class FileProcessor {
       }
     }, REPORT_MS);
     this.#kernel.on('isolate:crash', (e) => {
-      if (this.#ids.includes(e.id)) this.#entry('crash', `${e.id} crashed (${e.reason})`);
+      if (!this.#ids.includes(e.id)) return;
+      this.#crashes.push({
+        at: performance.now(),
+        id: e.id,
+        reason: e.reason,
+        pool: e.pool,
+        message: e.message,
+      });
+      this.#entry('crash', `${e.id} crashed (${e.reason})`);
     });
     this.#kernel.on('isolate:failed', (e) => {
       const kind = this.#kinds.get(e.id);
@@ -416,6 +435,11 @@ export class FileProcessor {
   /** The moves since `t` (`performance.now()`), with their cost where known. */
   movesSince(t: number): Move[] {
     return structuredClone(this.#moves.filter((m) => m.at >= t));
+  }
+
+  /** Every processor crash so far, with its reason (M3j). */
+  crashes(): Crash[] {
+    return structuredClone(this.#crashes);
   }
 
   /** The processors the kernel gave up on so far, with their kinds (M3j). */
