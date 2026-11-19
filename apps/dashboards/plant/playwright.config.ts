@@ -11,6 +11,8 @@ const LOAD = /(budget)\.spec\.ts$/;
 const COMPARISON = /comparison\.spec\.ts$/;
 // The interactive page's measured run (M3e decision 22), on demand too.
 const INTERACTIVE = /interactive-compare\.spec\.ts$/;
+// The agent-call cost (M4a task 13), on demand, against a PLANT_AGENT_COST=1 build.
+const AGENT_COST = /agent-cost\.spec\.ts$/;
 const LIVE = process.env['LIVE_URL'];
 
 export default defineConfig({
@@ -38,7 +40,11 @@ export default defineConfig({
   // run.
   projects: [
     ...ENGINES.flatMap(([name, device]) => [
-      { name, use: { ...devices[device] }, testIgnore: [LOAD, COMPARISON, INTERACTIVE] },
+      {
+        name,
+        use: { ...devices[device] },
+        testIgnore: [LOAD, COMPARISON, INTERACTIVE, AGENT_COST],
+      },
       { name: `${name}-load`, use: { ...devices[device] }, testMatch: LOAD },
     ]),
     // With `PLANT_COI=1` (the inspection feed's cost, M4b task 6) the run uses
@@ -68,6 +74,8 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
       testMatch: INTERACTIVE,
     },
+    { name: 'agent-cost', use: { ...devices['Desktop Chrome'] }, testMatch: AGENT_COST },
+    { name: 'agent-cost-firefox', use: { ...devices['Desktop Firefox'] }, testMatch: AGENT_COST },
     { name: 'live', use: { ...devices['Desktop Chrome'] }, testMatch: /smoke\.spec\.ts$/ },
   ],
 });

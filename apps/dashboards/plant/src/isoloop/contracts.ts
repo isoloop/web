@@ -12,6 +12,7 @@ import { MACHINES } from '../core/machines';
 import { MACHINE_KEEP, PERSISTENT, PLANT_KEEP } from '../core/retention';
 import * as s from '../core/schemas';
 import { of, type MachineStream, type PlantStream } from '../core/streams';
+import { agentCostTopic } from './agent-cost-topic';
 import { retentionOf, topicName } from './names';
 
 const at = (k: MachineStream) => ({ retention: retentionOf(MACHINE_KEEP[k]) });
@@ -40,4 +41,10 @@ const plantTopics = [
   topic(topicName('cleared'), { schema: s.cleared, ...plant('cleared') }),
 ];
 
-export default contracts(...machineTopics, ...plantTopics);
+// The agent-call cost's ping topic (M4a task 13), in `PLANT_AGENT_COST=1`
+// builds only: the flag is a build-time constant, so other builds drop it.
+// (Two calls, not a spread of an empty list, so the other builds' chunk is
+// byte for byte what it was without it.)
+export default import.meta.env.PLANT_AGENT_COST
+  ? contracts(...machineTopics, ...plantTopics, agentCostTopic())
+  : contracts(...machineTopics, ...plantTopics);
