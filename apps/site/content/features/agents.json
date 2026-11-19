@@ -8,7 +8,8 @@
     "Tools for agents are experimental. A requestable topic, one with a `reply`, can carry a `tool` description, and the kernel’s `agents.expose` lists which of them agents may call. Each becomes a tool whose input and output JSON Schemas come from the topic’s own schemas. The isolate that answers it replies as it does to any request, whichever agent asked.",
     "In development, `npx isoloop mcp` serves the tools to a coding agent over MCP, with tools of its own for reading the page: its isolates, topics, records and events. The page pairs only with the CLI’s token and from an allowed origin. Tools that change something, and the CLI’s restart, kill, block, publish and request, are listed only with `--allow-write`. `@isoloop/vite` fails a production build that still contains the dev MCP.",
     "In the browser, `@isoloop/webmcp` (new in 0.1.0-next.4, Firefox from 0.1.0-next.5) registers the same tools with WebMCP, a Community Group draft. Chromium 158 and Firefox 159 both keep it behind a flag, and it’s tested under Playwright only. Firefox’s agent sees only the read-only hint, and can’t cancel a call.",
-    "The hints, read-only, consequential and untrusted content, describe a tool; they don’t stop a call, so asking the user first is the agent’s job, or the page’s. Delivery is at least once, so a tool that changes something has to recognise a request it has already handled."
+    "The hints, read-only, consequential and untrusted content, describe a tool; they don’t stop a call, so asking the user first is the agent’s job, or the page’s. Delivery is at least once, so a tool that changes something has to recognise a request it has already handled.",
+    "What one call costs the page, measured on the plant dashboard with `0.1.0-next.5`, one call in flight and a handler that does nothing, on the bench machine (an AMD Ryzen 7 5825U, 4 cores fixed at 2.0 GHz): a round trip took 0.15 ms on average on an idle page and 0.24 ms at 5 kHz in Chromium 158, and 0.60 ms and 1.48 ms in Firefox 159. Each call took 0.035 ms of the main thread idle and 0.059 ms at 5 kHz, measured in Chromium only. The transport’s hop, the agent’s own time and the tool’s work come on top. A burst of 1,000 calls at once didn’t complete on a topic that keeps 100 records, and did with 2,000; the cause isn’t confirmed yet, so give a tool’s topic the retention its bursts need."
   ],
   "demo": "agents-code",
   "since": "0.1.0-next.3",
@@ -67,8 +68,16 @@
       "path": "docs/adr/0018-tools-for-agents.md"
     },
     {
+      "repo": "isoloop",
+      "path": "docs/investigations/agent-call-cost.md"
+    },
+    {
       "repo": "web",
       "path": "apps/dashboards/markets/e2e/dev-mcp.spec.ts"
+    },
+    {
+      "repo": "web",
+      "path": "apps/dashboards/plant/comparison/agent-cost"
     }
   ]
 }
