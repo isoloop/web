@@ -45,6 +45,7 @@ export const featureSchema = z.strictObject({
     'durable-still',
     'placement-still',
     'balancer-table',
+    'agents-code',
     'framework-tabs',
     'safety-facts',
     'cost-table',

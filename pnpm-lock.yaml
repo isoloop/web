@@ -231,6 +231,9 @@ catalogs:
     '@isoloop/vite':
       specifier: 0.1.0-next.5
       version: 0.1.0-next.5
+    '@isoloop/webmcp':
+      specifier: 0.1.0-next.5
+      version: 0.1.0-next.5
     isoloop:
       specifier: 0.1.0-next.5
       version: 0.1.0-next.5
@@ -527,6 +530,9 @@ importers:
       '@isoloop/vite':
         specifier: catalog:isoloop
         version: 0.1.0-next.5(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1))
+      '@isoloop/webmcp':
+        specifier: catalog:isoloop
+        version: 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
       '@types/react':
         specifier: catalog:react
         version: 19.3.0
@@ -805,6 +811,9 @@ packages:
     resolution: {integrity: sha512-WD1hXjeHn5Rh1Fz5CDkOUPdTjhkflARsBvgFYIj1jUP+Dz8rM1hwYckDq04XBKLZl+1tI6BX+CjO3d/KDOjEQw==}
     peerDependencies:
       vite: ^8
+
+  '@isoloop/webmcp@0.1.0-next.5':
+    resolution: {integrity: sha512-winwAdQwW1iDiVC62Te/iZoR0wnzNVSn/L5A7nZ3F3wCuPmm23j4knSwCL5X1lrprDuL9CyfKudSuWgOZupgPg==}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -2334,6 +2343,12 @@ snapshots:
   '@isoloop/vite@0.1.0-next.5(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1))':
     dependencies:
       vite: 8.3.8(@types/node@26.6.6)(yaml@2.9.1)
+
+  '@isoloop/webmcp@0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))':
+    dependencies:
+      '@isoloop/host': 0.1.0-next.5(vitest@5.0.5(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(yaml@2.9.1)))
+    transitivePeerDependencies:
+      - vitest
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
