@@ -2,6 +2,7 @@
 
 ## Recorded runs, newest first
 
+- [`agent-cost/`](agent-cost/README.md): one `kernel.request`'s cost (M4a task 13), on an idle page and at 5 kHz, on the dedicated machine with `@isoloop/*@0.1.0-next.5`.
 - [`inspect/`](inspect/README.md): the inspection feed's cost (M4b task 6), `matched` at 5 kHz with a reader on `kernel.inspect()` against without, on the dedicated machine with `isoloop/isoloop` main at `ce4dc9a`.
 - [`interactive/final/`](interactive/final/README.md): the interactive page's head-to-head (M3e), written up, native against Isoloop at 5 kHz, on the dedicated machine at `a5562f0` with `@isoloop/*@0.0.0-next.g3322248`. How it runs is [below](#the-interactive-page-interactivets).
 - [`final/`](final/README.md): the figures that ship with `plant-v0.1.0`, on the dedicated machine with `@isoloop/*@0.0.0-next.b8ffdcf`.
