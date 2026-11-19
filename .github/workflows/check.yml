@@ -2,8 +2,8 @@ name: Check
 
 # Format, lint, types, unit tests and every app's build, including its bundle
 # checks (no Isoloop code in native bundles, no React DOM in Preact ones).
-# `apps` lists the apps a pull request touches (all of them otherwise, none for
-# a change to docs only).
+# `apps` lists the apps whose E2E a pull request runs: those its changes reach
+# (scripts/ci/e2e-apps.ts), all of them otherwise.
 on:
   workflow_call:
     outputs:
@@ -39,33 +39,10 @@ jobs:
       - id: apps
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
-        run: |
-          # An app is a folder under apps/ with a package.json, at any depth
-          # (apps/<name> or apps/<group>/<name>); its id is that path below apps/.
-          # The site has no E2E of its own; its smoke test is the site job.
-          # apps/samples only holds the site's type-checked code samples.
-          # A package with a playwright.config.ts has E2E too; its id is its
-          # path, packages/<name> (e2e.yml runs it from there).
-          all=$( (find apps -name package.json -not -path '*/node_modules/*' \
-            | xargs -n1 dirname | sed 's#^apps/##' | grep -vxE 'site|samples'; \
-            find packages -maxdepth 2 -name playwright.config.ts -not -path '*/node_modules/*' \
-            | xargs -r -n1 dirname) | sort)
-          if [ -z "$BASE" ]; then
-            apps="$all"
-          else
-            # Docs-only changes (docs/** and Markdown anywhere) need no E2E.
-            changed=$(git diff --name-only "$BASE" HEAD | grep -vE '^docs/|\.md$' || true)
-            if [ -z "$changed" ]; then
-              apps=""
-            elif echo "$changed" | grep -qvE '^apps/'; then
-              apps="$all"
-            else
-              apps=$(for app in $all; do
-                if echo "$changed" | grep -q "^apps/$app/"; then echo "$app"; fi
-              done)
-            fi
-          fi
-          echo "apps=$(printf '%s\n' $apps | jq -Rnc '[inputs | select(length > 0)]')" >> "$GITHUB_OUTPUT"
+        # The apps whose runtime inputs the pull request changes, and the apps
+        # that depend on a changed package (scripts/ci/e2e-apps-rule.ts says
+        # which files count). Every app without a base (weekly.yml).
+        run: node scripts/ci/e2e-apps.ts
       - id: site
         env:
           # The pull request's base, or the push's previous commit.
