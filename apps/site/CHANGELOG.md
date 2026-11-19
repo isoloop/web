@@ -1,5 +1,15 @@
 # site
 
+## 0.5.0
+
+### Minor Changes
+
+- 9d6989b: `/features/` in six tabs (Isolation, Bus, Placement, Tools and frameworks, Safety, Cost), opened by a blueprint of the system with each feature on the part it runs in. Experimental features carry an orange Experimental pill wherever their name shows: the landing strip, the blueprint, the feature headings and each example's "What it shows". The tabs on every page no longer scroll the page when they mark the current tab. In the header, GitHub moves out of the page links to sit beside the theme switch.
+
+### Patch Changes
+
+- a10e25d: `/features/`: **Tools for agents** says what one call costs the page, measured on the plant dashboard with `0.1.0-next.5`: the round trip and the main-thread time per call in Chromium and Firefox, idle and at 5 kHz, and that a burst of 1,000 calls didn't complete on a topic keeping 100 records. The library pin moves to isoloop/isoloop `a07fa70`, which has the write-up.
+
 ## 0.4.0
 
 ### Minor Changes
