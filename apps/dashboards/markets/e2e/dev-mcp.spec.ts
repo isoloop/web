@@ -126,13 +126,15 @@ test('isoloop_tap samples live trades, capped, and stops at max', async ({ page 
     expect((await client.listTools()).tools.map((t) => t.name)).toContain('isoloop_tap');
 
     // A 2 s sample of the trades stream at 10×: records arrive, all from the
-    // topic asked for, at most the tap's 50 a second (ADR 0020, decision 3).
+    // topic asked for, at most the tap's 50 in each second (ADR 0020,
+    // decision 3). It ends at ms or at max (100), whichever comes first.
     const sample = json<Tapped>(
       await call(client, 'isoloop_tap', { topics: ['trades.v1'], ms: 2_000 }),
     );
     expect(sample.records.length).toBeGreaterThan(0);
-    expect(sample.records.length).toBeLessThanOrEqual(100);
-    expect(sample.ms).toBeGreaterThanOrEqual(1_900);
+    expect(sample.records.length).toBeLessThanOrEqual(50 * Math.ceil(sample.ms / 1_000));
+    if (sample.records.length < 100) expect(sample.ms).toBeGreaterThanOrEqual(1_900);
+    expect(sample.ms).toBeLessThan(3_000);
     expect(sample.skipped).toBeGreaterThanOrEqual(0);
     for (const r of sample.records) {
       expect(r.topic).toBe('trades.v1');
