@@ -18,6 +18,7 @@ A change is done when all five hold:
 - **Performance is a measurement:** device, build, tag, and the numbers. Compare Isoloop with native as measured results, in both directions.
 - **Every claim is checked** against the code or a test before it ships. Feature entries carry proof links.
 - **The maintainer reviews copy, ADRs and these rules.** Forks merge their own code and tooling PRs on green.
+- **One PR per task** from a plan's task table.
 
 ## Releases
 
