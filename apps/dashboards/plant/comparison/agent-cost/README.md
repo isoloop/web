@@ -4,7 +4,7 @@ One `kernel.request` from the main thread, the call every agent transport makes,
 
 - **Machine:** the dedicated bench machine (AMD Ryzen 7 5825U), bench mode on (cores fixed at 2.0 GHz), the container pinned to `--cpuset-cpus=2,4,6,8`, image `mcr.microsoft.com/playwright:v1.65.0-noble` (Playwright 1.65.0: Chromium headless shell 158, Firefox 159), 2026-11-19.
 - **Library:** `@isoloop/*@0.1.0-next.5`, this repo's pin.
-- **Plant:** isoloop/web#187 at `337dc8f`, built with `PLANT_AGENT_COST=1`.
+- **Plant:** isoloop/web#187 at `337dc8f`, built with `PLANT_AGENT_COST=1`. The PR's later commits add these results and change comments and docs only.
 
 [`results/summary.md`](results/summary.md) has every figure; each run's JSON (every round trip) is beside it. Each cell below is the median of the 5 per-round figures, with the lowest and highest round in brackets.
 
@@ -20,6 +20,6 @@ With 8 calls in flight: 12,853 calls/s (12,799 to 13,078) on idle Chromium and 9
 - **Timer resolution:** Chromium's `performance.now()` is 0.1 ms here (not cross-origin isolated) and Firefox's 1 ms, so per-call medians and p95s are in those steps; the mean comes from each burst's wall time over its calls.
 - **Main thread per call** is Chromium only: CDP `TaskDuration` over the bursts, less the page's own rate measured in 2 s quiet windows beside them. At 5 kHz that rate is most of the total, so the figure's spread is wider there.
 - **Not measured:** the transports' own hop (the dev MCP's WebSocket, WebMCP's browser side) and the agent's latency. No native baseline: native has no bus.
-- **Retention:** the ping topic keeps 2,000 records. With `last-n` 100, as markets' tools have, the first run's burst of 1,000 calls lost the calls past the 100th before the isolate read them, and they timed out: a request topic's retention bounds how many calls can wait.
+- **Retention:** the ping topic keeps 2,000 records. In the first server run it kept 100 (`last-n`, as markets' tools do), and the burst of 1,000 calls issued back to back failed: in Chromium at 5 kHz and in Firefox idle, a call of the burst (in Chromium, the 756th) got `No reply on plant.bench.ping.v1 within 10000 ms`. With 2,000 the same burst completed in every run. The 100-record retention looks like the cause, since the calls past it can be dropped before the isolate reads them, but this run doesn't prove it.
 
-The write-up is `docs/investigations/agent-call-cost.md` in isoloop/isoloop.
+The write-up is [`docs/investigations/agent-call-cost.md`](https://github.com/isoloop/isoloop/blob/main/docs/investigations/agent-call-cost.md) in isoloop/isoloop ([#287](https://github.com/isoloop/isoloop/pull/287)).
