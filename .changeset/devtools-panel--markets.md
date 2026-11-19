@@ -1,5 +1,4 @@
 ---
-'plant': minor
 'markets': minor
 ---
 

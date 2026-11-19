@@ -1,6 +1,5 @@
 ---
 'processor': patch
-'plant': patch
 ---
 
 On `@isoloop/*@0.1.0-next.2`, with three balancer fixes from M3j:
