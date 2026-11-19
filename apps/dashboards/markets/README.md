@@ -55,6 +55,12 @@ ISOLOOP_MCP_TOKEN=some-long-token npx isoloop mcp --allow-write   # what your ag
 VITE_ISOLOOP_MCP_TOKEN=some-long-token pnpm --filter ./apps/dashboards/markets dev
 ```
 
-Without `--allow-write` the CLI lists only the quote. Without `VITE_ISOLOOP_MCP_TOKEN` the page doesn't pair. Production builds don't contain the dev MCP: `@isoloop/vite` fails a build that does. `e2e/dev-mcp.spec.ts` runs both tools through the official MCP SDK client and the real CLI, in Chromium. WebMCP comes later (M4a task 9).
+Without `--allow-write` the CLI lists only the quote. Without `VITE_ISOLOOP_MCP_TOKEN` the page doesn't pair. Production builds don't contain the dev MCP: `@isoloop/vite` fails a build that does. `e2e/dev-mcp.spec.ts` runs both tools through the official MCP SDK client and the real CLI, in Chromium.
+
+In a browser with WebMCP, the Isoloop build also lists both tools to the browser's agent with [`connectWebMCP`](https://github.com/isoloop/isoloop/blob/main/docs/guide/agents.md). WebMCP is behind a flag in Chromium (`--enable-features=WebMCP`) and Firefox (`dom.modelcontext.enabled`); without it the page loads none of its code. `e2e/webmcp.spec.ts` lists the tools and asks for a quote through Playwright's WebMCP client, in both.
+
+## Devtools
+
+`?devtools=1` on the Isoloop build adds the [devtools panel](https://github.com/isoloop/isoloop/blob/main/docs/guide/devtools.md) in the bottom-right corner: the isolates with their controls, the bus, and a live record log, drawn by its own isolate. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it. `e2e/devtools.spec.ts` checks the panel on the built page, through a bus restart; `e2e/devtools-dev.spec.ts` checks it under the dev server.
 
 The head-to-head runner is `compare:pairs`: [`comparison/final/`](comparison/final/README.md#how-it-was-measured) has the command that produced the shipped figures.

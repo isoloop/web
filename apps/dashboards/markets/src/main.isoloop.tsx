@@ -7,6 +7,7 @@ import kraken from './isolates/feeds/kraken?isolate';
 import okx from './isolates/feeds/okx?isolate';
 import replay from './isolates/replay?isolate';
 import { filters as filtersTopic } from './isoloop/contracts';
+import './isoloop/devtools';
 import { ENGINE_ISOLATES } from './isoloop/engines';
 import { kernel } from './isoloop/kernel';
 import { poolOf } from './placement';
@@ -88,6 +89,13 @@ if (import.meta.env.DEV) {
       connectDevMCP(kernel, { token, title: 'markets', ...(url ? { url } : {}) });
     });
   }
+}
+
+// In a browser with WebMCP (behind a flag in Chromium and Firefox), the same
+// two tools are listed to the browser's agent (M4a, ADR 0018 decision 8).
+// Without it, the package isn't loaded at all.
+if ('modelContext' in document || 'modelContext' in navigator) {
+  void import('@isoloop/webmcp').then(({ connectWebMCP }) => connectWebMCP(kernel));
 }
 
 // The size's shared engines, as headless isolates (M3c decision 6).

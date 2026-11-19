@@ -3,6 +3,7 @@ import { isoloop } from '@isoloop/vite';
 import { ui } from 'ui/vite';
 import { defineConfig, type Alias, type Plugin } from 'vite';
 import { browserCheck } from '../../../shared/browser-check.ts';
+import { optInOutput } from '../../../shared/opt-in.ts';
 
 const src = (p: string): string => fileURLToPath(new URL(`./src/${p}`, import.meta.url));
 
@@ -154,6 +155,8 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: build === 'mixed-preact' ? 'dist/mixed/preact' : `dist/${build}`,
       emptyOutDir: true,
+      // The devtools panel and WebMCP, loaded only when asked for, as `opt-in-*`.
+      rolldownOptions: { output: optInOutput },
     },
   };
 });
