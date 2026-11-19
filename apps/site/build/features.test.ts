@@ -130,6 +130,7 @@ describe('loadFeatures', () => {
       'placement',
       'balancer',
       'agents',
+      'devtools',
       'frameworks',
       'safety',
       'cost',

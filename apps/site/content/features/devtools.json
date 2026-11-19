@@ -1,0 +1,66 @@
+{
+  "id": "devtools",
+  "order": 68,
+  "part": "host",
+  "name": "Devtools.",
+  "line": "Experimental: a panel in the page, run as an isolate of its own, showing the isolates, the bus and a live record log.",
+  "text": [
+    "Devtools are experimental. `connectDevtools(kernel)` from `@isoloop/devtools` (new in 0.1.0-next.4; the log and its skipped count from 0.1.0-next.5) puts a button in a corner of the page; a click or Alt+Shift+D opens a panel with three views. Isolates: each one’s state, lag, busy time, crash restarts, pool and memory, with Restart, Kill and Block on each row. Bus: each topic’s rate, head offset and retained count, each subscription’s lag and credit, and rejected publishes. Log: live records, at most 50 a second, with a count of what that cap left out.",
+    "The panel is a visual isolate in its own worker, never pooled, so a crash or hang in it doesn’t reach the page, and the supervisor restarts it like any other. It lists itself, marked devtools. It reads the kernel’s inspection feed, `kernel.inspect()`, through the `inspect` grant on a port of its own, so it keeps working while the bus restarts, and its traffic stays out of the bus figures it shows. The dev MCP reads the same feed for a coding agent.",
+    "Memory per isolate is measured only in Chromium on a cross-origin isolated page, while a reader listens, so a figure can be many seconds old. Nothing gates the controls in production, and killing a pool member stops its whole worker. With nothing reading it, the feed costs a buffer of the last 200 events, about 18 KB on the plant dashboard; what an open feed costs is on the plant example’s measurements."
+  ],
+  "demo": "devtools-code",
+  "since": "0.1.0-next.4",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/devtools/src/index.ts",
+      "symbol": "connectDevtools"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/devtools/src/devtools.test.ts",
+      "test": "restarts after a crash, like any isolate"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/devtools/src/devtools.test.ts",
+      "test": "mounts its button in the corner and opens a panel that lists itself"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/devtools.spec.ts",
+      "test": "keeps logging through a bus restart"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/devtools.spec.ts",
+      "test": "counts the records left out over the cap, from zero each time it opens"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/inspect.test.ts",
+      "test": "keeps the last 200 events, oldest first, whether inspected or not"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/guide/devtools.md"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/guide/inspection.md"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/adr/0020-inspection-feed.md"
+    },
+    {
+      "repo": "web",
+      "path": "apps/dashboards/plant/e2e/devtools.spec.ts"
+    },
+    {
+      "repo": "web",
+      "path": "apps/dashboards/markets/e2e/devtools.spec.ts"
+    }
+  ]
+}

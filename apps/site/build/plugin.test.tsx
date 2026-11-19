@@ -98,6 +98,7 @@ const data: SiteData = {
     placement: 'p',
     balancer: 'b',
     agents: 'a',
+    devtools: 'dt',
     grants: 'g',
     react: 'r',
     preact: 'pr',
