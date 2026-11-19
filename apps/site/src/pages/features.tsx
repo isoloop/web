@@ -15,6 +15,9 @@ const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/poo
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
 const BALANCER_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/balancer.md';
 const PROCESSOR = '/examples/processor/';
+const AGENTS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/agents.md';
+const MARKETS_TOOLS =
+  'https://github.com/isoloop/web/blob/main/apps/dashboards/markets/src/isoloop/contracts.ts';
 
 /** A feature's section: its heading in the gutter, with the bar of its part of the system, then its text and its figure. */
 function Feature({ entry, children }: { entry: Entry; children: ComponentChildren }): VNode {
@@ -219,6 +222,17 @@ function Features({ samples, features, examples }: SiteData): VNode {
         </p>
         <p>
           <a href={PROCESSOR}>{f.balancer.example}</a>
+        </p>
+      </>
+    ),
+    'agents-code': (
+      <>
+        <Code>{samples.agents}</Code>
+        <p>
+          <a href={AGENTS_GUIDE}>{f.agents.guide}</a>
+        </p>
+        <p>
+          <a href={MARKETS_TOOLS}>{f.agents.example}</a>
         </p>
       </>
     ),

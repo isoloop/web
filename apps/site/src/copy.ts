@@ -198,7 +198,7 @@ export const home = {
     label:
       'Isoloop isn’t at 0.1 yet, and the API may change. These are prereleases from the main branch, published under the next tag.',
     command:
-      'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next',
+      'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp@next',
     guide: 'The hosting guide',
   },
 };
@@ -206,9 +206,9 @@ export const home = {
 export const featuresPage = {
   title: 'Features',
   description:
-    'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, your framework, safety, and the cost.',
+    'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, tools for agents, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
-  lede: 'Code that shares data shouldn’t share an event loop. That idea runs through ten parts of one toolchain. Three run live below, on basic, the smallest example, running in this page; the rest are shown as code or as a still.',
+  lede: 'Code that shares data shouldn’t share an event loop. That idea runs through eleven parts of one toolchain. Three run live below, on basic, the smallest example, running in this page; the rest are shown as code or as a still.',
   changelog: 'What changed, release by release',
   containment: {
     caption:
@@ -302,6 +302,11 @@ export const featuresPage = {
     ],
     guide: 'The balancer guide',
     example: 'Watch it move tasks in the processor example',
+  },
+  // Source: isoloop/isoloop docs/guide/agents.md, at the library pin.
+  agents: {
+    guide: 'The Agents guide',
+    example: 'The markets dashboard’s two tools',
   },
   frameworks: {
     tabs: [

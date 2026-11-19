@@ -129,6 +129,7 @@ describe('loadFeatures', () => {
       'durable',
       'placement',
       'balancer',
+      'agents',
       'frameworks',
       'safety',
       'cost',

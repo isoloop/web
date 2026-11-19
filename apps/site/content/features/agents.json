@@ -1,0 +1,74 @@
+{
+  "id": "agents",
+  "order": 67,
+  "part": "host",
+  "name": "Tools for agents.",
+  "line": "Experimental: topics you choose become tools that a coding agent, or a browser’s agent, can call.",
+  "text": [
+    "Tools for agents are experimental. A requestable topic, one with a `reply`, can carry a `tool` description, and the kernel’s `agents.expose` lists which of them agents may call. Each becomes a tool whose input and output JSON Schemas come from the topic’s own schemas. The isolate that answers it replies as it does to any request, whichever agent asked.",
+    "In development, `npx isoloop mcp` serves the tools to a coding agent over MCP, with tools of its own for reading the page: its isolates, topics, records and events. The page pairs only with the CLI’s token and from an allowed origin. Tools that change something, and the CLI’s restart, kill, block, publish and request, are listed only with `--allow-write`. `@isoloop/vite` fails a production build that still contains the dev MCP.",
+    "In the browser, `@isoloop/webmcp` (new in 0.1.0-next.4, Firefox from 0.1.0-next.5) registers the same tools with WebMCP, a Community Group draft. Chromium 158 and Firefox 159 both keep it behind a flag, and it’s tested under Playwright only. Firefox’s agent sees only the read-only hint, and can’t cancel a call.",
+    "The hints, read-only, consequential and untrusted content, describe a tool; they don’t stop a call, so asking the user first is the agent’s job, or the page’s. Delivery is at least once, so a tool that changes something has to recognise a request it has already handled."
+  ],
+  "demo": "agents-code",
+  "since": "0.1.0-next.3",
+  "proof": [
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/agents.ts",
+      "symbol": "buildTools"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/agents.test.ts",
+      "test": "lists each exposed tool with its flags, JSON Schemas and timeout"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/agents.test.ts",
+      "test": "still gets the reply when the responder crashes and restarts within the timeout"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/host/src/dev-mcp.ts",
+      "symbol": "connectDevMCP"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/cli/src/mcp/mcp.test.ts",
+      "test": "keeps tools that change something behind --allow-write"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/cli/src/mcp/mcp.test.ts",
+      "test": "refuses a page from another origin, or with none"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/vite/src/guard.test.ts",
+      "test": "fails a production build that contains connectDevMCP"
+    },
+    {
+      "repo": "isoloop",
+      "path": "packages/webmcp/src/index.ts",
+      "symbol": "connectWebMCP"
+    },
+    {
+      "repo": "isoloop",
+      "path": "e2e/webmcp.spec.ts",
+      "test": "a crash mid-call: the isolate restarts and the reply still arrives"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/guide/agents.md"
+    },
+    {
+      "repo": "isoloop",
+      "path": "docs/adr/0018-tools-for-agents.md"
+    },
+    {
+      "repo": "web",
+      "path": "apps/dashboards/markets/e2e/dev-mcp.spec.ts"
+    }
+  ]
+}
