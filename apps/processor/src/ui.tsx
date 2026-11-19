@@ -22,6 +22,8 @@ export const REASONS: Record<string, string> = {
   backlog: 'falling behind',
   /** A quiet task joining another pool to free a worker (M3i). */
   pack: 'packed',
+  /** A second quarantine folding into the first, so a task falling behind gets its worker (M3j). */
+  room: 'making room',
   /** A first long task: noted, nothing moves (M3i). */
   noted: 'spike noted',
   /** Falling behind with nowhere to give it more CPU (M3i). */
