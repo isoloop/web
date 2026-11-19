@@ -1,8 +1,28 @@
 # plant
 
+## 0.3.0
+
+### Minor Changes
+
+- `?devtools=1` on the Isoloop build adds the devtools panel (`@isoloop/devtools`, experimental) in the bottom-right corner: each isolate's state, lag, busy time and controls, the bus's topics and subscriptions, and a live record log, drawn by an isolate of its own that keeps working through a bus restart. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it; each build's JavaScript figure leaves the panel out.
+- da9e138: The Isoloop build takes `?inspect=1`, which keeps a reader on the kernel's inspection feed for the whole run, and the comparison gains `isoloop:matched+inspect` and a ring-buffer figure, so the feed's cost can be measured (M4b task 6). `PLANT_COI=1` runs the preview server cross-origin isolated and the Chromium comparison in full Chromium, so the feed also measures memory per isolate. The *Comparison (plant)* workflow has a report-only `inspect` job. The main-thread memory sampler no longer leaves an uncaught error where the browser refuses the measurement. Built on `@isoloop/*` with `kernel.inspect()` (ADR 0020).
+
+### Patch Changes
+
+- f2e4767: On the interactive pages, an automatic widget that crashes past the kernel's restart limit is labelled "stopped: crashed too often" in its header. The balancer leaves it where it is and doesn't move or restart it.
+- On `@isoloop/*@0.1.0-next.4`. When a member sharing a pool falls behind and the worker cap leaves it nowhere to go, the balancer folds a second quarantine pool of offenders into the first, so the member gets that worker. On the interactive boards a widget moved this way shows "moved to Quarantine: making room for a widget falling behind", and in the File processor the move log says "making room".
+- On `@isoloop/*@0.1.0-next.5`. The balancer counts a pool toward `maxWorkers` from the moment a move claims it, so two moves in one decision can't open a pool past the cap. A second quarantine pool folds into the first like with like: offenders join offenders, and the other half of a bisect joins its first half.
+- 373d33b: The examples page's Plant tab gains the inspection feed's cost: `matched` at 5 kHz with a reader on `kernel.inspect()` against without, on cross-origin isolated and headless Chromium, with Firefox in words. Memory before garbage collection is 4 MB higher with the feed open on headless Chromium (+2 to +7), in every round, the one gap on one side of zero; total CPU on isolated Chromium leans about +1 point, within its spread (−7 to +1); the other gaps cross zero. The ring buffer is about 18 KB on Chromium and 15 KB on Firefox.
+- On `@isoloop/*@0.1.0-next.2`, with three balancer fixes from M3j:
+  
+  - A never-measured isolate's first way out of the quarantine, where it starts, no longer counts toward its move budget.
+  - A quiet pool of several isolates packs back into another, one isolate a minute.
+  - A backlog has to rise over two 10 s windows in a row before anything moves.
+- On `@isoloop/*@0.1.0-next.3`. A consumer-group member that crashes partway through a batched delivery keeps the records it settled, so they aren't sent to the next member again (ADR 0016, point 17). Before, a corrupt file that crashed its processor after the files before it in the batch were settled came back until the kernel gave up on every processor of its kind.
+
 ## Before Changesets
 
-The sections below were written on 2026-11-17 from the git history, the release tags and their PRs ([ADR 0004](../../../docs/adr/0004-publishing-and-governance.md), step 8). Changesets writes each release's section from the next one on. Each release is tagged `plant-v<version>` and deployed to isoloop.dev from that tag. A deploy builds every app at its commit, so a change can go live with another app's tag first; each change is listed under the first `plant-v*` tag that includes it.
+The sections below were written on 2026-11-17 from the git history, the release tags and their PRs ([ADR 0004](../../../docs/adr/0004-publishing-and-governance.md), step 8). Changesets writes the sections above them. Each release is tagged `plant-v<version>` and deployed to isoloop.dev from that tag. A deploy builds every app at its commit, so a change can go live with another app's tag first; each change is listed under the first `plant-v*` tag that includes it.
 
 ## 0.2.0
 
