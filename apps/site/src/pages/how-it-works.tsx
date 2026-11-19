@@ -165,7 +165,7 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
           />
         </>
       ),
-      diagrams: [],
+      diagrams: ['rendering'],
     },
     {
       id: 'supervisor',

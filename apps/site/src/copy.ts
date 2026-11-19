@@ -467,6 +467,41 @@ export const howItWorks = {
           'Each subscriber commits what its handlers finished, every 100 ms by default, which also returns credit.',
         ],
       },
+      rendering: {
+        lead: 'One visual isolate’s frame. The top row runs left to right, from the isolate’s code to the page; the rows below carry events and host calls back to the worker.',
+        parts: [
+          [
+            'Isolate’s worker',
+            'The isolate’s UI code, React, Preact or plain DOM, changes the worker’s `document`: the isoloop-dom subset. The recorder turns every change in one microtask into one batch. `ctx.host` and event dispatch live here too.',
+          ],
+          [
+            'Compositor',
+            'One queue per surface. Each animation frame it applies queued batches round-robin across surfaces while 8 ms of work lasts; the first batch of a frame always applies, and a batch is never split.',
+          ],
+          [
+            'Applier + registry',
+            'Writes each batch into the surface. Every tag, attribute and URL passes the registry first: unknown tags become `div`, and no script-capable tag or `on*` attribute is ever created.',
+          ],
+          [
+            'Surface shadow root',
+            'The `<iso-surface>` on the page. The kernel’s `styles` and the isolate’s `ctx.styles` are adopted here and don’t leak out.',
+          ],
+          [
+            'EventBridge and Router',
+            'Delegated listeners on the shadow root. An event goes back only if the isolate listens for it on the target or an ancestor; with routing on, same-origin link clicks go to the router.',
+          ],
+          [
+            'Host calls',
+            '`measure`, `focus`, `scrollIntoView` and `requestCanvas`, run in the compositor’s frame.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'The isolate renders; the subset records the changes, and at the end of the microtask they leave as one `patch`, with any new stylesheets.',
+          'The compositor queues the patch and applies it in the next frame that has budget for it; the applier sanitises and writes it.',
+          'A click on the surface reaches the EventBridge, which sends the worker an event naming its target and the listeners on its path. The worker dispatches it with capture and bubble.',
+          '`ctx.host.measure(node)` first sends what the recorder holds. The call runs after every batch sent before it, so it measures their layout. `requestCanvas` answers with an `OffscreenCanvas` instead.',
+        ],
+      },
       'isolate-lifecycle': {
         lead: 'The supervisor’s states for one isolate. The main path runs along the middle; failures branch off it.',
         parts: [
@@ -595,7 +630,7 @@ export const howItWorks = {
         items: [
           'Layout reads are asynchronous: `await ctx.host.measure(node)` instead of `getBoundingClientRect()`.',
           'An isolate can’t call `preventDefault` in time. The host always prevents `submit`, and same-origin link clicks go to the router.',
-          'Only these events reach the worker: click, dblclick, input, change, keydown, keyup, submit, focusin, focusout, pointerdown and pointerup, and pointer moves, at most one per frame. There’s no wheel, scroll or drag yet.',
+          'Only these events reach the worker: click, dblclick, input, change, keydown, keyup, submit, focusin, focusout, pointerdown and pointerup; pointer moves, at most one per frame; and scroll, at most one per frame for each scrolled element. There’s no wheel or drag yet.',
         ],
       },
       code: 'The Host tab’s counter, as a component',

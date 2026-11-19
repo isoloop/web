@@ -24,6 +24,7 @@ export const DIAGRAM_ORDER = [
   'runtime-topology',
   'placement',
   'bus-publish',
+  'rendering',
   'isolate-lifecycle',
   'restart-own-worker',
   'restart-pool',

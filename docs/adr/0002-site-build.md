@@ -86,7 +86,7 @@ In this order:
 
 ### 6. The library's diagrams
 
-- **Where they come from:** the seven core diagrams live in `isoloop/isoloop` under `docs/diagrams/`, with their drift test against the code (ADR 0001, decision 1). The site's build fetches that folder at the sha pinned in `apps/site/library.lock`:
+- **Where they come from:** the core diagrams live in `isoloop/isoloop` under `docs/diagrams/`, with their drift test against the code (ADR 0001, decision 1). The site's build fetches that folder at the sha pinned in `apps/site/library.lock`:
   - in CI, a sparse checkout of `isoloop/isoloop` at that sha
   - locally, `pnpm --filter site fetch-library`
 - **Bumping the pin** is a site PR.
@@ -233,7 +233,7 @@ The maintainer's review: `/how-it-works/` was seven diagrams with a paragraph ea
 
 - **The page is a walkthrough** of the runtime, one section per part: the host and its isolates; workers and pools; topics, records and the bus; rendering from a worker; the supervisor; restarts and catch-up; persistence and bus crashes; grants and safety; then the hosting policy (the Pages gap, as before) and where to go next.
 - **One step at a time.** A row of step tabs (short names: Overview, Host, Pools, Bus, Rendering, Supervisor, Restarts, Persistence, Safety) sits under the introduction and stays below the header while scrolling. Each tab is a link to the step's `#id`, so links, the back button and reloads keep the step; Previous and Next close each step. Without JS every step shows in order and the tabs are a list of contents. The hosting policy and where to go next stay below the steps, always shown.
-- **The diagrams sit in the step they explain, at the page's full width** and nearly a screen tall (`min(85svh, 60rem)`), not in the prose column. The runtime topology is the overview's; rendering from a worker has none. All seven are still copied and shown; the pin moves to the end of the page.
+- **The diagrams sit in the step they explain, at the page's full width** and nearly a screen tall (`min(85svh, 60rem)`), not in the prose column. The runtime topology is the overview's. Every core diagram is still copied and shown; the pin moves to the end of the page. Rendering from a worker had none until isoloop#263 added `rendering`, the eighth (2026-11-19); its step shows it.
 - **On the page, a diagram is the drawing alone** (`?embed=1`: none of the viewer's controls, title or cards), its frame sized to the drawing's proportions (its SVG's `viewBox`, read at build time) so all of it shows, at most `min(85svh, 60rem)` tall. **"Open full size" opens the viewer's presentation stage** (`?present=1`), with every control: theme, style, motion, export, route, lens, zoom.
 - **Each diagram is described in words** under it: what its regions or columns are, then its arrows in order, from the diagram's JSON at the pin (the parts the library's drift test checks). A reader who can't make out the drawing still gets all of it.
 - **Short code samples,** type-checked in `apps/samples` (`src/how/` for the new ones, reusing the features page's where they fit), highlighted like every other code block.
