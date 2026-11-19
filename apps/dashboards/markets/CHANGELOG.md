@@ -1,5 +1,17 @@
 # markets
 
+## 0.8.0
+
+### Minor Changes
+
+- 10b61c9: `?devtools=1` on the Isoloop build adds the devtools panel (`@isoloop/devtools`, experimental) in the bottom-right corner: each isolate's state, lag, busy time and controls, the bus's topics and subscriptions, and a live record log, drawn by an isolate of its own that keeps working through a bus restart. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it; each build's JavaScript figure leaves the panel out.
+- 10b61c9: In a browser with WebMCP (behind a flag in Chromium and Firefox), the Isoloop build lists its two agent tools, `markets.quote.v1` and `markets.alerts.create.v1`, to the browser's agent through `@isoloop/webmcp`. Without WebMCP the page loads none of its code.
+
+### Patch Changes
+
+- a7c0654: On `@isoloop/*@0.1.0-next.4`. When a member sharing a pool falls behind and the worker cap leaves it nowhere to go, the balancer folds a second quarantine pool of offenders into the first, so the member gets that worker. On the interactive boards a widget moved this way shows "moved to Quarantine: making room for a widget falling behind", and in the File processor the move log says "making room".
+- c4503e5: On `@isoloop/*@0.1.0-next.5`. The balancer counts a pool toward `maxWorkers` from the moment a move claims it, so two moves in one decision can't open a pool past the cap. A second quarantine pool folds into the first like with like: offenders join offenders, and the other half of a bisect joins its first half.
+
 ## 0.7.0
 
 ### Minor Changes
