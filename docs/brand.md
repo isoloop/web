@@ -12,8 +12,8 @@ The logo is **responsive**: a compact mark for small places, and a fuller one wh
 
 | Mark | What it is | Use it for | Smallest size |
 | --- | --- | --- | --- |
-| **Everyday mark** | The cube with the woven ribbon, no ring | the site header, favicon, docs, README, npm and GitHub org avatars: anywhere small | 16 px, using the flat version |
-| **Expressive mark** | The cube and ribbon inside a circular cycle arrow (two arrowheads) | social cards, the landing hero or footer at large size, the launch post, stickers: anywhere with room to show the loop | 64 px |
+| **Everyday mark** | The cube with the woven ribbon, no ring | the site header, favicon, docs, the npm and GitHub org avatars (the GitHub one on navy `#161c2c`): anywhere small | 16 px, using the flat version |
+| **Expressive mark** | The cube and ribbon inside a circular cycle arrow (two arrowheads) | social cards, the library's README header and GitHub social preview, the landing hero or footer at large size, the launch post, stickers: anywhere with room to show the loop | 64 px |
 
 Below 64 px, always use the everyday mark. At small sizes the ring takes up the space and the cube shrinks to a few pixels; at 16 px it becomes a circle nobody can recognise. That was checked in the site header and in a browser tab.
 
@@ -50,7 +50,7 @@ The social style is the **dark** expressive mark on navy `#161c2c`, with a soft 
 | X / Twitter header | 1500 × 500 | The mark on the **right**, timeline tracks running out to the left, headline beside it. The profile picture covers the bottom left on X, so the mark must not sit there. |
 | Avatar | 400 × 400 | The expressive mark, centred, with a soft glow |
 
-The headline is the site's: "Event-loop isolation for web apps".
+The headline is the site's: "Event-loop isolation for JavaScript apps".
 
 ## App and social tile
 
