@@ -1118,174 +1118,86 @@
   border-top: 0;
 }
 
-/* The blueprint that opens /features/ (src/pages/feature-map.tsx, ADR 0005). */
-.ui-intro > .ui-intro-text:has(.fmap) {
+/* The sticky notes that open /features/ (src/pages/feature-notes.tsx,
+   ADR 0005): one column per tab, one note per feature, tinted in the tab's
+   colour and slightly tilted. */
+.ui-intro > .ui-intro-text:has(.fnotes) {
   max-width: none;
 }
-.fmap ul {
+.fnotes {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1.25rem 1rem;
+  margin: 0;
+}
+.fnotes-col h3 {
+  margin: 0 0 0.75rem;
+  padding-left: 0.6rem;
+  border-left: 4px solid var(--part);
+  font-size: var(--ui-text-s);
+}
+.fnotes-col h3 a {
+  color: var(--ui-text);
+  text-decoration: none;
+}
+.fnotes-col ul {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.8rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.fmap li a {
-  display: inline-flex;
-  align-items: center;
+.fnotes-col li a {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.35rem;
+  min-height: 5.25rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 2px;
+  background: color-mix(in oklch, var(--part) 16%, var(--ui-surface));
+  box-shadow:
+    0 1px 1px oklch(0 0 0 / 0.08),
+    0 6px 10px -6px oklch(0 0 0 / 0.25);
   color: var(--ui-text);
   font-weight: 650;
   font-stretch: 87%;
   text-decoration: none;
+  transform: rotate(-1.2deg);
+  transition: transform 120ms ease-out;
 }
-
-/* A blueprint on a grid. Two rows: the main thread beside the bus, then the
-   workers; the cost along the bottom as a dimension line. */
-.fmap {
-  display: grid;
-  margin: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-areas:
-    'host bus bus'
-    'iso pool dev'
-    'cost cost cost';
-  gap: 0.75rem 1.25rem;
-  padding: 1rem;
-  border: 1px solid var(--ui-rule);
-  border-radius: var(--ui-radius-l);
-  background-color: var(--ui-surface);
-  background-image:
-    linear-gradient(var(--ui-rule) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ui-rule) 1px, transparent 1px);
-  background-size: 1.25rem 1.25rem;
-  background-position: -1px -1px;
+.fnotes-col li:nth-child(2n) a {
+  transform: rotate(1deg);
 }
-.fmap-host {
-  grid-area: host;
+.fnotes-col li:nth-child(3n) a {
+  transform: rotate(-0.4deg);
 }
-.fmap-bus {
-  grid-area: bus;
-  position: relative;
+.fnotes-col:nth-child(2n) li a {
+  transform: rotate(0.8deg);
 }
-/* The wire from the main thread to the bus. */
-.fmap-bus::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 100%;
-  width: 1.25rem;
-  border-top: 1.5px dashed var(--ui-border);
+.fnotes-col li a:hover,
+.fnotes-col li a:focus-visible {
+  transform: rotate(0) translateY(-2px);
 }
-.fmap-isolate {
-  grid-area: iso;
-}
-.fmap-pool {
-  grid-area: pool;
-}
-.fmap-devtools {
-  grid-area: dev;
-}
-.fmap-box {
-  padding: 0.55rem 0.65rem 0.65rem;
-  border: 1.5px dashed var(--part);
-  border-radius: var(--ui-radius-m);
-  background: var(--ui-surface);
-}
-.fmap-box h3 {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin: 0 0 0.45rem;
-  color: var(--ui-text);
-  font-family: var(--ui-font-mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.fmap-box h3::before {
-  content: '';
-  flex: none;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 2px;
-  background: var(--part);
-}
-.fmap-box h3 span {
-  overflow: hidden;
-  color: var(--ui-text-muted);
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.fmap-box ul {
-  gap: 0.4rem;
-}
-.fmap-box li a {
-  padding: 0.2rem 0.55rem;
-  border: 1px solid var(--ui-border);
-  border-radius: var(--ui-radius-m);
+.fnotes-col li a .ui-pill {
+  margin-left: 0;
+  /* On the page's background, where --ui-experimental reaches AA; the note's
+     tint alone doesn't. */
   background: var(--ui-bg);
-  font-size: var(--ui-text-s);
 }
-.fmap-box li a .ui-pill {
-  font-size: 0.62rem;
-  vertical-align: 0;
-}
-.fmap-box li a:hover {
-  border-color: var(--part);
-  box-shadow: inset 3px 0 0 var(--part);
-}
-.fmap-cost {
-  grid-area: cost;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0;
-  font-size: var(--ui-text-s);
-}
-.fmap-cost span {
-  color: var(--ui-text-muted);
-  font-family: var(--ui-font-mono);
-  font-size: 0.72rem;
-}
-/* A dimension line: a rule with end ticks, as on a drawing. */
-.fmap-cost::before {
-  content: '';
-  order: 1;
-  flex: 1;
-  height: 0.6rem;
-  border: 1.5px solid var(--ui-border);
-  border-block: 0;
-  background: linear-gradient(var(--ui-border), var(--ui-border)) center / 100% 1.5px no-repeat;
-}
-.fmap-cost a {
-  order: 2;
-  font-weight: 650;
-  font-stretch: 87%;
+@media (prefers-reduced-motion: reduce) {
+  .fnotes-col li a {
+    transition: none;
+  }
 }
 @media (max-width: 1100px) {
-  .fmap {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-areas: 'host bus' 'iso pool' 'dev dev' 'cost cost';
+  .fnotes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-@media (max-width: 760px) {
-  .fmap {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'host' 'bus' 'iso' 'pool' 'dev' 'cost';
-    row-gap: 1rem;
-  }
-  .fmap-bus::before {
-    top: auto;
-    bottom: 100%;
-    right: auto;
-    left: 50%;
-    width: 0;
-    height: 1rem;
-    border-top: 0;
-    border-left: 1.5px dashed var(--ui-border);
+@media (max-width: 520px) {
+  .fnotes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -32,11 +32,6 @@ export const featureSchema = z.strictObject({
   part: z.enum(['isolate', 'bus', 'pool', 'host', 'cost']),
   /** Its tab on /features/ (ADR 0005); the tabs and their order are in src/pages/features.tsx. */
   tab: z.enum(['isolation', 'bus', 'placement', 'tools', 'safety', 'cost']),
-  /**
-   * Where it sits on the blueprint that opens /features/ (ADR 0005): the part
-   * of the system it runs in, or the cost line along the bottom.
-   */
-  blueprint: z.enum(['host', 'bus', 'isolate', 'pool', 'devtools', 'cost']),
   /** The strip's lead, with its full stop; the section heading drops the stop. */
   name: z.string().regex(/\.$/, 'ends with a full stop'),
   /** Marked with the Experimental pill wherever its name shows (ADR 0005). */
