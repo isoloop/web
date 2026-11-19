@@ -64,6 +64,17 @@ describe('uiPartials', () => {
     expect(header).toContain('role="switch"');
   });
 
+  it('keeps GitHub out of the site nav, beside the theme switch', () => {
+    const header = uiPartials({ header: {} }).header ?? '';
+    const nav = header.slice(header.indexOf('<nav'), header.indexOf('</nav>'));
+    expect(nav).not.toContain('github.com');
+    const end = header.slice(header.indexOf('class="ui-header-end"'));
+    expect(end).toContain(
+      'href="https://github.com/isoloop/isoloop" aria-label="Isoloop on GitHub"',
+    );
+    expect(end).toContain('data-ui-theme-toggle');
+  });
+
   it('fixes the bar dark, with no toggle', () => {
     const { bar } = uiPartials({ bar: true });
     expect(bar).toContain('data-theme="dark"');

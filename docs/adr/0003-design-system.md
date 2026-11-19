@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, for the approved design (decisions 3, 5, 6 and 7; see [the amendment](#amended-for-the-approved-design-2026-11-14))
+- **Amended:** 2026-11-14, for the approved design (decisions 3, 5, 6 and 7; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (decisions 3, 7 and 8: `--ui-experimental` and its contrast pairs; the `.ui-pill` class; GitHub beside the theme switch, out of the site nav)
 - **Answers:** what the site and the examples share so they read as one site, how it's built, and how it changes. Grilled 2026-11-14. Amends [ADR 0002](0002-site-build.md), decision 1.
 
 ## Context

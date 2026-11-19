@@ -2,8 +2,11 @@
   "id": "devtools",
   "order": 68,
   "part": "host",
+  "tab": "tools",
+  "blueprint": "devtools",
   "name": "Devtools.",
-  "line": "Experimental: a panel in the page, run as an isolate of its own, showing the isolates, the bus and a live record log.",
+  "experimental": true,
+  "line": "A panel in the page, run as an isolate of its own, showing the isolates, the bus and a live record log.",
   "text": [
     "Devtools are experimental. `connectDevtools(kernel)` from `@isoloop/devtools` (new in 0.1.0-next.4; the log and its skipped count from 0.1.0-next.5) puts a button in a corner of the page; a click or Alt+Shift+D opens a panel with three views. Isolates: each one’s state, lag, busy time, crash restarts, pool and memory, with Restart, Kill and Block on each row. Bus: each topic’s rate, head offset and retained count, each subscription’s lag and credit, and rejected publishes. Log: live records, at most 50 a second, with a count of what that cap left out.",
     "The panel is a visual isolate in its own worker, never pooled, so a crash or hang in it doesn’t reach the page, and the supervisor restarts it like any other. It lists itself, marked devtools. It reads the kernel’s inspection feed, `kernel.inspect()`, through the `inspect` grant on a port of its own, so it keeps working while the bus restarts, and its traffic stays out of the bus figures it shows. The dev MCP reads the same feed for a coding agent.",

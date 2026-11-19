@@ -46,6 +46,8 @@
   --ui-magenta-2: oklch(0.741 0.121 351.3); /* #e58ab4 */
   --ui-red-1: oklch(0.501 0.178 28.7); /* #b3261e */
   --ui-red-2: oklch(0.768 0.137 25.6); /* #ff8f86 */
+  --ui-orange-1: oklch(0.56 0.15 50); /* #b75400 */
+  --ui-orange-2: oklch(0.8 0.13 62); /* #f9aa60 */
 
   --ui-space-1: 0.25rem;
   --ui-space-2: 0.5rem;
@@ -104,6 +106,7 @@
   --ui-part-isolate: var(--ui-teal-1);
   --ui-part-pool: var(--ui-violet-1);
   --ui-bad: var(--ui-red-1);
+  --ui-experimental: var(--ui-orange-1);
 }
 
 /* dark */
@@ -123,6 +126,7 @@
   --ui-part-isolate: var(--ui-teal-2);
   --ui-part-pool: var(--ui-violet-2);
   --ui-bad: var(--ui-red-2);
+  --ui-experimental: var(--ui-orange-2);
 }
 
 /* dark, without JS: the same block as above (contrast.test.ts checks they match) */
@@ -143,5 +147,6 @@
     --ui-part-isolate: var(--ui-teal-2);
     --ui-part-pool: var(--ui-violet-2);
     --ui-bad: var(--ui-red-2);
+    --ui-experimental: var(--ui-orange-2);
   }
 }

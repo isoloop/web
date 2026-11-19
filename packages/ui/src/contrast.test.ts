@@ -38,6 +38,9 @@ const PAIRS: [string, string, number][] = [
   ['ui-focus', 'ui-bg', 3],
   ['ui-bad', 'ui-bg', 4.5],
   ['ui-bad', 'ui-surface', 4.5],
+  // The experimental pill: small text and its outline in this colour.
+  ['ui-experimental', 'ui-bg', 4.5],
+  ['ui-experimental', 'ui-surface', 4.5],
   // The part colours mark tracks, bars and headings, always next to a name in text.
   ['ui-part-host', 'ui-bg', 3],
   ['ui-part-host', 'ui-surface', 3],

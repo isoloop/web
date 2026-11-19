@@ -1,13 +1,15 @@
 /** @jsxImportSource preact */
 import type { ComponentChildren, VNode } from 'preact';
 import { Table } from 'ui/components';
-import type { Feature as Entry } from '../../build/features.ts';
+import { featureSchema, type Feature as Entry } from '../../build/features.ts';
 import { featuresPage as f, home } from '../copy.ts';
 import { Recording } from './recording.tsx';
 import { Code, CodeTabs } from './code.tsx';
 import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
+import { FeatureMap } from './feature-map.tsx';
+import { Pill } from './pill.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison';
@@ -26,7 +28,7 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
   return (
     <section class="ui-gutter" id={entry.id} aria-labelledby={`${entry.id}-h`}>
       <h2 id={`${entry.id}-h`} data-part={entry.part}>
-        {entry.name.replace(/\.$/, '')}
+        {entry.name.replace(/\.$/, '')} <Pill feature={entry} />
       </h2>
       <div class="ui-body">
         {entry.text.map((t) => (
@@ -37,6 +39,21 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
     </section>
   );
 }
+
+/**
+ * Each tab's colour, from its part of the system (ADR 0005). The tabs and
+ * their order are the schema's (build/features.ts); a Record, so a tab added
+ * there fails the type check until it has a colour here.
+ */
+const TAB_PARTS: Record<Entry['tab'], Entry['part']> = {
+  isolation: 'isolate',
+  bus: 'bus',
+  placement: 'pool',
+  tools: 'host',
+  safety: 'host',
+  cost: 'cost',
+};
+const TABS = featureSchema.shape.tab.options.map((t) => [t, TAB_PARTS[t]] as const);
 
 function Features({ samples, features, examples }: SiteData): VNode {
   const demos: Record<Entry['demo'], VNode> = {
@@ -299,33 +316,34 @@ function Features({ samples, features, examples }: SiteData): VNode {
   };
   return (
     <main class="ui-shell">
-      <PageIntro
-        title={f.heading}
-        after={
-          <nav class="ui-strip" aria-label="Features">
-            <ul>
-              {features.map((x) => (
-                <li key={x.id} data-part={x.part}>
-                  <a href={`#${x.id}`}>
-                    <b>{x.name}</b> {x.line}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        }
-      >
-        <p class="ui-lede">{f.lede}</p>
-        <p>
-          <a href="/changelog/">{f.changelog}</a>
-        </p>
+      <PageIntro title={f.heading}>
+        <FeatureMap features={features} />
       </PageIntro>
 
-      {features.map((entry) => (
-        <Feature key={entry.id} entry={entry}>
-          {demos[entry.demo]}
-        </Feature>
-      ))}
+      {/* One tab per group of features (src/demos/steps.ts, as on /how-it-works/ and
+          /examples/); a #feature link opens its tab. Without JS every group shows. */}
+      <div class="steps features-tabs" data-steps>
+        <nav class="steps-nav" aria-label={f.tabs.label}>
+          <ol>
+            {TABS.map(([tab, part]) => (
+              <li key={tab} data-part={part}>
+                <a href={`#${f.tabs.ids[tab]}`}>{f.tabs.names[tab]}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        {TABS.map(([tab]) => (
+          <div class="features-tab" id={f.tabs.ids[tab]} data-step key={tab}>
+            {features
+              .filter((x) => x.tab === tab)
+              .map((entry) => (
+                <Feature key={entry.id} entry={entry}>
+                  {demos[entry.demo]}
+                </Feature>
+              ))}
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

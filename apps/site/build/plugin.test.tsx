@@ -179,6 +179,20 @@ describe('the pages', () => {
     expect(html).toContain('<script type="module" src="/src/demos/features.ts"></script>');
   });
 
+  it('put every feature on the /features/ blueprint and in one tab, the experimental ones with a pill', () => {
+    const html = renderDocument(named('features'), data, { csp: CSP });
+    const from = html.indexOf('<figure class="fmap"');
+    const map = html.slice(from, html.indexOf('</figure>', from));
+    for (const x of data.features) {
+      expect(map.split(`href="#${x.id}"`)).toHaveLength(2);
+      expect(html.split(`id="${x.id}"`)).toHaveLength(2);
+    }
+    const experimental = data.features.filter((x) => x.experimental).length;
+    expect(experimental).toBeGreaterThan(0);
+    expect(map.split('class="ui-pill"')).toHaveLength(experimental + 1);
+    expect(html.match(/ data-step="true"/g)).toHaveLength(6);
+  });
+
   it('give the landing costs table in both forms, every Δ with its verdict in words', () => {
     const html = renderDocument(named('home'), data, { csp: CSP });
     expect(html).toContain('ui-delta-wide');

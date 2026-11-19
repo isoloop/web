@@ -1,11 +1,15 @@
 // /features/: one basic for the page's three live demos, started when the
-// first of them comes into view; and the framework tabs.
+// first of them comes into view; the feature tabs; and the framework tabs.
 import { recording } from '../copy.ts';
 import { startBus } from './bus.ts';
 import { Channel, supported, whenNear } from './channel.ts';
 import { Recording } from './recording.ts';
 import { startReplay } from './replay.ts';
 import { startTabs } from './tabs.ts';
+import { startSteps } from './steps.ts';
+
+const steps = document.querySelector<HTMLElement>('[data-steps]');
+if (steps) startSteps(steps);
 
 const tabs = document.querySelector<HTMLElement>('[data-tabs]');
 if (tabs) startTabs(tabs);
