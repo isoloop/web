@@ -61,6 +61,6 @@ In a browser with WebMCP, the Isoloop build also lists both tools to the browser
 
 ## Devtools
 
-`?devtools=1` on the Isoloop build adds the [devtools panel](https://github.com/isoloop/isoloop/blob/main/docs/guide/devtools.md) in the bottom-right corner: the isolates with their controls, the bus, and a live record log, drawn by its own isolate. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it. `e2e/devtools.spec.ts` checks the panel on the built page, through a bus restart; `e2e/devtools-dev.spec.ts` checks it under the dev server.
+`?devtools=1` on the Isoloop build adds the [devtools panel](https://github.com/isoloop/isoloop/blob/main/docs/guide/devtools.md) in the bottom-right corner: the isolates with their controls, the bus, the kernel’s own events and a live record log (Messages), drawn by its own isolate. Its button is ringed by twelve arcs that show the kernel’s health. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it. `e2e/devtools.spec.ts` checks the panel on the built page, through a bus restart; `e2e/devtools-dev.spec.ts` checks it under the dev server.
 
 The head-to-head runner is `compare:pairs`: [`comparison/final/`](comparison/final/README.md#how-it-was-measured) has the command that produced the shipped figures.
