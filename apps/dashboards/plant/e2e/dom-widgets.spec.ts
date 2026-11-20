@@ -1,3 +1,4 @@
+/* oxlint-disable -- TEMPORARY diagnostics (web#203) */
 import { expect, test, type Page } from '@playwright/test';
 import { MACHINES } from '../src/core/machines';
 import { scalarsAt } from '../src/core/sensors/signals';
