@@ -19,6 +19,7 @@ import type { Plugin, ViteDevServer } from 'vite';
 import { buildDiagramFiles, DIAGRAMS_PATH, type EmittedFile } from './diagrams.ts';
 import { imagesOf } from './examples.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
+import { robots, sitemap } from './crawl.ts';
 import { PAGE_MARK } from '../src/pages/intro.tsx';
 
 /** Every page's policy (ADR 0002, decision 8). */
@@ -146,6 +147,16 @@ export function site(opts: SiteOptions): Plugin {
       },
     },
     generateBundle() {
+      // For search engines (build/crawl.ts).
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robots() });
+      this.emitFile({
+        type: 'asset',
+        fileName: 'sitemap.xml',
+        source: sitemap(
+          Object.values(opts.pages).map((p) => p.path),
+          opts.data.examples,
+        ),
+      });
       if (existsSync(previewFile()))
         this.emitFile({
           type: 'asset',
