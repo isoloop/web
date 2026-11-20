@@ -131,7 +131,7 @@ test('an experimental guide has the round mark in the sidebar and the full pill 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`/docs/${guide.slug}/`);
   const link = page.locator(`.docs-only-wide .docs-side a[href="/docs/${guide.slug}/"]`);
-  const mark = link.locator('.ui-mark');
+  const mark = link.locator('.ui-experimental-mark');
   await expect(mark).toHaveCount(1);
   await expect(mark).toHaveAttribute('title', 'Experimental');
   await expect(mark.locator('svg')).toHaveAttribute('aria-hidden', 'true');
@@ -149,7 +149,7 @@ test('an experimental guide has the round mark in the sidebar and the full pill 
   const stable = GUIDES.find((g) => g !== `/docs/${guide.slug}/`);
   await page.goto(stable ?? '/docs/');
   await expect(
-    page.locator('.docs-only-wide .docs-side a[aria-current="page"] .ui-mark'),
+    page.locator('.docs-only-wide .docs-side a[aria-current="page"] .ui-experimental-mark'),
   ).toHaveCount(0);
   // The index keeps the pill.
   await page.goto('/docs/');

@@ -9,7 +9,7 @@ import type { VNode } from 'preact';
  */
 export function ExperimentalMark({ label = 'Experimental' }: { label?: string }): VNode {
   return (
-    <span class="ui-mark" title={label}>
+    <span class="ui-experimental-mark" title={label}>
       <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
         <circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.5" />
         <path

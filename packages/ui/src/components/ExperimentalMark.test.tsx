@@ -5,7 +5,7 @@ import { ExperimentalMark } from './ExperimentalMark.tsx';
 
 it('renders the round mark, hidden from assistive tech, with a hidden label and a tooltip', () => {
   const html = render(<ExperimentalMark />);
-  expect(html).toContain('<span class="ui-mark" title="Experimental">');
+  expect(html).toContain('<span class="ui-experimental-mark" title="Experimental">');
   expect(html).toContain('<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">');
   expect(html).toContain('<circle cx="8" cy="8" r="6.9"');
   expect(html).toContain('<path d="M8 4.3v4.5"');

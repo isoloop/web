@@ -336,7 +336,7 @@ describe('the docs pages', () => {
     expect(html).toContain('<a href="/docs/pools/" aria-current="page">Worker pools</a>');
     // In the sidebar an experimental guide gets the round mark, not the pill (ADR 0005, amended).
     expect(html).toContain(
-      '<a href="/docs/balancer/">Balancer<span class="ui-mark" title="Experimental">',
+      '<a href="/docs/balancer/">Balancer<span class="ui-experimental-mark" title="Experimental">',
     );
     expect(html).not.toContain('<a href="/docs/balancer/">Balancer<span class="ui-pill">');
     expect(html).toContain('<h2>Agents and tooling</h2>');
