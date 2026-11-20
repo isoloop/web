@@ -1,5 +1,25 @@
 # site
 
+## 0.6.0
+
+### Minor Changes
+
+- 8372ee3: The docs have a Reference section: the API of every `@isoloop/*` package, one page each at `/docs/api/<package>/`, generated from the published types, plus the `isoloop` command line and a Kernel config link to `KernelConfig`. An experimental export shows the Experimental pill, and each API page is in `llms.txt` and `llms-full.txt` with a Markdown copy at `/docs/api/<package>.md`.
+- 5d44106: The docs are reachable: "Docs" is in the header right after Home, and opens `/docs/`, which lists every section and guide with its one-line description. Each guide's page has the docs layout: the section sidebar with the current page marked and the Experimental mark on the balancer and the devtools panel, the lead, "On this page" on the right, code blocks with a Copy button, and Previous and Next. Below 1100px the contents fold under the lead, and below 760px the sidebar folds into a "Docs" block at the top. The footer links `/llms.txt`, and the docs pages are in the sitemap.
+- 5a6c2dd: The docs have all fourteen guides of `0.1.0-next.8`, in three sections: Start (Getting started, What Isoloop can't hide), Build and Agents and tooling.
+- f7d652c: The header shows the `@isoloop/*` version the site is built from as a pill before GitHub, linking to the changelog.
+
+### Patch Changes
+
+- 580d5be: On `@isoloop/devtools@0.1.0-next.8`. The Devtools entry on /features/ says what the panel shows now: the health ring round its button, four tabs (Isolates with its pools, Bus, Events, Messages), and the kernel's events kept for the whole page session and the last three before it.
+- 4497c63: In the docs sidebar an experimental guide gets a compact round "!" mark after its name, with a tooltip and a hidden "Experimental" label, in place of the full pill. The pill stays on the guide's heading and on `/docs/`.
+- b5885ab: The site says consumer groups and request and reply are experimental in 0.1, as the library marks them from 0.1.0-next.9.
+- 7951c26: The site's build writes the docs for agents: `/llms.txt` in the llmstxt.org format, listing each docs page with its description; a Markdown copy of each page at `/docs/<slug>.md`, with its links made absolute; and `/llms-full.txt`, every guide in nav order.
+- 37b9249: The docs sidebar's Experimental mark sits after a title's last word, so a title that wraps ends in it.
+- 8dc2d1c: The site builds from `isoloop/isoloop` at `0.1.0-next.7`'s version commit, so `/changelog/` includes `0.1.0-next.7`. The build now fetches the library's guides as well as its diagrams, and CI checks that the pin is a published version: every package on npm, with npm's provenance naming the pin as the commit it was built from.
+- 35c7883: The Tools for agents, Balancer and Devtools entries on /features/ no longer list an ADR among their proofs: a proof is code or a test.
+- b5885ab: The site and the plant dashboard use the kernel's snake_case event `bus:durability_degraded` (`@isoloop/*` 0.1.0-next.9).
+
 ## 0.5.3
 
 ### Patch Changes
