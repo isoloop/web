@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { DIAGRAM_ORDER } from './diagrams.ts';
 import { loadFeatures } from './features.ts';
-import { CSP, renderDocument } from './plugin.ts';
+import type { Doc } from './docs/pages.ts';
+import { CSP, docInputs, renderDocument, site } from './plugin.ts';
+import { docPage } from '../src/pages/doc.tsx';
 import type { Page, SiteData } from '../src/pages/index.ts';
 import { PAGES } from '../src/pages/index.ts';
 import { howItWorks } from '../src/copy.ts';
@@ -255,5 +257,46 @@ describe('the pages', () => {
     for (const p of Object.values(PAGES)) {
       expect(renderDocument(p, data, {}).toLowerCase()).not.toMatch(/faster than native/);
     }
+  });
+});
+
+/** A plugin hook called as Vite would, with one id. */
+const call = (hook: unknown, id: string): unknown =>
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the plugin's own hooks, called as Vite would
+  (hook as (id: string) => unknown)(id);
+
+describe('the docs pages', () => {
+  const doc: Doc = {
+    slug: 'pools',
+    section: 'Build',
+    path: '/docs/pools/',
+    title: 'Worker pools',
+    description: 'Pools share a worker.',
+    html: '<h1>Worker pools</h1>\n<p>Pools share a worker.</p>\n',
+    headings: [],
+    source: 'docs/guide/pools.md',
+  };
+
+  it('name one virtual input per guide, under the site folder', () => {
+    expect(docInputs('/s', [doc])).toEqual({ 'docs/pools': '/s/docs/pools/index.html' });
+  });
+
+  it('resolve and load each virtual input as a doc stub, and leave other files alone', () => {
+    const p = site({ pages: {}, data, diagramsDir: '/nowhere', pagesModule: '', docs: [doc] });
+    expect(call(p.resolveId, '/s/docs/pools/index.html')).toBe('/s/docs/pools/index.html');
+    expect(call(p.load, '/s/docs/pools/index.html')).toBe('<!-- doc:pools -->\n');
+    expect(call(p.resolveId, '/s/docs/bus/index.html')).toBeUndefined();
+    expect(call(p.load, '/s/index.html')).toBeUndefined();
+  });
+
+  it("render a guide's HTML in the site's document, with its title, description and canonical path", () => {
+    const html = renderDocument(docPage(doc), data, { csp: CSP });
+    expect(html).toContain('<title>Worker pools · Isoloop</title>');
+    expect(html).toContain('<meta name="description" content="Pools share a worker."/>');
+    expect(html).toContain('<link rel="canonical" href="https://isoloop.dev/docs/pools/"/>');
+    expect(html).toContain('<p>Pools share a worker.</p>');
+    expect(html).toContain('Docs · Build');
+    // Not a header section yet: the docs aren't in the nav until M4c task 11.
+    expect(html).toContain('<!-- ui:header -->');
   });
 });

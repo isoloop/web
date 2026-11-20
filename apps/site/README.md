@@ -1,6 +1,6 @@
 # Site
 
-isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the landing page, the features, how it works, the examples hub and the changelog. The examples themselves are built on their own and put next to these pages by [`scripts/assemble-site.sh`](../../scripts/assemble-site.sh).
+isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the landing page, the features, how it works, the examples hub, the changelog and the docs pages (`/docs/<slug>/`, one per library guide). The examples themselves are built on their own and put next to these pages by [`scripts/assemble-site.sh`](../../scripts/assemble-site.sh).
 
 - **Pages are Preact components**, rendered to static HTML at build time through `ui/render` ([ADR 0003](../../docs/adr/0003-design-system.md)). No framework code reaches the browser; the only script on a page is ui's theme script.
 - **Every page carries** `<meta http-equiv="Content-Security-Policy" content="default-src 'self'">`, and every request is same-origin. The meta is left out in dev, where Vite injects inline styles.
@@ -18,6 +18,9 @@ isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the lan
 | `build/changelog.ts` | Builds `/changelog/` from every published library package's `CHANGELOG.md` at the pin and every app's, newest release first |
 | `build/diagrams.ts` | Rewrites the library's Archify pages to run under the site's policy |
 | `build/docs/render.ts` | `renderMarkdown()`: a docs page's Markdown to HTML, with its title, description, headings and links, and the only file that imports `markdown-it` (M4c). `render.test.ts` is the conformance suite any engine put behind it has to pass. `build/docs/highlight.ts` runs fences through the site's tokenizer |
+| `content/docs.json` | The docs pages' sections and order (M4c, decision 11), validated with zod. It lists exactly the guides in `docs/guide` at the pin: a guide at the pin that isn't listed, or a listed one the pin lacks, fails the build. `leadPending` marks a guide whose lead is still several sentences (M4c task 5): its description is the first sentence, and the build fails once the mark is no longer needed |
+| `build/docs/pages.ts` | Reads `docs.json`, matches it against the pinned guides and renders each through `renderMarkdown()`, with `build/docs/links.ts` rewriting links: another guide → `/docs/<slug>/`; ADRs, plans, source and the rest → GitHub at the pin; a relative link to nothing fails the build, naming the guide and the link |
+| `src/pages/doc.tsx` | A guide's page. Plain until the docs layout (M4c task 11): not in the header or the sitemap yet. The pages have no `index.html` stubs; `docInputs` in `build/plugin.ts` names a virtual one per guide |
 | `build/library.ts` | Fetches the library's `docs/diagrams` and `docs/guide` at the sha in `library.lock`, and reads its other files at that sha (proofs, changelogs) |
 | `build/pin.ts` | Checks the pin is a published version: every package at the pin on npm, and npm's provenance naming the pin as the commit it was built from (ADR 0006) |
 | `scripts/` | `serve.ts` (static server, as Pages), `linkcheck.ts`, `screenshots.ts`, `fetch-library.ts`, `check-pin.ts` |
