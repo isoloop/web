@@ -7,7 +7,7 @@
 - 8372ee3: On `@isoloop/*@0.1.0-next.10`, with the API's TSDoc complete. Nothing in the apps changes.
 - 718f2c0: On `@isoloop/*@0.1.0-next.6`. A pool's worker stays open until the host ends it after its last member, so an isolate that starts in a pool while the others are leaving it starts normally.
 - b5885ab: On `@isoloop/*@0.1.0-next.9`, the release that freezes the API. In the markets and plant dashboards the devtools button shows the kernel's health as a ring, and the panel has an Events tab with the kernel's history and a Messages tab (formerly Log) for the records the app publishes.
-- a856eff: A `PLANT_AGENT_COST=1` build adds a bench-only requestable topic and an isolate that answers it, and `pnpm compare:agent-cost` measures one `kernel.request` from the main thread on an idle page and at 5 kHz, on Chromium and Firefox (M4a task 13). Without the flag nothing changes: the deployed and measured builds are byte for byte the same.
+- a856eff: A `PLANT_AGENT_COST=1` build adds a bench-only requestable topic and an isolate that answers it, and `pnpm compare:agent-cost` measures one `kernel.request` from the main thread on an idle page and at 5 kHz, on Chromium and Firefox. Without the flag nothing changes: the deployed and measured builds are byte for byte the same.
 - b5885ab: The site and the plant dashboard use the kernel's snake_case event `bus:durability_degraded` (`@isoloop/*` 0.1.0-next.9).
 
 ## 0.3.0
