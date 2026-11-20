@@ -1,5 +1,12 @@
 # processor
 
+## 0.3.1
+
+### Patch Changes
+
+- 8372ee3: On `@isoloop/*@0.1.0-next.10`, with the API's TSDoc complete. Nothing in the apps changes.
+- b5885ab: On `@isoloop/*@0.1.0-next.9`, the release that freezes the API. In the markets and plant dashboards the devtools button shows the kernel's health as a ring, and the panel has an Events tab with the kernel's history and a Messages tab (formerly Log) for the records the app publishes.
+
 ## 0.3.0
 
 ### Minor Changes
