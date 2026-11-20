@@ -77,7 +77,7 @@
                 "label": "Memory after GC",
                 "cells": [
                   ["225 MB", "167 MB", ["−57 MB", "better"]],
-                  ["170 MB", "167 MB", ["−2 MB", "better"]]
+                  ["170 MB", "167 MB", ["−2 MB", "same"]]
                 ]
               },
               {
@@ -92,7 +92,8 @@
         ],
         "firefox": "Firefox: one pool falls behind, at 43.9 files a second and a p95 of 9.0 s. The balancer keeps up, at 50.1 files a second and a p95 of 94 ms, against 51 ms on a worker each.",
         "notes": [
-          "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians."
+          "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
+          "A Δ marked no change has a spread across the rounds that runs both ways."
         ],
         "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0"
       },
@@ -101,7 +102,7 @@
         "heading": "With faults",
         "findings": [
           "In a thousand files, 2 block their processor for 2 s, 100 take ten times the work and 1 crashes it.",
-          "The balancer does 52.5 files a second on 4 workers, against 50.0 on 9 for a worker each and 26.5 in one pool, and no file was lost.",
+          "The balancer does about as many files a second as a worker each, on 4 workers against 9: 52.5 against 50.0, within the rounds' spread. One pool does 26.5. No file was lost.",
           "Its latency is much higher than a worker each: a p95 of 12.7 s against 378 ms. One pool's is 20.5 s."
         ],
         "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, with faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
@@ -125,7 +126,7 @@
               {
                 "label": "Files done per second",
                 "cells": [
-                  ["50.0", "52.5", ["+2.5", "better"]],
+                  ["50.0", "52.5", ["+2.5", "same"]],
                   ["26.5", "52.5", ["+26.2", "better"]]
                 ]
               },
@@ -165,14 +166,14 @@
               {
                 "label": "CPU, all threads",
                 "cells": [
-                  ["255%", "260%", ["+6 pts", "worse"]],
+                  ["255%", "260%", ["+6 pts", "same"]],
                   ["122%", "260%", ["+138 pts", "worse"]]
                 ]
               },
               {
                 "label": "Memory after GC",
                 "cells": [
-                  ["257 MB", "270 MB", ["+9 MB", "worse"]],
+                  ["257 MB", "270 MB", ["+9 MB", "same"]],
                   ["152 MB", "270 MB", ["+105 MB", "worse"]]
                 ]
               },
@@ -189,7 +190,8 @@
         "firefox": "Firefox: 47.9 files a second against 50.3 on a worker each and 20.8 in one pool, and a p95 of 15.2 s against 622 ms and 24.5 s.",
         "notes": [
           "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
-          "Files done per second can be above the 50 produced: the window also clears files queued before it."
+          "Files done per second can be above the 50 produced: the window also clears files queued before it.",
+          "A Δ marked no change has a spread across the rounds that runs both ways."
         ],
         "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0"
       },
