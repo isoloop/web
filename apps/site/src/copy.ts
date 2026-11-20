@@ -486,7 +486,7 @@ export const howItWorks = {
           ],
           [
             'Consume',
-            'Subscribers, a consumer group whose members each get some of the records (by key), and the committed offsets.',
+            'Subscribers, a consumer group (experimental in 0.1) whose members each get some of the records (by key), and the committed offsets.',
           ],
         ] as [string, string][],
         steps: [
@@ -633,7 +633,7 @@ export const howItWorks = {
       heading: 'Topics, records and the bus',
       text: [
         "A topic is declared once, in a contracts module that the host, the bus and every isolate import; its default export, `contracts(…)`, is the list the host passes to `createKernel`. A topic has a name (with its major version, by convention, as in `count.v1`), a schema (from any Standard Schema library; zod here) and a retention: `{ kind: 'last-n', n }` keeps the last n records, `{ kind: 'time', ms }` the records younger than `ms`, and `{ kind: 'compacted' }` the latest record per key.",
-        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence tab). A topic with a `reply` schema also takes requests: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
+        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence tab). A topic with a `reply` schema also takes requests, which are experimental in 0.1: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
       ],
       flow: [
         'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path.',
@@ -685,7 +685,7 @@ export const howItWorks = {
       heading: 'Restarts and catch-up',
       text: [
         'Keep what must survive a restart in a topic: anything else in the isolate’s memory is lost. A restart is a new instance, and it rebuilds its state from the bus. Meanwhile its surface is blank, and it fills again on the new instance’s first paint.',
-        'Each subscription starts where its `from` says, as on the first start. A subscription in a consumer group that has committed resumes after the group’s commit, whatever its `from`.',
+        'Each subscription starts where its `from` says, as on the first start. A subscription in a consumer group (experimental in 0.1) that has committed resumes after the group’s commit, whatever its `from`.',
       ],
       from: [
         '`latest`, the default: live values where only the newest matters, such as a ticker or a status.',
