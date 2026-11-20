@@ -21,7 +21,11 @@ const proofSchema = z
     /** A test title the file must contain. */
     test: z.string().min(1).optional(),
   })
-  .refine((p) => !(p.symbol && p.test), 'a proof names a symbol or a test, not both');
+  .refine((p) => !(p.symbol && p.test), 'a proof names a symbol or a test, not both')
+  .refine(
+    (p) => !/^docs\/(adr|plans)\//.test(p.path),
+    'a proof is code or a test, not an ADR or a plan: public pages say how it works, not why it was decided',
+  );
 
 export const featureSchema = z.strictObject({
   /** The anchor on /features/, and the file name. */
