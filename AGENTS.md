@@ -29,3 +29,11 @@ A change is done when all five hold:
 ## Look and build
 
 The design system, the site's build and the brand are in [ADR 0002](docs/adr/0002-site-build.md), [ADR 0003](docs/adr/0003-design-system.md) and [`docs/brand.md`](docs/brand.md). Pages run under `default-src 'self'`: scripts and styles as same-origin files, every request same-origin.
+
+## Delegating work
+
+When a session hands a task to a subagent:
+
+- **A fork of the session** (same model, the whole conversation) for work that needs judgement: ADRs and other decisions, design, public API, generators and checks, changes across several packages, and anything that may contradict an ADR or a plan.
+- **A fresh agent on a smaller model** (Sonnet today) for a well-specified task with checks behind it: a guide from a plan's task row, site plumbing, a mechanical fix. It sees none of the conversation, so its brief names the task, the plan row, the files to read (this file, the docs rules, the skill it needs), its worktree, and what it may merge.
+- **Either way,** one PR per task, and the rest of this file applies as written.
