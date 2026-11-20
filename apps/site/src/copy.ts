@@ -291,12 +291,12 @@ export const featuresPage = {
   // and "Packing back", at the library pin; the defaults are its options'.
   balancer: {
     caption:
-      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes. Packing while a backlog holds steady, the busy time an app reports, and leaving alone an isolate the kernel gave up on are new in 0.1.0-next.1.',
+      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes, with its quarantine and bisect moves counted among the 3. Packing while a backlog holds steady, the busy time an app reports, and leaving alone an isolate the kernel gave up on are new in 0.1.0-next.1.',
     head: ['When', 'What the balancer does'],
     rows: <Row[]>[
       [
         'An isolate blocks its pool for over 100 ms twice within 60 s, or crashes',
-        'Moves it to the quarantine pool until it has been quiet for 30 s, a window that doubles with each repeat offence, up to 2 minutes',
+        'Moves it to the quarantine pool until it has been quiet for 30 s, a window that doubles with each repeat offence, up to 2 minutes. One that has used its 3 moves stays until the oldest is 5 minutes old',
       ],
       [
         'A pool lags over 50 ms for 3 s, or its members use 80 % of a core or more',
@@ -307,12 +307,12 @@ export const featuresPage = {
         'Moves half its members to quarantine; whichever half blocks again holds the culprit',
       ],
       [
-        'The backlog the app reports for an isolate grows over 10 s',
-        'Gives the isolate a pool of its own if the cap allows, else a less loaded pool',
+        'The backlog the app reports for an isolate grows over two 10 s windows in a row',
+        'Gives the isolate a pool of its own if the cap allows, else a less loaded pool. A second quarantine pool folds into the first to free a worker for it',
       ],
       [
-        'An isolate alone in its pool stays steady for 60 s',
-        'Packs it into another pool that stays under 40 % with it, freeing a worker',
+        'Every isolate in a pool stays steady for 60 s',
+        'Moves them one at a time into another pool that stays under 40 % with all of them, freeing a worker',
       ],
       [
         'The kernel gives up on an isolate',
