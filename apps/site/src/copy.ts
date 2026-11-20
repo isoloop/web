@@ -275,7 +275,7 @@ export const featuresPage = {
   durable: {
     head: ['Topic', 'Before the reload', 'After the reload'],
     caption:
-      'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability-degraded`.',
+      'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability_degraded`.',
   },
   placement: {
     layouts: [
@@ -703,7 +703,7 @@ export const howItWorks = {
       heading: 'Persistence and bus crashes',
       text: [
         "A topic with `durability: 'persistent'` writes its records to the origin private file system (OPFS), batched every 5 ms or 256 records, so a persistent publish resolves a few milliseconds later than a memory one. After a page reload the new bus loads them from disk, and each subscription starts where its `from` says: `committed` reads on after its last commit, `earliest` from what the topic retains. A `memory` topic, the default, starts empty after a reload.",
-        'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability-degraded`. When the origin’s storage is full, publishes reject with `quota_exceeded`; the kernel reports usage with `bus:quota`.',
+        'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability_degraded`. When the origin’s storage is full, publishes reject with `quota_exceeded`; the kernel reports usage with `bus:quota`.',
       ],
       crash: {
         heading: 'When the bus crashes',
