@@ -61,6 +61,24 @@ describe('renderMarkdown: title and description', () => {
       'docs/guide/bus.md:3',
     );
   });
+
+  it("takes the lead's first sentence with lead: 'first-sentence', for a guide still being reshaped", () => {
+    const doc = renderMarkdown(page('', 'The first one. Then `more` follows.'), {
+      lead: 'first-sentence',
+    });
+    expect(doc.description).toBe('The first one.');
+    expect(renderMarkdown(page('', 'Only one.'), { lead: 'first-sentence' }).description).toBe(
+      'Only one.',
+    );
+  });
+
+  it("still holds the first sentence to a full stop and ${MAX_DESCRIPTION} characters with lead: 'first-sentence'", () => {
+    const long = `${'word '.repeat(45)}end. Short.`;
+    expect(() => renderMarkdown(page('', long), { lead: 'first-sentence' })).toThrow(/at most 200/);
+    expect(() => renderMarkdown(page('', 'No end mark'), { lead: 'first-sentence' })).toThrow(
+      /full stop/,
+    );
+  });
 });
 
 describe('renderMarkdown: headings', () => {

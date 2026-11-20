@@ -37,7 +37,8 @@ export function readPin(siteDir: string): string {
 // Auto-gc off: each blob read on demand adds a promisor pack, and past
 // gc.autoPackLimit (50) a lazy fetch would repack the blob-less clone and
 // leave it unable to fetch further blobs.
-const GIT_CONFIG = ['-c', 'gc.auto=0', '-c', 'maintenance.auto=false'];
+// autocrlf off: the guides are read as written, whatever the machine's git config says.
+const GIT_CONFIG = ['-c', 'gc.auto=0', '-c', 'maintenance.auto=false', '-c', 'core.autocrlf=false'];
 
 function git(args: string[], cwd?: string): string {
   return execFileSync('git', [...GIT_CONFIG, ...args], {

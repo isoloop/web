@@ -8,6 +8,9 @@
 // - The hub's screenshots: copied to /examples/img/ (build/examples.ts).
 // - The diagrams: the pinned library pages, rewritten for the policy, under
 //   /how-it-works/diagrams/ (build/diagrams.ts).
+// - The docs: one page per pinned guide at /docs/<slug>/ (build/docs/pages.ts).
+//   They have no index.html stubs on disk: `docInputs` names one per guide,
+//   and this plugin resolves and loads it as `<!-- doc:<slug> -->`.
 // In dev, pages are loaded fresh on each request and a change reloads the page.
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +23,8 @@ import { buildDiagramFiles, DIAGRAMS_PATH, type EmittedFile } from './diagrams.t
 import { imagesOf } from './examples.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
 import { robots, sitemap } from './crawl.ts';
+import type { Doc } from './docs/pages.ts';
+import { docPage } from '../src/pages/doc.tsx';
 import { PAGE_MARK } from '../src/pages/intro.tsx';
 
 /** Every page's policy (ADR 0002, decision 8). */
@@ -39,6 +44,16 @@ const MARKS: Record<string, string> = Object.fromEntries(
 );
 
 const STUB = /^\s*<!--\s*page:([a-z0-9-]+)\s*-->\s*$/;
+const DOC_STUB = /^\s*<!--\s*doc:([a-z0-9-]+)\s*-->\s*$/;
+/** A docs page's input id, as `docInputs` names it, and its slug. */
+const DOC_INPUT = /\/docs\/([a-z0-9-]+)\/index\.html$/;
+
+/** The build inputs for the docs pages: one virtual `docs/<slug>/index.html` each, under `siteDir`. */
+export function docInputs(siteDir: string, docs: readonly Doc[]): Record<string, string> {
+  return Object.fromEntries(
+    docs.map((d) => [`docs/${d.slug}`, `${siteDir}/docs/${d.slug}/index.html`]),
+  );
+}
 
 /** The whole document for a page. `csp` is left out in dev, where Vite injects inline styles. */
 export function renderDocument(page: Page, data: SiteData, opts: { csp?: string }): string {
@@ -80,6 +95,8 @@ export interface SiteOptions {
   diagramsDir: string;
   /** In dev: the module that exports PAGES, loaded fresh on each request. */
   pagesModule: string;
+  /** The docs pages (build/docs/pages.ts), in manifest order. */
+  docs?: readonly Doc[];
 }
 
 function diagramFiles(dir: string): EmittedFile[] {
@@ -101,8 +118,17 @@ const TYPES: Record<string, string> = {
 export function site(opts: SiteOptions): Plugin {
   let server: ViteDevServer | undefined;
   let devDiagrams: Map<string, EmittedFile> | undefined;
+  const docs = new Map((opts.docs ?? []).map((d) => [d.slug, d]));
+  const docOf = (id: string): Doc | undefined => docs.get(DOC_INPUT.exec(id)?.[1] ?? '');
   return {
     name: 'site',
+    resolveId(id) {
+      return docOf(id) && !existsSync(id) ? id : undefined;
+    },
+    load(id) {
+      const doc = docOf(id);
+      return doc && !existsSync(id) ? `<!-- doc:${doc.slug} -->\n` : undefined;
+    },
     configureServer(s) {
       server = s;
       s.watcher.on('change', (file) => {
@@ -112,6 +138,16 @@ export function site(opts: SiteOptions): Plugin {
       });
       s.middlewares.use((req, res, next) => {
         const path = req.url?.split('?')[0] ?? '';
+        const doc = docs.get(/^\/docs\/([a-z0-9-]+)\/?$/.exec(path)?.[1] ?? '');
+        if (doc) {
+          s.transformIndexHtml(path, renderDocument(docPage(doc), opts.data, {}))
+            .then((html) => {
+              res.setHeader('Content-Type', 'text/html');
+              res.end(html);
+            })
+            .catch(next);
+          return;
+        }
         let file: { source: string | Uint8Array; type: string } | undefined;
         if (path.startsWith(`/${DIAGRAMS_PATH}`)) {
           devDiagrams ??= new Map(diagramFiles(opts.diagramsDir).map((f) => [f.fileName, f]));
@@ -137,6 +173,12 @@ export function site(opts: SiteOptions): Plugin {
     transformIndexHtml: {
       order: 'pre',
       async handler(html) {
+        const d = DOC_STUB.exec(html);
+        if (d) {
+          const doc = docs.get(d[1] ?? '');
+          if (!doc) throw new Error(`no docs page "${d[1]}" (content/docs.json)`);
+          return renderDocument(docPage(doc), opts.data, server ? {} : { csp: CSP });
+        }
         const m = STUB.exec(html);
         if (!m) return html;
         const name = m[1] ?? '';

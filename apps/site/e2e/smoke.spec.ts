@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 import { DIAGRAM_ORDER } from '../build/diagrams.ts';
+import { readManifest } from '../build/docs/pages.ts';
 import { expectAccessible } from './accessible.ts';
 
 declare global {
@@ -32,7 +34,20 @@ async function watch(page: Page): Promise<() => Promise<string[]>> {
   };
 }
 
-const PAGES = ['/', '/features/', '/how-it-works/', '/examples/', '/changelog/', '/__specimens/'];
+/** The docs pages, one per guide in content/docs.json (build/docs/pages.ts). */
+const DOCS = readManifest(
+  fileURLToPath(new URL('../content/docs.json', import.meta.url)),
+).sections.flatMap((s) => s.guides.map((g) => `/docs/${g.slug}/`));
+
+const PAGES = [
+  '/',
+  '/features/',
+  '/how-it-works/',
+  '/examples/',
+  '/changelog/',
+  '/__specimens/',
+  ...DOCS,
+];
 
 for (const path of PAGES) {
   test(`${path} loads cleanly and is accessible`, async ({ page }) => {

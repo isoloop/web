@@ -46,6 +46,14 @@ export interface RenderOptions {
   rewrite?: (href: string, kind: DocLink['kind']) => string;
   /** Names the source in errors, for example `docs/guide/bus.md`. */
   file?: string;
+  /**
+   * How the description is taken. `'strict'` (the default): the first
+   * paragraph, which must be one sentence of at most 200 characters.
+   * `'first-sentence'`: the first sentence of that paragraph, for a guide
+   * written before the rule whose lead is still being reshaped; it must still
+   * end with a full stop and fit in 200 characters.
+   */
+  lead?: 'strict' | 'first-sentence';
 }
 
 /** A page that breaks the docs' rules; the message names the file and the line. */
@@ -120,8 +128,10 @@ export function renderMarkdown(src: string, o: RenderOptions = {}): RenderedDoc 
       `${where((first.map?.[1] ?? 0) + 1)}: the title is followed by a one-sentence description`,
     );
   }
-  const description = plain(tokens[4]).replace(/\s+/g, ' ').trim();
+  const lead = plain(tokens[4]).replace(/\s+/g, ' ').trim();
   const descLine = (after.map?.[0] ?? 0) + 1;
+  const cut = o.lead === 'first-sentence' ? SENTENCE_BREAK.exec(lead) : null;
+  const description = cut ? lead.slice(0, cut.index + cut[0].trimEnd().length) : lead;
   if (!/[.!?]["')\]]?$/.test(description)) {
     throw new DocError(`${where(descLine)}: the description ends with a full stop`);
   }
