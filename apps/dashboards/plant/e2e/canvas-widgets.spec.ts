@@ -4,6 +4,47 @@ import { faultAt } from '../src/core/sensors/faults';
 import { params, scalarsAt } from '../src/core/sensors/signals';
 import { BUILDS, WEBKIT_STOPS, inScope, stopsOn, FIRST_DATA } from './scope';
 
+// TEMPORARY diagnostics (web#203): log the kernel's crashes in each test.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const log: unknown[] = [];
+    (window as unknown as { __log: unknown[] }).__log = log;
+    let k: { on: (ev: string, fn: (e: Record<string, unknown>) => void) => void } | undefined;
+    Object.defineProperty(window, 'kernel', {
+      configurable: true,
+      get: () => k,
+      set: (v: NonNullable<typeof k>) => {
+        k = v;
+        for (const ev of ['isolate:crash', 'isolate:failed', 'bus:crash', 'bus:restart'])
+          v.on(ev, (e) =>
+            log.push({
+              ev,
+              t: Math.round(performance.now()),
+              id: e['id'],
+              pool: e['pool'],
+              reason: e['reason'],
+              m: String(e['message'] ?? '').slice(0, 60),
+            }),
+          );
+        v.on('isolate:ready', (e) =>
+          log.push({ ev: 'ready', t: Math.round(performance.now()), id: e['id'] }),
+        );
+      },
+    });
+  });
+});
+test.afterEach(async ({ page }, info) => {
+  const log = ((await page
+    .evaluate(() => (window as unknown as { __log?: unknown[] }).__log)
+    .catch(() => [])) ?? []) as { ev: string; t: number; pool?: string }[];
+  const crashes = log.filter((e) => e.ev !== 'ready');
+  const pools = [...new Set(crashes.map((e) => `${e.pool}@${e.t}`))].slice(0, 12);
+  const ready = log.filter((e) => e.ev === 'ready');
+  console.log(
+    `DIAG ${info.status} retry=${info.retry} ${info.title.slice(0, 30)} ready=${ready.length} lastReady=${ready.at(-1)?.t} crashes=${crashes.length} firstCrash=${JSON.stringify(crashes[0] ?? null)} pools=${pools.join(',')}`,
+  );
+});
+
 // M3d task 4: each machine's canvas widgets draw on every build, and what they
 // draw matches the seeded data, so the builds agree with each other.
 const drawn = (page: Page, slot: string) => page.locator(`[data-slot="${slot}"] canvas`).first();
