@@ -65,7 +65,7 @@ test('the bus view shows the topics with their head offsets', async ({ page }) =
 
 test('the log shows live records, and keeps going through a bus restart', async ({ page }) => {
   await open(page);
-  await panel(page).locator('[data-tab="log"]').click();
+  await panel(page).locator('[data-tab="messages"], [data-tab="log"]').click();
   await expect(panel(page).locator('[data-log-table] tbody tr')).not.toHaveCount(0);
 
   await panel(page).locator('[data-log-filter]').fill('plant.events');
