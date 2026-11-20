@@ -2,7 +2,7 @@
 
 - **Status:** Proposed
 - **Date:** 2026-11-19
-- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20))
+- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20)); 2026-11-20 (decision 1a: Docs right after Home, and the library version as a pill before GitHub; see [the amendment](#amended-docs-first-and-the-version-pill-2026-11-20))
 - **Answers:** how a reader moves through a long page on the site, and how a feature that isn't stable yet is marked. Grilled 2026-11-19 (Q1–Q12), after a local prototype the maintainer reviewed. Amends [ADR 0002](0002-site-build.md) (the features page, the step tabs) and [ADR 0003](0003-design-system.md) (a status colour, the pill, the header's GitHub link).
 
 ## Context
@@ -44,6 +44,12 @@ The header's nav lists only the site's pages: Home, Features, How it works, Exam
 - The mark is Octicons' `mark-github` (MIT), inline as an SVG path.
 
 The dashboards' bar is unchanged.
+
+#### Amended: Docs first, and the version pill (2026-11-20)
+
+The maintainer's review before the docs go live:
+- **The nav:** Home, Docs, Features, How it works, Examples. Docs is where people who already know Isoloop go most, so it comes right after Home. This replaces ADR 0006's place for it, after Examples.
+- **The version:** the `@isoloop/*` version the site is built from (`library.lock`) is a pill at the far end, before GitHub, linking to the changelog. It replaces the row under each docs page's title, which also linked the guide's source on GitHub and its Markdown copy. The Markdown copies stay, for `llms.txt`.
 
 ### 2. Features in six tabs
 

@@ -26,7 +26,7 @@ import { render } from './render.ts';
 
 export interface UiOptions {
   /** The full header (site, hub, basic); `current` marks the section. Also adds base.css and theme.js. */
-  header?: boolean | { current?: Current };
+  header?: boolean | { current?: Current; version?: { label: string; href: string } };
   /** The thin, fixed-dark bar (dashboards). No base.css, no theme.js. */
   bar?: boolean;
   /** The footer. */
@@ -133,9 +133,16 @@ export function uiPartials(
   mark?: { light: string; dark: string },
 ): Record<'header' | 'bar' | 'footer', string | null> {
   const current = section ?? (typeof opts.header === 'object' ? opts.header.current : undefined);
+  const version = typeof opts.header === 'object' ? opts.header.version : undefined;
   return {
     header: opts.header
-      ? render(h(Header, { ...(current ? { current } : {}), ...(mark ? { mark } : {}) }))
+      ? render(
+          h(Header, {
+            ...(current ? { current } : {}),
+            ...(mark ? { mark } : {}),
+            ...(version ? { version } : {}),
+          }),
+        )
       : null,
     bar: opts.bar ? render(h(Bar, {})) : null,
     footer: opts.footer ? render(h(Footer, {})) : null,

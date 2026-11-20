@@ -323,11 +323,9 @@ describe('the docs pages', () => {
     expect(html).toContain('<!-- ui:header:docs -->');
     expect(html).toContain('<p class="docs-lead">Pools share <code>a</code> worker.</p>');
     expect(html).toContain('<p>Body.</p>');
-    expect(html).toContain('@isoloop/* 0.1.0-next.7');
-    expect(html).toContain(
-      'href="https://github.com/isoloop/isoloop/blob/abcdef1234567/docs/guide/pools.md"',
-    );
-    expect(html).toContain('<a href="/docs/pools.md">Markdown</a>');
+    // No source, Markdown or version row: the version is the header's pill (ADR 0005, amended 2026-11-20).
+    expect(html).not.toContain('docs-meta');
+    expect(html).not.toContain('<a href="/docs/pools.md">');
     expect(html).toContain('<script type="module" src="/src/demos/copy.ts"></script>');
   });
 

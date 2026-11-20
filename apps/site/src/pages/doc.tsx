@@ -2,8 +2,6 @@
 import type { VNode } from 'preact';
 import { ExperimentalMark } from 'ui/components';
 import type { Doc } from '../../build/docs/pages.ts';
-import { LIBRARY_GITHUB } from '../../build/docs/links.ts';
-import { mdPath } from '../../build/docs/llms.ts';
 import { docsPage as c, marks } from '../copy.ts';
 import type { Page, SiteData } from './types.ts';
 
@@ -79,7 +77,6 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
   const i = data.docs.findIndex((d) => d.slug === doc.slug);
   const prev = i > 0 ? data.docs[i - 1] : undefined;
   const next = i >= 0 ? data.docs[i + 1] : undefined;
-  const source = `${LIBRARY_GITHUB}/blob/${data.pin}/${doc.source}`;
   const hasContents = doc.headings.some((h) => h.depth === 2);
   return (
     <div class="docs-layout">
@@ -106,11 +103,6 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
         {/* Rendered from the pinned guide by renderMarkdown(), which escapes the source's HTML. */}
         {/* oxlint-disable-next-line react/no-danger -- build-time HTML from renderMarkdown (html: false), never user input */}
         <p class="docs-lead" dangerouslySetInnerHTML={{ __html: doc.leadHtml }} />
-        <p class="docs-meta">
-          <a href={source}>{c.source}</a>
-          <a href={mdPath(doc.slug)}>{c.markdown}</a>
-          <span>{c.version(data.libraryVersion)}</span>
-        </p>
         {hasContents ? (
           <details class="docs-fold docs-toc-fold">
             <summary>{c.onThisPage}</summary>
@@ -144,10 +136,6 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
         <aside class="docs-toc docs-only-widest" aria-label={c.onThisPage}>
           <b>{c.onThisPage}</b>
           <Contents doc={doc} />
-          <p class="docs-toc-foot">
-            <a href={source}>{c.source}</a>
-            <a href={mdPath(doc.slug)}>{c.markdown}</a>
-          </p>
         </aside>
       ) : null}
     </div>
@@ -192,9 +180,6 @@ export const docsIndexPage: Page = {
       <main class="docs-article">
         <h1>{c.heading}</h1>
         <p class="docs-lead">{c.lede}</p>
-        <p class="docs-meta">
-          <span>{c.version(data.libraryVersion)}</span>
-        </p>
         {sections(data.docs).map((s) => (
           <section class="docs-index-section" key={s.title} aria-labelledby={sectionId(s.title)}>
             <h2 id={sectionId(s.title)}>{s.title}</h2>
