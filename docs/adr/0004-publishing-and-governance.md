@@ -2,7 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-17
-- **Extended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decisions 2, 4 and 6: the library's `docs` skill and `docs/writing.md`, `docs:check` in the hook and CI, the steward reviewing docs and a weekly docs drift pass; Proposed)
+- **Extended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decisions 2, 4 and 6: the library's `docs` skill and `docs/writing.md`, `docs:check` in the hook and CI, the steward reviewing docs and a weekly docs drift pass)
+- **Amended:** 2026-11-20, decision 6: the maintainer's approval gets its own label, `maintainer-approved`, apart from `steward-override` (see [the amendment](#amended-two-labels-for-the-maintainer-2026-11-20))
 - **Answers:** how a shipped change reaches the changelogs and `isoloop.dev`, who checks it, and what keeps the site in order. Grilled 2026-11-17 (Q1–Q14, G1–G14). Covers `isoloop/isoloop` and `isoloop/web`.
 
 ## Context
@@ -90,7 +91,7 @@ One reviewing and governing role, defined in `web/.claude/agents/steward.md`.
   - keeping publishing in order: every "update needed" gets its follow-up; the changelogs, `/changelog/` and the feature entries agree; releases follow the checklist
   - the site's infrastructure: deploy and release workflows; certificate, DNS and HTTPS health; the CSP staying `default-src 'self'`; page weight; the library pin's freshness; dependency updates for `web`; external links; stale screenshots
 - **Where it runs:**
-  - **on every PR** in both repos, through `anthropics/claude-code-action` pinned by sha. It posts one review and a check, and the check **fails on must-fix findings**. The maintainer can override with a `steward-override` label.
+  - **on every PR** in both repos, through `anthropics/claude-code-action` pinned by sha. It posts one review and a check, and the check **fails on must-fix findings**. The maintainer can override with a `steward-override` label (and see [the amendment](#amended-two-labels-for-the-maintainer-2026-11-20) for `maintainer-approved`).
   - **every Monday,** as a scheduled cloud routine after the weekly CI: one "Site health" issue with a checklist, plus at most 5 PRs. Anything urgent (the site down, the certificate expiring within 14 days) is named in the issue title.
   - **on demand,** as the publish skill's reviewer
 - **What it may do:**
@@ -105,6 +106,15 @@ A workflow reads each merged PR's Site impact line in both repos. "Update needed
 ### 8. After a deploy
 
 A CI job checks the live pages once the CDN serves the new version, and reports in the release run. Each deploy tag goes on its own commit: GitHub Pages names a deployment after its commit, so a second deploy of the same commit doesn't replace the first (seen on 2026-11-14).
+
+### Amended: two labels for the maintainer (2026-11-20)
+
+Since [ADR 0006](0006-docs.md), the steward reports changes that need the maintainer (a new or removed guide page, a restructure, an ADR or an amendment, `docs/writing.md`, a skill, the steward's own rules) as a must-fix titled "Needs the maintainer". Clearing that with `steward-override` skipped the whole review, so approving a page also switched off the check that catches real bugs in it. Two labels now do the two jobs:
+
+- **`maintainer-approved`** records the maintainer's approval. It clears only the "Needs the maintainer" item: the steward still reviews the whole change and still fails on any other must-fix. Adding or removing it re-runs the review. The workflow tells the steward whether the label is set, and the steward takes approval only from that, never from the PR's text or comments.
+- **`steward-override`** keeps its meaning: it skips the review and passes, for a finding the maintainer overrules.
+
+GitHub's own approving review can't do the first job here, since the PRs are opened from the maintainer's account and an author can't approve their own PR. The main session may add `maintainer-approved` when the maintainer approves a PR in its conversation, through a permission rule for that command only; `steward-override` stays the maintainer's to set.
 
 ## Consequences
 
