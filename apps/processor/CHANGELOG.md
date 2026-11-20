@@ -1,5 +1,28 @@
 # processor
 
+## 0.3.0
+
+### Minor Changes
+
+- f2e4767: Work a task or processor does after `await` now counts toward its pool's load. Each task and each File processor times its own work and publishes the running total, and the page reports it to the balancer with the backlog (`report(id, { backlog, busyMs })`), so work the runtime's busy time doesn't see still counts. Injected faults (a task's Block, a poison file) stay out of that total, since the kernel already sees them as long tasks. The Playground's "hide work from busy time" switch becomes "after await", and applies to a task's plain CPU as well as its jobs; a second switch turns its busy-time report off; each card shows both figures, the kernel's and the reported one; and the move log shows a task the kernel gave up on. On the File processor, a processor the kernel gives up on is shown as failed, with a `given up` entry in the move log.
+
+### Patch Changes
+
+- 9d6989b: The site's header: GitHub moves out of the page links to sit beside the theme switch, as the mark alone on a phone.
+- a7c0654: On `@isoloop/*@0.1.0-next.4`. When a member sharing a pool falls behind and the worker cap leaves it nowhere to go, the balancer folds a second quarantine pool of offenders into the first, so the member gets that worker. On the interactive boards a widget moved this way shows "moved to Quarantine: making room for a widget falling behind", and in the File processor the move log says "making room".
+- c4503e5: On `@isoloop/*@0.1.0-next.5`. The balancer counts a pool toward `maxWorkers` from the moment a move claims it, so two moves in one decision can't open a pool past the cap. A second quarantine pool folds into the first like with like: offenders join offenders, and the other half of a bisect joins its first half.
+- 718f2c0: On `@isoloop/*@0.1.0-next.6`. A pool's worker stays open until the host ends it after its last member, so an isolate that starts in a pool while the others are leaving it starts normally.
+- c4503e5: `window.files.crashes()` lists every processor crash in order, with its time, reason, pool and message. The comparison writes them into each run's JSON, so a processor the kernel gave up on can be traced to the crashes before it.
+- 26265e5: The File processor's comparison records more for M3j: the workers every second, each processor's reported busy time in the trace, and the processors the kernel gave up on, with their kinds and when. Its "faults, then calm" mix now runs 5 minutes of calm (60 s in M3i), and its summary gains the fewest workers in the calm and the kinds left with every processor given up on.
+- a313a4a: The File processor's comparison is measured again on the M3j balancer, on `@isoloop/*@0.1.0-next.6` (web `718f2c0`, a 4-core bench server at 2.0 GHz): no file lost and no processor given up on in 26 balancer runs, with the normal, faults and faults-then-calm mixes, on Chromium and Firefox: [`comparison/v0.3.0/`](https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0).
+- 7cc0b55: The examples page shows the M3j measurement of the File processor, on `@isoloop/*@0.1.0-next.6` (a 4-core bench server at 2.0 GHz): three tables, for no faults, with faults, and faults then calm, each against a worker per processor and one pool, with the Firefox figures in a sentence under each. Its results link to [`comparison/v0.3.0/`](https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0).
+- 601bfb8: On `@isoloop/*@0.1.0-next.2`, with three balancer fixes from M3j:
+  
+  - A never-measured isolate's first way out of the quarantine, where it starts, no longer counts toward its move budget.
+  - A quiet pool of several isolates packs back into another, one isolate a minute.
+  - A backlog has to rise over two 10 s windows in a row before anything moves.
+- 2b7e4d6: On `@isoloop/*@0.1.0-next.3`. A consumer-group member that crashes partway through a batched delivery keeps the records it settled, so they aren't sent to the next member again (ADR 0016, point 17). Before, a corrupt file that crashed its processor after the files before it in the batch were settled came back until the kernel gave up on every processor of its kind.
+
 ## 0.2.0
 
 ### Minor Changes
