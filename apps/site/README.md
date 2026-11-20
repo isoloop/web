@@ -11,7 +11,8 @@ isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the lan
 | `src/pages/` | The pages, by name (`src/pages/index.ts`) |
 | `src/copy.ts` | **The page-level text,** with the source of each figure in a comment above it (ADR 0002, decision 10) |
 | `content/features/` | One entry per feature on `/features/` and the landing strip: its name, line, section text, its tab (which also sets its sticky note) ([ADR 0005](../../docs/adr/0005-page-navigation-and-status-marks.md)), `experimental` for the pill, `since`, and `proof` links to the code or tests behind it ([ADR 0004](../../docs/adr/0004-publishing-and-governance.md), decision 5) |
-| `build/plugin.ts` | Renders the stubs, copies the hub's screenshots and the diagrams into the build |
+| `build/plugin.ts` | Renders the stubs, copies the hub's screenshots and the diagrams into the build, and emits `robots.txt` and `sitemap.xml` |
+| `build/crawl.ts` | `robots.txt` (every crawler allowed, the sitemap named) and `sitemap.xml`: the site's pages and every deployed example, from the lists the build renders, so none is left out |
 | `build/examples.ts` | Reads and validates every app's `example.json` (a zod schema); a bad one fails the build, naming the file and the field |
 | `build/features.ts` | Validates the feature entries (zod) and checks every proof: the path, and the export or test title it names, at the library pin or in this checkout; a broken one fails the build, naming the entry and the path |
 | `build/changelog.ts` | Builds `/changelog/` from every published library package's `CHANGELOG.md` at the pin and every app's, newest release first |

@@ -395,3 +395,18 @@ for (const width of [1440, 390]) {
     expect(scroll).toBeLessThanOrEqual(client);
   });
 }
+
+test('robots.txt points at a sitemap whose every page is served', async ({ request }) => {
+  const robots = await request.get('/robots.txt');
+  expect(robots.status()).toBe(200);
+  expect(await robots.text()).toContain('Sitemap: https://isoloop.dev/sitemap.xml');
+  const xml = await (await request.get('/sitemap.xml')).text();
+  const paths = [...xml.matchAll(/<loc>https:\/\/isoloop\.dev(\/[^<]*)<\/loc>/g)].map(
+    (m) => m[1] ?? '',
+  );
+  expect(paths.length).toBeGreaterThan(5);
+  const statuses = await Promise.all(
+    paths.map(async (path) => [path, (await request.get(path)).status()] as const),
+  );
+  expect(statuses.filter(([, status]) => status !== 200)).toEqual([]);
+});
