@@ -46,6 +46,7 @@ const PAGES = [
   '/examples/',
   '/changelog/',
   '/__specimens/',
+  '/docs/',
   ...DOCS,
 ];
 

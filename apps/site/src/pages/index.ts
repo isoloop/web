@@ -1,5 +1,6 @@
 // The site's pages, by the name their index.html stub gives (`<!-- page:home -->`).
 import { changelogPage } from './changelog.tsx';
+import { docsIndexPage } from './doc.tsx';
 import { examplesHubPage } from './examples.tsx';
 import { featuresPage } from './features.tsx';
 import { homePage } from './home.tsx';
@@ -13,6 +14,7 @@ export const PAGES: Record<string, Page> = {
   'how-it-works': howItWorksPage,
   examples: examplesHubPage,
   changelog: changelogPage,
+  docs: docsIndexPage,
   'not-found': notFoundPage,
 };
 

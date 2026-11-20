@@ -155,6 +155,7 @@ const CURRENTS: ReadonlySet<string> = new Set<Current>([
   'features',
   'how-it-works',
   'examples',
+  'docs',
 ]);
 const isCurrent = (s: string): s is Current => CURRENTS.has(s);
 

@@ -87,6 +87,19 @@ describe('uiPartials', () => {
     expect(header).not.toContain('<a href="/" aria-current');
   });
 
+  it("has Docs as the last of the site's pages, before GitHub (ADR 0006)", () => {
+    const { header } = uiPartials({ header: true }, 'docs');
+    expect(header).toContain('<a href="/docs/" aria-current="page">Docs</a>');
+    const nav = /<nav class="ui-nav"[^>]*>([\s\S]*?)<\/nav>/.exec(header ?? '')?.[1] ?? '';
+    expect([...nav.matchAll(/>([^<]+)<\/a>/g)].map((m) => m[1])).toEqual([
+      'Home',
+      'Features',
+      'How it works',
+      'Examples',
+      'Docs',
+    ]);
+  });
+
   it('renders only what was asked for', () => {
     expect(uiPartials({ footer: true })).toMatchObject({ header: null, bar: null });
   });

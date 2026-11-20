@@ -24,7 +24,12 @@ export interface DocLink {
 }
 
 export interface RenderedDoc {
+  /** The whole page: the title, the lead and the body. */
   html: string;
+  /** The lead paragraph's content as HTML (no `<p>`), for a page that sets the title and lead itself. */
+  leadHtml: string;
+  /** Everything after the lead paragraph, as HTML. */
+  body: string;
   /** The `# h1`, as plain text. */
   title: string;
   /** The first paragraph after the title, as plain text: one sentence, at most 200 characters. */
@@ -74,11 +79,15 @@ const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const block = (body: string, lang: string): string =>
-  `<pre class="ui-code" tabindex="0"><code${lang ? ` data-lang="${escapeHtml(lang)}"` : ''}>${body}</code></pre>\n`;
+  `<div class="doc-code"><div class="doc-code-bar"><span>${escapeHtml(lang)}</span>` +
+  `<button class="doc-copy" type="button" data-copy aria-live="polite" hidden>Copy</button></div>` +
+  `<pre class="ui-code" tabindex="0"><code${lang ? ` data-lang="${escapeHtml(lang)}"` : ''}>${body}</code></pre></div>\n`;
 
-// Code as the site's code block (pre.ui-code, reachable by keyboard), through
-// the injected highlighter: rendered here rather than through markdown-it's
-// `highlight` option, so the markup doesn't depend on the engine.
+// Code as the site's code block (pre.ui-code, reachable by keyboard) under a
+// strip with its language and a Copy button, through the injected highlighter:
+// rendered here rather than through markdown-it's `highlight` option, so the
+// markup doesn't depend on the engine. The button is hidden until the page's
+// script (src/demos/copy.ts) can make it work: without JS the code still reads.
 md.renderer.rules.fence = (ts, idx, _opts, env) => {
   const t = ts[idx]!;
   const lang = t.info.trim().split(/\s+/)[0] ?? '';
@@ -167,6 +176,9 @@ export function renderMarkdown(src: string, o: RenderOptions = {}): RenderedDoc 
       }
     }
 
+    // A table scrolls sideways on narrow screens, so it takes keyboard focus.
+    if (t.type === 'table_open') t.attrSet('tabindex', '0');
+
     // Aligned table cells: a class, not markdown-it's inline style, which the CSP blocks.
     if (t.type === 'th_open' || t.type === 'td_open') {
       const align = /text-align:(left|center|right)/.exec(String(t.attrGet('style') ?? ''))?.[1];
@@ -188,5 +200,16 @@ export function renderMarkdown(src: string, o: RenderOptions = {}): RenderedDoc 
 
   const env: Env = {};
   if (o.highlight) highlighters.set(env, o.highlight);
-  return { html: md.renderer.render(tokens, md.options, env), title, description, headings, links };
+  // Tokens 0–2 are the title, 3–5 the lead paragraph (checked above). Each
+  // part is rendered once, so the highlighter sees each fence once.
+  const body = md.renderer.render(tokens.slice(6), md.options, env);
+  return {
+    html: md.renderer.render(tokens.slice(0, 6), md.options, env) + body,
+    leadHtml: md.renderer.render(tokens.slice(4, 5), md.options, env),
+    body,
+    title,
+    description,
+    headings,
+    links,
+  };
 }

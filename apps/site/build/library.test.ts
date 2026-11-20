@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { ensureLibrary, guidesDir, LIBRARY_PATHS, libraryDir } from './library.ts';
+import { ensureLibrary, guidesDir, LIBRARY_PATHS, libraryDir, libraryVersion } from './library.ts';
 
 const root = mkdtempSync(join(tmpdir(), 'site-library-'));
 afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -43,6 +43,23 @@ function site(pin: string): string {
   writeFileSync(join(dir, 'library.lock'), `${pin}\n`);
   return dir;
 }
+
+/** A pin with only host's package.json. */
+const read = (path: string): string | undefined =>
+  path === 'packages/host/package.json'
+    ? '{"name":"@isoloop/host","version":"0.1.0-next.7"}'
+    : undefined;
+
+describe('libraryVersion', () => {
+  it("reads the version every package shares from host's package.json", () => {
+    expect(libraryVersion({ read })).toBe('0.1.0-next.7');
+  });
+
+  it('fails when the pin has no such file or no version', () => {
+    expect(() => libraryVersion({ read: () => undefined })).toThrow(/no packages\/host/);
+    expect(() => libraryVersion({ read: () => '{}' })).toThrow(/no version/);
+  });
+});
 
 describe('ensureLibrary', () => {
   it('checks out the diagrams and the guides at the pin, and nothing else', () => {

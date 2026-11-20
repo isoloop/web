@@ -32,6 +32,8 @@ export const manifestSchema = z.strictObject({
                * the guide no longer needs it, so the mark can't outstay it.
                */
               leadPending: z.literal(true).optional(),
+              /** The guide's feature is `@experimental`: the pill after its name (ADR 0005, decision 4). */
+              experimental: z.literal(true).optional(),
             }),
           )
           .min(1),
@@ -47,12 +49,17 @@ export interface Doc {
   slug: string;
   /** Its section in the manifest, e.g. "Build". */
   section: string;
+  /** Marked `experimental` in the manifest. */
+  experimental: boolean;
   /** `/docs/<slug>/`. */
   path: string;
   title: string;
   description: string;
   html: string;
   headings: DocHeading[];
+  /** The lead paragraph as inline HTML, and the page after it (renderMarkdown). */
+  leadHtml: string;
+  body: string;
   /** The guide's path in the library, for the "source" link. */
   source: string;
 }
@@ -148,11 +155,14 @@ export function loadDocs(o: LoadDocsOptions): Doc[] {
       return {
         slug: g.slug,
         section: section.title,
+        experimental: g.experimental === true,
         path: `/docs/${g.slug}/`,
         title: doc.title,
         description: doc.description,
         html: doc.html,
         headings: doc.headings,
+        leadHtml: doc.leadHtml,
+        body: doc.body,
         source,
       };
     }),

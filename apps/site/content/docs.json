@@ -1,20 +1,40 @@
 {
-  "$comment": "The docs pages and their order (isoloop/isoloop M4c, decisions 9 and 11; ADR 0006). Lists exactly the guides in docs/guide at the pin (library.lock): a guide joins here in the PR that moves the pin to a version that has it. Sections, in order: Start, Build, Agents and tooling, Reference; a section appears once it has a guide. leadPending: the guide's lead is still being reshaped to one sentence (M4c task 5), so its description is the lead's first sentence.",
+  "$comment": "The docs pages and their order (isoloop/isoloop M4c, decisions 9 and 11; ADR 0006). Lists exactly the guides in docs/guide at the pin (library.lock): a guide joins here in the PR that moves the pin to a version that has it. Sections, in order: Start, Build, Agents and tooling, Reference; a section appears once it has a guide. leadPending: the guide's lead is still being reshaped to one sentence (M4c task 5), so its description is the lead's first sentence. experimental: the guide's feature is @experimental (the balancer, the devtools panel), drawn as the Experimental pill after its name.",
   "sections": [
     {
       "title": "Build",
       "guides": [
-        { "slug": "pools", "leadPending": true },
-        { "slug": "balancer", "leadPending": true },
-        { "slug": "hosting", "leadPending": true }
+        {
+          "slug": "pools",
+          "leadPending": true
+        },
+        {
+          "slug": "balancer",
+          "leadPending": true,
+          "experimental": true
+        },
+        {
+          "slug": "hosting",
+          "leadPending": true
+        }
       ]
     },
     {
       "title": "Agents and tooling",
       "guides": [
-        { "slug": "agents", "leadPending": true },
-        { "slug": "inspection", "leadPending": true },
-        { "slug": "devtools", "leadPending": true }
+        {
+          "slug": "agents",
+          "leadPending": true
+        },
+        {
+          "slug": "inspection",
+          "leadPending": true
+        },
+        {
+          "slug": "devtools",
+          "leadPending": true,
+          "experimental": true
+        }
       ]
     }
   ]
