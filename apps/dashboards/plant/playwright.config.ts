@@ -20,6 +20,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 1 : 0,
+  // One page at a time on CI. Two plant pages on a 4-core runner starve the
+  // pools' workers: one goes 2 s without a heartbeat while it starts or
+  // replays, the kernel kills it (KILL_AFTER_MS, src/isoloop/kernel.ts), and
+  // the restart's replay can miss the next one too. Under parallel runs that
+  // made the Firefox widget tests flaky (no widget rendered within 15 s).
+  // Main already runs each shard with --workers=1.
+  ...(process.env['CI'] ? { workers: 1 } : {}),
   reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',
   // LIVE_URL runs the smoke test against a deployed copy (after each deploy)
   // instead of the local build.
