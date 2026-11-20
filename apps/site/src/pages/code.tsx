@@ -5,9 +5,11 @@ import type { VNode } from 'preact';
  * Syntax highlighting at build time: the code comes out as spans with a token
  * class, so the browser runs nothing (the site's policy) and no highlighter
  * ships. Small on purpose: comments, strings, keywords, numbers, JSX tags and
- * called functions for TypeScript; comments and commands for shell.
+ * called functions for TypeScript and TSX; comments and commands for shell;
+ * strings, numbers and literals for JSON; comments, the doctype, tag names and
+ * attribute values for HTML.
  */
-export type Lang = 'ts' | 'sh';
+export type Lang = 'ts' | 'tsx' | 'json' | 'html' | 'sh';
 
 export type Token = [kind: string | null, text: string];
 
@@ -65,9 +67,32 @@ const TS = new RegExp(
 
 const SH = /(?<comment>#[^\n]*)|(?<command>^[ \t]*[\w.-]+)/gm;
 
+// Keys and values are both strings; `true`, `false` and `null` are keywords.
+const JSON_RE = new RegExp(
+  [
+    String.raw`(?<string>"(?:\\.|[^"\\\n])*")`,
+    String.raw`(?<number>-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)`,
+    String.raw`(?<word>\b(?:true|false|null)\b)`,
+  ].join('|'),
+  'g',
+);
+
+// Quoted text counts as a string only as an attribute's value, after `=`.
+const HTML = new RegExp(
+  [
+    String.raw`(?<comment><!--[\s\S]*?-->)`,
+    String.raw`(?<doctype><!doctype\b[^>]*>)`,
+    String.raw`(?<tag>(?<=<\/?)[A-Za-z][\w-]*)`,
+    String.raw`(?<string>(?<==)(?:"[^"]*"|'[^']*'))`,
+  ].join('|'),
+  'gi',
+);
+
+const PATTERNS: Record<Lang, RegExp> = { ts: TS, tsx: TS, json: JSON_RE, html: HTML, sh: SH };
+
 /** Splits code into tokens; text between matches comes back unclassed. */
 export function tokenize(code: string, lang: Lang): Token[] {
-  const re = lang === 'sh' ? SH : TS;
+  const re = PATTERNS[lang];
   re.lastIndex = 0;
   const out: Token[] = [];
   let at = 0;
@@ -79,6 +104,7 @@ export function tokenize(code: string, lang: Lang): Token[] {
     at = start + text.length;
     let kind: string | null = null;
     if (g['comment'] !== undefined) kind = 'comment';
+    else if (g['doctype'] !== undefined) kind = 'keyword';
     else if (g['string'] !== undefined) kind = 'string';
     else if (g['tag'] !== undefined) kind = 'tag';
     else if (g['number'] !== undefined) kind = 'number';
@@ -93,9 +119,13 @@ export function tokenize(code: string, lang: Lang): Token[] {
   return out;
 }
 
-/** The language a file name implies. */
+/** The language a file name implies; TypeScript when nothing else fits. */
 export function langOf(file: string): Lang {
-  return /\.(sh|bash)$/.test(file) ? 'sh' : 'ts';
+  if (/\.(sh|bash)$/.test(file)) return 'sh';
+  if (/\.[jt]sx$/.test(file)) return 'tsx';
+  if (file.endsWith('.json')) return 'json';
+  if (/\.html?$/.test(file)) return 'html';
+  return 'ts';
 }
 
 /** A block of code, highlighted, scrollable and reachable by keyboard. */
