@@ -7,7 +7,13 @@ import { loadExamples } from './build/examples.ts';
 import { loadFeatures } from './build/features.ts';
 import { buildLlms } from './build/docs/llms.ts';
 import { loadDocs } from './build/docs/pages.ts';
-import { ensureLibrary, guidesDir, libraryReader, readPin } from './build/library.ts';
+import {
+  ensureLibrary,
+  guidesDir,
+  libraryReader,
+  libraryVersion,
+  readPin,
+} from './build/library.ts';
 import { loadSamples } from './build/samples.ts';
 import { docInputs, site } from './build/plugin.ts';
 import { PAGES } from './src/pages/index.ts';
@@ -49,6 +55,8 @@ export default defineConfig({
         pin: readPin(siteDir),
         changelog: loadChangelog(library, readPin(siteDir), here('../..')),
         samples: loadSamples(here('../samples/src')),
+        docs,
+        libraryVersion: libraryVersion(library),
       },
     }),
     ui({ header: true, footer: true }),
@@ -64,6 +72,7 @@ export default defineConfig({
         'how-it-works': here('how-it-works/index.html'),
         examples: here('examples/index.html'),
         changelog: here('changelog/index.html'),
+        docs: here('docs/index.html'),
         'not-found': here('404.html'),
         ...docInputs(siteDir.replace(/\/$/, ''), docs),
       },

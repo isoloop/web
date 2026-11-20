@@ -29,10 +29,13 @@ const ADR = `${LIBRARY_GITHUB}/blob/${PIN}/docs/adr/0001-one-worker-per-isolate.
 const doc = (slug: string, section: string, title: string, description: string): Doc => ({
   slug,
   section,
+  experimental: false,
   path: `/docs/${slug}/`,
   title,
   description,
   html: '',
+  leadHtml: '',
+  body: '',
   headings: [],
   source: `docs/guide/${slug}.md`,
 });

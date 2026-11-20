@@ -3,13 +3,15 @@ import type { VNode } from 'preact';
 import { ThemeToggle } from './ThemeToggle.tsx';
 
 /** The site's sections, for `aria-current`. */
-export type Current = 'home' | 'features' | 'how-it-works' | 'examples';
+export type Current = 'home' | 'features' | 'how-it-works' | 'examples' | 'docs';
 
 const LINKS: { id: Current; href: string; label: string }[] = [
   { id: 'home', href: '/', label: 'Home' },
   { id: 'features', href: '/features/', label: 'Features' },
   { id: 'how-it-works', href: '/how-it-works/', label: 'How it works' },
   { id: 'examples', href: '/examples/', label: 'Examples' },
+  // ADR 0006 (amends ADR 0005, decision 1a): the docs, last of the site's pages.
+  { id: 'docs', href: '/docs/', label: 'Docs' },
 ];
 
 const GITHUB = 'https://github.com/isoloop/isoloop';

@@ -5,7 +5,7 @@ import { DIAGRAM_ORDER } from './diagrams.ts';
 import { loadFeatures } from './features.ts';
 import type { Doc } from './docs/pages.ts';
 import { CSP, docInputs, renderDocument, site } from './plugin.ts';
-import { docPage } from '../src/pages/doc.tsx';
+import { docPage, docsIndexPage } from '../src/pages/doc.tsx';
 import type { Page, SiteData } from '../src/pages/index.ts';
 import { PAGES } from '../src/pages/index.ts';
 import { howItWorks } from '../src/copy.ts';
@@ -117,6 +117,8 @@ const data: SiteData = {
     howPersistence: 'hps',
     howGrants: 'hg',
   },
+  docs: [],
+  libraryVersion: '0.1.0-next.7',
 };
 
 describe('renderDocument', () => {
@@ -269,13 +271,36 @@ describe('the docs pages', () => {
   const doc: Doc = {
     slug: 'pools',
     section: 'Build',
+    experimental: false,
     path: '/docs/pools/',
     title: 'Worker pools',
     description: 'Pools share a worker.',
-    html: '<h1>Worker pools</h1>\n<p>Pools share a worker.</p>\n',
-    headings: [],
+    html: '<h1>Worker pools</h1>\n<p>Pools share a worker.</p>\n<h2 id="when">When</h2>\n',
+    leadHtml: 'Pools share <code>a</code> worker.',
+    body: '<h2 id="when">When</h2>\n<p>Body.</p>\n',
+    headings: [
+      { depth: 2, text: 'When', id: 'when' },
+      { depth: 3, text: 'Detail', id: 'detail' },
+    ],
     source: 'docs/guide/pools.md',
   };
+  const balancer: Doc = {
+    ...doc,
+    slug: 'balancer',
+    experimental: true,
+    path: '/docs/balancer/',
+    title: 'Balancer',
+    description: 'It places isolates.',
+  };
+  const agents: Doc = {
+    ...doc,
+    slug: 'agents',
+    section: 'Agents and tooling',
+    path: '/docs/agents/',
+    title: 'Agents',
+    description: 'Tools for agents.',
+  };
+  const docsData: SiteData = { ...data, docs: [doc, balancer, agents], pin: 'abcdef1234567' };
 
   it('name one virtual input per guide, under the site folder', () => {
     expect(docInputs('/s', [doc])).toEqual({ 'docs/pools': '/s/docs/pools/index.html' });
@@ -289,14 +314,44 @@ describe('the docs pages', () => {
     expect(call(p.load, '/s/index.html')).toBeUndefined();
   });
 
-  it("render a guide's HTML in the site's document, with its title, description and canonical path", () => {
-    const html = renderDocument(docPage(doc), data, { csp: CSP });
+  it('render a guide in the docs layout, with its title, description and canonical path', () => {
+    const html = renderDocument(docPage(doc), docsData, { csp: CSP });
     expect(html).toContain('<title>Worker pools · Isoloop</title>');
     expect(html).toContain('<meta name="description" content="Pools share a worker."/>');
     expect(html).toContain('<link rel="canonical" href="https://isoloop.dev/docs/pools/"/>');
-    expect(html).toContain('<p>Pools share a worker.</p>');
-    expect(html).toContain('Docs · Build');
-    // Not a header section yet: the docs aren't in the nav until M4c task 11.
-    expect(html).toContain('<!-- ui:header -->');
+    // "Docs" is the header's section (ADR 0006).
+    expect(html).toContain('<!-- ui:header:docs -->');
+    expect(html).toContain('<p class="docs-lead">Pools share <code>a</code> worker.</p>');
+    expect(html).toContain('<p>Body.</p>');
+    expect(html).toContain('@isoloop/* 0.1.0-next.7');
+    expect(html).toContain(
+      'href="https://github.com/isoloop/isoloop/blob/abcdef1234567/docs/guide/pools.md"',
+    );
+    expect(html).toContain('<a href="/docs/pools.md">Markdown</a>');
+    expect(html).toContain('<script type="module" src="/src/demos/copy.ts"></script>');
+  });
+
+  it('mark the current page in the sidebar, group the sidebar by section, and pill the experimental guides', () => {
+    const html = renderDocument(docPage(doc), docsData, { csp: CSP });
+    expect(html).toContain('<a href="/docs/pools/" aria-current="page">Worker pools</a>');
+    expect(html).toContain(
+      '<a href="/docs/balancer/">Balancer<span class="ui-pill">Experimental</span></a>',
+    );
+    expect(html).toContain('<h2>Agents and tooling</h2>');
+  });
+
+  it('list only the h2s under "On this page", and link the previous and next guides', () => {
+    const html = renderDocument(docPage(balancer), docsData, { csp: CSP });
+    expect(html).toContain('<a href="#when">When</a>');
+    expect(html).not.toContain('<a href="#detail">');
+    expect(html).toContain('<a href="/docs/pools/" rel="prev">');
+    expect(html).toContain('<a href="/docs/agents/" rel="next" class="next">');
+  });
+
+  it('list every section and guide on /docs/, with their descriptions', () => {
+    const html = renderDocument(docsIndexPage, docsData, { csp: CSP });
+    expect(html).toContain('<!-- ui:header:docs -->');
+    expect(html).toContain('<h2 id="agents-and-tooling">Agents and tooling</h2>');
+    expect(html).toContain('<a href="/docs/agents/"><b>Agents</b></a> Tools for agents.');
   });
 });

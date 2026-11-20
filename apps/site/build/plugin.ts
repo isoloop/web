@@ -204,7 +204,10 @@ export function site(opts: SiteOptions): Plugin {
         type: 'asset',
         fileName: 'sitemap.xml',
         source: sitemap(
-          Object.values(opts.pages).map((p) => p.path),
+          [
+            ...Object.values(opts.pages).map((p) => p.path),
+            ...[...docs.values()].map((d) => d.path),
+          ],
           opts.data.examples,
         ),
       });

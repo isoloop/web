@@ -112,8 +112,12 @@ describe('renderMarkdown: tables', () => {
   it('renders tables with a header row', () => {
     const { html } = renderMarkdown(page(table));
     expect(html).toMatch(
-      /<table>[\s\S]*<thead>[\s\S]*<th[^>]*>Name<\/th>[\s\S]*<tbody>[\s\S]*<td[^>]*>1<\/td>/,
+      /<table tabindex="0">[\s\S]*<thead>[\s\S]*<th[^>]*>Name<\/th>[\s\S]*<tbody>[\s\S]*<td[^>]*>1<\/td>/,
     );
+  });
+
+  it('makes each table reachable by keyboard, since it scrolls sideways on narrow screens', () => {
+    expect(renderMarkdown(page(table)).html).toContain('<table tabindex="0">');
   });
 
   it('aligns columns with classes, never inline styles (the CSP blocks them)', () => {
@@ -192,5 +196,30 @@ describe('renderMarkdown: raw HTML', () => {
     expect(html).not.toContain('<script>');
     expect(html).not.toContain('<b>');
     expect(html).toContain('&lt;script&gt;');
+  });
+});
+
+describe('renderMarkdown: lead and body apart', () => {
+  it('gives the lead as inline HTML and the body after it, for a page that sets its own title', () => {
+    const r = renderMarkdown(page('## Next\n\nMore.\n', 'A page about `one` thing.'));
+    expect(r.leadHtml).toBe('A page about <code>one</code> thing.');
+    expect(r.body).not.toContain('<h1');
+    expect(r.body).not.toContain('A page about');
+    expect(r.body).toContain('<h2 id="next">Next</h2>');
+    expect(r.html).toContain('<h1');
+  });
+});
+
+describe('renderMarkdown: code blocks', () => {
+  it('puts each block under a strip with its language and a Copy button, hidden until a script enables it', () => {
+    const { html } = renderMarkdown(page('```tsx\nx\n```\n'));
+    expect(html).toContain(
+      '<div class="doc-code"><div class="doc-code-bar"><span>tsx</span><button class="doc-copy" type="button" data-copy aria-live="polite" hidden>Copy</button></div>',
+    );
+  });
+
+  it('leaves the language empty when the fence names none', () => {
+    const { html } = renderMarkdown(page('```\nx\n```\n'));
+    expect(html).toContain('<div class="doc-code-bar"><span></span>');
   });
 });

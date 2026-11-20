@@ -147,3 +147,18 @@ export function libraryReader(siteDir: string): LibraryReader {
       git(['ls-tree', '-r', '--name-only', pin, '--', dir], repo).split('\n').filter(Boolean),
   };
 }
+
+/**
+ * The `@isoloop/*` version at the pin, the one the docs describe: every
+ * package shares it (the fixed group), so host's stands for all of them.
+ */
+export function libraryVersion(library: Pick<LibraryReader, 'read'>): string {
+  const raw = library.read('packages/host/package.json');
+  if (raw === undefined) throw new Error('the pin has no packages/host/package.json');
+  const pkg: unknown = JSON.parse(raw);
+  const version =
+    typeof pkg === 'object' && pkg !== null && 'version' in pkg ? pkg.version : undefined;
+  if (typeof version !== 'string' || !version)
+    throw new Error('packages/host/package.json at the pin has no version');
+  return version;
+}
