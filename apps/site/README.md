@@ -18,8 +18,9 @@ isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the lan
 | `build/changelog.ts` | Builds `/changelog/` from every published library package's `CHANGELOG.md` at the pin and every app's, newest release first |
 | `build/diagrams.ts` | Rewrites the library's Archify pages to run under the site's policy |
 | `build/docs/render.ts` | `renderMarkdown()`: a docs page's Markdown to HTML, with its title, description, headings and links, and the only file that imports `markdown-it` (M4c). `render.test.ts` is the conformance suite any engine put behind it has to pass. `build/docs/highlight.ts` runs fences through the site's tokenizer |
-| `build/library.ts` | Fetches the library's `docs/diagrams` at the sha in `library.lock`, and reads its other files at that sha (proofs, changelogs) |
-| `scripts/` | `serve.ts` (static server, as Pages), `linkcheck.ts`, `screenshots.ts`, `fetch-library.ts` |
+| `build/library.ts` | Fetches the library's `docs/diagrams` and `docs/guide` at the sha in `library.lock`, and reads its other files at that sha (proofs, changelogs) |
+| `build/pin.ts` | Checks the pin is a published version: every package at the pin on npm, and npm's provenance naming the pin as the commit it was built from (ADR 0006) |
+| `scripts/` | `serve.ts` (static server, as Pages), `linkcheck.ts`, `screenshots.ts`, `fetch-library.ts`, `check-pin.ts` |
 | `e2e/` | The smoke test, and `expectAccessible` (axe) |
 
 ## Running it
@@ -44,7 +45,9 @@ Without `SITE=1`, `assemble-site.sh` includes the site only once a `site-v*` tag
 
 ## The library's diagrams
 
-`library.lock` pins an `isoloop/isoloop` commit. The build clones that repo without blobs into `.library/` (git-ignored), checks the pin is on its `main` (so the diagrams passed the drift test there), and takes only `docs/diagrams`. A fetched pin is reused, offline too. To show newer diagrams, change the sha in `library.lock` in a PR.
+`library.lock` pins an `isoloop/isoloop` commit. The build clones that repo without blobs into `.library/` (git-ignored), checks the pin is on its `main` (so the diagrams passed the drift test there), and takes only `docs/diagrams` and `docs/guide`. A fetched pin is reused, offline too.
+
+The pin must be a published version (ADR 0006): the commit a `chore: version` PR made, from 0.1 on the commit a `v*` tag points at. `pnpm --filter site check-pin` checks it against npm and runs in the site CI job; the build itself doesn't, so it works offline. To show newer diagrams and guides, change the sha in `library.lock` in a PR, after that version is published.
 
 Archify's pages need three rewrites to run under `default-src 'self'` (`build/diagrams.ts`):
 - **Style attributes** (`style="--step:N"`, one `fill`) become classes, with the declarations in a generated `dg-inline-<hash>.css`.
