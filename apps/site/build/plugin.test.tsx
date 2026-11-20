@@ -335,8 +335,9 @@ describe('the docs pages', () => {
     const html = renderDocument(docPage(doc), docsData, { csp: CSP });
     expect(html).toContain('<a href="/docs/pools/" aria-current="page">Worker pools</a>');
     // In the sidebar an experimental guide gets the round mark, not the pill (ADR 0005, amended).
+    // The mark stays on the title's last word, so a wrapped title ends in it.
     expect(html).toContain(
-      '<a href="/docs/balancer/">Balancer<span class="ui-experimental-mark" title="Experimental">',
+      '<a href="/docs/balancer/"><span class="docs-side-last">Balancer<span class="ui-experimental-mark" title="Experimental">',
     );
     expect(html).not.toContain('<a href="/docs/balancer/">Balancer<span class="ui-pill">');
     expect(html).toContain('<h2>Agents and tooling</h2>');
