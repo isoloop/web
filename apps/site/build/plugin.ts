@@ -23,6 +23,7 @@ import { buildDiagramFiles, DIAGRAMS_PATH, type EmittedFile } from './diagrams.t
 import { imagesOf } from './examples.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
 import { robots, sitemap } from './crawl.ts';
+import type { LlmsFile } from './docs/llms.ts';
 import type { Doc } from './docs/pages.ts';
 import { docPage } from '../src/pages/doc.tsx';
 import { PAGE_MARK } from '../src/pages/intro.tsx';
@@ -97,6 +98,8 @@ export interface SiteOptions {
   pagesModule: string;
   /** The docs pages (build/docs/pages.ts), in manifest order. */
   docs?: readonly Doc[];
+  /** llms.txt, llms-full.txt and each page's `.md` copy (build/docs/llms.ts). */
+  llms?: readonly LlmsFile[];
 }
 
 function diagramFiles(dir: string): EmittedFile[] {
@@ -113,6 +116,8 @@ const TYPES: Record<string, string> = {
   woff2: 'font/woff2',
   woff: 'font/woff',
   webp: 'image/webp',
+  txt: 'text/plain; charset=utf-8',
+  md: 'text/markdown; charset=utf-8',
 };
 
 export function site(opts: SiteOptions): Plugin {
@@ -120,6 +125,7 @@ export function site(opts: SiteOptions): Plugin {
   let devDiagrams: Map<string, EmittedFile> | undefined;
   const docs = new Map((opts.docs ?? []).map((d) => [d.slug, d]));
   const docOf = (id: string): Doc | undefined => docs.get(DOC_INPUT.exec(id)?.[1] ?? '');
+  const llms = new Map((opts.llms ?? []).map((f) => [`/${f.fileName}`, f]));
   return {
     name: 'site',
     resolveId(id) {
@@ -154,6 +160,9 @@ export function site(opts: SiteOptions): Plugin {
           const hit = devDiagrams.get(path.slice(DIAGRAMS_PATH.length + 1));
           if (hit)
             file = { source: hit.source, type: TYPES[hit.fileName.split('.').pop() ?? ''] ?? '' };
+        } else if (llms.has(path)) {
+          const f = llms.get(path)!;
+          file = { source: f.source, type: TYPES[f.fileName.split('.').pop() ?? ''] ?? '' };
         } else if (MARKS[path]) {
           file = { source: readFileSync(MARKS[path]), type: 'image/svg+xml' };
         } else if (path === PREVIEW && existsSync(previewFile())) {
@@ -210,6 +219,9 @@ export function site(opts: SiteOptions): Plugin {
       }
       for (const i of opts.data.examples.flatMap((e) => imagesOf(e))) {
         this.emitFile({ type: 'asset', fileName: i.src.slice(1), source: readFileSync(i.file) });
+      }
+      for (const f of opts.llms ?? []) {
+        this.emitFile({ type: 'asset', fileName: f.fileName, source: f.source });
       }
       for (const f of diagramFiles(opts.diagramsDir)) {
         this.emitFile({ type: 'asset', fileName: DIAGRAMS_PATH + f.fileName, source: f.source });

@@ -5,6 +5,7 @@ import { loadChangelog } from './build/changelog.ts';
 import { readDiagrams } from './build/diagrams.ts';
 import { loadExamples } from './build/examples.ts';
 import { loadFeatures } from './build/features.ts';
+import { buildLlms } from './build/docs/llms.ts';
 import { loadDocs } from './build/docs/pages.ts';
 import { ensureLibrary, guidesDir, libraryReader, readPin } from './build/library.ts';
 import { loadSamples } from './build/samples.ts';
@@ -21,13 +22,17 @@ const siteDir = here('.');
 const diagramsDir = ensureLibrary(siteDir);
 const library = libraryReader(siteDir);
 // The docs pages, from the guides at the pin (build/docs/pages.ts).
+const pin = readPin(siteDir);
+const kind = (path: string): 'file' | 'dir' | undefined =>
+  library.has(path) ? (library.list(path).some((f) => f !== path) ? 'dir' : 'file') : undefined;
 const docs = loadDocs({
   manifest: here('content/docs.json'),
   guidesDir: guidesDir(siteDir),
-  pin: readPin(siteDir),
-  kind: (path) =>
-    library.has(path) ? (library.list(path).some((f) => f !== path) ? 'dir' : 'file') : undefined,
+  pin,
+  kind,
 });
+// The same guides for agents: llms.txt, llms-full.txt, a .md copy each (build/docs/llms.ts).
+const llms = buildLlms({ docs, guidesDir: guidesDir(siteDir), pin, kind });
 
 export default defineConfig({
   plugins: [
@@ -36,6 +41,7 @@ export default defineConfig({
       pagesModule: '/src/pages/index.ts',
       diagramsDir,
       docs,
+      llms,
       data: {
         examples: loadExamples(here('../..')),
         features: loadFeatures(here('content/features'), library, here('../..')),
