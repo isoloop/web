@@ -118,3 +118,40 @@ test('without JS the docs read, and the Copy button stays hidden', async ({ brow
   await expect(page.locator('button[data-copy]').first()).toBeHidden();
   await context.close();
 });
+
+test('an experimental guide has the round mark in the sidebar and the full pill on its heading', async ({
+  page,
+}) => {
+  const experimental = readManifest(
+    fileURLToPath(new URL('../content/docs.json', import.meta.url)),
+  ).sections.flatMap((s) => s.guides.filter((g) => g.experimental).map((g) => g));
+  const guide = experimental[0];
+  expect(guide).toBeDefined();
+  if (!guide) return;
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/docs/${guide.slug}/`);
+  const link = page.locator(`.docs-only-wide .docs-side a[href="/docs/${guide.slug}/"]`);
+  const mark = link.locator('.ui-experimental-mark');
+  await expect(mark).toHaveCount(1);
+  await expect(mark).toHaveAttribute('title', 'Experimental');
+  await expect(mark.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+  await expect(link.locator('.ui-pill')).toHaveCount(0);
+  // The accessible name carries it, so colour isn't the only signal.
+  await expect(link).toHaveAccessibleName(/ Experimental$/);
+  // The label is there for screen readers only: it takes no room.
+  const box = await link.locator('.ui-sr-only').boundingBox();
+  expect(box?.width).toBeLessThanOrEqual(1);
+  // The heading keeps the full pill.
+  await expect(page.getByRole('heading', { level: 1 }).locator('.ui-pill')).toHaveText(
+    'Experimental',
+  );
+  // A stable guide has no mark.
+  const stable = GUIDES.find((g) => g !== `/docs/${guide.slug}/`);
+  await page.goto(stable ?? '/docs/');
+  await expect(
+    page.locator('.docs-only-wide .docs-side a[aria-current="page"] .ui-experimental-mark'),
+  ).toHaveCount(0);
+  // The index keeps the pill.
+  await page.goto('/docs/');
+  await expect(page.locator('.docs-index-section .ui-pill').first()).toBeVisible();
+});

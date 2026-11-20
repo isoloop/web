@@ -331,12 +331,14 @@ describe('the docs pages', () => {
     expect(html).toContain('<script type="module" src="/src/demos/copy.ts"></script>');
   });
 
-  it('mark the current page in the sidebar, group the sidebar by section, and pill the experimental guides', () => {
+  it('mark the current page in the sidebar, group the sidebar by section, and mark the experimental guides', () => {
     const html = renderDocument(docPage(doc), docsData, { csp: CSP });
     expect(html).toContain('<a href="/docs/pools/" aria-current="page">Worker pools</a>');
+    // In the sidebar an experimental guide gets the round mark, not the pill (ADR 0005, amended).
     expect(html).toContain(
-      '<a href="/docs/balancer/">Balancer<span class="ui-pill">Experimental</span></a>',
+      '<a href="/docs/balancer/">Balancer<span class="ui-experimental-mark" title="Experimental">',
     );
+    expect(html).not.toContain('<a href="/docs/balancer/">Balancer<span class="ui-pill">');
     expect(html).toContain('<h2>Agents and tooling</h2>');
   });
 

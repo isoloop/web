@@ -1,5 +1,6 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
+import { ExperimentalMark } from 'ui/components';
 import type { Doc } from '../../build/docs/pages.ts';
 import { LIBRARY_GITHUB } from '../../build/docs/links.ts';
 import { mdPath } from '../../build/docs/llms.ts';
@@ -45,7 +46,7 @@ function SideNav({ docs, current }: { docs: readonly Doc[]; current?: string }):
               <li key={d.slug}>
                 <a href={d.path} aria-current={d.slug === current ? 'page' : undefined}>
                   {d.title}
-                  <Pill doc={d} />
+                  {d.experimental ? <ExperimentalMark label={marks.experimental} /> : null}
                 </a>
               </li>
             ))}
