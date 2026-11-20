@@ -21,6 +21,8 @@ catalog:
   preact-render-to-string: 6.8.3
   # The site's smoke test checks accessibility with axe, behind expectAccessible() (ADR 0002, decision 9).
   '@axe-core/playwright': 4.14.0
+  # The docs' Markdown, at build time only, behind apps/site/build/docs/render.ts (M4c, ADR 0006). Ships its own types.
+  markdown-it: 15.0.3
   # Changelogs and app versions (ADR 0004): dev tooling only, never shipped.
   '@changesets/cli': 3.0.3
   # The dev MCP suites' client (M4a), as isoloop/isoloop uses it: tests only.

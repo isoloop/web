@@ -17,6 +17,7 @@ isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the lan
 | `build/features.ts` | Validates the feature entries (zod) and checks every proof: the path, and the export or test title it names, at the library pin or in this checkout; a broken one fails the build, naming the entry and the path |
 | `build/changelog.ts` | Builds `/changelog/` from every published library package's `CHANGELOG.md` at the pin and every app's, newest release first |
 | `build/diagrams.ts` | Rewrites the library's Archify pages to run under the site's policy |
+| `build/docs/render.ts` | `renderMarkdown()`: a docs page's Markdown to HTML, with its title, description, headings and links, and the only file that imports `markdown-it` (M4c). `render.test.ts` is the conformance suite any engine put behind it has to pass. `build/docs/highlight.ts` runs fences through the site's tokenizer |
 | `build/library.ts` | Fetches the library's `docs/diagrams` at the sha in `library.lock`, and reads its other files at that sha (proofs, changelogs) |
 | `scripts/` | `serve.ts` (static server, as Pages), `linkcheck.ts`, `screenshots.ts`, `fetch-library.ts` |
 | `e2e/` | The smoke test, and `expectAccessible` (axe) |
