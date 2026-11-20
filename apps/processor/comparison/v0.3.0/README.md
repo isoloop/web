@@ -18,7 +18,7 @@ On four cores at 2.0 GHz, at 50 files a second:
 1. **No file was lost, and the kernel gave up on no processor,** in any of the 26 runs with the balancer (10 normal, 10 with faults, 6 faults then calm), on either engine. M3i lost files in 3 of its 23 balancer runs with faults. `own` and `one` lost none here either.
 2. **With the processors reporting their own busy time, the full-pool trigger works.**
    - In the calm window, the processors together report about twice the busy time the runtime measures: 97 to 101 % of a core against 46 to 49 % on Chromium, 122 to 128 % against 50 to 53 % on Firefox. The difference is the work after `await`, which `busyMs` can't see.
-   - The full-pool trigger moved processors in every normal run (2 a run on Chromium, 3 on Firefox) and in 8 of the 10 fault runs. In M3i it never fired.
+   - The full-pool trigger moved processors in every normal run (2 `full` moves a run on Chromium and 3 on Firefox, of 10 and 11 moves in all) and in 8 of the 10 fault runs. In M3i it never fired.
    - Bisects fell: 7 bisect moves over the 5 fault runs on Chromium and 29 on Firefox, against 30 and 55 in M3i. Firefox still bisects the most.
 3. **With no faults, the balancer splits the one pool into two and keeps up on both engines.**
    - **Chromium:** 3 workers against `own`'s 9, with 57 MB less memory and 8 points less CPU across threads, at a p95 of 74 ms against 39 ms. Against `one`, 1 more worker and a p95 of 74 ms against 148 ms.
@@ -212,6 +212,8 @@ On four cores at 2.0 GHz, at 50 files a second:
 | Files done twice | 0 | 38 | **+38** | 0 | 38 | **+38** |
 
 ### The balancer's own cost: `one-off` against `one`
+
+Δ here too is the median of each round's gap, so with a wide spread across rounds it can differ from the two columns by more than usual: memory on Chromium with faults, for one.
 
 | Figure | Engine, mix | `one-off` | `one` | **Δ** |
 | --- | --- | --- | --- | --- |
