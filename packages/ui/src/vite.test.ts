@@ -87,17 +87,28 @@ describe('uiPartials', () => {
     expect(header).not.toContain('<a href="/" aria-current');
   });
 
-  it("has Docs as the last of the site's pages, before GitHub (ADR 0006)", () => {
+  it('has Docs right after Home (ADR 0005, amended 2026-11-20)', () => {
     const { header } = uiPartials({ header: true }, 'docs');
     expect(header).toContain('<a href="/docs/" aria-current="page">Docs</a>');
     const nav = /<nav class="ui-nav"[^>]*>([\s\S]*?)<\/nav>/.exec(header ?? '')?.[1] ?? '';
     expect([...nav.matchAll(/>([^<]+)<\/a>/g)].map((m) => m[1])).toEqual([
       'Home',
+      'Docs',
       'Features',
       'How it works',
       'Examples',
-      'Docs',
     ]);
+  });
+
+  it('shows the version as a pill before GitHub, linking to the changelog', () => {
+    const { header } = uiPartials({
+      header: { version: { label: '0.1.0-next.8', href: '/changelog/' } },
+    });
+    const end = /<div class="ui-header-end">([\s\S]*)<\/div>/.exec(header ?? '')?.[1] ?? '';
+    expect(end).toMatch(
+      /^<a class="ui-version" href="\/changelog\/"[^>]*>0\.1\.0-next\.8<\/a><a class="ui-github"/,
+    );
+    expect(uiPartials({ header: true }).header).not.toContain('ui-version');
   });
 
   it('renders only what was asked for', () => {

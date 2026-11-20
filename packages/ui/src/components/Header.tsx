@@ -7,11 +7,11 @@ export type Current = 'home' | 'features' | 'how-it-works' | 'examples' | 'docs'
 
 const LINKS: { id: Current; href: string; label: string }[] = [
   { id: 'home', href: '/', label: 'Home' },
+  // ADR 0005, amended 2026-11-20: the docs right after Home.
+  { id: 'docs', href: '/docs/', label: 'Docs' },
   { id: 'features', href: '/features/', label: 'Features' },
   { id: 'how-it-works', href: '/how-it-works/', label: 'How it works' },
   { id: 'examples', href: '/examples/', label: 'Examples' },
-  // ADR 0006 (amends ADR 0005, decision 1a): the docs, last of the site's pages.
-  { id: 'docs', href: '/docs/', label: 'Docs' },
 ];
 
 const GITHUB = 'https://github.com/isoloop/isoloop';
@@ -31,9 +31,12 @@ const GITHUB_MARK =
 export function Header({
   current,
   mark,
+  version,
 }: {
   current?: Current;
   mark?: { light: string; dark: string };
+  /** The library version the site is built from, as a pill before GitHub, linking to its changelog. */
+  version?: { label: string; href: string };
 }): VNode {
   return (
     <header class="ui-header">
@@ -54,6 +57,15 @@ export function Header({
         ))}
       </nav>
       <div class="ui-header-end">
+        {version ? (
+          <a
+            class="ui-version"
+            href={version.href}
+            aria-label={`Version ${version.label}, changelog`}
+          >
+            {version.label}
+          </a>
+        ) : null}
         <a class="ui-github" href={GITHUB} aria-label="Isoloop on GitHub">
           <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true" focusable="false">
             <path fill="currentColor" d={GITHUB_MARK} />

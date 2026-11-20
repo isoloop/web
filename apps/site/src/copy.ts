@@ -797,14 +797,10 @@ export const docsPage = {
   description:
     'How to build with Isoloop: getting started, the guides for each part, and the reference.',
   heading: 'Docs',
-  lede: 'How to build with Isoloop, section by section. Each page is a guide from the library, at the version shown on it.',
+  lede: 'How to build with Isoloop, section by section.',
   docs: 'Docs',
   nav: 'Docs',
   onThisPage: 'On this page',
-  source: 'Source on GitHub',
-  /** The page's Markdown copy, /docs/<slug>.md (build/docs/llms.ts). */
-  markdown: 'Markdown',
-  version: (v: string) => `@isoloop/* ${v}`,
   previous: 'Previous',
   next: 'Next',
   /** The code blocks' button once it has copied (src/demos/copy.ts); "Copy" is in the markup (build/docs/render.ts). */

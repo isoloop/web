@@ -1294,15 +1294,6 @@
 .docs-toc li a:hover {
   color: var(--ui-text);
 }
-.docs-toc-foot {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-top: 1.2rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--ui-rule);
-  font-size: 0.88rem;
-}
 
 .docs-article {
   min-width: 0;
@@ -1315,8 +1306,7 @@
   font-size: 0.9rem;
   font-stretch: 87%;
 }
-.docs-crumb a,
-.docs-meta a {
+.docs-crumb a {
   color: var(--ui-text-muted);
 }
 .docs-article h1 {
@@ -1333,15 +1323,6 @@
   font-size: 1.25rem;
   line-height: 1.45;
   max-width: 42rem;
-}
-.docs-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem 1.2rem;
-  margin: 1.1rem 0 0;
-  color: var(--ui-text-muted);
-  font-size: 0.9rem;
-  font-stretch: 87%;
 }
 
 /* The guide's own Markdown. Long names in inline code break rather than widen the page. */

@@ -59,7 +59,10 @@ export default defineConfig({
         libraryVersion: libraryVersion(library),
       },
     }),
-    ui({ header: true, footer: true }),
+    ui({
+      header: { version: { label: libraryVersion(library), href: '/changelog/' } },
+      footer: true,
+    }),
   ],
   base: '/',
   build: {
