@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-17
+- **Extended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decisions 2, 4 and 6: the library's `docs` skill and `docs/writing.md`, `docs:check` in the hook and CI, the steward reviewing docs and a weekly docs drift pass; Proposed)
 - **Answers:** how a shipped change reaches the changelogs and `isoloop.dev`, who checks it, and what keeps the site in order. Grilled 2026-11-17 (Q1–Q14, G1–G14). Covers `isoloop/isoloop` and `isoloop/web`.
 
 ## Context
