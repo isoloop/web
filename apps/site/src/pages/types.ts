@@ -1,7 +1,7 @@
 import type { VNode } from 'preact';
 import type { Changelog } from '../../build/changelog.ts';
 import type { Diagram } from '../../build/diagrams.ts';
-import type { Doc } from '../../build/docs/pages.ts';
+import type { Doc, NavSection } from '../../build/docs/pages.ts';
 import type { Example } from '../../build/examples.ts';
 import type { Feature } from '../../build/features.ts';
 import type { Samples } from '../../build/samples.ts';
@@ -21,6 +21,8 @@ export interface SiteData {
   samples: Samples;
   /** The docs pages, in docs.json order (build/docs/pages.ts). */
   docs: Doc[];
+  /** The sidebar's and /docs/'s sections: each page, and links into them (Kernel config). */
+  docsNav: NavSection[];
   /** The `@isoloop/*` version at the pin, which the docs describe. */
   libraryVersion: string;
 }

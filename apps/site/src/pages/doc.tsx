@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
 import { ExperimentalMark } from 'ui/components';
-import type { Doc } from '../../build/docs/pages.ts';
+import type { Doc, NavItem, NavSection } from '../../build/docs/pages.ts';
 import { docsPage as c, marks } from '../copy.ts';
 import type { Page, SiteData } from './types.ts';
 
@@ -14,35 +14,27 @@ import type { Page, SiteData } from './types.ts';
 
 const COPY_SCRIPT = '/src/demos/copy.ts';
 
-/** The docs in their manifest sections, in order. */
-function sections(docs: readonly Doc[]): { title: string; docs: Doc[] }[] {
-  const out: { title: string; docs: Doc[] }[] = [];
-  for (const d of docs) {
-    const last = out.at(-1);
-    if (last?.title === d.section) last.docs.push(d);
-    else out.push({ title: d.section, docs: [d] });
-  }
-  return out;
-}
-
 /** A section's anchor on /docs/, e.g. `agents-and-tooling`. */
 const sectionId = (title: string): string => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-function Pill({ doc }: { doc: Doc }): VNode | null {
+function Pill({ doc }: { doc: { experimental: boolean } }): VNode | null {
   return doc.experimental ? <span class="ui-pill">{marks.experimental}</span> : null;
 }
 
-/** The section sidebar; `current` marks this page. */
-function SideNav({ docs, current }: { docs: readonly Doc[]; current?: string }): VNode {
+/** The section sidebar; `current` marks this page. Links into a page (Kernel config) are never current. */
+function SideNav({ nav, current }: { nav: readonly NavSection[]; current?: string }): VNode {
   return (
     <nav class="docs-side" aria-label={c.nav}>
-      {sections(docs).map((s) => (
+      {nav.map((s) => (
         <div key={s.title}>
           <h2>{s.title}</h2>
           <ul>
-            {s.docs.map((d) => (
-              <li key={d.slug}>
-                <a href={d.path} aria-current={d.slug === current ? 'page' : undefined}>
+            {s.items.map((d: NavItem) => (
+              <li key={d.path}>
+                <a
+                  href={d.path}
+                  aria-current={d.slug !== undefined && d.slug === current ? 'page' : undefined}
+                >
                   {d.experimental ? (
                     <MarkedTitle title={d.title} label={marks.experimental} />
                   ) : (
@@ -58,15 +50,29 @@ function SideNav({ docs, current }: { docs: readonly Doc[]; current?: string }):
   );
 }
 
-/** The page's h2s, for "On this page". */
+/** The page's h2s, for "On this page"; on an API page, each entry point's exports (h3) under it. */
 function Contents({ doc }: { doc: Doc }): VNode | null {
   const h2 = doc.headings.filter((h) => h.depth === 2);
   if (!h2.length) return null;
+  const under = (i: number) => {
+    const at = doc.headings.indexOf(h2[i]!);
+    const end = i + 1 < h2.length ? doc.headings.indexOf(h2[i + 1]!) : doc.headings.length;
+    return doc.headings.slice(at + 1, end).filter((h) => h.depth === 3);
+  };
   return (
     <ul>
-      {h2.map((h) => (
+      {h2.map((h, i) => (
         <li key={h.id}>
           <a href={`#${h.id}`}>{h.text}</a>
+          {doc.kind === 'api' && under(i).length ? (
+            <ul>
+              {under(i).map((x) => (
+                <li key={x.id}>
+                  <a href={`#${x.id}`}>{x.text}</a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </li>
       ))}
     </ul>
@@ -81,7 +87,7 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
   return (
     <div class="docs-layout">
       <div class="docs-only-wide">
-        <SideNav docs={data.docs} current={doc.slug} />
+        <SideNav nav={data.docsNav} current={doc.slug} />
       </div>
       <main class="docs-article">
         <details class="docs-fold docs-only-narrow">
@@ -91,7 +97,7 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
               {doc.section} · {doc.title}
             </span>
           </summary>
-          <SideNav docs={data.docs} current={doc.slug} />
+          <SideNav nav={data.docsNav} current={doc.slug} />
         </details>
         <p class="docs-crumb">
           <a href="/docs/">{c.docs}</a> · {doc.section}
@@ -175,17 +181,17 @@ export const docsIndexPage: Page = {
   render: (data: SiteData) => (
     <div class="docs-layout docs-layout-index">
       <div class="docs-only-wide">
-        <SideNav docs={data.docs} />
+        <SideNav nav={data.docsNav} />
       </div>
       <main class="docs-article">
         <h1>{c.heading}</h1>
         <p class="docs-lead">{c.lede}</p>
-        {sections(data.docs).map((s) => (
+        {data.docsNav.map((s) => (
           <section class="docs-index-section" key={s.title} aria-labelledby={sectionId(s.title)}>
             <h2 id={sectionId(s.title)}>{s.title}</h2>
             <ul>
-              {s.docs.map((d) => (
-                <li key={d.slug}>
+              {s.items.map((d) => (
+                <li key={d.path}>
                   <a href={d.path}>
                     <b>{d.title}</b>
                     <Pill doc={d} />

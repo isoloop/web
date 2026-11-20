@@ -1,11 +1,18 @@
 // ensureLibrary against a local repo standing in for isoloop/isoloop: the
-// pinned LIBRARY_PATHS (diagrams and guides) land on disk, and only those.
+// pinned LIBRARY_PATHS (diagrams, guides and API pages) land on disk, and only those.
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { ensureLibrary, guidesDir, LIBRARY_PATHS, libraryDir, libraryVersion } from './library.ts';
+import {
+  apiDir,
+  ensureLibrary,
+  guidesDir,
+  LIBRARY_PATHS,
+  libraryDir,
+  libraryVersion,
+} from './library.ts';
 
 const root = mkdtempSync(join(tmpdir(), 'site-library-'));
 afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -62,11 +69,12 @@ describe('libraryVersion', () => {
 });
 
 describe('ensureLibrary', () => {
-  it('checks out the diagrams and the guides at the pin, and nothing else', () => {
-    expect(LIBRARY_PATHS).toEqual(['docs/diagrams', 'docs/guide']);
+  it('checks out the diagrams, the guides and the API pages at the pin, and nothing else', () => {
+    expect(LIBRARY_PATHS).toEqual(['docs/diagrams', 'docs/guide', 'docs/api']);
     const lib = library({
       'docs/diagrams/a.json': '{}',
       'docs/guide/hosting.md': '# Hosting\n',
+      'docs/api/host.md': '# @isoloop/host\n',
       'docs/adr/0001.md': '# ADR\n',
       'packages/host/package.json': '{}',
     });
@@ -75,17 +83,29 @@ describe('ensureLibrary', () => {
     expect(diagrams).toBe(join(libraryDir(s), 'docs', 'diagrams'));
     expect(existsSync(join(diagrams, 'a.json'))).toBe(true);
     expect(existsSync(join(guidesDir(s), 'hosting.md'))).toBe(true);
+    expect(existsSync(join(apiDir(s), 'host.md'))).toBe(true);
     expect(existsSync(join(libraryDir(s), 'docs', 'adr'))).toBe(false);
     expect(existsSync(join(libraryDir(s), 'packages'))).toBe(false);
   });
 
-  it('fetches again when a stamped checkout from before the guides lacks them', () => {
-    const lib = library({ 'docs/diagrams/a.json': '{}', 'docs/guide/pools.md': '# Pools\n' });
+  it('fetches again when a stamped checkout from before the guides or the API pages lacks them', () => {
+    const lib = library({
+      'docs/diagrams/a.json': '{}',
+      'docs/guide/pools.md': '# Pools\n',
+      'docs/api/host.md': '# @isoloop/host\n',
+    });
     const s = site(lib.sha);
     ensureLibrary(s, lib.url);
     rmSync(guidesDir(s), { recursive: true });
+    rmSync(apiDir(s), { recursive: true });
     ensureLibrary(s, lib.url);
     expect(existsSync(join(guidesDir(s), 'pools.md'))).toBe(true);
+    expect(existsSync(join(apiDir(s), 'host.md'))).toBe(true);
+  });
+
+  it('fails a pin whose commit has no API pages', () => {
+    const lib = library({ 'docs/diagrams/a.json': '{}', 'docs/guide/x.md': '# X\n' });
+    expect(() => ensureLibrary(site(lib.sha), lib.url)).toThrow();
   });
 
   it('fails a pin whose commit has no guides', () => {

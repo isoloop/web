@@ -45,9 +45,9 @@ const MARKS: Record<string, string> = Object.fromEntries(
 );
 
 const STUB = /^\s*<!--\s*page:([a-z0-9-]+)\s*-->\s*$/;
-const DOC_STUB = /^\s*<!--\s*doc:([a-z0-9-]+)\s*-->\s*$/;
+const DOC_STUB = /^\s*<!--\s*doc:((?:api\/)?[a-z0-9-]+)\s*-->\s*$/;
 /** A docs page's input id, as `docInputs` names it, and its slug. */
-const DOC_INPUT = /\/docs\/([a-z0-9-]+)\/index\.html$/;
+const DOC_INPUT = /\/docs\/((?:api\/)?[a-z0-9-]+)\/index\.html$/;
 
 /** The build inputs for the docs pages: one virtual `docs/<slug>/index.html` each, under `siteDir`. */
 export function docInputs(siteDir: string, docs: readonly Doc[]): Record<string, string> {
@@ -144,7 +144,7 @@ export function site(opts: SiteOptions): Plugin {
       });
       s.middlewares.use((req, res, next) => {
         const path = req.url?.split('?')[0] ?? '';
-        const doc = docs.get(/^\/docs\/([a-z0-9-]+)\/?$/.exec(path)?.[1] ?? '');
+        const doc = docs.get(/^\/docs\/((?:api\/)?[a-z0-9-]+)\/?$/.exec(path)?.[1] ?? '');
         if (doc) {
           s.transformIndexHtml(path, renderDocument(docPage(doc), opts.data, {}))
             .then((html) => {

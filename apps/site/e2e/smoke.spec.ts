@@ -37,7 +37,7 @@ async function watch(page: Page): Promise<() => Promise<string[]>> {
 /** The docs pages, one per guide in content/docs.json (build/docs/pages.ts). */
 const DOCS = readManifest(
   fileURLToPath(new URL('../content/docs.json', import.meta.url)),
-).sections.flatMap((s) => s.guides.map((g) => `/docs/${g.slug}/`));
+).sections.flatMap((s) => s.guides.flatMap((g) => ('slug' in g ? [`/docs/${g.slug}/`] : [])));
 
 const PAGES = [
   '/',
