@@ -23,6 +23,7 @@ Read the diff, then the code it touches, then the rules: [`AGENTS.md`](../../AGE
   - Without the label, report each such change as a must-fix titled "Needs the maintainer".
   - With it, list them under Notes as approved, and review everything else as usual: the label clears only this item, so any other must-fix still fails the verdict.
   - Edits to existing pages inside a feature PR don't need it.
+  - **The API freeze** (library [M4d](https://github.com/isoloop/isoloop/blob/main/docs/plans/m4d-release.md), decision 11), from `0.1.0-next.9` on: a library PR whose API check report lists a change to the published `.d.ts` (an export added, changed, renamed or removed) needs the maintainer too. An addition marked `@experimental` doesn't. Name each change from the report under "Needs the maintainer".
   - `steward-override` is a different label: it skips the review entirely, for a finding the maintainer overrules.
 
 ### Docs, on library PRs
