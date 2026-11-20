@@ -20,7 +20,7 @@
         "findings": [
           "Against a worker each, the balancer runs the 8 processors on 3 workers instead of 9, with 57 MB less memory after GC and 8 points less CPU across threads. Its p95 latency is 74 ms against 39 ms.",
           "Against one pool, it uses 1 more worker, and its p95 is 74 ms against 148 ms.",
-          "No file was lost in any run, and the kernel gave up on no processor."
+          "No file was lost in any run, and the kernel gave up on no processor. The balancer did 4 files twice, from the processors it moved: delivery is at least once."
         ],
         "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, no faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
         "tag": "processor-v0.3.0",
