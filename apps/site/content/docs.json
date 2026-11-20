@@ -1,5 +1,5 @@
 {
-  "$comment": "The docs pages and their order (isoloop/isoloop M4c, decisions 9 and 11; ADR 0006). Lists exactly the guides in docs/guide at the pin (library.lock): a guide joins here in the PR that moves the pin to a version that has it. Sections, in order: Start, Build, Agents and tooling, Reference; a section appears once it has a guide. leadPending: the guide's lead is still being reshaped to one sentence (M4c task 5), so its description is the lead's first sentence. experimental: the guide's feature is @experimental (the balancer, the devtools panel), drawn as the Experimental pill after its name.",
+  "$comment": "The docs pages and their order (isoloop/isoloop M4c, decisions 9, 11 and 29; ADR 0006). Lists exactly the pages at the pin (library.lock): the guides in docs/guide (slug = file name) and the generated API pages in docs/api (slug = api/ + file name, page /docs/api/<name>/). A page joins here in the PR that moves the pin to a version that has it. An entry with title, href and description is a link into a page (Kernel config), shown in the sidebar and on /docs/ but not a page. Sections, in order: Start, Build, Agents and tooling, Reference; a section appears once it has a page. leadPending: the guide's lead is still being reshaped to one sentence (M4c task 5), so its description is the lead's first sentence. experimental: the page's feature is @experimental, drawn as the Experimental mark in the sidebar and the pill on /docs/ and the page's title.",
   "sections": [
     {
       "title": "Start",
@@ -57,6 +57,52 @@
         },
         {
           "slug": "dev-tools"
+        }
+      ]
+    },
+    {
+      "title": "Reference",
+      "guides": [
+        {
+          "slug": "api/host"
+        },
+        {
+          "slug": "api/runtime"
+        },
+        {
+          "slug": "api/bus"
+        },
+        {
+          "slug": "api/react"
+        },
+        {
+          "slug": "api/preact"
+        },
+        {
+          "slug": "api/vite"
+        },
+        {
+          "slug": "api/dom"
+        },
+        {
+          "slug": "api/balancer",
+          "experimental": true
+        },
+        {
+          "slug": "api/devtools",
+          "experimental": true
+        },
+        {
+          "slug": "api/webmcp",
+          "experimental": true
+        },
+        {
+          "slug": "api/cli"
+        },
+        {
+          "title": "Kernel config",
+          "href": "/docs/api/host/#kernelconfig",
+          "description": "Every option `createKernel` takes, with its default."
         }
       ]
     }

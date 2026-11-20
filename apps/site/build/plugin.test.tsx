@@ -118,6 +118,7 @@ const data: SiteData = {
     howGrants: 'hg',
   },
   docs: [],
+  docsNav: [],
   libraryVersion: '0.1.0-next.7',
 };
 
@@ -267,9 +268,19 @@ const call = (hook: unknown, id: string): unknown =>
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the plugin's own hooks, called as Vite would
   (hook as (id: string) => unknown)(id);
 
+/** A docs page as a sidebar entry. */
+const item = (d: Doc) => ({
+  title: d.title,
+  path: d.path,
+  description: d.description,
+  experimental: d.experimental,
+  slug: d.slug,
+});
+
 describe('the docs pages', () => {
   const doc: Doc = {
     slug: 'pools',
+    kind: 'guide',
     section: 'Build',
     experimental: false,
     path: '/docs/pools/',
@@ -300,7 +311,43 @@ describe('the docs pages', () => {
     title: 'Agents',
     description: 'Tools for agents.',
   };
-  const docsData: SiteData = { ...data, docs: [doc, balancer, agents], pin: 'abcdef1234567' };
+  const host: Doc = {
+    ...doc,
+    slug: 'api/host',
+    kind: 'api',
+    section: 'Reference',
+    path: '/docs/api/host/',
+    title: '@isoloop/host',
+    description: 'The main thread.',
+    body: '<h2 id="isoloophost"><code>@isoloop/host</code></h2>\n<h3 id="createkernel"><code>createKernel</code></h3>\n',
+    headings: [
+      { depth: 2, text: '@isoloop/host', id: 'isoloophost' },
+      { depth: 3, text: 'createKernel', id: 'createkernel' },
+      { depth: 3, text: 'KernelConfig', id: 'kernelconfig' },
+    ],
+    source: 'docs/api/host.md',
+  };
+  const docsData: SiteData = {
+    ...data,
+    docs: [doc, balancer, agents, host],
+    docsNav: [
+      { title: 'Build', items: [item(doc), item(balancer)] },
+      { title: 'Agents and tooling', items: [item(agents)] },
+      {
+        title: 'Reference',
+        items: [
+          item(host),
+          {
+            title: 'Kernel config',
+            path: '/docs/api/host/#kernelconfig',
+            description: 'Every option.',
+            experimental: false,
+          },
+        ],
+      },
+    ],
+    pin: 'abcdef1234567',
+  };
 
   it('name one virtual input per guide, under the site folder', () => {
     expect(docInputs('/s', [doc])).toEqual({ 'docs/pools': '/s/docs/pools/index.html' });
@@ -347,6 +394,22 @@ describe('the docs pages', () => {
     expect(html).not.toContain('<a href="#detail">');
     expect(html).toContain('<a href="/docs/pools/" rel="prev">');
     expect(html).toContain('<a href="/docs/agents/" rel="next" class="next">');
+  });
+
+  it('list an API page\'s exports under its entry point in "On this page"', () => {
+    const html = renderDocument(docPage(host), docsData, { csp: CSP });
+    expect(html).toContain(
+      '<a href="#isoloophost">@isoloop/host</a><ul><li><a href="#createkernel">createKernel</a></li><li><a href="#kernelconfig">KernelConfig</a></li></ul>',
+    );
+  });
+
+  it('show a link into a page (Kernel config) in the sidebar and on /docs/, never as the current page', () => {
+    const page = renderDocument(docPage(host), docsData, { csp: CSP });
+    expect(page).toContain('<a href="/docs/api/host/" aria-current="page">@isoloop/host</a>');
+    expect(page).toContain('<a href="/docs/api/host/#kernelconfig">Kernel config</a>');
+    const index = renderDocument(docsIndexPage, docsData, { csp: CSP });
+    expect(index).toContain('<b>Kernel config</b>');
+    expect(index).toContain('Every option.');
   });
 
   it('list every section and guide on /docs/, with their descriptions', () => {

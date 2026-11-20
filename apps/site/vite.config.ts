@@ -6,9 +6,10 @@ import { readDiagrams } from './build/diagrams.ts';
 import { loadExamples } from './build/examples.ts';
 import { loadFeatures } from './build/features.ts';
 import { buildLlms } from './build/docs/llms.ts';
-import { loadDocs } from './build/docs/pages.ts';
+import { docsNav, loadDocs } from './build/docs/pages.ts';
 import {
   ensureLibrary,
+  apiDir,
   guidesDir,
   libraryReader,
   libraryVersion,
@@ -34,11 +35,13 @@ const kind = (path: string): 'file' | 'dir' | undefined =>
 const docs = loadDocs({
   manifest: here('content/docs.json'),
   guidesDir: guidesDir(siteDir),
+  apiDir: apiDir(siteDir),
   pin,
   kind,
 });
-// The same guides for agents: llms.txt, llms-full.txt, a .md copy each (build/docs/llms.ts).
-const llms = buildLlms({ docs, guidesDir: guidesDir(siteDir), pin, kind });
+const nav = docsNav(here('content/docs.json'), docs);
+// The same pages for agents: llms.txt, llms-full.txt, a .md copy each (build/docs/llms.ts).
+const llms = buildLlms({ docs, guidesDir: guidesDir(siteDir), apiDir: apiDir(siteDir), pin, kind });
 
 export default defineConfig({
   plugins: [
@@ -56,6 +59,7 @@ export default defineConfig({
         changelog: loadChangelog(library, readPin(siteDir), here('../..')),
         samples: loadSamples(here('../samples/src')),
         docs,
+        docsNav: nav,
         libraryVersion: libraryVersion(library),
       },
     }),

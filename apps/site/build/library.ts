@@ -12,8 +12,8 @@ import { join } from 'node:path';
 
 export const LIBRARY_REPO = 'https://github.com/isoloop/isoloop.git';
 
-/** The folders checked out at the pin: the core diagrams and the guides. */
-export const LIBRARY_PATHS = ['docs/diagrams', 'docs/guide'] as const;
+/** The folders checked out at the pin: the core diagrams, the guides and the generated API pages. */
+export const LIBRARY_PATHS = ['docs/diagrams', 'docs/guide', 'docs/api'] as const;
 
 /** The pinned checkout's folder in `.library/`; `ensureLibrary` fills it. */
 export function libraryDir(siteDir: string): string {
@@ -23,6 +23,11 @@ export function libraryDir(siteDir: string): string {
 /** The pinned `docs/guide`; call `ensureLibrary` first. */
 export function guidesDir(siteDir: string): string {
   return join(libraryDir(siteDir), 'docs', 'guide');
+}
+
+/** The pinned `docs/api`, the generated API pages; call `ensureLibrary` first. */
+export function apiDir(siteDir: string): string {
+  return join(libraryDir(siteDir), 'docs', 'api');
 }
 
 /** The pinned sha, checked for shape. */
@@ -71,7 +76,7 @@ export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): 
   const diagrams = join(out, 'docs', 'diagrams');
   const stamp = join(cache, `${pin}.ok`);
   const onDisk = (): boolean => LIBRARY_PATHS.every((p) => existsSync(join(out, p)));
-  // A stamp from before docs/guide was fetched doesn't count, since its folder lacks it.
+  // A stamp from before docs/guide or docs/api was fetched doesn't count, since its folder lacks them.
   if (existsSync(stamp) && onDisk()) return diagrams;
 
   mkdirSync(cache, { recursive: true });

@@ -8,7 +8,7 @@ import { readManifest } from '../build/docs/pages.ts';
 const ORIGIN = 'https://isoloop.dev';
 const slugs = readManifest(
   fileURLToPath(new URL('../content/docs.json', import.meta.url)),
-).sections.flatMap((s) => s.guides.map((g) => g.slug));
+).sections.flatMap((s) => s.guides.flatMap((g) => ('slug' in g ? [g.slug] : [])));
 
 test('llms.txt lists every docs page, and each link reaches its Markdown copy', async ({
   request,
@@ -19,9 +19,9 @@ test('llms.txt lists every docs page, and each link reaches its Markdown copy', 
   const txt = await res.text();
   expect(txt.startsWith('# Isoloop\n\n> ')).toBe(true);
 
-  const links = [...txt.matchAll(/\]\((https:\/\/isoloop\.dev\/docs\/[a-z0-9-]+\.md)\)/g)].map(
-    (m) => m[1] ?? '',
-  );
+  const links = [
+    ...txt.matchAll(/\]\((https:\/\/isoloop\.dev\/docs\/(?:api\/)?[a-z0-9-]+\.md)\)/g),
+  ].map((m) => m[1] ?? '');
   expect(links.map((l) => l.slice(`${ORIGIN}/docs/`.length, -3)).toSorted()).toEqual(
     slugs.toSorted(),
   );

@@ -2,17 +2,16 @@
 // same build as the pages, so they can't go stale:
 // - /llms.txt: the llmstxt.org index, one line per docs page with its
 //   description, linking each page's Markdown copy;
-// - /docs/<slug>.md: the guide as fetched at the pin, its links made absolute;
-// - /llms-full.txt: every guide in nav order, each under its title and URL.
-// Links in the copies: another guide → its Markdown copy on the site; anything
+// - /docs/<slug>.md: the page as fetched at the pin, its links made absolute
+//   (a guide's /docs/pools.md, an API page's /docs/api/host.md);
+// - /llms-full.txt: every page in nav order, each under its title and URL.
+// Links in the copies: another docs page → its Markdown copy on the site; anything
 // else in the library → GitHub at the pin (the same rules as the pages,
 // links.ts).
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { site } from '../../src/copy.ts';
 import { ORIGIN } from '../crawl.ts';
-import { GUIDES_PATH, LIBRARY_GITHUB, rewriteLink, type LinkContext } from './links.ts';
-import type { Doc } from './pages.ts';
+import { LIBRARY_GITHUB, rewriteLink, type LinkContext } from './links.ts';
+import { readPage, type Doc } from './pages.ts';
 import { renderMarkdown } from './render.ts';
 
 /** A file the build emits at the site's root. */
@@ -27,6 +26,8 @@ export interface LlmsOptions {
   docs: readonly Doc[];
   /** The pinned docs/guide folder. */
   guidesDir: string;
+  /** The pinned docs/api folder, for the API pages. */
+  apiDir?: string;
   pin: string;
   kind: LinkContext['kind'];
   /** Default `https://isoloop.dev`. */
@@ -40,7 +41,7 @@ export const mdPath = (slug: string): string => `/docs/${slug}.md`;
 export function absoluteLink(href: string, ctx: LinkContext, origin = ORIGIN): string {
   if (href.startsWith('#')) return href;
   const to = rewriteLink(href, 'link', ctx);
-  const guide = /^\/docs\/([a-z0-9-]+)\/(.*)$/.exec(to);
+  const guide = /^\/docs\/((?:api\/)?[a-z0-9-]+)\/(.*)$/.exec(to);
   if (guide) return `${origin}${mdPath(guide[1] ?? '')}${guide[2] ?? ''}`;
   return to.startsWith('/') ? origin + to : to;
 }
@@ -133,9 +134,11 @@ export function buildLlms(o: LlmsOptions): LlmsFile[] {
   const guides = new Set(o.docs.map((d) => d.slug));
   const copies = new Map<string, string>();
   for (const d of o.docs) {
-    const file = `${GUIDES_PATH}/${d.slug}.md`;
-    const src = readFileSync(join(o.guidesDir, `${d.slug}.md`), 'utf8').replace(/\r\n/g, '\n');
-    copies.set(d.slug, markdownCopy(src, { file, pin: o.pin, guides, kind: o.kind }, origin));
+    const src = readPage(d.slug, o);
+    copies.set(
+      d.slug,
+      markdownCopy(src, { file: d.source, pin: o.pin, guides, kind: o.kind }, origin),
+    );
   }
   return [
     { fileName: 'llms.txt', source: llmsTxt(o.docs, o.pin, origin) },
