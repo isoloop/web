@@ -45,8 +45,11 @@ function SideNav({ docs, current }: { docs: readonly Doc[]; current?: string }):
             {s.docs.map((d) => (
               <li key={d.slug}>
                 <a href={d.path} aria-current={d.slug === current ? 'page' : undefined}>
-                  {d.title}
-                  {d.experimental ? <ExperimentalMark label={marks.experimental} /> : null}
+                  {d.experimental ? (
+                    <MarkedTitle title={d.title} label={marks.experimental} />
+                  ) : (
+                    d.title
+                  )}
                 </a>
               </li>
             ))}
@@ -152,6 +155,20 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
 }
 
 /** The page for one guide. */
+/** The title with the mark kept on the last word's line, so a wrapped title ends in it. */
+function MarkedTitle({ title, label }: { title: string; label: string }): VNode {
+  const cut = title.lastIndexOf(' ') + 1;
+  return (
+    <>
+      {title.slice(0, cut)}
+      <span class="docs-side-last">
+        {title.slice(cut)}
+        <ExperimentalMark label={label} />
+      </span>
+    </>
+  );
+}
+
 export function docPage(doc: Doc): Page {
   return {
     path: doc.path,
