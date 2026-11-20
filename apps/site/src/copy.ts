@@ -291,7 +291,7 @@ export const featuresPage = {
   // and "Packing back", at the library pin; the defaults are its options'.
   balancer: {
     caption:
-      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes, with its quarantine and bisect moves counted among the 3. Packing while a backlog holds steady, the busy time an app reports, and leaving alone an isolate the kernel gave up on are new in 0.1.0-next.1.',
+      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes, with its quarantine, bisect and fold moves counted among the 3. Packing while a backlog holds steady, the busy time an app reports, and leaving alone an isolate the kernel gave up on are new in 0.1.0-next.1.',
     head: ['When', 'What the balancer does'],
     rows: <Row[]>[
       [
