@@ -13,7 +13,7 @@ Read the diff, then the code it touches, then the rules: [`AGENTS.md`](../../AGE
 - **Claims:** every sentence of site copy, docs or changelog the change adds or alters is true of the code at this commit. Trace each one to its source.
 - **Positioning and wording:** the whole package; measurements carry device, build and tag; Isoloop and native compared as measured results.
 - **Site impact:** the line is present and honest. A change to public API, user-visible behaviour, measurements or a documented limitation is not `none`.
-- **Changeset:** present for any change users see, and its text describes the change as shipped. It says nothing about work still to come ("in a later task", "nothing uses it yet", "will come with"): changesets ship together at the next version, and a follow-up that lands first makes such a sentence false. Library: a public `.d.ts` change has at least a minor entry, TSDoc and `docs/guide` updated.
+- **Changeset:** present for any change users see, and its text describes the change as shipped. It says nothing about work still to come ("in a later task", "nothing uses it yet", "will come with"): changesets ship together at the next version, and a follow-up that lands first makes such a sentence false. A limit, default or count in it carries the exact figure the guide gives, or is left to the guide. Library: a public `.d.ts` change has at least a minor entry, TSDoc and `docs/guide` updated.
 - **Docs:** README, guide or TSDoc match the new behaviour. On library PRs, also the docs rules below.
 - **Site build rules:** pages stay within `default-src 'self'` (scripts and styles as same-origin files, every request same-origin); new UI keeps keyboard access, visible focus and AA contrast; links resolve.
 - **Version PRs** (`chore: version …`): read each changelog's new section as one text, against the code at this commit. Search the sections for words that look ahead (`later`, `yet`, `will`, `next`, `follow`, `comes`) over whole lines, not sentence by sentence, since code spans hold dots. A match is only a lead (`0.1.0-next.3`, "will throw if…" are fine): judge each in context. An entry that says something comes later, or describes something another entry in the section removes or changes, is a must-fix.
@@ -23,6 +23,7 @@ Read the diff, then the code it touches, then the rules: [`AGENTS.md`](../../AGE
   - With it, list them under Notes as approved, and review everything else as usual: the label clears only this item, so any other must-fix still fails the verdict.
   - Edits to existing pages inside a feature PR don't need it.
   - `steward-override` is a different label: it skips the review entirely, for a finding the maintainer overrules.
+- **An ADR fix that follows a code PR** says "after #N" and opens as a draft (the library's `docs` skill). If it's marked ready while #N is still open, report it under Notes as waiting on #N, not as a false claim. Once #N has merged, review it as usual: the ADR must match the code at this commit.
 
 ### Docs, on library PRs
 
@@ -38,6 +39,8 @@ The docs rules are the library's [`docs/writing.md`](https://github.com/isoloop/
 On `isoloop/web` PRs there's no library checkout. The guides' text is reviewed on its library PR; here check only that `apps/site/content/docs.json` lists exactly the guides at the pin, and that a new guide's entry comes with the pin bump that brings it.
 
 When a finding is a pattern, look for every instance in the diff and list them all in that finding, so one round fixes it.
+
+When a claim is false or stale (a wrong limit, an old name, a default that changed), search for the same claim beyond the diff, on library PRs: the changesets, the package READMEs, the guides and the TSDoc (`git grep` the old name or figure). List every place under that one must-fix, the files the PR didn't touch included.
 
 Report in three groups, most severe first:
 - **Must-fix:** a false claim, a wrong Site impact, a missing changeset or docs for a user-visible change, a CSP or accessibility break.
