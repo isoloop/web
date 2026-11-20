@@ -2,7 +2,7 @@
 
 - **Status:** Proposed
 - **Date:** 2026-11-19
-- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed)
+- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20))
 - **Answers:** how a reader moves through a long page on the site, and how a feature that isn't stable yet is marked. Grilled 2026-11-19 (Q1–Q12), after a local prototype the maintainer reviewed. Amends [ADR 0002](0002-site-build.md) (the features page, the step tabs) and [ADR 0003](0003-design-system.md) (a status colour, the pill, the header's GitHub link).
 
 ## Context
@@ -89,6 +89,10 @@ In place of the lede and the changelog link, `/features/` opens with a board of 
   - an outlined capsule
   - small capitals at 0.72rem, smaller inside the tag chips
   - the text and the outline both in `--ui-experimental`
+
+#### Amended: the compact mark in navigation lists (2026-11-20)
+
+In navigation lists, the docs sidebar and later the API reference's symbol lists, the experimental mark is a compact round "!" (`ExperimentalMark` in `packages/ui`, an inline SVG in `--ui-experimental`) with a visually hidden "Experimental" label and a tooltip, so it never relies on colour alone. The full pill stays on the page heading (an experimental guide's h1) and on the `/docs/` index. The mark is a graphic, so `--ui-experimental` against the page and the surface is held to 3:1 by the contrast test, on top of the pill's 4.5:1.
 
 ### 5. A status colour (amends ADR 0003, decisions 3 and 8)
 

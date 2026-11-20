@@ -4,6 +4,7 @@ export { Bar } from './Bar.tsx';
 export { Button, type ButtonProps } from './Button.tsx';
 export { Callout } from './Callout.tsx';
 export { Card, type CardProps } from './Card.tsx';
+export { ExperimentalMark } from './ExperimentalMark.tsx';
 export { Footer } from './Footer.tsx';
 export { Frame, type FrameProps } from './Frame.tsx';
 export { Head, type HeadProps } from './Head.tsx';

@@ -1254,6 +1254,11 @@
   font-size: 0.95rem;
   line-height: 1.35;
 }
+.docs-side li a:has(.ui-mark) {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 .docs-side li a:hover {
   color: var(--ui-text);
   text-decoration: underline;
@@ -1264,7 +1269,6 @@
   color: var(--ui-text);
   font-weight: 650;
 }
-.docs-side .ui-pill,
 .docs-article h1 .ui-pill,
 .docs-index-section .ui-pill {
   margin-left: 0.35em;

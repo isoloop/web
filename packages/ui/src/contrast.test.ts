@@ -65,6 +65,16 @@ describe.each(Object.entries(themes))('the %s theme', (_name, semantic) => {
   });
 });
 
+// The compact experimental mark (ADR 0005, amended 2026-11-20) is a graphic, so
+// it needs the 3:1 non-text level against the page and the surface.
+describe.each(Object.entries(themes))('the %s theme, the experimental mark', (_name, semantic) => {
+  it.each(['ui-bg', 'ui-surface'])('--ui-experimental on --%s is at least 3:1', (bg) => {
+    expect(
+      contrast(colour(semantic, 'ui-experimental'), colour(semantic, bg)),
+    ).toBeGreaterThanOrEqual(3);
+  });
+});
+
 it('the no-JS dark block matches the dark block', () => {
   const media = declarations(blockAfter('dark, without JS'));
   expect([...media]).toEqual([...themes.dark]);
