@@ -23,6 +23,7 @@ Read the diff, then the code it touches, then the rules: [`AGENTS.md`](../../AGE
   - Without the label, report each such change as a must-fix titled "Needs the maintainer".
   - With it, list them under Notes as approved, and review everything else as usual: the label clears only this item, so any other must-fix still fails the verdict.
   - Edits to existing pages inside a feature PR don't need it.
+  - **The API freeze** (the library's M4d plan, decision 11): once the library's base branch is at `0.1.0-next.9` or later (`git show origin/<base>:packages/host/package.json`), a library PR that changes the published `.d.ts` needs the maintainer too: an export added, changed, renamed or removed. The `api` job (the API check workflow, `scripts/ci/api-check.ts`) lists those changes in its log; the diff's exported declarations in `packages/*/src` show the same. An addition marked `@experimental` doesn't need it. Name each change under "Needs the maintainer".
   - `steward-override` is a different label: it skips the review entirely, for a finding the maintainer overrules.
 
 ### Docs, on library PRs
