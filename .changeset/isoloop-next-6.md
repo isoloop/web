@@ -1,5 +1,4 @@
 ---
-'processor': patch
 'markets': patch
 'plant': patch
 'basic': patch
