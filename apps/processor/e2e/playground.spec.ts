@@ -42,8 +42,13 @@ test('a task that blocks once stays; blocking again within 60 s sends it to quar
   await page.waitForTimeout(1_500);
   // A first spike is only noted (ADR 0017, amended for M3i).
   await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
-  await page.waitForTimeout(5_000);
-  await expect(columnOf(page, heavy)).toHaveAttribute('data-pool', 'balancer-1');
+  await expect(page.locator('.log li[data-kind="noted"]').first()).toContainText(heavy, {
+    timeout: 10_000,
+  });
+  await page.waitForTimeout(3_000);
+  // Still in a balancer pool, not the quarantine. Which pool isn't the point: on a busy runner the
+  // balancer may move it for load (another pool), which isn't a quarantine.
+  await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'pool');
   await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
   await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'quarantine', {
     timeout: 15_000,
