@@ -151,6 +151,15 @@ function TaskCard({ task, playground }: { task: TaskView; playground: Playground
       <div className="card-head">
         <strong>{task.name}</strong>
         <span className="mono muted state">{task.state}</span>
+        {task.measuring && (
+          <span
+            className="badge"
+            data-reason="measuring"
+            title="New here: the balancer measures its load before placing it"
+          >
+            measuring
+          </span>
+        )}
         {task.moved && (
           <span className="badge" data-reason={task.moved.reason}>
             {REASONS[task.moved.reason] ?? task.moved.reason} · from {task.moved.from}

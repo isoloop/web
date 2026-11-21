@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
 // The File processor (M3h decision 29), against the built app, in real time.
-// Processors start in the quarantine until measured (about 3 s), then the
-// balancer places them; a consumer group per kind hands a stopped
+// Processors start in the quarantine until measured (about 3 s; the page
+// shows that as Measuring, src/measuring.ts), then the balancer places them; a consumer group per kind hands a stopped
 // processor's unfinished files to the group again.
 
 declare global {
@@ -39,8 +39,8 @@ test('files flow through: results, jobs per second and latency', async ({ page }
 test('no file is lost when processors move', async ({ page }) => {
   test.setTimeout(90_000);
   await page.evaluate(() => window.files.setDials({ running: true, rate: 30 }));
-  // The balancer's own moves (out of the quarantine once measured)…
-  await expect(page.locator('.log li[data-kind="steady"]').first()).toBeVisible({
+  // The balancer's own moves (out of the quarantine once measured, logged as measured)…
+  await expect(page.locator('.log li[data-kind="measured"]').first()).toBeVisible({
     timeout: 15_000,
   });
   // …and every processor stopped and started again, twice.
@@ -141,3 +141,26 @@ for (const mode of ['own', 'one'] as const) {
     await drained(page);
   });
 }
+
+test('with Restarts at none, a crashed processor is given up at once, and Restart brings it back', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  // The control reloads the page with ?restarts= (restarts.ts).
+  await page.getByTestId('restarts').selectOption('0');
+  await expect(page).toHaveURL(/restarts=0/);
+  await page.waitForFunction(() => window.files !== undefined);
+  await page.evaluate(() => window.files.setDials({ running: true, rate: 20, corrupt: 50 }));
+  const gaveUp = page.getByTestId('gave-up').first();
+  await expect(gaveUp).toContainText('restarts off', { timeout: 30_000 });
+  const card = page.locator('.card:has([data-testid="gave-up"])').first();
+  const id = (await card.locator('.card-head strong').textContent()) ?? '';
+  await page.evaluate(() => window.files.setDials({ corrupt: 0 }));
+  await card.getByRole('button', { name: 'Restart' }).click();
+  await expect(page.locator('.log li[data-kind="restart"]').first()).toContainText(id);
+  // That processor's card loses its gave-up line once it runs again.
+  const same = page.locator('.card').filter({
+    has: page.locator('.card-head strong', { hasText: new RegExp(`^${id}$`) }),
+  });
+  await expect(same.getByTestId('gave-up')).toHaveCount(0, { timeout: 15_000 });
+});

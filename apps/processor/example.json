@@ -7,7 +7,7 @@
     "In the playground, add a few tasks and turn their dials up until a pool's tasks add up to 80% of a core: the balancer moves the heaviest one to a pool with room.",
     "Watch the move log at the bottom of the page: each entry gives the time, the reason, the move, and how long the task was stopped before it ran again.",
     "Block a task twice within a minute: it goes to the quarantine pool until it has been quiet for 30 s; each further offence doubles that wait, up to 2 minutes, and a fourth keeps it apart for good.",
-    "In the file processor, raise the share of corrupt files, the dial that crashes a processor: the kernel restarts it, and the files it hadn't finished go to the other processor in its group. With the balancer, a crashed processor also goes to the quarantine.",
+    "In the file processor, raise the share of corrupt files, the dial that crashes a processor: the kernel restarts it, and the files it hadn't finished go to the other processor in its group. With the balancer, a crashed processor also goes to the quarantine. Past the restart limit (3 in 60 s by default) the kernel gives it up, and its queue grows until you press Restart on its card: set Restarts to 1 to see it sooner.",
     "Raise the share of poison files: each one blocks its processor's loop for 2 s, which the page's 10 s kill timeout lets pass, and stalls every processor sharing its pool. A processor that blocks twice within a minute goes to the quarantine pool; when the beat can't name it, the balancer bisects instead, sending half the pool there. Its unfinished files go to the other processor in its group."
   ],
   "order": 40,
@@ -30,7 +30,8 @@
       "src": "/examples/processor/files/",
       "height": 1000,
       "intro": [
-        "A generator makes synthetic files at the rate you set: CSV to parse and sum, images to scale and blur, archives to compress, and data to hash with SHA-256, each more work the bigger it is. Each kind goes to its own topic, read by a consumer group of two processors, all headless isolates that share the work. A processor commits a file only once its result is out, so when the balancer moves it, what it hadn't finished goes to the group again. Poison files block a processor for 2 s, heavy ones are ten times the work, corrupt ones crash it."
+        "A generator makes synthetic files at the rate you set: CSV to parse and sum, images to scale and blur, archives to compress, and data to hash with SHA-256, each more work the bigger it is. Each kind goes to its own topic, read by a consumer group of two processors, all headless isolates that share the work. A processor commits a file only once its result is out, so when the balancer moves it, what it hadn't finished goes to the group again. Poison files block a processor for 2 s, heavy ones are ten times the work, corrupt ones crash it.",
+        "With the balancer, new processors start in a Measuring pool for about 3 s, while it measures their load, then it places them."
       ]
     }
   ],

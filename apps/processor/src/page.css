@@ -105,6 +105,11 @@
 .column[data-kind='quarantine'] {
   border: 2px dashed var(--ui-bad);
 }
+/* The measuring step: new isolates the balancer measures before placing them
+   (measuring.ts). Neutral, not a quarantine's warning. */
+.column[data-kind='measuring'] {
+  border: 2px dashed var(--ui-border);
+}
 .column header {
   display: flex;
   justify-content: space-between;
@@ -387,4 +392,22 @@
 [data-embed] .ui-shell.processor {
   max-width: none;
   padding: var(--ui-space-3);
+}
+
+/* A processor the kernel gave up on (restarts.ts): why, and Restart. */
+.gave-up {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2);
+  margin-top: var(--ui-space-2);
+  padding-top: var(--ui-space-2);
+  border-top: 1px dashed var(--ui-bad);
+  color: var(--ui-bad);
+  font-size: var(--ui-text-s);
+}
+
+.restarts select {
+  width: auto;
 }
