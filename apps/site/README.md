@@ -64,7 +64,7 @@ Anything else inline fails the build, so a re-render that brings something new i
 
 `/examples/` shows one example per panel, beside the rail that `/how-it-works/` and `/features/` also use (`src/pages/steps.tsx`, `src/demos/steps.ts`). Each app has an `example.json` next to its `package.json`; the schema is in `build/examples.ts`, and unknown fields fail, so a typo can't slip through:
 
-- `title`, `tab` (its tab's short name), `summary` (what it is), `order`.
+- `title`, `tab` (its short name in the rail), `summary` (what it is), `order`.
 - `shows`: feature ids from `content/features/`, shown as the landing page's features strip. An id that isn't a feature fails the build.
 - `try`: what to do in it, and what to watch.
 - `measurements`, one of:

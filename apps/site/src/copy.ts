@@ -208,12 +208,13 @@ export const featuresPage = {
   description:
     'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, tools for agents, devtools, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
-  notes: { label: 'The features, one note each, by tab' },
+  notes: { label: 'The features, one note each, by group' },
   tabs: {
     label: 'Features, by group',
     /** The pager under each group (src/pages/steps.tsx, Pager). */
     previous: 'Previous',
     next: 'Next',
+    pager: 'Previous and next',
     names: {
       isolation: 'Isolation',
       bus: 'Bus',
@@ -405,6 +406,7 @@ export const howItWorks = {
     },
     previous: 'Previous',
     next: 'Next',
+    pager: 'Previous and next',
   },
   /**
    * How to read each diagram, in words. Sources: each diagram's JSON at the pin
@@ -746,7 +748,7 @@ export const examplesPage = {
   heading: 'Examples',
   intro:
     'Each example runs live in your browser on the published @isoloop packages. The dashboards come as native builds and Isoloop builds of the same code, so you can compare them side by side.',
-  nav: { label: 'Examples', previous: 'Previous', next: 'Next' },
+  nav: { label: 'Examples', previous: 'Previous', next: 'Next', pager: 'Previous and next' },
   links: { live: 'Open live', source: 'Source', results: 'Results', architecture: 'Architecture' },
   shows: 'What it shows',
   try: 'What to try',

@@ -110,15 +110,18 @@ export function Pager({
   next,
   previous,
   nextLabel,
+  label,
 }: {
   prev?: { href: string; text: string } | undefined;
   next?: { href: string; text: string } | undefined;
   previous: string;
   nextLabel: string;
+  /** The pager's accessible name, e.g. "Previous and next". */
+  label: string;
 }): VNode | null {
   if (!prev && !next) return null;
   return (
-    <nav class="docs-pager" aria-label={`${previous} and ${nextLabel.toLowerCase()}`}>
+    <nav class="docs-pager" aria-label={label}>
       {prev ? (
         <a href={prev.href} rel="prev">
           <span>{previous}</span>
@@ -143,12 +146,15 @@ export function StepTabs({
   steps,
   previous,
   next,
+  pager,
   after,
 }: {
   label: string;
   steps: Step[];
   previous: string;
   next: string;
+  /** The pager's accessible name. */
+  pager: string;
   /** Shown under every step, after its pager: a footnote. */
   after?: ComponentChildren | undefined;
 }): VNode {
@@ -177,6 +183,7 @@ export function StepTabs({
               next={nxt ? { href: `#${nxt.id}`, text: nxt.name } : undefined}
               previous={previous}
               nextLabel={next}
+              label={pager}
             />
             {after}
           </section>

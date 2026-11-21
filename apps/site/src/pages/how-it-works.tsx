@@ -265,6 +265,7 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
         label={h.nav.label}
         previous={h.nav.previous}
         next={h.nav.next}
+        pager={h.nav.pager}
         after={
           <p class="rail-footnote">
             {h.pinned}{' '}

@@ -306,8 +306,9 @@ function Features({ samples, features, examples }: SiteData): VNode {
         <FeatureNotes features={features} />
       </PageIntro>
 
-      {/* One tab per group of features (src/demos/steps.ts, as on /how-it-works/ and
-          /examples/); a #feature link opens its tab. Without JS every group shows. */}
+      {/* One panel per group of features, beside the rail (src/demos/steps.ts, as on
+          /how-it-works/ and /examples/); a #feature link opens its group. Without JS
+          every group shows. */}
       <div class="features-tabs">
         <RailLayout
           label={f.tabs.label}
@@ -342,6 +343,7 @@ function Features({ samples, features, examples }: SiteData): VNode {
                   next={nxt ? { href: `#${f.tabs.ids[nxt]}`, text: f.tabs.names[nxt] } : undefined}
                   previous={f.tabs.previous}
                   nextLabel={f.tabs.next}
+                  label={f.tabs.pager}
                 />
               </div>
             );
