@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { WEBKIT_STOPS, FIRST_DATA } from './scope';
+import { WEBKIT_STOPS, firstData } from './scope';
 
 // M3d task 7: the placements (decision 6, plus matched and one), what a block takes down in
 // each (decision 9), and the persistent alarms and events (decision 5).
@@ -162,10 +162,10 @@ test('own: the page warns about the worker count', async ({ page }) => {
 });
 
 for (const build of ['native', 'native-workers']) {
-  test(`${build}: a blocked widget stalls the whole page`, async ({ page }) => {
+  test(`${build}: a blocked widget stalls the whole page`, async ({ page, browserName }) => {
     await page.goto(`/${build}/`);
     await expect(at(page, 'T3-gauges', '.gauges')).toHaveAttribute('data-ts', /\d/, {
-      timeout: FIRST_DATA,
+      timeout: firstData(browserName),
     });
     await page.locator('[data-slot="T3-gauges"]').hover();
     const t0 = Date.now();

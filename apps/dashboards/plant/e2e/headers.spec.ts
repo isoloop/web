@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { WEBKIT_STOPS, stopsOn, FIRST_DATA } from './scope';
+import { WEBKIT_STOPS, stopsOn, firstData } from './scope';
 
 // M3d decision 8: each header says where its widget runs, and its updates/s.
 const where = (page: Page, slot: string) =>
@@ -25,7 +25,7 @@ for (const [url, slot, label] of CASES) {
   }) => {
     test.skip(stopsOn(browserName, url.split('/')[1] ?? ''), WEBKIT_STOPS);
     await page.goto(url);
-    await expect(where(page, slot)).toHaveText(label, { timeout: FIRST_DATA });
+    await expect(where(page, slot)).toHaveText(label, { timeout: firstData(browserName) });
     await expect(page.locator(`[data-slot="${slot}"] [data-head="updates"]`)).toHaveText(
       /^\d+ updates\/s$/,
       { timeout: 15_000 },

@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { MACHINES } from '../src/core/machines';
 import { scalarsAt } from '../src/core/sensors/signals';
 import { overheatingNow } from './faults';
-import { BUILDS, WEBKIT_STOPS, inScope, stopsOn, FIRST_DATA } from './scope';
+import { BUILDS, WEBKIT_STOPS, inScope, stopsOn, firstData } from './scope';
 
 // M3d task 5: each machine's DOM widgets show the seeded data on every build,
 // and the event log's filter works on every build.
@@ -18,7 +18,7 @@ for (const build of inScope(BUILDS)) {
     await Promise.all(
       MACHINES.map((m) =>
         expect(at(page, `${m}-gauges`, '.gauges')).toHaveAttribute('data-ts', /\d/, {
-          timeout: FIRST_DATA,
+          timeout: firstData(browserName),
         }),
       ),
     );

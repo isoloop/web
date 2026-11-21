@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { MACHINES } from '../src/core/machines';
 import { faultAt } from '../src/core/sensors/faults';
 import { params, scalarsAt } from '../src/core/sensors/signals';
-import { BUILDS, WEBKIT_STOPS, inScope, stopsOn, FIRST_DATA } from './scope';
+import { BUILDS, WEBKIT_STOPS, inScope, stopsOn, firstData } from './scope';
 
 // M3d task 4: each machine's canvas widgets draw on every build, and what they
 // draw matches the seeded data, so the builds agree with each other.
@@ -36,7 +36,7 @@ for (const build of inScope(BUILDS)) {
     await page.goto(`/${build}/?rate=2&seed=1`);
     await Promise.all(
       MACHINES.map((m) =>
-        expect(drawn(page, `${m}-spectrum`)).toBeVisible({ timeout: FIRST_DATA }),
+        expect(drawn(page, `${m}-spectrum`)).toBeVisible({ timeout: firstData(browserName) }),
       ),
     );
     // Each waveform draws at the rate.
