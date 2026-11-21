@@ -2,6 +2,7 @@
 // page" marking the heading the reader is at (src/demos/spy.ts). Without JS
 // the contents are plain links.
 import './copy.ts';
+import './search.ts';
 import { startSpy } from './spy.ts';
 
 const links = [...document.querySelectorAll<HTMLAnchorElement>('.docs-toc a[href^="#"]')];
