@@ -16,32 +16,32 @@
   "proof": [
     {
       "repo": "isoloop",
-      "path": "packages/balancer/src/balancer.ts",
+      "path": "packages/balancer/src/balancer/balancer.ts",
       "symbol": "createBalancer"
     },
     {
       "repo": "isoloop",
-      "path": "packages/balancer/src/balancer.test.ts",
+      "path": "packages/balancer/src/balancer/balancer.test.ts",
       "test": "never moves isolates spawned through the kernel, nor one on hold"
     },
     {
       "repo": "isoloop",
-      "path": "packages/balancer/src/balancer.test.ts",
+      "path": "packages/balancer/src/balancer/balancer.test.ts",
       "test": "reads work the beats miss from the report: a full pool moves its heaviest instead of bisecting"
     },
     {
       "repo": "isoloop",
-      "path": "packages/balancer/src/balancer.test.ts",
+      "path": "packages/balancer/src/balancer/balancer.test.ts",
       "test": "doubles the steady window on each re-offence, then keeps a repeat offender apart"
     },
     {
       "repo": "isoloop",
-      "path": "packages/balancer/src/balancer.test.ts",
+      "path": "packages/balancer/src/balancer/balancer.test.ts",
       "test": "marks a failed member, takes it out of its pool, and never moves or restarts it"
     },
     {
       "repo": "isoloop",
-      "path": "packages/balancer/src/kernel.browser.test.ts",
+      "path": "packages/balancer/src/balancer/kernel.browser.test.ts",
       "test": "spawns into its own pools on a real kernel, and allows one balancer per kernel"
     },
     {

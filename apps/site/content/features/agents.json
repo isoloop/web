@@ -18,17 +18,17 @@
   "proof": [
     {
       "repo": "isoloop",
-      "path": "packages/host/src/agents.ts",
+      "path": "packages/host/src/agents/agents.ts",
       "symbol": "buildTools"
     },
     {
       "repo": "isoloop",
-      "path": "packages/host/src/agents.test.ts",
+      "path": "packages/host/src/agents/agents.test.ts",
       "test": "lists each exposed tool with its flags, JSON Schemas and timeout"
     },
     {
       "repo": "isoloop",
-      "path": "packages/host/src/agents.test.ts",
+      "path": "packages/host/src/agents/agents.test.ts",
       "test": "still gets the reply when the responder crashes and restarts within the timeout"
     },
     {
@@ -48,7 +48,7 @@
     },
     {
       "repo": "isoloop",
-      "path": "packages/vite/src/guard.test.ts",
+      "path": "packages/vite/src/plugins/guard.test.ts",
       "test": "fails a production build that contains connectDevMCP"
     },
     {
@@ -79,7 +79,7 @@
     },
     {
       "repo": "isoloop",
-      "path": "packages/bus/src/requests.test.ts",
+      "path": "packages/bus/src/broker/requests.test.ts",
       "test": "answers what fits a topic keeping 100 and drops the rest of a 1,000 burst at once"
     }
   ]
