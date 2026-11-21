@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed)
+- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed)
 - **Answers:** what `apps/site` is built with, which pages it has, what may run on them, how it shows the examples and the library's diagrams, and what its copy may claim. Where it lives and how it deploys is [ADR 0001](0001-what-this-repo-is.md); its look is [ADR 0003](0003-design-system.md).
 
 ## Context
@@ -276,6 +276,15 @@ The maintainer's review of the whole site before 0.1, on a local prototype. This
 - The apps gained a manual start and an idle view; without `start=manual` they start as before, so their benchmarks and tests are unchanged.
 - (Bad) A started example stops when its panel is left, so a reader comparing two panels starts each again.
 
+### Amended: the security policy on Pages (2026-11-21)
+
+The site review before 0.1 found that decision 8 described the site's own pages, not the examples, and that the gap it stated was wider than it said. This changes decision 8's first and last points. Where this section and decision 8 disagree, this section wins.
+
+- **The site's own pages carry the policy as a meta tag,** `default-src 'self'`, as decision 8 says: the landing page, features, how it works, the examples hub, the docs, the changelog and the 404.
+- **The example apps carry none on Pages.** Basic, the Processor and the dashboards have no meta tag, and Pages can't send headers, so on this host their pages and their workers run without a policy. This was never decided; the apps simply never had the meta tag.
+- **They run under the policy as a header everywhere else.** `isoloop()` from `@isoloop/vite` sends it on every response from `vite preview`, native and Isoloop builds alike, and from the Isoloop builds' dev servers (the native builds' `dev:native*` servers send none). So the E2E tests and the comparison runs, served by `vite preview`, run both sides under the same policy. That policy allows inline styles, since Isoloop's surfaces set style attributes (isoloop/isoloop#357).
+- **The Examples page says so,** in place of How it works: one line under its introduction, linking the hosting guide (`/docs/hosting/`) for a real deployment, where the policy goes in headers. How it works no longer has the policy section.
+
 ## Consequences
 
 **Good**
@@ -297,7 +306,7 @@ The maintainer's review of the whole site before 0.1, on a local prototype. This
 - The live demo only shows what basic does. The plant's scale is a click away, not on the page.
 - The diagrams come from another repo at a pinned sha, so a redrawn diagram reaches the site only when someone bumps the pin.
 - Screenshots go stale unless someone runs `pnpm screenshots`.
-- The meta CSP can't cover workers on Pages. The page says so, but the example isn't fully under the policy it recommends.
+- (Amendment) On Pages the examples run without the policy, pages and workers alike. The Examples page says so, but the live examples aren't under the policy the hosting guide recommends.
 - Axe is a dependency in the smoke test, kept behind `expectAccessible`.
 
 ## Alternatives considered
