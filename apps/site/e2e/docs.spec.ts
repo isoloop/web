@@ -184,3 +184,72 @@ test('Kernel config in the sidebar goes to KernelConfig on the host API page', a
   await expect(page).toHaveURL(/\/docs\/api\/host\/#kernelconfig$/);
   await expect(page.locator('#kernelconfig')).toBeVisible();
 });
+
+// The docs' search (src/demos/search.ts, /docs/search.json): hidden without
+// JS, the index loaded on first use, found by words and code identifiers,
+// keyboard to a result and its heading, accessible with the panel open.
+test.describe('the docs search', () => {
+  const box = '.docs-only-wide .docs-search input';
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('loads its index on first use, finds words and identifiers, and says when nothing matches', async ({
+    page,
+  }) => {
+    let loads = 0;
+    page.on('request', (r) => {
+      if (r.url().endsWith('/docs/search.json')) loads++;
+    });
+    await page.goto('/docs/contracts/');
+    await expect(page.locator(box)).toBeVisible();
+    expect(loads).toBe(0);
+    await page.keyboard.press('/');
+    await expect(page.locator(box)).toBeFocused();
+    const panel = page.locator('.docs-only-wide .docs-search-panel');
+    for (const [q, title] of [
+      ['spawn', 'Getting started'],
+      ['busyMs', 'Automatic placement: the balancer'],
+      ['quarantine', 'Automatic placement: the balancer'],
+      ['grants', 'Contracts and grants'],
+      ['llms', 'Docs'],
+    ] as const) {
+      // One query after another, in the same box.
+      // oxlint-disable-next-line no-await-in-loop -- each query in turn, on one input
+      await page.fill(box, q);
+      // oxlint-disable-next-line no-await-in-loop -- each query in turn, on one input
+      await expect(panel.locator('[role="option"]').first()).toContainText(title);
+    }
+    expect(loads).toBe(1);
+    await page.fill(box, 'zzqxv');
+    await expect(panel.locator('.docs-search-empty')).toHaveText('No results for “zzqxv”');
+    await expect(panel.locator('[role="option"]')).toHaveCount(0);
+  });
+
+  test('moves through the results by keyboard and lands on the chosen heading', async ({
+    page,
+  }) => {
+    await page.goto('/docs/contracts/');
+    await page.fill(box, 'quarantine');
+    const input = page.locator(box);
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('ArrowDown');
+    await expect(input).toHaveAttribute('aria-activedescendant', 'search-side-list-1');
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/docs\/balancer\/#when-to-use-it$/);
+    await expect(page.locator('#when-to-use-it')).toBeInViewport();
+  });
+
+  test('closes on Escape and is accessible open', async ({ page }) => {
+    await page.goto('/docs/contracts/');
+    await page.fill(box, 'pool');
+    await expect(page.locator(box)).toHaveAttribute('aria-expanded', 'true');
+    await expectAccessible(page);
+    await page.keyboard.press('Escape');
+    await expect(page.locator(box)).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('is hidden without JS', async ({ browser }) => {
+    const page = await (await browser.newContext({ javaScriptEnabled: false })).newPage();
+    await page.goto('/docs/contracts/');
+    await expect(page.locator('.docs-search').first()).toBeHidden();
+  });
+});

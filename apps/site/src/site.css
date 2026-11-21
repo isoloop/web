@@ -1875,3 +1875,154 @@
   font-stretch: 80%;
   line-height: 1.25;
 }
+
+/* The crumb line, with the page's own Markdown copy at its far end. */
+.docs-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+/* /docs/: the docs as plain text, for agents (llms.txt). */
+.docs-agents {
+  margin: 0.9rem 0 0;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+}
+.docs-agents a,
+.docs-md {
+  color: var(--ui-text-muted);
+}
+
+/* The docs' search (src/pages/doc.tsx, src/demos/search.ts): a pill-shaped
+   input at the top of the sidebar, with a search icon and the "/" key; its
+   results in a panel under it, wider than the rail where there's room. */
+.docs-search {
+  position: relative;
+  margin: 0 0 1.4rem;
+}
+.docs-search[hidden] {
+  display: none;
+}
+.docs-search input {
+  width: 100%;
+  height: 2.4rem;
+  padding: 0 2.4rem 0 2.25rem;
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-stretch: 87%;
+}
+.docs-search input::placeholder {
+  color: var(--ui-text-muted);
+}
+.docs-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.docs-search input:focus-visible {
+  outline: 3px solid var(--ui-focus);
+  outline-offset: 1px;
+}
+.docs-search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 1.2rem;
+  translate: 0 -50%;
+  color: var(--ui-text-muted);
+  pointer-events: none;
+}
+.docs-search-kbd {
+  position: absolute;
+  right: 0.6rem;
+  top: 1.2rem;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--ui-border);
+  border-radius: 0.35rem;
+  color: var(--ui-text-muted);
+  font: 600 0.75rem / 1 var(--ui-font-mono);
+  pointer-events: none;
+}
+.docs-search:focus-within .docs-search-kbd {
+  display: none;
+}
+.docs-search-panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: min(36rem, calc(100vw - 2rem));
+  padding: 0.35rem;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-l);
+  background: var(--ui-surface);
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.35);
+}
+.docs-search-panel[hidden] {
+  display: none;
+}
+/* In the folded sidebar (phones), the panel takes the fold's width. */
+.docs-fold .docs-search-panel {
+  position: static;
+  width: auto;
+  margin-top: 0.4rem;
+  box-shadow: none;
+}
+.docs-search-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.docs-search-panel li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--ui-radius-m);
+  cursor: pointer;
+}
+.docs-search-panel li[aria-selected='true'] {
+  background: color-mix(in oklch, var(--ui-accent) 16%, transparent);
+}
+.docs-search-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--ui-text);
+  font-weight: 650;
+  font-stretch: 87%;
+}
+.docs-search-heading {
+  color: var(--ui-text);
+  font-size: 0.92rem;
+}
+.docs-search-heading::before {
+  content: '› ';
+  color: var(--ui-text-muted);
+}
+.docs-search-snippet {
+  color: var(--ui-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.docs-search-panel mark {
+  background: color-mix(in oklch, var(--ui-accent) 28%, transparent);
+  color: var(--ui-text);
+  border-radius: 0.15rem;
+}
+.docs-search-empty {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  color: var(--ui-text-muted);
+  font-size: 0.9rem;
+}
+.docs-search-empty:empty {
+  display: none;
+}

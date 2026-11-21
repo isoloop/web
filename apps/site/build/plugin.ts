@@ -118,6 +118,7 @@ const TYPES: Record<string, string> = {
   webp: 'image/webp',
   txt: 'text/plain; charset=utf-8',
   md: 'text/markdown; charset=utf-8',
+  json: 'application/json; charset=utf-8',
 };
 
 export function site(opts: SiteOptions): Plugin {

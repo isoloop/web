@@ -793,6 +793,30 @@ export const docsPage = {
   next: 'Next',
   /** The code blocks' button once it has copied (src/demos/copy.ts); "Copy" is in the markup (build/docs/render.ts). */
   copied: 'Copied',
+  /**
+   * The docs for agents, on /docs/ (build/docs/llms.ts writes /llms.txt, the
+   * llmstxt.org index; /llms-full.txt, every guide in nav order; and each
+   * page's /docs/<slug>.md, the guide as fetched at the pin).
+   */
+  agents: {
+    lead: 'For AI agents: these docs as plain text,',
+    index: 'llms.txt',
+    indexNote: '(an index),',
+    full: 'llms-full.txt',
+    fullNote: '(everything) and each page as Markdown.',
+  },
+  /** On a guide or an API page, its own Markdown copy (/docs/<slug>.md). */
+  markdown: 'View as Markdown',
+  /** The search at the top of the docs' sidebar (src/demos/search.ts, /docs/search.json). */
+  search: {
+    label: 'Search the docs',
+    placeholder: 'Search docs',
+    results: 'Search results',
+    /** Followed by the query in quotes. */
+    empty: 'No results for',
+    /** The key that focuses it, shown beside it. */
+    key: '/',
+  },
 };
 
 export const notFound = {

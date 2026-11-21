@@ -6,6 +6,8 @@ import { readDiagrams } from './build/diagrams.ts';
 import { loadExamples } from './build/examples.ts';
 import { loadFeatures } from './build/features.ts';
 import { buildLlms } from './build/docs/llms.ts';
+import { searchIndex } from './build/docs/search.ts';
+import { docsPage } from './src/copy.ts';
 import { docsNav, loadDocs } from './build/docs/pages.ts';
 import {
   ensureLibrary,
@@ -41,7 +43,24 @@ const docs = loadDocs({
 });
 const nav = docsNav(here('content/docs.json'), docs);
 // The same pages for agents: llms.txt, llms-full.txt, a .md copy each (build/docs/llms.ts).
-const llms = buildLlms({ docs, guidesDir: guidesDir(siteDir), apiDir: apiDir(siteDir), pin, kind });
+const llms = [
+  ...buildLlms({ docs, guidesDir: guidesDir(siteDir), apiDir: apiDir(siteDir), pin, kind }),
+  // The docs' search index (build/docs/search.ts), served and emitted as the llms files are.
+  {
+    fileName: 'docs/search.json',
+    source: JSON.stringify(
+      searchIndex(docs, [
+        {
+          t: docsPage.heading,
+          h: '',
+          u: '/docs/',
+          s: docsPage.heading,
+          x: [docsPage.lede, ...Object.values(docsPage.agents)].join(' '),
+        },
+      ]),
+    ),
+  },
+];
 
 export default defineConfig({
   plugins: [

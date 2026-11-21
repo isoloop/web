@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
 import { ExperimentalMark } from 'ui/components';
+import { mdPath } from '../../build/docs/llms.ts';
 import type { Doc, NavItem, NavSection } from '../../build/docs/pages.ts';
 import { docsPage as c, marks } from '../copy.ts';
 import type { Page, SiteData } from './types.ts';
@@ -10,8 +11,9 @@ import type { Page, SiteData } from './types.ts';
 // 1100px the contents fold under the page's meta line, and below 760px the
 // sidebar folds into a "Docs" block at the top, both as <details>, so the
 // pages read and navigate without JS. The scripts are the code blocks' Copy
-// button (src/demos/copy.ts) and "On this page" marking the heading in view
-// (src/demos/docs.ts, src/demos/spy.ts).
+// button (src/demos/copy.ts), "On this page" marking the heading in view
+// (src/demos/spy.ts) and the search (src/demos/search.ts), all from
+// src/demos/docs.ts.
 
 const COPY_SCRIPT = '/src/demos/docs.ts';
 
@@ -23,9 +25,64 @@ function Pill({ doc }: { doc: { experimental: boolean } }): VNode | null {
 }
 
 /** The section sidebar; `current` marks this page. Links into a page (Kernel config) are never current. */
-function SideNav({ nav, current }: { nav: readonly NavSection[]; current?: string }): VNode {
+/**
+ * The docs' search (src/demos/search.ts): an ARIA combobox over a listbox of
+ * results. Rendered hidden and shown by the script, since without JS there's
+ * nothing to search with: the site has no server. `id` keeps the two copies
+ * on a page (the sidebar's and the folded one's) apart.
+ */
+function SearchBox({ id, class: extra }: { id: string; class?: string }): VNode {
+  return (
+    <div class={extra ? `docs-search ${extra}` : 'docs-search'} data-search hidden>
+      <label class="ui-sr-only" for={`${id}-q`}>
+        {c.search.label}
+      </label>
+      <svg class="docs-search-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <path
+          d="M10.6 10.6 14 14"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        />
+      </svg>
+      <input
+        id={`${id}-q`}
+        type="search"
+        // Preact's types ask a combobox input for a list attribute; the ARIA
+        // pattern here (a listbox in aria-controls) doesn't use one.
+        {...({ role: 'combobox' } as Record<string, string>)}
+        aria-expanded="false"
+        aria-controls={`${id}-list`}
+        aria-autocomplete="list"
+        autocomplete="off"
+        spellcheck={false}
+        placeholder={c.search.placeholder}
+      />
+      <kbd class="docs-search-kbd" aria-hidden="true">
+        {c.search.key}
+      </kbd>
+      <div class="docs-search-panel" hidden>
+        <ul id={`${id}-list`} role="listbox" aria-label={c.search.results} />
+        <p class="docs-search-empty" role="status" aria-live="polite" />
+      </div>
+    </div>
+  );
+}
+
+function SideNav({
+  nav,
+  current,
+  search,
+}: {
+  nav: readonly NavSection[];
+  current?: string;
+  /** The search box's id prefix: each copy of the sidebar has its own. */
+  search: string;
+}): VNode {
   return (
     <nav class="docs-side" aria-label={c.nav}>
+      <SearchBox id={search} />
       {nav.map((s) => (
         <div key={s.title}>
           <h2>{s.title}</h2>
@@ -88,7 +145,7 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
   return (
     <div class="docs-layout">
       <div class="docs-only-wide">
-        <SideNav nav={data.docsNav} current={doc.slug} />
+        <SideNav nav={data.docsNav} current={doc.slug} search="search-side" />
       </div>
       <main class="docs-article">
         <details class="docs-fold docs-only-narrow">
@@ -98,10 +155,15 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
               {doc.section} · {doc.title}
             </span>
           </summary>
-          <SideNav nav={data.docsNav} current={doc.slug} />
+          <SideNav nav={data.docsNav} current={doc.slug} search="search-fold" />
         </details>
         <p class="docs-crumb">
-          <a href="/docs/">{c.docs}</a> · {doc.section}
+          <span>
+            <a href="/docs/">{c.docs}</a> · {doc.section}
+          </span>
+          <a class="docs-md" href={mdPath(doc.slug)}>
+            {c.markdown}
+          </a>
         </p>
         <h1>
           {doc.title}
@@ -179,14 +241,20 @@ export const docsIndexPage: Page = {
   path: '/docs/',
   section: 'docs',
   head: { title: c.title, description: c.description },
+  scripts: ['/src/demos/search.ts'],
   render: (data: SiteData) => (
     <div class="docs-layout docs-layout-index">
       <div class="docs-only-wide">
-        <SideNav nav={data.docsNav} />
+        <SideNav nav={data.docsNav} search="search-side" />
       </div>
       <main class="docs-article">
+        <SearchBox id="search-top" class="docs-only-narrow" />
         <h1>{c.heading}</h1>
         <p class="docs-lead">{c.lede}</p>
+        <p class="docs-agents">
+          {c.agents.lead} <a href="/llms.txt">{c.agents.index}</a> {c.agents.indexNote}{' '}
+          <a href="/llms-full.txt">{c.agents.full}</a> {c.agents.fullNote}
+        </p>
         {data.docsNav.map((s) => (
           <section class="docs-index-section" key={s.title} aria-labelledby={sectionId(s.title)}>
             <h2 id={sectionId(s.title)}>{s.title}</h2>
