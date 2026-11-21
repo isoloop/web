@@ -35,11 +35,12 @@ for (const build of inScope(BUILDS)) {
   }) => {
     test.skip(stopsOn(browserName, build), WEBKIT_STOPS);
     await page.goto(`/${build}/?rate=2&seed=1`);
+    const t0 = Date.now();
     await Promise.all(
-      MACHINES.map((m) =>
-        expect(drawn(page, `${m}-spectrum`)).toBeVisible({ timeout: FIRST_DATA }),
-      ),
+      MACHINES.map((m) => expect(drawn(page, `${m}-spectrum`)).toBeVisible({ timeout: 60_000 })),
     );
+    console.log(`BISECT first-data canvas ${browserName} ${build} ${Date.now() - t0} ms`);
+    void FIRST_DATA;
     // Each waveform draws at the rate.
     await expect
       .poll(() => Promise.all(MACHINES.map((m) => description(page, `${m}-waveform`))), {

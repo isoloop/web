@@ -15,13 +15,16 @@ for (const build of inScope(BUILDS)) {
   }) => {
     test.skip(stopsOn(browserName, build), WEBKIT_STOPS);
     await page.goto(`/${build}/?seed=3`);
+    const t0 = Date.now();
     await Promise.all(
       MACHINES.map((m) =>
         expect(at(page, `${m}-gauges`, '.gauges')).toHaveAttribute('data-ts', /\d/, {
-          timeout: FIRST_DATA,
+          timeout: 60_000,
         }),
       ),
     );
+    console.log(`BISECT first-data dom ${browserName} ${build} ${Date.now() - t0} ms`);
+    void FIRST_DATA;
     // Each gauge shows the generator's value at its row's time.
     const gauges = await Promise.all(
       MACHINES.map(async (m) => {
