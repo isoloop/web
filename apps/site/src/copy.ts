@@ -757,6 +757,17 @@ export const examplesPage = {
   inProgress: 'Work in progress',
   more: 'The full results, with the method',
   shot: 'a screenshot',
+  /**
+   * The Pages gap, under the intro (ADR 0002, decision 8, amended 2026-11-21).
+   * Source: the built site (only the site's own pages carry the meta CSP) and
+   * isoloop()'s header on every `vite preview` response (@isoloop/vite).
+   */
+  policy: {
+    before:
+      'On this host the examples run without the security policy: GitHub Pages can’t send headers. In the tests and the comparison runs they run under it, and ',
+    link: 'the hosting guide',
+    after: ' covers a real deployment.',
+  },
   support: 'They need Safari 16.4 or later, or a recent Chrome, Edge or Firefox.',
 };
 

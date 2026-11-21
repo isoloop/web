@@ -423,6 +423,17 @@ test('the rail stays in view beside the steps, and folds above them on a phone',
   await expect(fold.locator('summary')).toContainText('Bus');
 });
 
+test('the examples hub says the examples run without the policy on this host', async ({ page }) => {
+  // ADR 0002, decision 8, amended 2026-11-21.
+  await page.goto('/examples/');
+  const line = page.locator('.ex-policy');
+  await expect(line).toContainText('On this host the examples run without the security policy');
+  await expect(line.getByRole('link', { name: 'the hosting guide' })).toHaveAttribute(
+    'href',
+    '/docs/hosting/',
+  );
+});
+
 for (const [panel, frame] of [
   ['basic', '/examples/basic/?embed=1&start=manual'],
   ['processor-playground', '/examples/processor/?embed=1&start=manual'],

@@ -11,6 +11,9 @@ import { Pager, RailLayout, type RailGroup } from './steps.tsx';
 import { StripItem } from './pill.tsx';
 import type { Page, SiteData } from './types.ts';
 
+/** The Pages gap's line links the hosting guide in this site's docs. */
+const HOSTING_GUIDE = '/docs/hosting/';
+
 /** An example's links: live first, then source, results and architecture. */
 export function ExampleLinks({ example }: { example: Example }): VNode {
   const { links } = example;
@@ -291,6 +294,13 @@ function Examples({ examples, features }: SiteData): VNode {
         <p class="ui-lede">{t.intro}</p>
         <p>
           <small>{t.support}</small>
+        </p>
+        <p class="ex-policy">
+          <small>
+            {t.policy.before}
+            <a href={HOSTING_GUIDE}>{t.policy.link}</a>
+            {t.policy.after}
+          </small>
         </p>
       </PageIntro>
       <div class="examples-rail">
