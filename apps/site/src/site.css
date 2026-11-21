@@ -24,7 +24,7 @@
 }
 .ui-note {
   margin: 0.6rem 0 0;
-  max-width: 70ch;
+  max-width: var(--m-prose, 44rem);
   color: var(--ui-text-muted);
   font-size: 0.9rem;
 }
@@ -47,7 +47,7 @@
   white-space: nowrap;
 }
 .ui-try-section {
-  margin-top: 2.5rem;
+  margin-top: 1.25rem;
 }
 @media (min-width: 761px) {
   .ui-try-section > .ui-try {
@@ -65,10 +65,20 @@
   grid-column: 1;
   grid-row: 2;
   max-width: none;
-  padding-right: 1.5rem;
+}
+/* The expressive mark fills the site's left column (--ui-gutter), up to
+   15rem, centred in it, and centred on the intro text beside it: both sit in
+   the opening's second row, each centred in it, so a taller mark grows the
+   row rather than shrinking. */
+.ui-intro > .ui-intro-mark {
+  align-self: center;
+  justify-self: stretch;
+  display: flex;
+  justify-content: center;
 }
 .ui-intro-mark .ui-mark {
   width: 100%;
+  max-width: 15rem;
   height: auto;
 }
 .ui-intro > .ui-intro-text {
@@ -76,6 +86,11 @@
   align-self: center;
   display: grid;
   row-gap: 1.25rem;
+}
+/* One spacing between the opening's items, the grid's row gap: the
+   paragraphs' own margins would stack on it. */
+.ui-intro > .ui-intro-text > * {
+  margin: 0;
 }
 @media (max-width: 760px) {
   .ui-intro > .ui-intro-mark {
@@ -96,7 +111,7 @@
 .demo,
 .still {
   margin: 1.75rem 0 0;
-  max-width: 60rem;
+  max-width: var(--m-fig, 60rem);
 }
 .demo figcaption,
 .still figcaption,
@@ -104,7 +119,7 @@
   color: var(--ui-text-muted);
   font-size: 0.9rem;
   margin-top: 0.85rem;
-  max-width: 44rem;
+  max-width: var(--m-prose, 44rem);
 }
 
 /* Restart, a still */
@@ -457,7 +472,7 @@
 /* The framework tabs; without JS every sample shows with its title. */
 .tabs {
   margin-top: 1.5rem;
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
 }
 [role='tablist'] {
   display: flex;
@@ -501,7 +516,7 @@
 /* Safety facts */
 .facts {
   margin: 0;
-  max-width: 44rem;
+  max-width: var(--m-prose, 44rem);
 }
 .facts div {
   padding: 0.75rem 0;
@@ -641,7 +656,7 @@
   padding-left: 1.1rem;
   color: var(--ui-text-muted);
   font-size: var(--ui-text-s);
-  max-width: 44rem;
+  max-width: var(--m-prose, 44rem);
 }
 .ui-notes li {
   margin-bottom: 0.4rem;
@@ -666,7 +681,7 @@
 .ui-delta-caption {
   color: var(--ui-text-muted);
   font-size: 0.9rem;
-  max-width: 44rem;
+  max-width: var(--m-prose, 44rem);
   margin: 0;
 }
 .ui-delta-narrow .ui-table caption {
@@ -769,7 +784,7 @@
   margin-right: 1rem;
 }
 .ui-demo-code > p {
-  max-width: 44rem;
+  max-width: var(--m-prose, 44rem);
   color: var(--ui-text-muted);
 }
 .ui-demo-code > p:last-child {
@@ -832,12 +847,12 @@
   border-top: 0;
 }
 .hiw-text {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
 }
 .hiw-text > p,
 .hiw-text > ul,
 .hiw-text > dl {
-  max-width: 44rem;
+  max-width: var(--m-prose, 44rem);
 }
 .hiw-diagram {
   margin-top: var(--ui-space-7);
@@ -864,7 +879,7 @@
   margin: 0 0 0.5rem;
 }
 .hiw-read-lead {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
   margin: 0 0 var(--ui-space-5);
 }
 .hiw-read-cols {
@@ -927,10 +942,10 @@
  * the page's width; with one per theme, the page's data-theme picks it.
  */
 .ex-text {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
 }
 .ex-text > p {
-  max-width: 44rem;
+  max-width: var(--m-prose, 44rem);
 }
 .ex-shot {
   display: block;
@@ -957,7 +972,7 @@
   margin: 0 0 0.75rem;
 }
 .ex-try ol {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
   margin: 0;
   padding-left: 1.3rem;
 }
@@ -987,7 +1002,7 @@
   font-size: 1.15rem;
 }
 .ex-caption {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
   margin: 0;
   color: var(--ui-text-muted);
   font-size: var(--ui-text-s);
@@ -1004,7 +1019,7 @@
   text-transform: uppercase;
 }
 .ex-findings {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
   margin: 0 0 var(--ui-space-5);
   padding: 0;
   list-style: none;
@@ -1031,14 +1046,14 @@
   border-top: 1px solid var(--ui-rule);
 }
 .ex-block-foot > p {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
   margin: 0;
 }
 .ex-block-foot > p + p {
   margin-top: 0.5rem;
 }
 .ex-wip > p {
-  max-width: 52rem;
+  max-width: var(--m-wide, 52rem);
 }
 @media (max-width: 760px) {
   .ex-block {
@@ -1244,7 +1259,6 @@
 
 .docs-article {
   min-width: 0;
-  max-width: 46rem;
   padding-top: 2.5rem;
 }
 .docs-crumb {
@@ -1269,7 +1283,7 @@
   margin: 1.1rem 0 0;
   font-size: 1.25rem;
   line-height: 1.45;
-  max-width: 42rem;
+  max-width: var(--m-doc, 46rem);
 }
 
 /* The guide's own Markdown. Long names in inline code break rather than widen the page. */
@@ -1514,7 +1528,8 @@
 }
 
 /* ------------------------------------------------------------------
- * The rail on every page made of parts (ADR 0005, amended 2026-11-21).
+ * The rail on every page made of parts (ADR 0005), the page's two widths and
+ * reading (ADR 0003), both amended 2026-11-21.
  * ------------------------------------------------------------------ */
 
 /* The rail: the docs sidebar's look, on every page made of parts. */
@@ -1603,12 +1618,201 @@
   }
 }
 
+/* Reading: running text a step down from the headings' colour (--ui-prose),
+   more leading and a bigger size, quieter links, code chips and bold. */
+:root :is(.doc, .docs-lead, .ui-body, .hiw-text, .ui-intro-text, .hiw-read, .ex-body) {
+  color: var(--ui-prose);
+}
+:root :is(.doc, .ui-body, .hiw-text, .hiw-read) :is(p, li, dd) {
+  line-height: 1.72;
+}
+:root .doc :is(p, ul, ol) {
+  margin: 1.1rem 0;
+}
+:root :is(.doc, .ui-body, .hiw-text, .hiw-read) :is(strong, b) {
+  font-weight: 600;
+  color: var(--ui-text);
+}
+:root :is(.doc, .ui-body, .hiw-text, .hiw-read, .docs-lead) a:not(.ui-button) {
+  color: color-mix(in oklch, var(--ui-accent) 75%, var(--ui-prose));
+  text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
+  text-decoration-thickness: 1px;
+}
+:root :is(.doc, .ui-body, .hiw-text, .hiw-read, .docs-lead) a:not(.ui-button):hover {
+  color: var(--ui-accent);
+  text-decoration-color: currentColor;
+}
+:root :not(pre) > code {
+  border-color: transparent;
+  background: color-mix(in oklch, var(--ui-text) 5%, transparent);
+  color: var(--ui-text);
+  padding: 0.1em 0.3em;
+}
+:root :is(.doc, .ui-body, .hiw-text) :is(p, li, dd) {
+  font-size: 1.125rem;
+}
+
+/* Measures: --m-prose for running text, --m-doc for a docs page's text,
+   --m-wide for text blocks and code, --m-fig for figures and demos (none:
+   the full column). */
+:root {
+  --m-prose: 56rem;
+  --m-doc: 56rem;
+  --m-wide: 68rem;
+  --m-fig: none;
+}
+/* The shell's own caps (packages/ui, @layer ui), overridden unlayered. */
+.ui-intro > :not(h1),
+.ui-body > p,
+.ui-body > ul,
+.ui-body > ol,
+.ui-body > dl,
+.ui-uses,
+.ui-try,
+.ui-table caption {
+  max-width: var(--m-prose, 44rem);
+}
+.ui-intro > .ui-intro-text:has(.fnotes),
+.ui-intro > .ui-strip {
+  max-width: none;
+}
+.ui-examples > li,
+.ui-code {
+  max-width: var(--m-wide, 52rem);
+}
+/* Docs: the article fills the space between the rails; its text keeps the
+   measure, code blocks and tables fill the column. */
+.doc > :not(.doc-code, table, pre, hr, h2) {
+  max-width: var(--m-doc, 46rem);
+}
 /* "On this page": the heading in view, as the rails mark theirs. */
 .docs-toc li a[aria-current] {
   border-left: 4px solid var(--ui-accent);
   padding-left: calc(0.75rem - 3px);
   color: var(--ui-text);
   font-weight: 650;
+}
+
+/* The rails and the contents, sized with the reading text. */
+:root .docs-side li a {
+  font-size: 1.05rem;
+}
+:root .docs-side h2 {
+  font-size: 1.05rem;
+}
+:root .docs-toc li a {
+  font-size: 0.98rem;
+}
+:root .docs-toc > b {
+  font-size: 1.05rem;
+}
+:root .docs-layout {
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr) 14rem;
+}
+:root .docs-layout-index {
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
+}
+:root .rail-layout {
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
+}
+@media (max-width: 1100px) {
+  :root .docs-layout {
+    grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  :root :is(.docs-layout, .docs-layout-index, .rail-layout) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Two widths. One text column: prose,
+   code blocks, lists, link lists and callouts share the measure and one
+   right edge; long code lines scroll inside their block. Figures (diagrams,
+   live demos, screenshots, recordings, wide tables) break out to the full
+   column. */
+:root {
+  --text: var(--m-prose, 44rem);
+}
+:root .docs-layout {
+  --text: var(--m-doc, 46rem);
+}
+/* The text column. */
+:root
+  :is(
+    .ui-body > p,
+    .ui-body > ul,
+    .ui-body > ol,
+    .ui-body > dl,
+    .ui-body > .ui-code,
+    .ui-body > .tabs,
+    .ui-body > .ui-links,
+    .ui-uses,
+    .ui-try,
+    .facts,
+    .tabs,
+    .ui-code,
+    .ui-demo-code > p,
+    .demo figcaption,
+    .still figcaption,
+    .ui-recording figcaption,
+    .ui-table caption,
+    .hiw-text,
+    .hiw-read,
+    .ex-text,
+    .ex-try ol,
+    .ex-caption,
+    .ex-findings,
+    .ex-block-foot > p,
+    .ex-wip > p,
+    .doc > :not(table)
+  ) {
+  max-width: var(--text);
+}
+/* Inside a text-column block, its children take the block's width. */
+:root
+  :is(.hiw-text, .ex-text, .hiw-read, .tabs)
+  :is(p, ul, ol, dl, .ui-code, .tabs, .hiw-read-lead) {
+  max-width: 100%;
+}
+:root .doc-code .ui-code {
+  max-width: none;
+}
+/* Figures break out to the full column. */
+:root
+  :is(
+    .demo,
+    .still,
+    .hiw-diagram,
+    .ex-shot,
+    .ex-measurements,
+    .ex-block,
+    .ui-recording,
+    .ui-table-wrap
+  ) {
+  max-width: none;
+}
+/* Docs tables: as wide as their content, so a narrow one stays in the text
+   column and a wide one breaks out, up to the full column, then scrolls. */
+:root .doc table {
+  width: max-content;
+  max-width: 100%;
+}
+
+/* Two widths, How it works: "Reading the diagram" and "Open full size"
+   belong to the figure. The whole figure takes the diagram's fitted width
+   (the full column for a wide diagram, never less than the text measure),
+   from the column's left edge, so frame, link and panel share one right
+   edge. */
+:root .rail-main .hiw-diagram .hiw-read {
+  max-width: none;
+}
+:root .hiw-diagram.fit {
+  width: max(min(100%, var(--text)), min(100%, calc(min(85svh, 60rem) * var(--ratio))));
+}
+:root .hiw-diagram.fit .ui-frame iframe {
+  width: 100%;
+  margin-inline: 0;
 }
 
 /* The pager's chevrons: drawn in CSS (a rotated border in currentColor), so
