@@ -1,3 +1,4 @@
+// Bisect run for the Plant Firefox flake (draft, not to merge).
 import { expect, test, type Page } from '@playwright/test';
 import { MACHINES } from '../src/core/machines';
 import { faultAt } from '../src/core/sensors/faults';
