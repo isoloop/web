@@ -1,5 +1,16 @@
 # markets
 
+## 0.9.0
+
+### Minor Changes
+
+- 94bffdb: A Devtools switch on every page that runs Isoloop: the dashboards' Isoloop builds and their interactive pages have it on their bar, and the processor pages in their controls. It reloads the page with `?devtools=1` added or removed, which opens the devtools panel once the kernel exists (on the processor, from `@isoloop/devtools`, never before Start). On the examples hub, the same switch sits over the processor frames: it reloads the frame idle with the flag, carries it to "Open full page", and makes the frame taller for the panel.
+
+### Patch Changes
+
+- d277f32: On `@isoloop/*@0.1.0-next.11`, which moves the library's source into areas and declares its scripts in `sideEffects`. Nothing in the apps changes.
+- b87db68: The dark theme's background is a neutral `#171b26`, with its surface, rules and borders to match, in place of the navy; the version pill and the Experimental pill sit centred on their text. On the site, the page is 96rem wide and its left column is shared by every page.
+
 ## 0.8.1
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # processor
 
+## 0.4.0
+
+### Minor Changes
+
+- 94bffdb: A Devtools switch on every page that runs Isoloop: the dashboards' Isoloop builds and their interactive pages have it on their bar, and the processor pages in their controls. It reloads the page with `?devtools=1` added or removed, which opens the devtools panel once the kernel exists (on the processor, from `@isoloop/devtools`, never before Start). On the examples hub, the same switch sits over the processor frames: it reloads the frame idle with the flag, carries it to "Open full page", and makes the frame taller for the panel.
+- 9d5b051: With `?start=manual` (the site's examples hub), both pages draw their idle view and start no kernel and no worker until told to; on the File processor, the hub's Start also starts the generator. The pages' intros come from `example.json`, the same text the hub shows. Embedded, a page shows only the working app, edge to edge.
+- 2ce8191: With the balancer, a new processor's first 3 s in the quarantine pool, while the balancer measures its load, shows as **Measuring**, and its way out as `measured`, not as an offence. The File processor has a **Restarts in 60 s** control (none, 1, 3, 10), which reloads the page with `?restarts=`; a processor past the limit shows why on its card, with a **Restart** button.
+
+### Patch Changes
+
+- d277f32: On `@isoloop/*@0.1.0-next.11`, which moves the library's source into areas and declares its scripts in `sideEffects`. Nothing in the apps changes.
+- b87db68: The dark theme's background is a neutral `#171b26`, with its surface, rules and borders to match, in place of the navy; the version pill and the Experimental pill sit centred on their text. On the site, the page is 96rem wide and its left column is shared by every page.
+
 ## 0.3.1
 
 ### Patch Changes

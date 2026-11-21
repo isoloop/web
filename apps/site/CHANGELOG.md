@@ -1,5 +1,21 @@
 # site
 
+## 0.7.0
+
+### Minor Changes
+
+- 1b2f334: The docs have a search box at the top of their sidebar (and of `/docs/` on a phone): it matches page titles, headings and text from a small index built with the site (`/docs/search.json`), and `/` focuses it. Every docs page links its own Markdown copy ("View as Markdown"), and `/docs/` points agents at `llms.txt` and `llms-full.txt`.
+- 9d5b051: The examples hub groups the examples in the rail (Basic; Dashboards, with Plant and Markets; Processor, with its Playground and File processor), one panel per page. Basic and the Processor's two pages run in their panel: the app's own idle view, framed, with Start over it; nothing runs until Start, and leaving the panel reloads it idle. "Open full page" above each frame opens the app's own page.
+- ecfcd21: How it works and Features navigate by a rail, the docs sidebar's look: the parts (and on Features, each group's features) down the left, the one in view marked as you read, with Previous and Next under each part. On a phone the rail folds into a block above the page. How it works' security-policy and Where to go next sections are gone (the note that the examples run without the security policy on this host is now a line on the Examples page); where its diagrams come from is a footnote under each step.
+
+### Patch Changes
+
+- 94bffdb: A Devtools switch on every page that runs Isoloop: the dashboards' Isoloop builds and their interactive pages have it on their bar, and the processor pages in their controls. It reloads the page with `?devtools=1` added or removed, which opens the devtools panel once the kernel exists (on the processor, from `@isoloop/devtools`, never before Start). On the examples hub, the same switch sits over the processor frames: it reloads the frame idle with the flag, carries it to "Open full page", and makes the frame taller for the panel.
+- d277f32: The docs have a Bundle size guide, after Hosting: what each Isoloop import adds to an app's JavaScript, and how to keep it small. The docs and the feature pages' proofs follow `@isoloop/*` 0.1.0-next.11.
+- e74e9c8: The landing page links into the docs: Getting started and the hosting guide under the install command, and the full list of limits after its short one. Its examples link says which run on the page; the behaviour table is labelled at plant-v0.3.1; the supervisor line gives the restart limit (3 in a minute); the prerelease note says the API is frozen for 0.1. Every feature strip item puts its line below its name.
+- b87db68: The dark theme's background is a neutral `#171b26`, with its surface, rules and borders to match, in place of the navy; the version pill and the Experimental pill sit centred on their text. On the site, the page is 96rem wide and its left column is shared by every page.
+- a6fba4e: Pages have two widths: running text, lists and code keep a reading measure, and figures (diagrams, live demos, wide tables) break out to the full column. Running text is calmer to read: a softer colour than the headings, 18px with more leading, quieter links and code chips. The landing's mark fills the left column, centred on the text beside it.
+
 ## 0.6.0
 
 ### Minor Changes

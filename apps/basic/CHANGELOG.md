@@ -4,6 +4,17 @@
 
 The sections below were written on 2026-11-17 from the git history, the release tags and their PRs ([ADR 0004](../../docs/adr/0004-publishing-and-governance.md), step 8). Changesets writes each release's section from the next one on. Each release is tagged `basic-v<version>` and deployed to isoloop.dev from that tag. A deploy builds every app at its commit, so a change can go live with another app's tag first; each change is listed under the first `basic-v*` tag that includes it.
 
+## 0.2.0
+
+### Minor Changes
+
+- 9d5b051: With `?start=manual` (the site's examples hub), the page draws its idle panes and starts no kernel and no worker until it's told to start; opened alone with the parameter, it shows its own Start. Its intro comes from `example.json`, the same text the hub shows. Embedded, it fills the frame edge to edge.
+
+### Patch Changes
+
+- d277f32: On `@isoloop/*@0.1.0-next.11`, which moves the library's source into areas and declares its scripts in `sideEffects`. Nothing in the apps changes.
+- b87db68: The dark theme's background is a neutral `#171b26`, with its surface, rules and borders to match, in place of the navy; the version pill and the Experimental pill sit centred on their text. On the site, the page is 96rem wide and its left column is shared by every page.
+
 ## 0.1.1
 
 ### Patch Changes
