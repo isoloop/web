@@ -205,6 +205,30 @@
     color: var(--ui-text);
   }
 
+  /* The Devtools switch (shared/devtools-switch.ts, and the examples hub's
+     frames): a checkbox, its label and the compact experimental mark. On the
+     dashboards' bar it sits at the far end. */
+  .ui-devtools-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-s);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .ui-devtools-switch input {
+    margin: 0;
+    accent-color: var(--ui-accent);
+  }
+  .ui-devtools-switch[hidden] {
+    display: none;
+  }
+  .ui-bar .ui-devtools-switch {
+    margin-left: auto;
+    color: var(--ui-text);
+  }
+
   /* Its rule spans the content column, as the sections' rules do (the page's
      width less its side padding); the links are centred under it. */
   .ui-footer {

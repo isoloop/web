@@ -14,6 +14,7 @@ import generatorSrc from '../isolates/generator?isolate';
 import processorSrc from '../isolates/processor?isolate';
 import { FileProcessor, type Dials, type Mode } from './model';
 import { FilesPage } from './Page';
+import { connectDevtoolsIfAsked } from '../devtools';
 import { restartsFrom } from '../restarts';
 import '../../../../shared/booted.ts';
 
@@ -82,6 +83,8 @@ model.attach(kernel, balancer);
 // Started from the examples hub (?start=manual), its Start is the run's too:
 // the generator starts with the kernel, as the page's own Start would.
 if (manualStart) model.setDials({ running: true });
+// The devtools panel, with ?devtools=1: after the kernel, so never before Start.
+connectDevtoolsIfAsked(kernel);
 
 declare global {
   interface Window {

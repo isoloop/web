@@ -5,7 +5,11 @@
 // It loads only when asked for. The package is imported lazily, so a page
 // without the flag runs no panel isolate, no extra worker and no feed reader,
 // and the measured comparison runs (which never pass it) are unchanged.
+import { mountDevtoolsSwitch } from '../../../../../shared/devtools-switch.ts';
 import { kernel } from './kernel';
+
+// The switch on the dashboards' bar: only Isoloop builds load this module.
+mountDevtoolsSwitch(document.querySelector('.ui-bar'));
 
 if (new URLSearchParams(location.search).get('devtools') === '1') {
   void import('@isoloop/devtools').then(({ connectDevtools }) => connectDevtools(kernel));

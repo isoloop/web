@@ -1,8 +1,9 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
+import { ExperimentalMark } from 'ui/components';
 import type { Example } from '../../build/examples.ts';
 import type { Feature } from '../../build/features.ts';
-import { examplesPage as t } from '../copy.ts';
+import { examplesPage as t, marks } from '../copy.ts';
 import { PageIntro } from './intro.tsx';
 import { MeasuredBlock } from './measurements.tsx';
 import { inline } from './inline.tsx';
@@ -85,7 +86,15 @@ function Live({ embed }: { embed: NonNullable<Example['embeds']>[number] }): VNo
   return (
     <figure class="ex-live" data-live>
       <p class="ex-live-open">
-        <a href={embed.src}>
+        {embed.devtools ? (
+          // Shown by src/demos/examples.ts: without JS there's nothing to switch.
+          <label class="ui-devtools-switch" hidden>
+            <input type="checkbox" data-devtools />
+            Devtools
+            <ExperimentalMark label={marks.experimental} />
+          </label>
+        ) : null}
+        <a href={embed.src} data-open>
           Open full page →<span class="visually-hidden">: {embed.title}</span>
         </a>
       </p>

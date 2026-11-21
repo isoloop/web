@@ -3,6 +3,7 @@ import { isoloop } from '@isoloop/vite';
 import { ui } from 'ui/vite';
 import { defineConfig } from 'vite';
 import { browserCheck } from '../../../shared/browser-check.ts';
+import { optInOutput } from '../../../shared/opt-in.ts';
 
 const here = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 
@@ -25,6 +26,11 @@ export default defineConfig(({ mode }) => {
     plugins: [browserCheck(kind), ...(kind === 'isoloop' ? [isoloop()] : []), ui({ bar: true })],
     base: './',
     worker: { format: 'es' },
-    build: { outDir: here(`./dist/interactive/${kind}`), emptyOutDir: true },
+    build: {
+      outDir: here(`./dist/interactive/${kind}`),
+      emptyOutDir: true,
+      // The devtools panel, loaded only with `?devtools=1`, as `opt-in-*`.
+      rolldownOptions: { output: optInOutput },
+    },
   };
 });
