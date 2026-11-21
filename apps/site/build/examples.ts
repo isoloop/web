@@ -104,6 +104,8 @@ export const exampleSchema = z.strictObject({
         title: text,
         src: rootPath,
         height: z.number().int().min(200).max(2000),
+        /** The page takes `?devtools=1`; the hub offers a Devtools switch over its frame. */
+        devtools: z.literal(true).optional(),
         /**
          * The page's intro, drawn by the page itself and by the hub's panel
          * (shared/intro.ts): paragraphs, or `{ list }`; text marks `code` and

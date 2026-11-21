@@ -394,6 +394,11 @@
   padding: var(--ui-space-3);
 }
 
+/* The page's own devtools switch; framed by the site's examples hub, the hub's switch takes its place. */
+[data-embed] .devtools-toggle {
+  display: none;
+}
+
 /* A processor the kernel gave up on (restarts.ts): why, and Restart. */
 .gave-up {
   display: flex;

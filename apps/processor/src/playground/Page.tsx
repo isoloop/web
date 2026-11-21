@@ -2,7 +2,7 @@
 // the balancer's moves. It redraws from `playground.snapshot()` ten times a
 // second; every action goes back through the model.
 import type { ReactElement } from 'react';
-import { Intro, LagChart, MoveLog, REASONS, useSnapshot } from '../ui';
+import { DevtoolsToggle, Intro, LagChart, MoveLog, REASONS, useSnapshot } from '../ui';
 import { MAX_TASKS, type ColumnView, type Mode, type Playground, type TaskView } from './model';
 
 const LIGHT = [5, 8, 10, 12, 15];
@@ -105,6 +105,7 @@ export function PlaygroundPage({ playground }: { playground: Playground }): Reac
         >
           workers {snap.workers} · balancer pools {snap.balancerPools}/{snap.maxWorkers}
         </span>
+        <DevtoolsToggle />
       </section>
 
       <section className="columns" aria-label="Workers">

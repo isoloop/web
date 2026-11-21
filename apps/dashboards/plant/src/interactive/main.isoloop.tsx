@@ -14,6 +14,7 @@ import contractsUrl from './contracts?isolate';
 import { jobs } from './jobs';
 import { InteractivePage } from './page';
 import { SETTINGS } from './url';
+import { devtoolsRequested, mountDevtoolsSwitch } from '../../../../../shared/devtools-switch.ts';
 import '../page.css';
 import './interactive.css';
 
@@ -39,6 +40,12 @@ declare global {
 }
 window.kernel = kernel;
 window.balancer = balancer;
+
+// The Devtools switch on the bar, and with ?devtools=1 the panel, imported
+// lazily as on the dashboard's Isoloop build (src/isoloop/devtools.ts).
+mountDevtoolsSwitch(document.querySelector('.ui-bar'));
+if (devtoolsRequested())
+  void import('@isoloop/devtools').then(({ connectDevtools }) => connectDevtools(kernel));
 
 for (const j of jobs(SETTINGS.seed, SETTINGS.rate)) {
   kernel.spawn({

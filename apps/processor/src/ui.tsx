@@ -1,6 +1,7 @@
 // What both processor pages draw the same way: a worker's lag against the
 // balancer's thresholds, the move log, and a model redrawn ten times a second.
 import { useEffect, useState, type ReactElement } from 'react';
+import { mountDevtoolsSwitch } from '../../../shared/devtools-switch';
 import {
   RESTART_STEPS,
   isRestartStep,
@@ -162,6 +163,16 @@ export function Intro({ id }: { id: string }): ReactElement {
       )}
     </>
   );
+}
+
+/**
+ * The page's own Devtools switch (shared/devtools-switch.ts, the same on the
+ * dashboards' bar): reloads the page with `?devtools=1` added or removed.
+ * Hidden when the page is framed by the site's examples hub (?embed=1),
+ * which draws the same switch over its frame.
+ */
+export function DevtoolsToggle(): ReactElement {
+  return <span className="group devtools-toggle" ref={(el) => mountDevtoolsSwitch(el)} />;
 }
 
 const STEP_LABELS: Record<RestartStep, string> = {

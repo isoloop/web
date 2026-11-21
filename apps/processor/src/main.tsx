@@ -13,6 +13,7 @@ import contractsUrl from './contracts?isolate';
 import taskSrc from './isolates/task?isolate';
 import { Playground } from './playground/model';
 import { PlaygroundPage } from './playground/Page';
+import { connectDevtoolsIfAsked } from './devtools';
 import '../../../shared/booted.ts';
 
 /** The balancer's own allowance of pools: its default, made visible on the page. */
@@ -46,6 +47,8 @@ const balancer = createBalancer(kernel, {
   loads: { get: (id) => loads.get(id), set: (id, pct) => void loads.set(id, pct) },
 });
 playground.attach(kernel, balancer);
+// The devtools panel, with ?devtools=1: after the kernel, so never before Start.
+connectDevtoolsIfAsked(kernel);
 
 declare global {
   interface Window {
