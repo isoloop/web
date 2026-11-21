@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed)
+- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed)
 - **Answers:** what `apps/site` is built with, which pages it has, what may run on them, how it shows the examples and the library's diagrams, and what its copy may claim. Where it lives and how it deploys is [ADR 0001](0001-what-this-repo-is.md); its look is [ADR 0003](0003-design-system.md).
 
 ## Context
@@ -248,6 +248,33 @@ The maintainer's review of `/examples/`: a narrow column of long result paragrap
 - **Each tab:** its links, what it is, its screenshot at the page's width (one per theme where the app has both, shown by `data-theme`), what it shows (features, each linked to where the site explains it), what to try, and its measurements.
 - **Measurements are data in each app's `example.json`** (`measurements`), so the app's own PR keeps them true: measured blocks (findings first, then an A/B/Δ table, a caption with device, browser, rounds and tag, the other engine in words, a link to the run), a block of findings alone for runs recorded by hand in one round (the phones), a run in progress with the previous one linked (the processor), or none, with why (Basic). Δ is copied as written, since it's the median of per-round gaps. The hub's build validates every field.
 - **One source for the plant's desktop figures:** the landing page's and the features page's costs table read plant's `desktop` block, so the three pages can't disagree.
+
+### Amended: the examples hub with live examples (2026-11-21)
+
+The maintainer's review of the whole site before 0.1, on a local prototype. This changes decision 4 (what runs live) and decision 5's hub, and the tabs amendment above. Where this section and those disagree, this section wins.
+
+**One panel per example page.** The rail ([ADR 0005](0005-page-navigation-and-status-marks.md), amended 2026-11-21) groups the examples by app: Basic; Dashboards, with Plant and Markets; Processor, with its Playground and its File processor. Each page has a panel of its own, `#basic` to `#processor-files`, and the pager steps through all five. A panel per app put both processor pages and all their text in one panel. The Processor's text and links show on both of its panels; what it shows and what to try go on Playground, and its measurements on File processor, since they measure the File processor.
+
+**Basic and the Processor run on the page (decision 4).** Decision 4 said only basic runs on the site, below the landing page's hero. Now the hub also runs basic and both processor pages, each in a same-origin frame of the app with `?embed=1&start=manual`, loaded lazily. The dashboards keep their screenshots: they're full-page and heavy, so running them for every visitor would contradict the cost table, as before.
+- **The idle app, under a Start.** With `start=manual` the app draws its real UI from its initial state, with no kernel and no worker: basic its pane frames and controls, the processor pages their controls, tiles and tables. The site draws a dimmed layer with a Start button over it. Start tells the frame to start by a same-origin message, with the origin and the source checked, and the app creates its kernel then. No worker runs before Start, checked through the browser's worker targets in review.
+- **Leaving a panel resets its frame:** it reloads idle under the Start, so nothing runs unseen.
+- **The working app only:** embedded, an app drops its header, its tabs, its intro and its page column, and fills the frame edge to edge on a transparent background. The hub's panel holds the text.
+- **The full pages stay:** "Open full page →" sits on the frame's top edge and opens the app's own page, which has more room. The dashboards keep "Open live".
+
+**One intro per page (decision 5).** Each live page's intro is written once, in its app's `example.json` (`embeds[].intro`). The app draws it on its own page, basic into its static HTML at build time, and the hub shows the same text, so the two can't drift. A test in the processor checks the thresholds its intro states against the page's own constants.
+
+**Devtools on the examples.** Every page that runs Isoloop has the Devtools switch ([ADR 0003](0003-design-system.md), amended 2026-11-21): the dashboards' Isoloop builds and their interactive pages on their bar, the processor pages in their controls. On the hub, the same switch sits over the processor frames: it reloads the frame idle with `?devtools=1`, carries the flag to "Open full page", and makes the frame taller so the panel docks inside it. The panel starts with the app, on Start, and adds one worker.
+
+**Alternatives considered.**
+- **A screenshot as the poster, with "Run it here":** a picture of the app rather than the app, which the maintainer rejected; the idle UI shows what Start will run.
+- **A Start button inside each app:** two Starts in one place once the hub had its own, and on the File processor the app's own Start (the generator) read as a second one. One click on the hub now starts both.
+- **The hub panel as the only page for basic and the processor,** with their own paths sending a visitor to the panel: tried and reverted. The panel is narrower than the app's own page, and the redirect needed exceptions for the frames, query strings, the smoke tests on the live URLs, the screenshots and the benchmarks.
+- **Running the dashboards on the hub:** their weight, for every visitor, as decision 4 said.
+
+**Consequences.**
+- A visitor tries basic and the processor without leaving the hub, and nothing runs until they ask.
+- The apps gained a manual start and an idle view; without `start=manual` they start as before, so their benchmarks and tests are unchanged.
+- (Bad) A started example stops when its panel is left, so a reader comparing two panels starts each again.
 
 ## Consequences
 
