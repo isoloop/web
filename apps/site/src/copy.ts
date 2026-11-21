@@ -211,6 +211,9 @@ export const featuresPage = {
   notes: { label: 'The features, one note each, by tab' },
   tabs: {
     label: 'Features, by group',
+    /** The pager under each group (src/pages/steps.tsx, Pager). */
+    previous: 'Previous',
+    next: 'Next',
     names: {
       isolation: 'Isolation',
       bus: 'Bus',
@@ -374,9 +377,9 @@ export const howItWorks = {
   heading: 'How Isoloop works',
   intro: [
     'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
-    'Each tab below covers one part, with its code and the diagram drawn from the library’s code.',
+    'Each step below covers one part, with its code and the diagram drawn from the library’s code.',
   ],
-  /** Under Where to go next: where the diagrams come from, then the short sha. */
+  /** Under each step, as a footnote: where the diagrams come from, then the short sha. */
   pinned:
     'The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it. These are from isoloop/isoloop at',
   overview: {
@@ -733,23 +736,6 @@ export const howItWorks = {
       ],
       link: 'Safety, on the features page',
     },
-  },
-  policy: {
-    heading: 'These pages and their security policy',
-    text: "Every page on this site, the diagrams included, runs under the Content-Security-Policy default-src 'self'. GitHub Pages can’t send headers, so here the policy is a meta tag, and a meta tag doesn’t reach workers: basic’s workers run without a policy on this host. In a real deployment the policy goes in the response headers, which cover the workers too.",
-    link: 'The hosting guide',
-  },
-  next: {
-    heading: 'Where to go next',
-    links: [
-      ['/features/', 'The features, with live demos'],
-      ['/examples/', 'The examples, running live'],
-      [
-        'https://github.com/isoloop/isoloop/tree/main/docs/guide',
-        'The guides: pools, the balancer, hosting',
-      ],
-      ['https://github.com/isoloop/isoloop', 'The source, on GitHub'],
-    ] as [string, string][],
   },
 };
 

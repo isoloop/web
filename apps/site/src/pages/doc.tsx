@@ -9,10 +9,11 @@ import type { Page, SiteData } from './types.ts';
 // 0006): a section sidebar, the guide, and its contents on the right. Below
 // 1100px the contents fold under the page's meta line, and below 760px the
 // sidebar folds into a "Docs" block at the top, both as <details>, so the
-// pages read and navigate without JS. The only script is the code blocks'
-// Copy button (src/demos/copy.ts).
+// pages read and navigate without JS. The scripts are the code blocks' Copy
+// button (src/demos/copy.ts) and "On this page" marking the heading in view
+// (src/demos/docs.ts, src/demos/spy.ts).
 
-const COPY_SCRIPT = '/src/demos/copy.ts';
+const COPY_SCRIPT = '/src/demos/docs.ts';
 
 /** A section's anchor on /docs/, e.g. `agents-and-tooling`. */
 const sectionId = (title: string): string => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');

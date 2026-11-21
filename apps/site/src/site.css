@@ -811,53 +811,13 @@
 }
 
 /*
- * The step tabs (src/pages/steps.tsx, src/demos/steps.ts), on /how-it-works/
- * and /examples/; then how it works' diagrams across the page's full width with how to read them. Without
- * JS every step shows, and the tabs are a list of contents.
+ * A page's panels (src/pages/steps.tsx, src/demos/steps.ts), beside the rail
+ * on /how-it-works/ and /examples/; then how it works' diagrams with how to
+ * read them. Without JS every step shows, and the rail is a list of contents.
  */
-.steps {
-  margin-top: var(--ui-space-7);
-}
-.steps-nav {
-  position: sticky;
-  top: var(--ui-bar-h);
-  z-index: 5;
-  background: var(--ui-bg);
-}
-/* The rule is drawn inside the list, under the tabs' borders: a tab pulled
-   over a border below would overflow the list, which scrolls sideways, and
-   give it a vertical scroll too. */
-.steps-nav ol {
-  display: flex;
-  gap: 0.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: thin;
-  box-shadow: inset 0 -1px 0 var(--ui-rule);
-}
-.steps-nav a {
-  display: block;
-  padding: 0.75rem 0.9rem 0.6rem;
-  color: var(--ui-text-muted);
-  font-weight: 600;
-  font-stretch: 87%;
-  text-decoration: none;
-  white-space: nowrap;
-  border-bottom: 3px solid transparent;
-}
-.steps-nav a:hover {
-  color: var(--ui-text);
-}
-.steps-nav a[aria-current] {
-  color: var(--ui-text);
-  border-bottom-color: var(--part, var(--ui-text));
-}
 .steps-step {
   padding-top: var(--ui-space-6);
-  /* Below the sticky step tabs, too, when a link lands on a step. */
+  /* Below the sticky header when a link lands on a step. */
   scroll-margin-top: 3.25rem;
 }
 .steps-step[hidden] {
@@ -870,11 +830,6 @@
 .steps-on .steps-step + .steps-step {
   margin-top: 0;
   border-top: 0;
-}
-.steps-step > h2 {
-  margin: 0 0 1.25rem;
-  padding-left: 0.75rem;
-  border-left: 4px solid var(--part, var(--ui-text));
 }
 .hiw-text {
   max-width: 52rem;
@@ -954,14 +909,6 @@
 .hiw-read li::marker {
   color: var(--ui-text-muted);
   font-weight: 650;
-}
-.steps-pager {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--ui-space-4);
-  margin-top: var(--ui-space-7);
-  padding-top: var(--ui-space-4);
-  border-top: 1px solid var(--ui-rule);
 }
 @media (max-width: 760px) {
   .hiw-read {
@@ -1102,12 +1049,6 @@
 /* /features/'s tabs (src/pages/features.tsx): each tab holds its features'
    gutter sections. Their sticky headings and anchors stop below the header
    and the tab row. */
-.features-tabs .steps-nav {
-  margin-top: var(--ui-space-7);
-}
-.features-tabs .ui-gutter > h2 {
-  top: calc(var(--ui-bar-h) + 4.25rem);
-}
 .features-tabs .ui-gutter,
 .features-tab {
   scroll-margin-top: 3.5rem;
@@ -1570,4 +1511,163 @@
   .docs-pager a.next {
     text-align: left;
   }
+}
+
+/* ------------------------------------------------------------------
+ * The rail on every page made of parts (ADR 0005, amended 2026-11-21).
+ * ------------------------------------------------------------------ */
+
+/* The rail: the docs sidebar's look, on every page made of parts. */
+.rail-layout {
+  display: grid;
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
+  column-gap: var(--ui-gutter-gap);
+  margin-top: var(--ui-space-7);
+}
+.rail-wide > .rail {
+  position: sticky;
+  top: calc(var(--ui-bar-h) + 1.5rem);
+  align-self: start;
+  max-height: calc(100svh - var(--ui-bar-h) - 3rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding-bottom: 1rem;
+}
+.rail-wide {
+  align-self: stretch;
+}
+.rail h2 {
+  margin: 1.4rem 0 0.4rem;
+}
+.rail h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.rail h2 a:hover {
+  text-decoration: underline;
+}
+.rail li a[aria-current] {
+  border-left: 4px solid var(--ui-accent);
+  padding-left: calc(0.85rem - 3px);
+  color: var(--ui-text);
+  font-weight: 650;
+}
+.rail-main {
+  min-width: 0;
+}
+.rail-main .steps-step {
+  padding-top: 0;
+}
+.steps-on .rail-main .steps-step + .steps-step {
+  margin-top: 0;
+}
+.rail-footnote {
+  margin-top: var(--ui-space-5);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+}
+
+/* Features in the rail: each feature's heading sits above its text, not in a
+   second gutter beside the rail. */
+.rail-main .ui-gutter {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 0;
+}
+.features-tabs .rail-main .ui-gutter,
+.features-tab {
+  scroll-margin-top: calc(var(--ui-bar-h) + 1rem);
+}
+.features-tabs .rail-main .features-tab > .ui-gutter:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.features-tabs .rail-layout {
+  margin-top: var(--ui-space-8);
+}
+
+@media (max-width: 760px) {
+  .rail-layout {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: var(--ui-space-5);
+  }
+  .rail-fold {
+    position: sticky;
+    top: var(--ui-bar-h);
+    z-index: 5;
+    margin-bottom: var(--ui-space-5);
+  }
+  .rail-fold > .rail {
+    max-height: 60svh;
+    overflow-y: auto;
+  }
+}
+
+/* "On this page": the heading in view, as the rails mark theirs. */
+.docs-toc li a[aria-current] {
+  border-left: 4px solid var(--ui-accent);
+  padding-left: calc(0.75rem - 3px);
+  color: var(--ui-text);
+  font-weight: 650;
+}
+
+/* The pager's chevrons: drawn in CSS (a rotated border in currentColor), so
+   they need no icon font and nothing to fetch, and as empty generated
+   content they're silent to screen readers, as aria-hidden would be; the
+   link says Previous or Next. Centred on the title's line, a cap height
+   tall; on hover they nudge outward, and stay put with reduced motion. */
+.docs-pager a b {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+}
+.docs-pager a[rel='prev'] b::before,
+.docs-pager a[rel='next'] b::after {
+  content: '';
+  flex: none;
+  width: 0.42em;
+  height: 0.42em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transition: translate 0.15s ease;
+}
+.docs-pager a[rel='prev'] b::before {
+  rotate: 135deg;
+  margin-left: 0.15em;
+}
+.docs-pager a[rel='next'] b::after {
+  rotate: -45deg;
+  margin-right: 0.15em;
+}
+.docs-pager a[rel='prev']:hover b::before {
+  translate: -2px 0;
+}
+.docs-pager a[rel='next']:hover b::after {
+  translate: 2px 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .docs-pager a[rel='prev'] b::before,
+  .docs-pager a[rel='next'] b::after {
+    transition: none;
+  }
+  .docs-pager a[rel='prev']:hover b::before,
+  .docs-pager a[rel='next']:hover b::after {
+    translate: none;
+  }
+}
+
+/* A panel's heading, one style on every page made of parts: How it works'
+   steps, Features' features, Examples' examples. The bar is the section's
+   part colour (data-part) or, without one, the text colour; the same space
+   below on all three, to the panel's first paragraph or figure. The docs'
+   h2 (with the rule above) is a level below and keeps its own style. */
+.rail-main h2.panel-h {
+  position: static;
+  margin: 0 0 1.25rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--part, var(--ui-text));
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-stretch: 80%;
+  line-height: 1.25;
 }

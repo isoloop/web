@@ -2,7 +2,7 @@
 
 isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the landing page, the features, how it works, the examples hub, the changelog, and the docs (`/docs/` and `/docs/<slug>/`, one page per library guide). The examples themselves are built on their own and put next to these pages by [`scripts/assemble-site.sh`](../../scripts/assemble-site.sh).
 
-- **Pages are Preact components**, rendered to static HTML at build time through `ui/render` ([ADR 0003](../../docs/adr/0003-design-system.md)). No framework code reaches the browser; the only script on a page is ui's theme script, plus a page's own enhancement modules (the live demos, the tabs, the docs' Copy button).
+- **Pages are Preact components**, rendered to static HTML at build time through `ui/render` ([ADR 0003](../../docs/adr/0003-design-system.md)). No framework code reaches the browser; the only script on a page is ui's theme script, plus a page's own enhancement modules (the live demos, the rail, the docs' Copy button and contents).
 - **Every page carries** `<meta http-equiv="Content-Security-Policy" content="default-src 'self'">`, and every request is same-origin. The meta is left out in dev, where Vite injects inline styles.
 
 | Path | What it is |
@@ -62,7 +62,7 @@ Anything else inline fails the build, so a re-render that brings something new i
 
 ## The hub
 
-`/examples/` shows one example per tab (the step tabs `/how-it-works/` also uses: `src/pages/steps.tsx`, `src/demos/steps.ts`). Each app has an `example.json` next to its `package.json`; the schema is in `build/examples.ts`, and unknown fields fail, so a typo can't slip through:
+`/examples/` shows one example per panel, beside the rail that `/how-it-works/` and `/features/` also use (`src/pages/steps.tsx`, `src/demos/steps.ts`). Each app has an `example.json` next to its `package.json`; the schema is in `build/examples.ts`, and unknown fields fail, so a typo can't slip through:
 
 - `title`, `tab` (its tab's short name), `summary` (what it is), `order`.
 - `shows`: feature ids from `content/features/`, shown as the landing page's features strip. An id that isn't a feature fails the build.
