@@ -23,7 +23,7 @@ A change is done when all five hold:
 ## Releases
 
 - **Tags are pushed by the maintainer, or on the maintainer's explicit word for that release.**
-- **Each deploy tag goes on its own commit.** Pages names a deployment after its commit, so a second deploy of the same commit leaves the first one live.
+- **Every release tag deploys the commit it's on, and Pages keeps the first deploy of a commit.** A second deploy of the same commit leaves the first one live. When tags share a commit, such as a release PR's merge, push `site-v*` first, so the first deploy of that commit is the complete one, then the app tags, one per push.
 - **After a deploy,** check the live pages once the CDN serves them (it caches for up to 10 minutes and ignores query strings).
 
 ## Look and build
