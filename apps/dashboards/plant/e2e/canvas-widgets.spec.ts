@@ -33,6 +33,8 @@ for (const build of inScope(BUILDS)) {
     browserName,
   }) => {
     test.skip(stopsOn(browserName, build), WEBKIT_STOPS);
+    // Firefox's first data can take up to 45 s on CI (scope.ts, firstData): 3x the test timeout.
+    test.slow(browserName === 'firefox', 'first data can take up to 45 s');
     await page.goto(`/${build}/?rate=2&seed=1`);
     await Promise.all(
       MACHINES.map((m) =>

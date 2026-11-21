@@ -24,6 +24,8 @@ for (const [url, slot, label] of CASES) {
     browserName,
   }) => {
     test.skip(stopsOn(browserName, url.split('/')[1] ?? ''), WEBKIT_STOPS);
+    // Firefox's first data can take up to 45 s on CI (scope.ts, firstData): 3x the test timeout.
+    test.slow(browserName === 'firefox', 'first data can take up to 45 s');
     await page.goto(url);
     await expect(where(page, slot)).toHaveText(label, { timeout: firstData(browserName) });
     await expect(page.locator(`[data-slot="${slot}"] [data-head="updates"]`)).toHaveText(

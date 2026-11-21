@@ -163,6 +163,8 @@ test('own: the page warns about the worker count', async ({ page }) => {
 
 for (const build of ['native', 'native-workers']) {
   test(`${build}: a blocked widget stalls the whole page`, async ({ page, browserName }) => {
+    // Firefox's first data can take up to 45 s on CI (scope.ts, firstData): 3x the test timeout.
+    test.slow(browserName === 'firefox', 'first data can take up to 45 s');
     await page.goto(`/${build}/`);
     await expect(at(page, 'T3-gauges', '.gauges')).toHaveAttribute('data-ts', /\d/, {
       timeout: firstData(browserName),
