@@ -2,7 +2,15 @@
 // came out (queue, jobs per second, latency), the processors on their
 // workers, the latest results with a filter, and the balancer's moves.
 import { useState, type ReactElement } from 'react';
-import { Intro, LagChart, MoveLog, REASONS, RestartsControl, useSnapshot } from '../ui';
+import {
+  DevtoolsToggle,
+  Intro,
+  LagChart,
+  MoveLog,
+  REASONS,
+  RestartsControl,
+  useSnapshot,
+} from '../ui';
 import { KIND_LABELS } from './kinds';
 import type { FileProcessor, Mode, ProcessorView, Result, WorkerView } from './model';
 
@@ -118,6 +126,7 @@ export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
           workers {snap.workerCount} · balancer pools {snap.balancerPools}/{snap.maxWorkers}
         </span>
         <RestartsControl />
+        <DevtoolsToggle />
       </section>
 
       <section className="stats" aria-label="Figures">

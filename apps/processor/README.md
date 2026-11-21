@@ -29,9 +29,10 @@ The File processor, run on a worker per processor, in one pool and placed by the
 - **`from: 'earliest'`** applies only to a group's first join: a group that has committed resumes after its commits, even when every member has left (ADR 0016, point 14).
 - Until `@isoloop/*@0.1.0-next.0` (isoloop#224, the fix for #211), a group's commit could cross a redelivery and cover files the processor hadn't received, so processors put every file they held back on the topic when they stopped, subscribed `from: 'committed'`, and committed only below the lowest file held. The M3h and M3i measurements ran with those workarounds.
 
-## Embedded
+## Embedded and devtools
 
 - **`?start=manual`** (the site's examples hub, with `?embed=1`): both pages draw their idle view and start no kernel and no worker until told to (`shared/manual-start.ts`): the hub's Start sends a same-origin message, and on the File processor it also starts the generator. Opened alone with the parameter, a page draws its own Start. Without it, nothing changes.
+- **`?devtools=1`:** the devtools panel from `@isoloop/devtools`, connected once the kernel exists (`src/devtools.ts`), so never before Start; the Devtools switch in the controls (`shared/devtools-switch.ts`) sets it and reloads.
 
 ## Notes
 
