@@ -95,8 +95,13 @@
     margin-left: auto;
   }
   /* The library version the site is built from: a quiet pill that opens the changelog. */
+  /* Centred optically: equal padding on a line box of 1, the text box
+     trimmed to the cap height and baseline where the engine supports it. */
   .ui-version {
-    padding: 0.1em 0.6em 0.15em;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3em 0.65em;
+    text-box: trim-both cap alphabetic;
     border: 1px solid var(--ui-border);
     border-radius: 999px;
     color: var(--ui-text-muted);
@@ -104,7 +109,7 @@
     font-stretch: 87%;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1;
     text-decoration: none;
     white-space: nowrap;
   }
@@ -224,6 +229,7 @@
   .ui-intro {
     display: grid;
     grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
+    column-gap: var(--ui-gutter-gap);
     row-gap: 1.25rem;
     margin-top: 2.5rem;
   }
@@ -239,6 +245,7 @@
   .ui-gutter {
     display: grid;
     grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
+    column-gap: var(--ui-gutter-gap);
     margin-top: var(--ui-space-8);
     padding-top: 1.25rem;
     border-top: 1px solid var(--ui-rule);
@@ -334,10 +341,14 @@
     font-stretch: 87%;
   }
   /* A status mark next to a name: an outlined pill, e.g. "Experimental". */
+  /* Centred optically, as the version pill: equal padding on a line box of 1,
+     the text box trimmed to the cap height and baseline where supported. */
   .ui-pill {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     margin-left: 0.2em;
-    padding: 0.05em 0.55em 0.1em;
+    padding: 0.32em 0.6em;
+    text-box: trim-both cap alphabetic;
     border: 1px solid var(--ui-experimental);
     border-radius: 999px;
     color: var(--ui-experimental);
@@ -345,7 +356,7 @@
     font-weight: 650;
     font-stretch: 87%;
     letter-spacing: 0.03em;
-    line-height: 1.4;
+    line-height: 1;
     text-transform: uppercase;
     vertical-align: 0.2em;
     white-space: nowrap;
@@ -384,7 +395,7 @@
   }
   .ui-panel {
     display: grid;
-    grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
+    grid-template-columns: var(--ui-label) minmax(0, 1fr);
     background: var(--ui-surface);
     border: 1px solid var(--ui-rule);
     border-radius: var(--ui-radius-l);
