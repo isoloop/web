@@ -223,7 +223,7 @@ export const featuresPage = {
       safety: 'Safety',
       cost: 'Cost',
     },
-    /** The tabs' anchors; a feature's own id is its section's, so these differ from every one. */
+    /** The groups' anchors; a feature's own id is its section's, so these differ from every one. */
     ids: {
       isolation: 'isolation',
       bus: 'messaging',
@@ -390,7 +390,7 @@ export const howItWorks = {
     ],
   },
   open: 'Open full size',
-  /** The step tabs: one short name per step, in order. */
+  /** The steps in the rail: one short name per step, in order. */
   nav: {
     label: 'Steps',
     names: {
@@ -624,7 +624,7 @@ export const howItWorks = {
       text: [
         'Each isolate runs in a worker: a thread of its own, with its own event loop. By default an isolate gets a worker to itself. With `pool` in its manifest, it shares one worker with every isolate that names the same pool.',
         'A pool saves memory. In the plant dashboard’s matched comparison, a small headless isolate cost about 0.2 MB in a pool, against 2.8 MB on its own worker; in return its members stall and restart together, as the next paragraph says. Measured with `@isoloop/*@0.0.0-next.d028bc1` in Chromium, on 4 physical cores fixed at 2.0 GHz, medians of 5 rounds, memory after GC 16 s after load.',
-        'Members share an event loop. One that blocks stalls them all, and a worker error restarts them all; an error a member reports as its own restarts only that member (the Restarts tab has the details). They also share one document, so they can read each other’s DOM and input, and they can reach each other’s bus ports, so a pool holds all its members’ grants. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
+        'Members share an event loop. One that blocks stalls them all, and a worker error restarts them all; an error a member reports as its own restarts only that member (the Restarts step has the details). They also share one document, so they can read each other’s DOM and input, and they can reach each other’s bus ports, so a pool holds all its members’ grants. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
         'The kernel never pools on its own. Placement is the manifest’s choice, or that of the opt-in, experimental `@isoloop/balancer`, which moves isolates between pools as their load changes.',
       ],
       link: 'The pools guide: when to pool, with the plant’s figures',
@@ -638,7 +638,7 @@ export const howItWorks = {
       heading: 'Topics, records and the bus',
       text: [
         "A topic is declared once, in a contracts module that the host, the bus and every isolate import; its default export, `contracts(…)`, is the list the host passes to `createKernel`. A topic has a name (with its major version, by convention, as in `count.v1`), a schema (from any Standard Schema library; zod here) and a retention: `{ kind: 'last-n', n }` keeps the last n records, `{ kind: 'time', ms }` the records younger than `ms`, and `{ kind: 'compacted' }` the latest record per key.",
-        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence tab). A topic with a `reply` schema also takes requests, which are experimental in 0.1: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
+        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence step). A topic with a `reply` schema also takes requests, which are experimental in 0.1: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
       ],
       flow: [
         'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path.',
@@ -667,7 +667,7 @@ export const howItWorks = {
           'Only these events reach the worker: click, dblclick, input, change, keydown, keyup, submit, focusin, focusout, pointerdown and pointerup; pointer moves, at most one per frame; and scroll, at most one per frame for each scrolled element. There’s no wheel or drag yet.',
         ],
       },
-      code: 'The Host tab’s counter, as a component',
+      code: 'The Host step’s counter, as a component',
     },
     // Sources: DEFAULT_SUPERVISOR_CONFIG, DEFAULT_BACKOFF, KernelConfig
     // `heartbeat` and `supervisor`, IsolateManifest `fallback`, Kernel `stop`
@@ -695,7 +695,7 @@ export const howItWorks = {
       from: [
         '`latest`, the default: live values where only the newest matters, such as a ticker or a status.',
         '`earliest`: state rebuilt from what the topic retains, as the counter does.',
-        '`committed`: work done once per record, such as jobs or alerts. It reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus tab.',
+        '`committed`: work done once per record, such as jobs or alerts. It reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus step.',
       ],
       cost: 'With `earliest`, every restart replays everything the topic retains, and in a pool every member replays on the pool’s one thread. So the longer a topic’s retention, the longer such a restart takes to catch up, and the pools guide measured it growing over a long run. Keep retention to what a restart needs.',
       costLink: 'The pools guide, with the plant’s figures',
