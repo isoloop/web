@@ -51,7 +51,7 @@
 }
 @media (min-width: 761px) {
   .ui-try-section > .ui-try {
-    margin-left: var(--ui-gutter);
+    margin-left: calc(var(--ui-gutter) + var(--ui-gutter-gap));
   }
 }
 .ui-intro > .ui-strip {
@@ -1180,8 +1180,14 @@
 .fnotes-col li a:focus-visible {
   transform: rotate(0) translateY(-2px);
 }
+/* A note with a pill stacks: the pill always on its own line under the name,
+   short name or long. */
+.fnotes-col li a:has(.ui-pill) {
+  flex-direction: column;
+  align-items: flex-start;
+}
 .fnotes-col li a .ui-pill {
-  margin-left: 0;
+  margin: 0;
   /* On the page's background, where --ui-experimental reaches AA; the note's
      tint alone doesn't. */
   background: var(--ui-bg);
@@ -1212,11 +1218,11 @@
   margin: 0 auto;
   padding: 0 1.5rem;
   display: grid;
-  grid-template-columns: 14.5rem minmax(0, 1fr) 12.5rem;
-  column-gap: 3rem;
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr) 12.5rem;
+  column-gap: var(--ui-gutter-gap);
 }
 .docs-layout-index {
-  grid-template-columns: 14.5rem minmax(0, 1fr);
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
 }
 .docs-side,
 .docs-toc {
@@ -1527,7 +1533,7 @@
 }
 @media (max-width: 1100px) {
   .docs-layout {
-    grid-template-columns: 13.5rem minmax(0, 1fr);
+    grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
   }
   .docs-only-widest {
     display: none;

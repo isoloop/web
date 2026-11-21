@@ -31,6 +31,9 @@ const PAIRS: [string, string, number][] = [
   ['ui-text', 'ui-bg', 4.5],
   ['ui-text', 'ui-surface', 4.5],
   ['ui-text-muted', 'ui-bg', 4.5],
+  // Running text, a step softer than the headings.
+  ['ui-prose', 'ui-bg', 4.5],
+  ['ui-prose', 'ui-surface', 4.5],
   ['ui-accent', 'ui-bg', 4.5],
   ['ui-on-accent', 'ui-accent', 4.5],
   ['ui-border', 'ui-bg', 3],
