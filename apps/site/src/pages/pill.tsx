@@ -8,12 +8,17 @@ export function Pill({ feature }: { feature: Pick<Feature, 'experimental'> }): V
   return feature.experimental ? <span class="ui-pill">{marks.experimental}</span> : null;
 }
 
-/** A feature's strip item: its name in bold, the pill, then its line. */
+/**
+ * A feature's strip item: its name in bold and the pill on one line, then its
+ * line below, on every item alike (a description run on after the pill left
+ * its first word on the pill's line).
+ */
 export function StripItem({ feature, href }: { feature: Feature; href: string }): VNode {
   return (
     <li data-part={feature.part}>
       <a href={href}>
-        <b>{feature.name}</b> <Pill feature={feature} /> {feature.line}
+        <b>{feature.name}</b> <Pill feature={feature} />{' '}
+        <span class="ui-strip-line">{feature.line}</span>
       </a>
     </li>
   );

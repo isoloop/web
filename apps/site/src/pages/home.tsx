@@ -74,8 +74,10 @@ function Home({ features, samples, examples }: SiteData): VNode {
                 <StripItem key={f.id} feature={f} href={`/features/#${f.id}`} />
               ))}
             </ul>
-            <a href="/features/">{home.strip.all}</a>
           </nav>
+          <p>
+            <a href="/features/">{home.strip.all}</a>
+          </p>
         </div>
       </section>
 
@@ -116,6 +118,9 @@ function Home({ features, samples, examples }: SiteData): VNode {
               <li key={i}>{i}</li>
             ))}
           </ul>
+          <p>
+            <a href="/docs/limits/">{home.limits.more}</a>
+          </p>
         </div>
       </section>
 
@@ -137,9 +142,10 @@ function Home({ features, samples, examples }: SiteData): VNode {
           <p>{home.install.label}</p>
           <Code lang="sh">{home.install.command}</Code>
           <p>
-            <a href="https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md">
-              {home.install.guide}
-            </a>
+            <a href="/docs/getting-started/">{home.install.start}</a>
+          </p>
+          <p>
+            <a href="/docs/hosting/">{home.install.guide}</a>
           </p>
         </div>
       </section>

@@ -99,7 +99,9 @@ export const home = {
     heading: 'Event-loop isolation for JavaScript apps',
     text: 'An open-source TypeScript library. Each part of your app runs on its own worker or in a shared pool, talks only through a message bus that keeps its records, and is restarted by a supervisor when it fails. A block or a crash stays in its part, and the rest of the app keeps running. React, Preact or plain DOM.',
     primary: 'See the features',
-    secondary: 'Examples',
+    // Basic and the processor run live on /examples/ (in its panels, idle until
+    // Start); the plant and markets dashboards open on their own pages.
+    secondary: 'The examples: two run live on the page, the dashboards on their own pages',
   },
   try: 'Try it. This is basic, the smallest example, running in this page: four isolates on three event loops. A and B have a worker each; C and D share a pool and read A’s count. Block or crash one, or block the main thread, and watch what keeps running.',
   code: {
@@ -133,10 +135,11 @@ export const home = {
   gives: {
     heading: 'What it gives',
     // Source: apps/dashboards/plant/README.md, "What each build does when
-    // something goes wrong", and e2e/placements.spec.ts. Behaviour only: the
-    // figures are in the costs table below.
+    // something goes wrong", and e2e/placements.spec.ts, both unchanged at
+    // plant-v0.3.1 (checked 2026-11-21). Behaviour only: the figures are in
+    // the costs table below.
     caption:
-      'The plant dashboard: 72 widgets on 8 machines, built three ways from the same code and data. What each build does when something goes wrong, at plant-v0.1.0.',
+      'The plant dashboard: 72 widgets on 8 machines, built three ways from the same code and data. What each build does when something goes wrong, at plant-v0.3.1.',
     head: ['', 'Native', 'Native + workers', 'Isoloop'],
     rows: <Row[]>[
       [
@@ -180,26 +183,35 @@ export const home = {
       'Drag and drop, text selection and canvas drawing tied to pointer timing. Canvas isolates can draw to an OffscreenCanvas instead.',
       'The cost. Every worker, the bus and the kernel take CPU, memory and start-up time, as the table above shows.',
     ],
+    /** The docs' page of the same name (/docs/limits/), with the full list. */
+    more: 'The full list, in the docs',
   },
   how: {
     heading: 'How it works',
     // Sources: isoloop/isoloop docs/diagrams (runtime topology, restarts),
-    // ADR 0015 (pools), docs/guide/pools.md (start positions, isoloop#186).
+    // ADR 0015 (pools), docs/guide/pools.md (start positions, isoloop#186),
+    // docs/guide/supervision.md (the defaults: 3 restarts within 60 s, so a
+    // fourth crash in a minute fails the isolate).
     text: [
       'Your app’s host runs on the page’s main thread. Each isolate runs in a worker, either one of its own or a pool it shares with others.',
       'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says.',
-      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
+      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it, and gives an isolate up after 3 restarts in a minute. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
     ],
     link: 'How it works, part by part',
   },
   install: {
     heading: 'Install',
     platform: 'Isoloop runs in the browser.',
+    // The freeze: isoloop/isoloop docs/plans/m4d-release.md at the pin, task 6
+    // (declared with 0.1.0-next.9; from then on, a change to the published
+    // types needs the maintainer's approval).
     label:
-      'Isoloop isn’t at 0.1 yet, and the API may change. These are prereleases from the main branch, published under the next tag.',
+      'Isoloop isn’t at 0.1 yet. The API is frozen for 0.1. These are prereleases from the main branch, published under the next tag.',
     command:
       'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp@next\n# for the devtools panel (experimental):\npnpm add @isoloop/devtools@next',
     guide: 'The hosting guide',
+    /** The docs' first page (/docs/getting-started/), from an empty Vite app to a running isolate. */
+    start: 'Getting started',
   },
 };
 
