@@ -2,7 +2,7 @@
 
 - **Status:** Proposed
 - **Date:** 2026-11-19
-- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20)); 2026-11-20 (decision 1a: Docs right after Home, and the library version as a pill before GitHub; see [the amendment](#amended-docs-first-and-the-version-pill-2026-11-20))
+- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20)); 2026-11-20 (decision 1a: Docs right after Home, and the library version as a pill before GitHub; see [the amendment](#amended-docs-first-and-the-version-pill-2026-11-20)); 2026-11-21 (decisions 1, 2 and 3: the step tabs give way to a left rail, one panel heading style, one pager; see [the amendment](#amended-the-rail-2026-11-21); Proposed)
 - **Answers:** how a reader moves through a long page on the site, and how a feature that isn't stable yet is marked. Grilled 2026-11-19 (Q1–Q12), after a local prototype the maintainer reviewed. Amends [ADR 0002](0002-site-build.md) (the features page, the step tabs) and [ADR 0003](0003-design-system.md) (a status colour, the pill, the header's GitHub link).
 
 ## Context
@@ -35,6 +35,36 @@ All three run one script, `src/demos/steps.ts`. It gains two things:
 
 - **A hash that names something inside a panel**, such as `/features/#balancer`, opens that panel and scrolls to the target. So the landing page's strip and the examples' "What it shows" keep linking straight to a feature.
 - **The tab row scrolls sideways only.** Marking the current tab no longer moves the page.
+
+#### Amended: the rail (2026-11-21)
+
+The maintainer's review of the whole site before 0.1, done on a local prototype with a settings switcher (widths, reading, columns, background) and reviewed round by round. Where this section and decisions 1, 2 and 3 disagree, this section wins.
+
+**Why the tabs went.** The site had three ways through a long page: the docs' left sidebar with "On this page" on the right, the step tabs on the other three pages, and on `/features/` the sticky notes on top of a tab row naming the same six groups. The tab row suits three to five peers; these pages have 9 to 12 items in groups. A row of 9 steps or 12 features scrolls sideways on a phone with most of it out of view, and the notes and the tab row said the same thing twice.
+
+**One pattern: the left rail.**
+- **The docs' sidebar, on every page made of parts:** Features, How it works and Examples get the same left rail as the docs, in the site's left column ([ADR 0003](0003-design-system.md), amended 2026-11-21). It's sticky; on Features and Examples it has group headings, with the items under them.
+- **One panel at a time, as before:** the rail's links are `#id`s that survive reloads and the back button; a hash that names something inside a panel (`/features/#balancer`) opens it and scrolls there; without JS every panel shows in order and the rail is a list of contents.
+- **How it marks where you are:** plain group headings, and one accent bar on the current item, as in the docs. The part colours stay on the panels' own headings, not in the rail: a coloured bar on each group heading plus the current item's made two markers, which read as broken.
+- **Following the reading:** on Features, the rail marks the feature in view, the same scroll-spy as the docs' "On this page": the last heading whose top has passed a third of the window. A click or a hash change holds its item until the reader scrolls by themselves. At the end of a page, headings that can never reach that line share the last window's height of scroll, so none is skipped and the last is current at the bottom.
+- **Phones:** below 760px the rail folds into a sticky `<details>` above the panel, naming the current item.
+- **One pager:** every panel ends with the docs' Previous and Next, each with a chevron on its outer side. How it works' own pager and its "Where to go next" section, which repeated the header's nav, go; so does its box on the pages' security policy, which the hosting guide covers. The note on where the diagrams come from becomes a footnote under the pager.
+
+**Features (decisions 2 and 3).** The six groups, their order and their anchors stay; they're the rail's group headings now, and the tab row goes. The sticky notes stay as the page's opening: they show every feature at a glance, and the rail is how a reader moves.
+
+**Examples.** The rail groups them by app, with a panel per example page ([ADR 0002](0002-site-build.md), amended 2026-11-21).
+
+**One panel heading.** A panel's heading has one style on all three pages, the one Features had: 1.5rem, bold, at the section headings' width, with a 4px bar in its part's colour, or the text colour where it has none. Before, How it works had a smaller heading with a grey bar and Examples had no bar at all. The docs' h2, with its rule above, is a level below and keeps its own style.
+
+**Alternatives considered.**
+- **Keeping the tabs, with the rail only on the docs:** two patterns for the same job, and the tab row's crowding on phones stays.
+- **The sticky notes and the tab row together on `/features/`:** the same six groups twice.
+- **Part colours in the rail:** two markers per group; the docs' single accent bar reads better.
+
+**Consequences.**
+- One way through every long page, the docs included: what a reader learns on one page works on the others.
+- (Bad) The rail takes the left column on these pages. The wider page ([ADR 0003](0003-design-system.md), amended 2026-11-21) leaves the content more room than before even so.
+- (Bad) Find-in-page still can't see a hidden panel, as with the tabs.
 
 ### 1a. The header: pages, then what isn't a page (amends ADR 0003, decision 7)
 
