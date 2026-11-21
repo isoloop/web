@@ -470,6 +470,35 @@ for (const [panel, frame] of [
   });
 }
 
+test('the hub’s Devtools switch reloads a processor frame idle with ?devtools=1', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/examples/#processor-playground');
+  const section = page.locator('#processor-playground');
+  const frame = section.locator('iframe');
+  const height = Number(await frame.getAttribute('height'));
+  // The script reloads the frame through its own window, so its URL is the one to read.
+  const url = (): Promise<string> =>
+    frame.evaluate((el: HTMLIFrameElement) => el.contentWindow?.location.href ?? '');
+  const box = section.getByRole('checkbox', { name: /Devtools/ });
+  await expect(box).toBeVisible();
+  await box.check();
+  await expect.poll(url).toMatch(/devtools=1/);
+  expect(Number(await frame.getAttribute('height'))).toBeGreaterThan(height);
+  await expect(section.getByRole('link', { name: /Open full page/ })).toHaveAttribute(
+    'href',
+    /devtools=1/,
+  );
+  // Idle again under Start; the panel starts with the app.
+  await expect(section.locator('.ex-live-cover')).toBeVisible();
+  await box.uncheck();
+  await expect.poll(url).not.toMatch(/devtools=1/);
+  // Basic has no switch.
+  await page.goto('/examples/#basic');
+  await expect(page.locator('#basic').getByRole('checkbox', { name: /Devtools/ })).toHaveCount(0);
+});
+
 test('robots.txt points at a sitemap whose every page is served', async ({ request }) => {
   const robots = await request.get('/robots.txt');
   expect(robots.status()).toBe(200);

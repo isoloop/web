@@ -94,3 +94,28 @@ test('the log shows live records, and keeps going through a bus restart', async 
   await panel(page).locator('[data-tab="isolates"]').click();
   await expect(row(page, 'isoloop-devtools')).toHaveAttribute('data-state', 'running');
 });
+
+test('the bar’s Devtools switch reloads with ?devtools=1 and opens the panel; native has none', async ({
+  page,
+}) => {
+  await page.goto('/isoloop/');
+  const box = page.locator('.ui-bar').getByRole('checkbox', { name: /Devtools/ });
+  await expect(box).not.toBeChecked();
+  await expect(panel(page)).toHaveCount(0);
+  await box.check();
+  await expect(page).toHaveURL(/devtools=1/);
+  await expect(page.locator('.ui-bar').getByRole('checkbox', { name: /Devtools/ })).toBeChecked();
+  await expect(panel(page)).toHaveCount(1);
+  // Off again: the flag goes, and so does the panel.
+  await page
+    .locator('.ui-bar')
+    .getByRole('checkbox', { name: /Devtools/ })
+    .uncheck();
+  await expect(page).not.toHaveURL(/devtools=1/);
+  await expect(panel(page)).toHaveCount(0);
+  // The interactive page has the same switch; the native build has none.
+  await page.goto('/interactive/isoloop/');
+  await expect(page.locator('.ui-bar').getByRole('checkbox', { name: /Devtools/ })).toHaveCount(1);
+  await page.goto('/native/');
+  await expect(page.locator('.ui-devtools-switch')).toHaveCount(0);
+});

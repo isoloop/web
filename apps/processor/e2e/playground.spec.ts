@@ -342,3 +342,26 @@ for (const mode of ['own', 'one'] as const) {
     await expect(page.locator('.log li[data-kind="spike"]')).toHaveCount(0);
   });
 }
+
+test('the Devtools switch in the controls reloads with ?devtools=1 and opens the panel', async ({
+  page,
+}) => {
+  const box = page.locator('.controls').getByRole('checkbox', { name: /Devtools/ });
+  await expect(box).not.toBeChecked();
+  await expect(page.locator('[data-isoloop-devtools]')).toHaveCount(0);
+  await box.check();
+  await expect(page).toHaveURL(/devtools=1/);
+  await expect(page.locator('.controls').getByRole('checkbox', { name: /Devtools/ })).toBeChecked();
+  // Connected after the kernel (src/devtools.ts).
+  await expect(page.locator('[data-isoloop-devtools]')).toHaveCount(1);
+  await expect
+    .poll(() =>
+      page.evaluate(() => window.kernel.isolates().some((i) => i.id === 'isoloop-devtools')),
+    )
+    .toBe(true);
+});
+
+test('framed by the hub (?embed=1), the page hides its own Devtools switch', async ({ page }) => {
+  await page.goto('./?embed=1');
+  await expect(page.locator('.devtools-toggle')).toBeHidden();
+});
