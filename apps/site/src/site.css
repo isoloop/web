@@ -1212,11 +1212,11 @@
   margin: 0 auto;
   padding: 0 1.5rem;
   display: grid;
-  grid-template-columns: 14.5rem minmax(0, 1fr) 12.5rem;
-  column-gap: 3rem;
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr) 12.5rem;
+  column-gap: var(--ui-gutter-gap);
 }
 .docs-layout-index {
-  grid-template-columns: 14.5rem minmax(0, 1fr);
+  grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
 }
 .docs-side,
 .docs-toc {
@@ -1527,7 +1527,7 @@
 }
 @media (max-width: 1100px) {
   .docs-layout {
-    grid-template-columns: 13.5rem minmax(0, 1fr);
+    grid-template-columns: var(--ui-gutter) minmax(0, 1fr);
   }
   .docs-only-widest {
     display: none;
