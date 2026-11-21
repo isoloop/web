@@ -14,6 +14,7 @@ import generatorSrc from '../isolates/generator?isolate';
 import processorSrc from '../isolates/processor?isolate';
 import { FileProcessor, type Dials, type Mode } from './model';
 import { FilesPage } from './Page';
+import { restartsFrom } from '../restarts';
 import '../../../../shared/booted.ts';
 
 /**
@@ -47,7 +48,16 @@ const maxWorkers = num('maxWorkers') ?? Math.max(2, (navigator.hardwareConcurren
 // The page draws from the model at once. With ?start=manual (the site's
 // examples hub) that's the idle view, and the kernel, the balancer and every
 // worker wait for Start (shared/manual-start.ts); without it, they start now.
-const model = new FileProcessor({ processorSrc, generatorSrc, maxWorkers, mode, dials });
+/** The kernel's restart limit, from `?restarts=` (the Restarts control); the host's defaults without it. */
+const restarts = restartsFrom(location.search);
+const model = new FileProcessor({
+  processorSrc,
+  generatorSrc,
+  maxWorkers,
+  mode,
+  dials,
+  restartLimit: restarts.limit,
+});
 const root = document.getElementById('root');
 if (!root) throw new Error('#root missing');
 const view = createRoot(root);
@@ -65,6 +75,7 @@ const kernel = createKernel({
   // A poison file holds a processor's loop for 2 s; the kernel kills a loop only after 10 s.
   heartbeat: { killAfterMs: 10_000 },
   routing: false,
+  ...(restarts.supervisor ? { supervisor: restarts.supervisor } : {}),
 });
 const balancer = placement === 'one-off' ? undefined : createBalancer(kernel, { maxWorkers });
 model.attach(kernel, balancer);

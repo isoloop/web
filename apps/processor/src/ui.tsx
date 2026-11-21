@@ -1,6 +1,13 @@
 // What both processor pages draw the same way: a worker's lag against the
 // balancer's thresholds, the move log, and a model redrawn ten times a second.
 import { useEffect, useState, type ReactElement } from 'react';
+import {
+  RESTART_STEPS,
+  isRestartStep,
+  restartsFrom,
+  withRestarts,
+  type RestartStep,
+} from './restarts';
 import { spans, type IntroBlock } from '../../../shared/intro';
 import example from '../example.json' with { type: 'json' };
 
@@ -19,6 +26,8 @@ export const REASONS: Record<string, string> = {
   crash: 'crashed',
   bisect: 'bisect',
   steady: 'steady again',
+  /** A new isolate's way out of the quarantine once measured (measuring.ts, isoloop/isoloop#346). */
+  measured: 'measured',
   restart: 'restarted',
   /** Its reported backlog kept rising (M3i). */
   backlog: 'falling behind',
@@ -152,5 +161,43 @@ export function Intro({ id }: { id: string }): ReactElement {
         ),
       )}
     </>
+  );
+}
+
+const STEP_LABELS: Record<RestartStep, string> = {
+  '0': 'none (fail on first crash)',
+  '1': '1',
+  '3': '3 (default)',
+  '10': '10',
+};
+
+/**
+ * The kernel's restart limit (restarts.ts): restarts allowed per isolate in
+ * 60 s before the kernel gives up on it. Kernel-wide, so a change reloads
+ * the page with `?restarts=` and applies from the start.
+ */
+export function RestartsControl(): ReactElement {
+  const { step } = restartsFrom(location.search);
+  return (
+    <label
+      className="group"
+      title="Restarts allowed per isolate within 60 s before the kernel gives up on it"
+    >
+      Restarts in 60 s
+      <select
+        value={step}
+        data-testid="restarts"
+        onChange={(e) => {
+          const next = e.currentTarget.value;
+          if (isRestartStep(next)) location.assign(withRestarts(location.href, next));
+        }}
+      >
+        {RESTART_STEPS.map((s) => (
+          <option key={s} value={s}>
+            {STEP_LABELS[s]}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

@@ -14,6 +14,8 @@ import {
   imageJobs,
   results as resultsTopic,
 } from '../contracts';
+import { Offences } from '../measuring';
+import { DEFAULT_LIMIT, gaveUpText } from '../restarts';
 import type { LogEntry } from '../ui';
 import { KINDS, type Kind } from './kinds';
 
@@ -105,12 +107,17 @@ export type ProcessorView = {
   /** Files it finished this run. */
   done: number;
   moved: { reason: string; from: string } | undefined;
+  /** In the quarantine to be measured, not for an offence (measuring.ts). */
+  measuring: boolean;
+  /** Why the kernel gave up on it, while it stays down (restarts.ts). */
+  gaveUp: string | undefined;
 };
 
 export type WorkerView = {
   key: string;
   label: string;
-  kind: 'pool' | 'quarantine' | 'own';
+  /** `measuring`: a quarantine holding only isolates being measured (measuring.ts). */
+  kind: 'pool' | 'quarantine' | 'measuring' | 'own';
   lags: number[];
   processors: ProcessorView[];
 };
@@ -167,6 +174,8 @@ export class FileProcessor {
   #balancer: Balancer | undefined;
   readonly #src: string;
   readonly #generatorSrc: string;
+  /** The kernel's restart limit (restarts.ts): for the gave-up line. */
+  readonly #restartLimit: number;
   readonly #maxWorkers: number;
   /** Each processor's id and kind: `csv-1`, `csv-2`, `image-1`… */
   readonly #kinds = new Map<string, Kind>(
@@ -194,6 +203,8 @@ export class FileProcessor {
   readonly #beats = new Map<string, { last: number; beats: Beat[] }>();
   readonly #lags = new Map<string, { last: number; lags: number[] }>();
   readonly #moved = new Map<string, { reason: string; from: string; at: number }>();
+  /** Who has offended, so the measuring step isn't shown as a quarantine stay. */
+  readonly #offences = new Offences();
   readonly #log: LogEntry[] = [];
   readonly #movesAt: number[] = [];
   readonly #moves: Move[] = [];
@@ -221,7 +232,10 @@ export class FileProcessor {
     processorSrc: string;
     generatorSrc: string;
     maxWorkers: number;
+    /** The kernel's restart limit, for the gave-up line; the host's default if unset. */
+    restartLimit?: number;
   }) {
+    this.#restartLimit = opts.restartLimit ?? DEFAULT_LIMIT;
     this.#mode = opts.mode ?? (opts.balancer ? 'balancer' : 'one');
     this.#dials = { ...this.#dials, ...opts.dials };
     this.#src = opts.processorSrc;
@@ -319,21 +333,25 @@ export class FileProcessor {
       this.#lags.set(key, l);
     });
     this.#balancer?.on('move', (e) => {
-      this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
+      const kind = this.#offences.move(e);
+      this.#moved.set(e.id, { reason: kind, from: e.from, at: performance.now() });
       this.#movesAt.push(performance.now());
       this.#moves.push({ at: performance.now(), ...e });
-      this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`);
+      this.#entry(kind, `${e.id}: ${e.from} → ${e.to}`);
     });
     // What each move cost: from the stop to the first beat in its new place.
     this.#balancer?.on('arrived', (e) => {
       const m = this.#moves.findLast((x) => x.id === e.id && x.costMs === undefined);
       if (m) m.costMs = e.costMs;
       const entry = this.#log.findLast(
-        (l) => l.text.startsWith(`${e.id}: `) && l.kind === e.reason,
+        (l) =>
+          l.text.startsWith(`${e.id}: `) &&
+          (l.kind === e.reason || (e.reason === 'steady' && l.kind === 'measured')),
       );
       if (entry && entry.costMs === undefined) entry.costMs = e.costMs;
     });
     this.#balancer?.on('spike', (e) => {
+      this.#offences.spike(e);
       if (e.action !== 'noted') return;
       this.#noted++;
       this.#entry('noted', `${e.id}: one long task (${Math.round(e.lagMs)} ms), noted`);
@@ -343,7 +361,10 @@ export class FileProcessor {
       this.#entry('behind', `${e.id}: ${e.backlog} files waiting, nowhere with more CPU`);
     });
     this.#balancer?.on('failed', (e) => {
-      this.#entry('failed', `${e.id}: given up by the kernel (${e.reason}), left in ${e.pool}`);
+      this.#entry(
+        'failed',
+        `${e.id}: ${gaveUpText(this.#restartLimit, e.reason)}, left in ${e.pool}`,
+      );
     });
     this.#k.subscribe(
       busyTopic,
@@ -369,6 +390,7 @@ export class FileProcessor {
     }, REPORT_MS);
     this.#k.on('isolate:crash', (e) => {
       if (!this.#ids.includes(e.id)) return;
+      this.#offences.crash(e.id);
       this.#crashes.push({
         at: performance.now(),
         id: e.id,
@@ -384,8 +406,15 @@ export class FileProcessor {
       this.#givenUp.push({ at: performance.now(), id: e.id, kind, reason: e.reason, pool: e.pool });
       // Without a balancer, the page logs it itself.
       if (this.#mode !== 'balancer')
-        this.#entry('failed', `${e.id}: given up by the kernel (${e.reason})`);
+        this.#entry('failed', `${e.id}: ${gaveUpText(this.#restartLimit, e.reason)}`);
     });
+  }
+
+  /** Starts a processor the kernel gave up on again (`kernel.restart`, which clears its window). */
+  restart(id: string): void {
+    if (!this.#ids.includes(id)) return;
+    this.#entry('restart', `${id}: restarted by hand`);
+    void this.#k.restart(id);
   }
 
   get mode(): Mode {
@@ -431,6 +460,7 @@ export class FileProcessor {
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
+    this.#offences.clear();
     this.#busy.clear();
     this.#entry('mode', `placement: ${mode}`);
     for (const id of this.#ids) this.#spawn(id);
@@ -548,7 +578,22 @@ export class FileProcessor {
         done: this.#doneBy.get(id) ?? 0,
         moved:
           moved && now - moved.at < 6_000 ? { reason: moved.reason, from: moved.from } : undefined,
+        measuring: this.#mode === 'balancer' && this.#offences.measuring(id, where),
+        gaveUp:
+          snap?.state === 'failed'
+            ? gaveUpText(
+                this.#restartLimit,
+                this.#givenUp.findLast((g) => g.id === id)?.reason ?? 'error',
+              )
+            : undefined,
       });
+    }
+    // A quarantine holding only isolates being measured is the measuring step, not a quarantine.
+    for (const w of workers.values()) {
+      if (w.kind === 'quarantine' && w.processors.every((p) => p.measuring)) {
+        w.kind = 'measuring';
+        w.label = `Measuring · ${w.key}`;
+      }
     }
 
     const latencies = this.#latencies.map((l) => l.ms);
