@@ -146,6 +146,7 @@ function Examples({ examples, features }: SiteData): VNode {
         label={t.nav.label}
         previous={t.nav.previous}
         next={t.nav.next}
+        pager={t.nav.pager}
         steps={examples.map((e) => ({
           id: tabId(e),
           name: e.tab,

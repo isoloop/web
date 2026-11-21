@@ -10,6 +10,7 @@ import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
 import { FeatureNotes, TABS } from './feature-notes.tsx';
 import { Pill } from './pill.tsx';
+import { Pager, RailLayout } from './steps.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison';
@@ -27,7 +28,7 @@ const MARKETS_TOOLS =
 function Feature({ entry, children }: { entry: Entry; children: ComponentChildren }): VNode {
   return (
     <section class="ui-gutter" id={entry.id} aria-labelledby={`${entry.id}-h`}>
-      <h2 id={`${entry.id}-h`} data-part={entry.part}>
+      <h2 class="panel-h" id={`${entry.id}-h`} data-part={entry.part}>
         {entry.name.replace(/\.$/, '')} <Pill feature={entry} />
       </h2>
       <div class="ui-body">
@@ -305,29 +306,49 @@ function Features({ samples, features, examples }: SiteData): VNode {
         <FeatureNotes features={features} />
       </PageIntro>
 
-      {/* One tab per group of features (src/demos/steps.ts, as on /how-it-works/ and
-          /examples/); a #feature link opens its tab. Without JS every group shows. */}
-      <div class="steps features-tabs" data-steps>
-        <nav class="steps-nav" aria-label={f.tabs.label}>
-          <ol>
-            {TABS.map(([tab, part]) => (
-              <li key={tab} data-part={part}>
-                <a href={`#${f.tabs.ids[tab]}`}>{f.tabs.names[tab]}</a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-        {TABS.map(([tab]) => (
-          <div class="features-tab" id={f.tabs.ids[tab]} data-step key={tab}>
-            {features
+      {/* One panel per group of features, beside the rail (src/demos/steps.ts, as on
+          /how-it-works/ and /examples/); a #feature link opens its group. Without JS
+          every group shows. */}
+      <div class="features-tabs">
+        <RailLayout
+          label={f.tabs.label}
+          groups={TABS.map(([tab, part]) => ({
+            title: { href: `#${f.tabs.ids[tab]}`, text: f.tabs.names[tab], part },
+            items: features
               .filter((x) => x.tab === tab)
-              .map((entry) => (
-                <Feature key={entry.id} entry={entry}>
-                  {demos[entry.demo]}
-                </Feature>
-              ))}
-          </div>
-        ))}
+              .map((x) => ({
+                href: `#${x.id}`,
+                text: x.name.replace(/\.$/, ''),
+                experimental: x.experimental ?? false,
+                item: true,
+              })),
+          }))}
+        >
+          {TABS.map(([tab], i) => {
+            const prev = TABS[i - 1]?.[0];
+            const nxt = TABS[i + 1]?.[0];
+            return (
+              <div class="features-tab" id={f.tabs.ids[tab]} data-step key={tab}>
+                {features
+                  .filter((x) => x.tab === tab)
+                  .map((entry) => (
+                    <Feature key={entry.id} entry={entry}>
+                      {demos[entry.demo]}
+                    </Feature>
+                  ))}
+                <Pager
+                  prev={
+                    prev ? { href: `#${f.tabs.ids[prev]}`, text: f.tabs.names[prev] } : undefined
+                  }
+                  next={nxt ? { href: `#${f.tabs.ids[nxt]}`, text: f.tabs.names[nxt] } : undefined}
+                  previous={f.tabs.previous}
+                  nextLabel={f.tabs.next}
+                  label={f.tabs.pager}
+                />
+              </div>
+            );
+          })}
+        </RailLayout>
       </div>
     </main>
   );

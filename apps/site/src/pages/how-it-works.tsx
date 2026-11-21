@@ -12,7 +12,6 @@ import type { Page, SiteData } from './types.ts';
 const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
 const PLANT_MATCHED =
   'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/matched-v2';
-const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
 
 type StepId = keyof typeof h.nav.names;
 
@@ -266,6 +265,15 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
         label={h.nav.label}
         previous={h.nav.previous}
         next={h.nav.next}
+        pager={h.nav.pager}
+        after={
+          <p class="rail-footnote">
+            {h.pinned}{' '}
+            <a href={`https://github.com/isoloop/isoloop/tree/${pin}/docs/diagrams`}>
+              <code>{pin.slice(0, 7)}</code>
+            </a>
+          </p>
+        }
         steps={steps.map((st) => ({
           id: anchor(st.id),
           name: h.nav.names[st.id],
@@ -282,39 +290,6 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
           ),
         }))}
       />
-
-      <section class="ui-gutter" aria-labelledby="policy">
-        <h2 id="policy">{h.policy.heading}</h2>
-        <div class="ui-body">
-          <Callout>
-            <p>{h.policy.text}</p>
-            <p>
-              <a href={HOSTING_GUIDE}>{h.policy.link}</a>
-            </p>
-          </Callout>
-        </div>
-      </section>
-
-      <section class="ui-gutter" aria-labelledby="next">
-        <h2 id="next">{h.next.heading}</h2>
-        <div class="ui-body">
-          <ul>
-            {h.next.links.map(([href, label]) => (
-              <li key={href}>
-                <a href={href}>{label}</a>
-              </li>
-            ))}
-          </ul>
-          <p>
-            <small>
-              {h.pinned}{' '}
-              <a href={`https://github.com/isoloop/isoloop/tree/${pin}/docs/diagrams`}>
-                <code>{pin.slice(0, 7)}</code>
-              </a>
-            </small>
-          </p>
-        </div>
-      </section>
     </main>
   );
 }

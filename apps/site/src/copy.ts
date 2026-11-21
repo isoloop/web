@@ -208,9 +208,13 @@ export const featuresPage = {
   description:
     'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, tools for agents, devtools, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
-  notes: { label: 'The features, one note each, by tab' },
+  notes: { label: 'The features, one note each, by group' },
   tabs: {
     label: 'Features, by group',
+    /** The pager under each group (src/pages/steps.tsx, Pager). */
+    previous: 'Previous',
+    next: 'Next',
+    pager: 'Previous and next',
     names: {
       isolation: 'Isolation',
       bus: 'Bus',
@@ -219,7 +223,7 @@ export const featuresPage = {
       safety: 'Safety',
       cost: 'Cost',
     },
-    /** The tabs' anchors; a feature's own id is its section's, so these differ from every one. */
+    /** The groups' anchors; a feature's own id is its section's, so these differ from every one. */
     ids: {
       isolation: 'isolation',
       bus: 'messaging',
@@ -374,9 +378,9 @@ export const howItWorks = {
   heading: 'How Isoloop works',
   intro: [
     'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
-    'Each tab below covers one part, with its code and the diagram drawn from the library’s code.',
+    'Each step below covers one part, with its code and the diagram drawn from the library’s code.',
   ],
-  /** Under Where to go next: where the diagrams come from, then the short sha. */
+  /** Under each step, as a footnote: where the diagrams come from, then the short sha. */
   pinned:
     'The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it. These are from isoloop/isoloop at',
   overview: {
@@ -386,7 +390,7 @@ export const howItWorks = {
     ],
   },
   open: 'Open full size',
-  /** The step tabs: one short name per step, in order. */
+  /** The steps in the rail: one short name per step, in order. */
   nav: {
     label: 'Steps',
     names: {
@@ -402,6 +406,7 @@ export const howItWorks = {
     },
     previous: 'Previous',
     next: 'Next',
+    pager: 'Previous and next',
   },
   /**
    * How to read each diagram, in words. Sources: each diagram's JSON at the pin
@@ -619,7 +624,7 @@ export const howItWorks = {
       text: [
         'Each isolate runs in a worker: a thread of its own, with its own event loop. By default an isolate gets a worker to itself. With `pool` in its manifest, it shares one worker with every isolate that names the same pool.',
         'A pool saves memory. In the plant dashboard’s matched comparison, a small headless isolate cost about 0.2 MB in a pool, against 2.8 MB on its own worker; in return its members stall and restart together, as the next paragraph says. Measured with `@isoloop/*@0.0.0-next.d028bc1` in Chromium, on 4 physical cores fixed at 2.0 GHz, medians of 5 rounds, memory after GC 16 s after load.',
-        'Members share an event loop. One that blocks stalls them all, and a worker error restarts them all; an error a member reports as its own restarts only that member (the Restarts tab has the details). They also share one document, so they can read each other’s DOM and input, and they can reach each other’s bus ports, so a pool holds all its members’ grants. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
+        'Members share an event loop. One that blocks stalls them all, and a worker error restarts them all; an error a member reports as its own restarts only that member (the Restarts step has the details). They also share one document, so they can read each other’s DOM and input, and they can reach each other’s bus ports, so a pool holds all its members’ grants. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
         'The kernel never pools on its own. Placement is the manifest’s choice, or that of the opt-in, experimental `@isoloop/balancer`, which moves isolates between pools as their load changes.',
       ],
       link: 'The pools guide: when to pool, with the plant’s figures',
@@ -633,7 +638,7 @@ export const howItWorks = {
       heading: 'Topics, records and the bus',
       text: [
         "A topic is declared once, in a contracts module that the host, the bus and every isolate import; its default export, `contracts(…)`, is the list the host passes to `createKernel`. A topic has a name (with its major version, by convention, as in `count.v1`), a schema (from any Standard Schema library; zod here) and a retention: `{ kind: 'last-n', n }` keeps the last n records, `{ kind: 'time', ms }` the records younger than `ms`, and `{ kind: 'compacted' }` the latest record per key.",
-        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence tab). A topic with a `reply` schema also takes requests, which are experimental in 0.1: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
+        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence step). A topic with a `reply` schema also takes requests, which are experimental in 0.1: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
       ],
       flow: [
         'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path.',
@@ -662,7 +667,7 @@ export const howItWorks = {
           'Only these events reach the worker: click, dblclick, input, change, keydown, keyup, submit, focusin, focusout, pointerdown and pointerup; pointer moves, at most one per frame; and scroll, at most one per frame for each scrolled element. There’s no wheel or drag yet.',
         ],
       },
-      code: 'The Host tab’s counter, as a component',
+      code: 'The Host step’s counter, as a component',
     },
     // Sources: DEFAULT_SUPERVISOR_CONFIG, DEFAULT_BACKOFF, KernelConfig
     // `heartbeat` and `supervisor`, IsolateManifest `fallback`, Kernel `stop`
@@ -690,7 +695,7 @@ export const howItWorks = {
       from: [
         '`latest`, the default: live values where only the newest matters, such as a ticker or a status.',
         '`earliest`: state rebuilt from what the topic retains, as the counter does.',
-        '`committed`: work done once per record, such as jobs or alerts. It reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus tab.',
+        '`committed`: work done once per record, such as jobs or alerts. It reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus step.',
       ],
       cost: 'With `earliest`, every restart replays everything the topic retains, and in a pool every member replays on the pool’s one thread. So the longer a topic’s retention, the longer such a restart takes to catch up, and the pools guide measured it growing over a long run. Keep retention to what a restart needs.',
       costLink: 'The pools guide, with the plant’s figures',
@@ -734,23 +739,6 @@ export const howItWorks = {
       link: 'Safety, on the features page',
     },
   },
-  policy: {
-    heading: 'These pages and their security policy',
-    text: "Every page on this site, the diagrams included, runs under the Content-Security-Policy default-src 'self'. GitHub Pages can’t send headers, so here the policy is a meta tag, and a meta tag doesn’t reach workers: basic’s workers run without a policy on this host. In a real deployment the policy goes in the response headers, which cover the workers too.",
-    link: 'The hosting guide',
-  },
-  next: {
-    heading: 'Where to go next',
-    links: [
-      ['/features/', 'The features, with live demos'],
-      ['/examples/', 'The examples, running live'],
-      [
-        'https://github.com/isoloop/isoloop/tree/main/docs/guide',
-        'The guides: pools, the balancer, hosting',
-      ],
-      ['https://github.com/isoloop/isoloop', 'The source, on GitHub'],
-    ] as [string, string][],
-  },
 };
 
 export const examplesPage = {
@@ -760,7 +748,7 @@ export const examplesPage = {
   heading: 'Examples',
   intro:
     'Each example runs live in your browser on the published @isoloop packages. The dashboards come as native builds and Isoloop builds of the same code, so you can compare them side by side.',
-  nav: { label: 'Examples', previous: 'Previous', next: 'Next' },
+  nav: { label: 'Examples', previous: 'Previous', next: 'Next', pager: 'Previous and next' },
   links: { live: 'Open live', source: 'Source', results: 'Results', architecture: 'Architecture' },
   shows: 'What it shows',
   try: 'What to try',

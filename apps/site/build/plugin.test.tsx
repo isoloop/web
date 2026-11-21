@@ -373,7 +373,7 @@ describe('the docs pages', () => {
     // No source, Markdown or version row: the version is the header's pill (ADR 0005, amended 2026-11-20).
     expect(html).not.toContain('docs-meta');
     expect(html).not.toContain('<a href="/docs/pools.md">');
-    expect(html).toContain('<script type="module" src="/src/demos/copy.ts"></script>');
+    expect(html).toContain('<script type="module" src="/src/demos/docs.ts"></script>');
   });
 
   it('mark the current page in the sidebar, group the sidebar by section, and mark the experimental guides', () => {

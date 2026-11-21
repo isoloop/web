@@ -315,14 +315,16 @@ test('/features/ shows basic’s real records, reads and a replay after a crash'
   expect((await problems()).filter((e) => !/crash/i.test(e))).toEqual([]);
 });
 
-test('/features/ shows one tab of features at a time, and a feature link opens its tab', async ({
+test('/features/ shows one group of features at a time, and a feature link opens its group', async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/features/');
+  // The rail (ADR 0005, amended 2026-11-21): groups as headings, features as items.
   const tabs = page.getByRole('navigation', { name: 'Features, by group' });
-  await expect(tabs.getByRole('link', { name: 'Isolation' })).toHaveAttribute(
+  await expect(tabs.getByRole('link', { name: 'Containment' })).toHaveAttribute(
     'aria-current',
-    'step',
+    'location',
   );
   await expect(page.locator('#containment')).toBeVisible();
   await expect(page.locator('#balancer')).toBeHidden();
@@ -330,9 +332,9 @@ test('/features/ shows one tab of features at a time, and a feature link opens i
   await page.locator('.fnotes a[href="#balancer"]').click();
   await expect(page.locator('#balancer')).toBeVisible();
   await expect(page.locator('#containment')).toBeHidden();
-  await expect(tabs.getByRole('link', { name: 'Placement' })).toHaveAttribute(
+  await expect(tabs.getByRole('link', { name: /Automatic placement/ })).toHaveAttribute(
     'aria-current',
-    'step',
+    'location',
   );
   await expect(
     page.getByRole('heading', { name: 'Automatic placement Experimental' }),
@@ -387,7 +389,7 @@ test('how it works shows one step at a time, kept in the URL', async ({ page }) 
   ).toHaveCount(1);
   await page
     .locator('#bus')
-    .getByRole('link', { name: /Next: Rendering/ })
+    .getByRole('link', { name: /Next\s*Rendering/ })
     .click();
   await expect(page.locator('#render')).toBeVisible();
   await page.goBack();
@@ -402,15 +404,24 @@ test('how it works shows one step at a time, kept in the URL', async ({ page }) 
   await expect(page.locator('#restart iframe')).toHaveCount(2);
 });
 
-for (const width of [1440, 390]) {
-  test(`the step tabs never scroll vertically at ${String(width)}px`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 900 });
-    await page.goto('/how-it-works/');
-    const list = page.locator('.steps-nav ol');
-    const [scroll, client] = await list.evaluate((el) => [el.scrollHeight, el.clientHeight]);
-    expect(scroll).toBeLessThanOrEqual(client);
-  });
-}
+test('the rail stays in view beside the steps, and folds above them on a phone', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/how-it-works/');
+  const rail = page.locator('.rail-wide .rail');
+  await expect(rail).toBeVisible();
+  expect(await rail.evaluate((el) => getComputedStyle(el).position)).toBe('sticky');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(rail).toBeHidden();
+  const fold = page.locator('.rail-fold');
+  await expect(fold.locator('summary')).toContainText('Overview');
+  await fold.locator('summary').click();
+  await fold.getByRole('link', { name: 'Bus', exact: true }).click();
+  await expect(page.locator('#bus')).toBeVisible();
+  await expect(fold).not.toHaveAttribute('open');
+  await expect(fold.locator('summary')).toContainText('Bus');
+});
 
 test('robots.txt points at a sitemap whose every page is served', async ({ request }) => {
   const robots = await request.get('/robots.txt');
