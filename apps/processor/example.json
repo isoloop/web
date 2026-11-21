@@ -6,11 +6,34 @@
   "try": [
     "In the playground, add a few tasks and turn their dials up until a pool's tasks add up to 80% of a core: the balancer moves the heaviest one to a pool with room.",
     "Watch the move log at the bottom of the page: each entry gives the time, the reason, the move, and how long the task was stopped before it ran again.",
-    "Block a task twice within a minute: it goes to the quarantine pool until it has been quiet for 30 s.",
-    "In the file processor, raise the share of corrupt files: each one makes its processor crash; the kernel restarts it, and the files it hadn't finished go to the other processor in its group.",
-    "Raise the share of poison files: each one blocks its processor's loop for 2 s, which the page's 10 s kill timeout lets pass. A processor that blocks twice within a minute goes to the quarantine pool, and its unfinished files go to the other processor in its group."
+    "Block a task twice within a minute: it goes to the quarantine pool until it has been quiet for 30 s; each further offence doubles that wait, up to 2 minutes, and a fourth keeps it apart for good.",
+    "In the file processor, raise the share of corrupt files, the dial that crashes a processor: the kernel restarts it, and the files it hadn't finished go to the other processor in its group. With the balancer, a crashed processor also goes to the quarantine.",
+    "Raise the share of poison files: each one blocks its processor's loop for 2 s, which the page's 10 s kill timeout lets pass, and stalls every processor sharing its pool. A processor that blocks twice within a minute goes to the quarantine pool; when the beat can't name it, the balancer bisects instead, sending half the pool there. Its unfinished files go to the other processor in its group."
   ],
   "order": 40,
+  "group": "Processor",
+  "embeds": [
+    {
+      "id": "processor-playground",
+      "title": "Playground",
+      "src": "/examples/processor/",
+      "height": 1000,
+      "intro": [
+        "Background work with no UI: each task is a headless isolate that keeps a share of one core busy. Add some, turn a dial up, and watch the balancer. It reads every worker's heartbeat and moves the heaviest task out of a pool that is full (its tasks add up to 80 % of a core) or stays over 50 ms of lag for 3 s. A task that blocks its loop past 100 ms twice within a minute goes to quarantine, and comes back once it has been quiet for 30 s; each further offence doubles that wait, up to 2 minutes, and a fourth keeps it apart for good.",
+        "Give a task jobs a second and its CPU dial becomes what those jobs need. The page reports each task's backlog to the balancer, which moves a task whose backlog keeps growing to where it gets more CPU. Press Calm, and a minute later quiet tasks pack back into fewer pools.",
+        "Switch a task to work after `await` and the runtime's busy time no longer sees its work. Each task also times its own work, and the page reports that to the balancer, so the card shows both: what the kernel measured, and what the task reported. Turn its report off, and the backlog is all the balancer has to go on. A task the kernel gives up on (it crashed past its restart limit) stays where it is: the balancer never moves or restarts it."
+      ]
+    },
+    {
+      "id": "processor-files",
+      "title": "File processor",
+      "src": "/examples/processor/files/",
+      "height": 1000,
+      "intro": [
+        "A generator makes synthetic files at the rate you set: CSV to parse and sum, images to scale and blur, archives to compress, and data to hash with SHA-256, each more work the bigger it is. Each kind goes to its own topic, read by a consumer group of two processors, all headless isolates that share the work. A processor commits a file only once its result is out, so when the balancer moves it, what it hadn't finished goes to the group again. Poison files block a processor for 2 s, heavy ones are ten times the work, corrupt ones crash it."
+      ]
+    }
+  ],
   "measurements": {
     "status": "measured",
     "blocks": [

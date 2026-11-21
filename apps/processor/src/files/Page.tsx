@@ -2,7 +2,7 @@
 // came out (queue, jobs per second, latency), the processors on their
 // workers, the latest results with a filter, and the balancer's moves.
 import { useState, type ReactElement } from 'react';
-import { LagChart, MoveLog, REASONS, useSnapshot } from '../ui';
+import { Intro, LagChart, MoveLog, REASONS, useSnapshot } from '../ui';
 import { KIND_LABELS } from './kinds';
 import type { FileProcessor, Mode, ProcessorView, Result, WorkerView } from './model';
 
@@ -14,9 +14,8 @@ const MODES: { mode: Mode; label: string; hint: string }[] = [
 
 const ms = (v: number | undefined): string => (v === undefined ? '--' : `${Math.round(v)} ms`);
 
-export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
-  const [snap, refresh] = useSnapshot(model);
-  const d = snap.dials;
+/** The page's tabs and intro: all of it that needs no kernel (drawn before Start with ?start=manual). */
+export function FilesIntro(): ReactElement {
   return (
     <>
       <nav className="tabs" aria-label="Processor pages">
@@ -27,15 +26,18 @@ export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
       </nav>
       <section className="intro">
         <h1>File processor</h1>
-        <p>
-          A generator makes synthetic files at the rate you set: CSV to parse and sum, images to
-          scale and blur, archives to compress, and data to hash with SHA-256, each more work the
-          bigger it is. Each kind goes to its own topic, read by a group of two processors, all
-          headless isolates. A processor commits a file only once its result is out, so when the
-          balancer moves it, what it hadn’t finished goes to the group again. Poison files block a
-          processor for 2 s, heavy ones are ten times the work, corrupt ones crash it.
-        </p>
+        <Intro id="processor-files" />
       </section>
+    </>
+  );
+}
+
+export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
+  const [snap, refresh] = useSnapshot(model);
+  const d = snap.dials;
+  return (
+    <>
+      <FilesIntro />
 
       <section className="controls" aria-label="Generator">
         <div className="group">

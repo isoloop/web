@@ -9,6 +9,7 @@ import messages from './isolates/messages?isolate';
 import primes from './isolates/primes?isolate';
 import ticker from './isolates/ticker?isolate';
 import { Budget } from './budget';
+import { LAYOUT, type Slot } from './layout';
 import { embedded, startDemo } from './demo';
 import { blockMain, createPane, startFps } from './panes';
 import surfaceCss from './surface.css?inline';
@@ -42,54 +43,37 @@ declare global {
 }
 window.kernel = kernel;
 
-const POOL = 'shared';
-const isolates = [
-  {
-    id: 'A',
-    name: 'A · Counter',
-    where: 'own worker',
-    parent: 'own',
+/** Each isolate's code and grants; its name and place are in layout.ts. */
+const CODE: Record<string, { src: string; grants: { publish: string[]; subscribe: string[] } }> = {
+  A: {
     src: counter,
     grants: {
       publish: ['count.v1', 'activity.v1'],
       subscribe: ['count.v1', 'control.v1', 'budget.v1'],
     },
   },
-  {
-    id: 'B',
-    name: 'B · Ticker',
-    where: 'own worker',
-    parent: 'own',
-    src: ticker,
-    grants: { publish: ['activity.v1'], subscribe: ['control.v1', 'budget.v1'] },
-  },
-  {
-    id: 'C',
-    name: 'C · Primes',
-    where: `pool "${POOL}"`,
-    parent: 'pooled',
-    pool: POOL,
-    upstream: 'A',
+  B: { src: ticker, grants: { publish: ['activity.v1'], subscribe: ['control.v1', 'budget.v1'] } },
+  C: {
     src: primes,
     grants: {
       publish: ['primes.v1', 'activity.v1'],
       subscribe: ['count.v1', 'control.v1', 'budget.v1'],
     },
   },
-  {
-    id: 'D',
-    name: 'D · Messages',
-    where: `pool "${POOL}"`,
-    parent: 'pooled',
-    pool: POOL,
-    upstream: 'A',
+  D: {
     src: messages,
     grants: {
       publish: ['note.v1', 'activity.v1'],
       subscribe: ['count.v1', 'note.v1', 'primes.v1', 'control.v1', 'budget.v1'],
     },
   },
-];
+};
+const isolates: (Slot & (typeof CODE)[string])[] = [];
+for (const slot of LAYOUT) {
+  const code = CODE[slot.id];
+  if (!code) throw new Error(`no code for isolate ${slot.id}`);
+  isolates.push({ ...slot, ...code });
+}
 
 // Embedded in the site's demo, the isolates report their work and run on their
 // own (src/demo.ts, isoloop-demo@1); standalone, they wait for clicks.

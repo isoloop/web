@@ -1,6 +1,8 @@
 // What both processor pages draw the same way: a worker's lag against the
 // balancer's thresholds, the move log, and a model redrawn ten times a second.
 import { useEffect, useState, type ReactElement } from 'react';
+import { spans, type IntroBlock } from '../../../shared/intro';
+import example from '../example.json' with { type: 'json' };
 
 /** The balancer's thresholds (ADR 0017 defaults), drawn on each worker's lag. */
 export const SUSTAINED_MS = 50;
@@ -114,5 +116,41 @@ export function MoveLog({ log }: { log: LogEntry[] }): ReactElement {
         </ol>
       )}
     </section>
+  );
+}
+
+/** One line of an intro: its `code` and **bold** spans (shared/intro.ts). */
+const line = (text: string): ReactElement[] =>
+  spans(text).map((s, i) =>
+    s.kind === 'code' ? (
+      <code key={i}>{s.text}</code>
+    ) : s.kind === 'bold' ? (
+      <strong key={i}>{s.text}</strong>
+    ) : (
+      <span key={i}>{s.text}</span>
+    ),
+  );
+
+/**
+ * A page's intro, from example.json (`embeds[].intro`): the site's examples
+ * hub draws the same text, so the two can't drift (shared/intro.ts).
+ */
+export function Intro({ id }: { id: string }): ReactElement {
+  const blocks: IntroBlock[] | undefined = example.embeds.find((e) => e.id === id)?.intro;
+  if (!blocks) throw new Error(`example.json: no intro for ${id}`);
+  return (
+    <>
+      {blocks.map((b, i) =>
+        typeof b === 'string' ? (
+          <p key={i}>{line(b)}</p>
+        ) : (
+          <ul key={i}>
+            {b.list.map((li) => (
+              <li key={li}>{line(li)}</li>
+            ))}
+          </ul>
+        ),
+      )}
+    </>
   );
 }

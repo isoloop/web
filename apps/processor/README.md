@@ -2,7 +2,7 @@
 
 Background work on Isoloop, as headless isolates (M3h). Two pages:
 
-- **Playground** (`/`): add tasks, turn each one's CPU dial, block or crash it, and watch `@isoloop/balancer` place them. A pool whose tasks add up to 80 % of a core, or that lags over 50 ms for 3 s, loses its heaviest task; a task that blocks past 100 ms twice within a minute, or crashes, goes to quarantine and comes back after 30 s of quiet (a first long task is only noted). There's one column per worker, with its lag from `isolate:beat` against the thresholds, and a log of every move. The placement switch runs the same tasks on the balancer, on a worker each (`own`), or in one pool (`one`).
+- **Playground** (`/`): add tasks, turn each one's CPU dial, block or crash it, and watch `@isoloop/balancer` place them. A pool whose tasks add up to 80 % of a core, or that lags over 50 ms for 3 s, loses its heaviest task; a task that blocks past 100 ms twice within a minute, or crashes, goes to quarantine (a first long task is only noted) and comes back after 30 s of quiet; each further offence doubles that wait, up to 2 minutes, and a fourth keeps it apart for good. There's one column per worker, with its lag from `isolate:beat` against the thresholds, and a log of every move. The placement switch runs the same tasks on the balancer, on a worker each (`own`), or in one pool (`one`).
 - **File processor** (`/files/`): a generator makes synthetic files at a dialled rate, and groups of headless processors work through them, placed by the balancer, a worker each, or in one pool. The page shows the queue, jobs per second, p50 and p95 latency per file, each processor's worker and load, the latest results (with a filter), and every move.
 
 Each task keeps `load` % of one core busy, in uninterrupted pieces of the page's "work chunk" (10 ms by default), and rests in between. Its dial is a record in the compacted `playground.tasks.v1` topic under its id, read from the start, so a task the balancer moves (stopped, then spawned in another pool) carries on as set.
@@ -26,6 +26,10 @@ The File processor, run on a worker per processor, in one pool and placed by the
 - **Crashes** (M3j): `window.files.crashes()` lists every processor crash in order, with its time, reason (`error`, `unresponsive`, `ready_timeout`…), pool and message, and the comparison writes them into each run's JSON, so a give-up can be traced to the crashes before it.
 - **`from: 'earliest'`** applies only to a group's first join: a group that has committed resumes after its commits, even when every member has left (ADR 0016, point 14).
 - Until `@isoloop/*@0.1.0-next.0` (isoloop#224, the fix for #211), a group's commit could cross a redelivery and cover files the processor hadn't received, so processors put every file they held back on the topic when they stopped, subscribed `from: 'committed'`, and committed only below the lowest file held. The M3h and M3i measurements ran with those workarounds.
+
+## Embedded
+
+- **`?start=manual`** (the site's examples hub, with `?embed=1`): both pages draw their idle view and start no kernel and no worker until told to (`shared/manual-start.ts`): the hub's Start sends a same-origin message, and on the File processor it also starts the generator. Opened alone with the parameter, a page draws its own Start. Without it, nothing changes.
 
 ## Notes
 

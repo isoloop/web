@@ -98,8 +98,9 @@ const order = (a: string, b: string): number => {
 };
 
 export class Playground {
-  readonly #kernel: Kernel;
-  readonly #balancer: Balancer;
+  /** Set by `attach`: until then the page shows the idle view (start=manual). */
+  #kernel: Kernel | undefined;
+  #balancer: Balancer | undefined;
   readonly #src: string;
   readonly #maxWorkers: number;
   readonly #loads: Map<string, number>;
@@ -116,50 +117,73 @@ export class Playground {
   #chunkMs = 10;
   #next = 1;
 
+  /**
+   * Without a kernel and balancer the model draws its initial state and starts
+   * nothing, so a page can show its idle view before the reader presses
+   * Start; `attach` then starts it. With them, it starts at once.
+   */
   constructor(opts: {
-    kernel: Kernel;
-    balancer: Balancer;
+    kernel?: Kernel | undefined;
+    balancer?: Balancer | undefined;
     taskSrc: string;
     maxWorkers: number;
     loads: Map<string, number>;
   }) {
-    this.#kernel = opts.kernel;
-    this.#balancer = opts.balancer;
     this.#src = opts.taskSrc;
     this.#maxWorkers = opts.maxWorkers;
     this.#loads = opts.loads;
-    this.#balancer.on('move', (e) => {
+    if (opts.kernel && opts.balancer) this.attach(opts.kernel, opts.balancer);
+  }
+
+  /** The kernel, once attached. */
+  get #k(): Kernel {
+    if (!this.#kernel) throw new Error('Playground: not started (attach a kernel first)');
+    return this.#kernel;
+  }
+
+  /** The balancer, once attached. */
+  get #b(): Balancer {
+    if (!this.#balancer) throw new Error('Playground: not started (attach a balancer first)');
+    return this.#balancer;
+  }
+
+  /** Starts the model on a kernel and its balancer: every subscription and listener. */
+  attach(kernel: Kernel, balancer: Balancer): void {
+    if (this.#kernel) throw new Error('Playground: already started');
+    this.#kernel = kernel;
+    this.#balancer = balancer;
+    this.#b.on('move', (e) => {
       this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
       this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`, e.id);
     });
     // What each move cost the task: stopped until its first beat in the new place.
-    this.#balancer.on('arrived', (e) => {
+    this.#b.on('arrived', (e) => {
       const entry = this.#log.findLast((l) => l.id === e.id && l.kind === e.reason);
       if (entry && entry.costMs === undefined) entry.costMs = e.costMs;
     });
-    this.#balancer.on('spike', (e) => {
+    this.#b.on('spike', (e) => {
       if (e.action === 'noted')
         this.#entry('noted', `${e.id}: one long task (${Math.round(e.lagMs)} ms), noted`, e.id);
     });
-    this.#balancer.on('behind', (e) => {
+    this.#b.on('behind', (e) => {
       this.#entry('behind', `${e.id}: ${e.backlog} jobs waiting, nowhere with more CPU`, e.id);
     });
     // The kernel gave up on it (M3j): the balancer leaves it where it is.
-    this.#balancer.on('failed', (e) => {
+    this.#b.on('failed', (e) => {
       this.#entry(
         'failed',
         `${e.id}: given up by the kernel (${e.reason}), left in ${e.pool}`,
         e.id,
       );
     });
-    this.#kernel.subscribe(
+    this.#k.subscribe(
       doneTopic,
       (r) => {
         if (r.key) this.#done.set(r.key, Math.max(this.#done.get(r.key) ?? 0, r.value.done));
       },
       { from: 'earliest' },
     );
-    this.#kernel.subscribe(
+    this.#k.subscribe(
       busyTopic,
       (r) => {
         if (r.key && this.#dials.has(r.key)) this.#busy.set(r.key, r.value.busyMs);
@@ -175,7 +199,7 @@ export class Playground {
           d.rate > 0 || (this.backlog(id) ?? 0) > 0 ? (this.backlog(id) ?? 0) : undefined;
         const busyMs = d.reports ? this.#busy.get(id) : undefined;
         if (backlog === undefined && busyMs === undefined) continue;
-        this.#balancer.report(id, {
+        this.#b.report(id, {
           ...(backlog === undefined ? {} : { backlog }),
           ...(busyMs === undefined ? {} : { busyMs }),
         });
@@ -183,7 +207,7 @@ export class Playground {
     }, REPORT_MS);
     // Every heartbeat as it arrives (ADR 0017): each task's busy time, and
     // each worker's lag once per beat (a pool's members share one beat).
-    this.#kernel.on('isolate:beat', (e) => {
+    this.#k.on('isolate:beat', (e) => {
       if (!this.#dials.has(e.id)) return;
       const b = this.#beats.get(e.id);
       if (b) {
@@ -200,7 +224,7 @@ export class Playground {
       }
       this.#lags.set(key, l);
     });
-    this.#kernel.on('isolate:crash', (e) => {
+    this.#k.on('isolate:crash', (e) => {
       if (!this.#dials.has(e.id)) return;
       this.#entry('crash', `${e.id} crashed (${e.reason})`);
     });
@@ -228,7 +252,7 @@ export class Playground {
     this.#done.delete(id);
     this.#busy.delete(id);
     this.#moved.delete(id);
-    await (this.#mode === 'balancer' ? this.#balancer.stop(id) : this.#kernel.stop(id));
+    await (this.#mode === 'balancer' ? this.#b.stop(id) : this.#k.stop(id));
   }
 
   setLoad(id: string, load: number): void {
@@ -282,11 +306,11 @@ export class Playground {
   }
 
   block(id: string, ms = 2_000): void {
-    void this.#kernel.publish(control, { value: { to: id, act: 'block', ms } });
+    void this.#k.publish(control, { value: { to: id, act: 'block', ms } });
   }
 
   crash(id: string): void {
-    void this.#kernel.publish(control, { value: { to: id, act: 'crash' } });
+    void this.#k.publish(control, { value: { to: id, act: 'crash' } });
   }
 
   async setMode(mode: Mode): Promise<void> {
@@ -296,9 +320,7 @@ export class Playground {
     this.#mode = mode;
     // Mid-move, the balancer's `stop` cancels the move and waits for the
     // stop (isoloop#209), so every one is gone when this resolves.
-    await Promise.all(
-      ids.map((id) => (prev === 'balancer' ? this.#balancer.stop(id) : this.#kernel.stop(id))),
-    );
+    await Promise.all(ids.map((id) => (prev === 'balancer' ? this.#b.stop(id) : this.#k.stop(id))));
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
@@ -309,9 +331,9 @@ export class Playground {
 
   snapshot(): Snapshot {
     const now = performance.now();
-    const isolates = this.#kernel.isolates();
+    const isolates = this.#kernel?.isolates() ?? [];
     const byId = new Map(isolates.map((i) => [i.id, i]));
-    const placements = new Map(this.#balancer.placements().map((p) => [p.id, p]));
+    const placements = new Map((this.#balancer?.placements() ?? []).map((p) => [p.id, p]));
 
     const columns = new Map<string, ColumnView>();
     const column = (key: string): ColumnView => {
@@ -361,7 +383,7 @@ export class Playground {
     }
 
     const live = isolates.filter((i) => i.pool === undefined && LIVE.has(i.state)).length;
-    const running = this.#kernel.pools().filter((p) => p.running);
+    const running = (this.#kernel?.pools() ?? []).filter((p) => p.running);
     const pools = running.length;
     const balancerPools = running.filter(
       (p) => p.name.startsWith('balancer-') && p.name !== 'balancer-quarantine-1',
@@ -370,7 +392,7 @@ export class Playground {
       mode: this.#mode,
       chunkMs: this.#chunkMs,
       columns: [...columns.values()].toSorted((a, b) => order(a.key, b.key)),
-      workers: 1 + live + pools,
+      workers: this.#kernel ? 1 + live + pools : 0,
       balancerPools,
       maxWorkers: this.#maxWorkers,
       log: this.#log.slice(-40).toReversed(),
@@ -387,15 +409,15 @@ export class Playground {
         subscribe: [tasks.name, control.name, doneTopic.name],
       },
     };
-    if (this.#mode === 'balancer') this.#balancer.spawn(manifest);
-    else if (this.#mode === 'one') this.#kernel.spawn({ ...manifest, pool: ONE });
-    else this.#kernel.spawn(manifest);
+    if (this.#mode === 'balancer') this.#b.spawn(manifest);
+    else if (this.#mode === 'one') this.#k.spawn({ ...manifest, pool: ONE });
+    else this.#k.spawn(manifest);
   }
 
   #publish(id: string): void {
     const d = this.#dials.get(id);
     if (!d) return;
-    void this.#kernel.publish(tasks, {
+    void this.#k.publish(tasks, {
       key: id,
       value: {
         load: d.load,

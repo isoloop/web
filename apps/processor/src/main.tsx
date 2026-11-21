@@ -4,7 +4,9 @@ import '../../../shared/guard.ts';
 import './page.css';
 import { createBalancer } from '@isoloop/balancer';
 import { createKernel } from '@isoloop/host';
+import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
+import { whenStarted } from '../../../shared/manual-start.ts';
 import workers from 'virtual:isoloop/workers';
 import list from './contracts';
 import contractsUrl from './contracts?isolate';
@@ -13,6 +15,25 @@ import { Playground } from './playground/model';
 import { PlaygroundPage } from './playground/Page';
 import '../../../shared/booted.ts';
 
+/** The balancer's own allowance of pools: its default, made visible on the page. */
+const maxWorkers = Math.max(2, (navigator.hardwareConcurrency || 4) - 2);
+/** Measured loads, kept for the page's life: the balancer reads and writes them. */
+const loads = new Map<string, number>();
+// The page draws from the model at once. With ?start=manual (the site's
+// examples hub) that's the idle view, and the kernel, the balancer and every
+// worker wait for Start (shared/manual-start.ts); without it, they start now.
+const playground = new Playground({ taskSrc, maxWorkers, loads });
+const root = document.getElementById('root');
+if (!root) throw new Error('#root missing');
+const view = createRoot(root);
+// Drawn at once, so a Start control of the page's own lands after it.
+flushSync(() => view.render(<PlaygroundPage playground={playground} />));
+await whenStarted(
+  root,
+  'Nothing runs yet. Start creates the kernel and the bus; then add tasks.',
+  'append',
+);
+
 const kernel = createKernel({
   contracts: { url: contractsUrl, list },
   workers,
@@ -20,17 +41,11 @@ const kernel = createKernel({
   heartbeat: { killAfterMs: 10_000 },
   routing: false,
 });
-
-/** The balancer's own allowance of pools: its default, made visible on the page. */
-const maxWorkers = Math.max(2, (navigator.hardwareConcurrency || 4) - 2);
-/** Measured loads, kept for the page's life: the balancer reads and writes them. */
-const loads = new Map<string, number>();
 const balancer = createBalancer(kernel, {
   maxWorkers,
   loads: { get: (id) => loads.get(id), set: (id, pct) => void loads.set(id, pct) },
 });
-
-const playground = new Playground({ kernel, balancer, taskSrc, maxWorkers, loads });
+playground.attach(kernel, balancer);
 
 declare global {
   interface Window {
@@ -41,7 +56,3 @@ declare global {
   }
 }
 Object.assign(window, { kernel, balancer, playground });
-
-const root = document.getElementById('root');
-if (!root) throw new Error('#root missing');
-createRoot(root).render(<PlaygroundPage playground={playground} />);
