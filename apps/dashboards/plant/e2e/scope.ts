@@ -29,7 +29,8 @@ export const stopsOn = (browserName: string, build: string): boolean =>
  * runner, the Isoloop build's first data in Firefox took 2.2 to 4.7 s in most
  * runs, and 14.5 s in one of five (run 44929464398, 2026-11-21); in others it
  * went past 15 s, with no isolate failing, and the page got there within 60 s.
- * Chromium and WebKit stay at 15 s.
+ * Chromium and WebKit stay at 15 s. The tests that wait for it are marked
+ * slow on Firefox, so the test timeout (30 s by default) covers it.
  */
 export function firstData(browserName: string): number {
   return browserName === 'firefox' ? 45_000 : 15_000;
