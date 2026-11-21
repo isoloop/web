@@ -423,6 +423,53 @@ test('the rail stays in view beside the steps, and folds above them on a phone',
   await expect(fold.locator('summary')).toContainText('Bus');
 });
 
+test('the examples hub says the examples run without the policy on this host', async ({ page }) => {
+  // ADR 0002, decision 8, amended 2026-11-21.
+  await page.goto('/examples/');
+  const line = page.locator('.ex-policy');
+  await expect(line).toContainText('On this host the examples run without the security policy');
+  await expect(line.getByRole('link', { name: 'the hosting guide' })).toHaveAttribute(
+    'href',
+    '/docs/hosting/',
+  );
+});
+
+for (const [panel, frame] of [
+  ['basic', '/examples/basic/?embed=1&start=manual'],
+  ['processor-playground', '/examples/processor/?embed=1&start=manual'],
+] as const) {
+  test(`the hub's ${panel} panel runs its app only after Start, and again idle once left`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/examples/#${panel}`);
+    const section = page.locator(`#${panel}`);
+    await expect(section.locator(`iframe[src="${frame}"]`)).toHaveCount(1);
+    const app = section.locator('iframe').contentFrame();
+    const kernel = (): Promise<boolean> =>
+      section
+        .locator('iframe')
+        .evaluate((el: HTMLIFrameElement) => Reflect.has(el.contentWindow ?? {}, 'kernel'));
+    // Idle: the app's own UI under the hub's Start, and no kernel.
+    const start = section.locator('.ex-live-cover').getByRole('button', { name: 'Start' });
+    await expect(start).toBeVisible();
+    await expect(app.locator('body')).not.toBeEmpty();
+    expect(await kernel()).toBe(false);
+    await start.click();
+    await expect(start).toBeHidden();
+    await expect.poll(kernel).toBe(true);
+    await expect(section.getByRole('link', { name: /Open full page/ })).toHaveAttribute(
+      'href',
+      frame.split('?')[0] ?? '',
+    );
+    // Leaving the panel reloads the frame idle, with Start back over it.
+    await page.goto('/examples/#plant');
+    await page.goto(`/examples/#${panel}`);
+    await expect(start).toBeVisible();
+    await expect.poll(kernel).toBe(false);
+  });
+}
+
 test('robots.txt points at a sitemap whose every page is served', async ({ request }) => {
   const robots = await request.get('/robots.txt');
   expect(robots.status()).toBe(200);

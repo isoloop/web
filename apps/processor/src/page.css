@@ -376,3 +376,15 @@
   gap: 0.4rem;
   font-size: 0.75rem;
 }
+
+/* In the site's examples hub (?embed=1): the working app only. The hub's
+   panel has the tabs' two pages as its own panels, and the intro as its text. */
+[data-embed] .tabs,
+[data-embed] .intro {
+  display: none;
+}
+/* And edge to edge: no page column, a small inner padding. */
+[data-embed] .ui-shell.processor {
+  max-width: none;
+  padding: var(--ui-space-3);
+}

@@ -35,7 +35,7 @@ pnpm --filter site dev            # the site's own pages, with the diagrams
 pnpm --filter site build          # dist/
 ```
 
-The whole site as deployed, with the examples:
+In dev, the server has only the site's own pages, so `/examples/`'s frames don't run the examples. To see them running, use the whole site as deployed, with the examples:
 
 ```bash
 pnpm --filter "./apps/dashboards/*" --filter ./apps/basic --filter ./apps/processor --filter ./apps/site build
@@ -63,9 +63,11 @@ Anything else inline fails the build, so a re-render that brings something new i
 
 ## The hub
 
-`/examples/` shows one example per panel, beside the rail that `/how-it-works/` and `/features/` also use (`src/pages/steps.tsx`, `src/demos/steps.ts`). Each app has an `example.json` next to its `package.json`; the schema is in `build/examples.ts`, and unknown fields fail, so a typo can't slip through:
+`/examples/` shows one example per panel, beside the rail that `/how-it-works/` and `/features/` also use (`src/pages/steps.tsx`, `src/demos/steps.ts`). Basic's and the Processor's pages run in the panel itself: each is a frame of the app with `?embed=1&start=manual`, which draws its idle view and starts no kernel and no worker until the hub's Start (`src/demos/examples.ts`, `shared/manual-start.ts`); leaving the panel reloads the frame idle. The page's intro is `example.json`'s `embeds[].intro`, drawn by the app and by the hub (`shared/intro.ts`). Each app has an `example.json` next to its `package.json`; the schema is in `build/examples.ts`, and unknown fields fail, so a typo can't slip through:
 
 - `title`, `tab` (its short name in the rail), `summary` (what it is), `order`.
+- `group` (optional): its heading in the hub's rail, e.g. Dashboards.
+- `embeds` (optional): the pages that run live in the hub, each with an `id` (its panel), `title`, `src`, frame `height` and an optional `intro` (paragraphs, or `{ list }`; `code` and **bold** marked).
 - `shows`: feature ids from `content/features/`, shown as the landing page's features strip. An id that isn't a feature fails the build.
 - `try`: what to do in it, and what to watch.
 - `measurements`, one of:

@@ -90,6 +90,33 @@ export const exampleSchema = z.strictObject({
   try: z.array(text).min(1),
   /** Where it sits on the hub; lower first. */
   order: z.number().int().optional(),
+  /** Its group in the hub's rail, e.g. Dashboards; the example's own name if none. */
+  group: text.optional(),
+  /**
+   * The pages that run live on the hub, idle until Start: each a same-origin
+   * page, framed with ?embed=1&start=manual at a fixed height. Without it the
+   * hub shows the screenshot only.
+   */
+  embeds: z
+    .array(
+      z.strictObject({
+        id: z.string().regex(/^[a-z][a-z0-9-]*$/, 'a lowercase id, e.g. playground'),
+        title: text,
+        src: rootPath,
+        height: z.number().int().min(200).max(2000),
+        /**
+         * The page's intro, drawn by the page itself and by the hub's panel
+         * (shared/intro.ts): paragraphs, or `{ list }`; text marks `code` and
+         * **bold**. The panel shows it instead of the summary.
+         */
+        intro: z
+          .array(z.union([text, z.strictObject({ list: z.array(text).min(1) })]))
+          .min(1)
+          .optional(),
+      }),
+    )
+    .min(1)
+    .optional(),
   /**
    * Measured comparisons; or a run in progress, with the previous one linked;
    * or none, with why.

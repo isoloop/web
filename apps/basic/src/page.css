@@ -131,3 +131,17 @@
   /* The landing page says this just above the iframe. */
   display: none;
 }
+
+/* In the site's examples hub (?embed=1&start=manual): edge to edge, no page
+   column, a small inner padding. */
+[data-embed] .ui-shell.basic {
+  max-width: none;
+  padding: var(--ui-space-3);
+}
+
+/* Before Start (?start=manual): the panes' idle line, in the panes' own muted style. */
+.idle-line {
+  margin: 0 0 var(--ui-space-3);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+}

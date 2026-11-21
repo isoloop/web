@@ -159,10 +159,10 @@ test('?embed=1 shows the demo without the header and footer', async ({ page }) =
   await expect(page.locator('html')).toHaveAttribute('data-embed', '');
   await expect(page.locator('.ui-header')).toBeHidden();
   await expect(page.locator('.ui-footer')).toBeHidden();
-  // The landing page explains the demo above the iframe, so basic's intro is hidden.
-  await expect(page.locator('.intro > p:not(.guard-note):not(.reads)')).toBeHidden();
-  // So is the sentence about C and D reading A: the landing page has its own.
-  await expect(page.locator('.intro .reads')).toBeHidden();
+  // The page that frames it explains the demo, so basic's intro is hidden: its
+  // paragraphs (example.json's intro, drawn at build) and its rules.
+  const paragraphs = await page.locator('.intro > p:not(.guard-note)').all();
+  await Promise.all(paragraphs.map((p) => expect(p).toBeHidden()));
   await expect(page.locator('.intro .rules')).toBeHidden();
   // The controls and the pool's caption stay.
   await expect(page.locator('#block-main')).toBeVisible();
@@ -172,8 +172,8 @@ test('?embed=1 shows the demo without the header and footer', async ({ page }) =
 test('without ?embed=1 the intro is shown', async ({ page }) => {
   await page.goto('./');
   await ready(page);
-  await expect(page.locator('.intro > p:not(.guard-note):not(.reads)')).toBeVisible();
-  await expect(page.locator('.intro .reads')).toContainText("C and D read A's count");
+  await expect(page.locator('.intro > p:not(.guard-note)').first()).toBeVisible();
+  await expect(page.locator('.intro')).toContainText("C and D read A's count");
   await expect(page.locator('.intro .rules')).toBeVisible();
 });
 

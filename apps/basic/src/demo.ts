@@ -30,7 +30,12 @@ export const IDS = ['A', 'B', 'C', 'D'] as const;
 /** Whether this page is the site's embedded demo. */
 export function embedded(): boolean {
   try {
-    return window.parent !== window && new URLSearchParams(location.search).get('embed') === '1';
+    const params = new URLSearchParams(location.search);
+    // The examples hub frames the page too, with start=manual: there it's the
+    // page itself, waiting for clicks, not the site's demo.
+    return (
+      window.parent !== window && params.get('embed') === '1' && params.get('start') !== 'manual'
+    );
   } catch {
     return false;
   }

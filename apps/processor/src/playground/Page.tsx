@@ -2,7 +2,7 @@
 // the balancer's moves. It redraws from `playground.snapshot()` ten times a
 // second; every action goes back through the model.
 import type { ReactElement } from 'react';
-import { LagChart, MoveLog, REASONS, SPIKE_MS, SUSTAINED_MS, useSnapshot } from '../ui';
+import { Intro, LagChart, MoveLog, REASONS, useSnapshot } from '../ui';
 import { MAX_TASKS, type ColumnView, type Mode, type Playground, type TaskView } from './model';
 
 const LIGHT = [5, 8, 10, 12, 15];
@@ -14,9 +14,8 @@ const MODES: { mode: Mode; label: string; hint: string }[] = [
   { mode: 'one', label: 'One pool', hint: 'every task in a single pool' },
 ];
 
-export function PlaygroundPage({ playground }: { playground: Playground }): ReactElement {
-  const [snap, refresh] = useSnapshot(playground);
-  const full = snap.count >= MAX_TASKS;
+/** The page's tabs and intro: all of it that needs no kernel (drawn before Start with ?start=manual). */
+export function PlaygroundIntro(): ReactElement {
   return (
     <>
       <nav className="tabs" aria-label="Processor pages">
@@ -27,28 +26,18 @@ export function PlaygroundPage({ playground }: { playground: Playground }): Reac
       </nav>
       <section className="intro">
         <h1>Balancer playground</h1>
-        <p>
-          Each task is a headless isolate that keeps a share of one core busy. Add some, turn a dial
-          up, and watch the balancer. It reads every worker’s heartbeat and moves the heaviest task
-          out of a pool that is full (its tasks add up to 80 % of a core) or stays over{' '}
-          {SUSTAINED_MS} ms of lag for 3 s. A task that blocks its loop past {SPIKE_MS} ms twice
-          within a minute goes to quarantine, and comes back once it has been quiet for 30 s.
-        </p>
-        <p>
-          Give a task jobs a second and its CPU dial becomes what those jobs need. The page reports
-          each task’s backlog to the balancer, which moves a task whose backlog keeps growing to
-          where it gets more CPU. Press Calm, and a minute later quiet tasks pack back into fewer
-          pools.
-        </p>
-        <p>
-          Switch a task to work after <code>await</code> and the runtime’s busy time no longer sees
-          its work. Each task also times its own work, and the page reports that to the balancer, so
-          the card shows both: what the kernel measured, and what the task reported. Turn its report
-          off, and the backlog is all the balancer has to go on. A task the kernel gives up on (it
-          crashed past its restart limit) stays where it is: the balancer never moves or restarts
-          it.
-        </p>
+        <Intro id="processor-playground" />
       </section>
+    </>
+  );
+}
+
+export function PlaygroundPage({ playground }: { playground: Playground }): ReactElement {
+  const [snap, refresh] = useSnapshot(playground);
+  const full = snap.count >= MAX_TASKS;
+  return (
+    <>
+      <PlaygroundIntro />
 
       <section className="controls" aria-label="Controls">
         <div className="group">
