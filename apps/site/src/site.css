@@ -1180,8 +1180,14 @@
 .fnotes-col li a:focus-visible {
   transform: rotate(0) translateY(-2px);
 }
+/* A note with a pill stacks: the pill always on its own line under the name,
+   short name or long. */
+.fnotes-col li a:has(.ui-pill) {
+  flex-direction: column;
+  align-items: flex-start;
+}
 .fnotes-col li a .ui-pill {
-  margin-left: 0;
+  margin: 0;
   /* On the page's background, where --ui-experimental reaches AA; the note's
      tint alone doesn't. */
   background: var(--ui-bg);
