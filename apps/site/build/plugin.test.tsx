@@ -215,7 +215,7 @@ describe('the pages', () => {
     expect(from).toBeGreaterThan(-1);
     const card = html.slice(from, html.indexOf('</dd>', from));
     expect(card).toContain("<code>style-src 'self' 'unsafe-inline'</code>");
-    expect(card).toContain('docs/guide/hosting.md');
+    expect(card).toContain('href="/docs/hosting/"');
   });
 
   it('put every feature on one /features/ note and in one tab, the experimental ones with a pill', () => {
