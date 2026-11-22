@@ -50,10 +50,11 @@ jobs:
         run: |
           # The site job (ADR 0002, decision 11) runs when the site, the design
           # system, basic (which the landing page embeds) or any example.json
-          # changes; or when there's nothing to compare against.
+          # changes; when another app's pages or their <head> change, which the
+          # search test reads; or when there's nothing to compare against.
           if [ -z "$BASE" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
             site=true
-          elif git diff --name-only "$BASE" HEAD | grep -qE '^(apps/site|apps/samples|packages/ui|apps/basic)/|(^|/)example\.json$|^scripts/assemble-site\.sh$|^\.github/workflows/site\.yml$'; then
+          elif git diff --name-only "$BASE" HEAD | grep -qE '^(apps/site|apps/samples|packages/ui|apps/basic)/|(^|/)example\.json$|^shared/|^apps/(processor|dashboards/[^/]+)/(.*\.html|vite\.([a-z]+\.)?config\.ts|scripts/index-page\.ts)$|^scripts/assemble-site\.sh$|^\.github/workflows/site\.yml$'; then
             site=true
           else
             site=false
