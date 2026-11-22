@@ -299,7 +299,7 @@ function Examples({ examples, features }: SiteData): VNode {
   }));
   return (
     <main class="ui-shell">
-      <PageIntro title={t.heading}>
+      <PageIntro title={t.heading} image="examples">
         <p class="ui-lede">{t.intro}</p>
         <p>
           <small>{t.support}</small>

@@ -94,6 +94,27 @@
   --ui-bar-h: 4.75rem;
 }
 
+/* Between the full page and the mobile layout the left column steps down, so
+   the text beside it keeps its width; the 760px block below overrides these. */
+@media (max-width: 1280px) {
+  :root {
+    --ui-gutter: 13rem;
+    --ui-gutter-gap: 2.5rem;
+  }
+}
+@media (max-width: 1100px) {
+  :root {
+    --ui-gutter: 10.5rem;
+    --ui-gutter-gap: 2rem;
+  }
+}
+@media (max-width: 900px) {
+  :root {
+    --ui-gutter: 8rem;
+    --ui-gutter-gap: 1rem;
+  }
+}
+
 @media (max-width: 760px) {
   :root {
     --ui-gutter: 7.5rem;

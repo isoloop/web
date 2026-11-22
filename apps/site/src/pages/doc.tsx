@@ -4,6 +4,7 @@ import { ExperimentalMark } from 'ui/components';
 import { mdPath } from '../../build/docs/llms.ts';
 import type { Doc, NavItem, NavSection } from '../../build/docs/pages.ts';
 import { docsPage as c, marks } from '../copy.ts';
+import { PAGE_IMAGES } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
 
 // The docs layout (isoloop/isoloop M4c task 11, from the approved mock; ADR
@@ -249,12 +250,24 @@ export const docsIndexPage: Page = {
       </div>
       <main class="docs-article">
         <SearchBox id="search-top" class="docs-only-narrow" />
-        <h1>{c.heading}</h1>
-        <p class="docs-lead">{c.lede}</p>
-        <p class="docs-agents">
-          {c.agents.lead} <a href="/llms.txt">{c.agents.index}</a> {c.agents.indexNote}{' '}
-          <a href="/llms-full.txt">{c.agents.full}</a> {c.agents.fullNote}
-        </p>
+        <div class="docs-index-head">
+          <div class="docs-index-head-text">
+          <h1>{c.heading}</h1>
+          <p class="docs-lead">{c.lede}</p>
+          <p class="docs-agents">
+            {c.agents.lead} <a href="/llms.txt">{c.agents.index}</a> {c.agents.indexNote}{' '}
+            <a href="/llms-full.txt">{c.agents.full}</a> {c.agents.fullNote}
+          </p>
+          </div>
+          <img
+            class="docs-index-image"
+            src={PAGE_IMAGES.docs}
+            alt=""
+            width={160}
+            height={160}
+            aria-hidden="true"
+          />
+        </div>
         {data.docsNav.map((s) => (
           <section class="docs-index-section" key={s.title} aria-labelledby={sectionId(s.title)}>
             <h2 id={sectionId(s.title)}>{s.title}</h2>
