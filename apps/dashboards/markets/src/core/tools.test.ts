@@ -100,6 +100,31 @@ describe('markets.alerts.create.v1', () => {
   });
 });
 
+describe('the alerts job on prices', () => {
+  it('fires a rule once while two exchanges are either side of it (web#255)', () => {
+    const { src, published, send } = memorySource();
+    const svc = runAlerts(src);
+    svc.create('req-1', { symbol: 'BTC-USD', metric: 'price', op: 'above', threshold: 100 });
+    for (let round = 0; round < 10; round++) {
+      for (const [exchange, last] of [
+        ['okx', 101],
+        ['kraken', 99],
+      ] as const) {
+        send('prices', {
+          exchange,
+          symbol: 'BTC-USD',
+          last,
+          bid: last,
+          ask: last,
+          ts: round * 500,
+        });
+      }
+    }
+    expect(published.filter((p) => p.stream === 'alerts')).toHaveLength(1);
+    svc.stop();
+  });
+});
+
 describe('markets.quote.v1', () => {
   it('answers the aggregate over the window and each exchange quote', () => {
     vi.useFakeTimers({ now: 1_000_000 });

@@ -159,9 +159,9 @@ export function agentRuleId(requestId: string): string {
 }
 
 /**
- * Evaluates the rules in `alertRules` against `prices` (`price`, each
- * exchange's last) and `aggregates` (`vwap`, `spread`) into `alerts`. It reads
- * `alerts` back first, so a restart doesn't fire a rule twice.
+ * Evaluates the rules in `alertRules` against `prices` (`price`, every
+ * exchange's last, held per symbol) and `aggregates` (`vwap`, `spread`) into
+ * `alerts`. It reads `alerts` back first, so a restart doesn't fire a rule twice.
  */
 export function runAlerts(src: Source): AlertsService {
   const engine = new AlertEngine();
