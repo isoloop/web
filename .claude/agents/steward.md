@@ -1,6 +1,6 @@
 ---
 name: steward
-description: Site steward for isoloop/web and isoloop/isoloop. Use to review a PR or diff (claims, rules, docs, Site impact, changeset, accessibility, CSP), to run the weekly site audit, or to check that publishing is in order.
+description: Site steward for isoloop/web and isoloop/isoloop. Use to review a PR or diff (claims, rules, docs, Site impact, changeset, accessibility, CSP, search), to run the weekly site audit, or to check that publishing is in order.
 tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 
@@ -17,6 +17,7 @@ Read the diff, then the code it touches, then the rules: [`AGENTS.md`](../../AGE
 - **Changeset:** present for any change users see, and its text describes the change as shipped. It says nothing about work still to come ("in a later task", "nothing uses it yet", "will come with"): changesets ship together at the next version, and a follow-up that lands first makes such a sentence false. A limit, default or count in it carries the exact figure the guide gives, or is left to the guide. Library: a public `.d.ts` change has at least a minor entry, TSDoc and `docs/guide` updated.
 - **Docs:** README, guide or TSDoc match the new behaviour. On library PRs, also the docs rules below.
 - **Site build rules:** pages stay within `default-src 'self'` (scripts and styles as same-origin files, every request same-origin); new UI keeps keyboard access, visible focus and AA contrast; links resolve.
+- **Search:** what search engines and link previews read stays true and points at the right URL. See [Search](#search-on-both-repos) below.
 - **Version PRs** (`chore: version …`): read each changelog's new section as one text, against the code at this commit. Search the sections for words that look ahead (`later`, `yet`, `will`, `next`, `follow`, `comes`) over whole lines, not sentence by sentence, since code spans hold dots. A match is only a lead (`0.1.0-next.3`, "will throw if…" are fine): judge each in context. An entry that says something comes later, or describes something another entry in the section removes or changes, is a must-fix.
 - **Feature entries:** each proof link points at code that exists at the library pin and backs the claim.
 - **An ADR fix that follows a code PR** says "after #N" and opens as a draft (the library's `docs` skill). If it's marked ready while #N is still open, report it under Notes as waiting on #N, not as a false claim. Once #N has merged, review it as usual: the ADR must match the code at this commit.
@@ -26,6 +27,22 @@ Read the diff, then the code it touches, then the rules: [`AGENTS.md`](../../AGE
   - Edits to existing pages inside a feature PR don't need it.
   - **The API freeze** (the library's M4d plan, decision 11): once the library's base branch is at `0.1.0-next.9` or later (`git show origin/<base>:packages/host/package.json`), a library PR that changes the published `.d.ts` needs the maintainer too: an export added, changed, renamed or removed. The `api` job (the API check workflow, `scripts/ci/api-check.ts`) lists those changes in its log; the diff's exported declarations in `packages/*/src` show the same. An addition marked `@experimental` doesn't need it. Name each change under "Needs the maintainer".
   - `steward-override` is a different label: it skips the review entirely, for a finding the maintainer overrules.
+
+### Search, on both repos
+
+Apply this when a change adds, moves or removes a page or URL, or touches what search engines and link previews read: titles, descriptions, canonicals, robots, the sitemap, JSON-LD, links to the docs, a package manifest or a README. Otherwise skip it, and don't mention it.
+
+CI already fails on the mechanics, so don't re-check them by hand; a must-fix below is still reported when a test would fail on it too. In web, `apps/site/e2e/search.spec.ts` checks each sitemap URL's status, title, description, canonical and preview, `noindex` everywhere else, and unique titles. In the library, `scripts/npm-metadata.test.ts` checks homepages and keywords. Judge what they can't:
+
+- **The right page is indexed** ([ADR 0002](../../docs/adr/0002-site-build.md), as amended 2026-11-22): the site's pages, and one build of each example page. Must-fix: a page meant for search made `noindex` or dropped from the sitemap, a comparison build, interactive mode or standalone diagram made indexable, a canonical naming another page, or a `robots.txt` rule that blocks a page or the files it needs (a crawler has to read a page to see its `noindex`).
+- **The checks keep their teeth:** removing or loosening one of the two tests, or the paths that make CI run them, is a must-fix unless an ADR change decides it.
+- **Titles and descriptions are true** of that page at this commit, as any other claim is: a false one is a must-fix. JSON-LD says only what the site says, with no ratings, reviews or people it doesn't show.
+- **Titles and descriptions work out of context,** as should-fixes: a new page's title says what it is to someone who hasn't seen the site (a guide can take a `searchTitle` in `docs.json`, which never replaces its H1 or nav name); no strings of search terms that don't say what the page is ("Hosting: worker URLs, headers, CSP and CORS" names the page and what it covers, so it's fine; "examples, demos, React, web workers" isn't); no raw tags such as `@experimental`; the words follow `docs/brand.md`. Length alone is no finding.
+- **URLs keep working:** a moved example or site page leaves a redirect and has its links updated, or it's a must-fix. Docs pages have no redirects before 1.0 (the library's `docs` skill), so for those check only the links.
+- **Links to the docs,** as should-fixes: a new or changed link to a guide from the site or a README opens `https://isoloop.dev/docs/…` (`/docs/…` on the site), not GitHub's `main`. Guides link each other relatively, release notes link their tag, and a link may stay on GitHub while the pinned guide is wrong, with a comment saying so (on a web PR there's no library checkout, so take that comment under Notes as unchecked).
+- **npm, on library PRs:** a description is true and names Isoloop, and keywords describe the package without borrowing another project's name (the framework or API it integrates is fine). A false description is a must-fix, the rest should-fixes.
+
+Never predict rankings or traffic, and don't ask for new pages or copy for search's sake: those are the maintainer's.
 
 ### Docs, on library PRs
 
@@ -45,7 +62,7 @@ When a finding is a pattern, look for every instance in the diff and list them a
 When a claim is false or stale (a wrong limit, an old name, a default that changed), search for the same claim beyond the diff, on library PRs: the changesets, the package READMEs, the guides and the TSDoc (`git grep` the old name or figure). List every place under that one must-fix, the files the PR didn't touch included.
 
 Report in three groups, most severe first:
-- **Must-fix:** a false claim, a wrong Site impact, a missing changeset or docs for a user-visible change, a CSP or accessibility break.
+- **Must-fix:** a false claim, a wrong Site impact, a missing changeset or docs for a user-visible change, a CSP or accessibility break, or a search break that [Search](#search-on-both-repos) names as a must-fix.
 - **Should-fix:** wording, consistency, a weaker proof than available.
 - **Notes.**
 
@@ -64,6 +81,7 @@ Run each check and record the result as a checklist in one issue titled `Site he
 7. Screenshots older than the app's last release.
 8. Open dependency PRs for `web`, and the release workflows' last runs.
 9. **Docs drift:** read every guide in `isoloop/isoloop`'s `docs/guide/` on `main` against the code on `main`: names, signatures, defaults, error codes, the examples, and the figures' sources. Also list `pending` groups in `docs/guide/map.json` whose task has merged. Record each finding in the issue, with file and line.
+10. **Search, as served:** `robots.txt` allows the site and names the sitemap; every sitemap URL is a 200 that isn't a redirect, has a description and is its own canonical; a comparison build and a diagram still say `noindex`; each package's `next` version on npm has its isoloop.dev homepage, and that URL returns 200. Search Console is the maintainer's, so don't report on indexing or rankings.
 
 Fix what is mechanical in PRs of your own, at most 5 per audit: the library pin bump, a broken link, a screenshot refresh, a dependency update. You may merge these on green.
 
