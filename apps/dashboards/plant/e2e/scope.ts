@@ -25,12 +25,11 @@ export const stopsOn = (browserName: string, build: string): boolean =>
 
 /**
  * How long a test waits for a page's first data: 15 s, the later waits'
- * figure, and 45 s on Firefox. With 72 widgets starting on a 4-core CI
- * runner, the Isoloop build's first data in Firefox took 2.2 to 4.7 s in most
- * runs, and 14.5 s in one of five (run 44929464398, 2026-11-21); in others it
- * went past 15 s, with no isolate failing, and the page got there within 60 s.
- * Chromium and WebKit stay at 15 s. The tests that wait for it are marked
- * slow on Firefox, so the test timeout (30 s by default) covers it.
+ * figure, and 45 s on Firefox, sized on CI runs of 2026-11-21 (run
+ * 44929464398). The longest of those waits were the tests' own doing: many
+ * locators at once starve Firefox of worker messages (first-data.ts). The
+ * tests that wait for it are marked slow on Firefox, so the test timeout
+ * (30 s by default) covers it.
  */
 export function firstData(browserName: string): number {
   return browserName === 'firefox' ? 45_000 : 15_000;
