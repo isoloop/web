@@ -14,12 +14,14 @@ import { Pager, RailLayout } from './steps.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison';
-const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
+const POOLS_GUIDE = '/docs/pools/';
+// On GitHub until the pin has isoloop/isoloop#372: the pinned guide still says
+// style-src needs no 'unsafe-inline', which the Safety card here corrects.
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
-const BALANCER_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/balancer.md';
+const BALANCER_GUIDE = '/docs/balancer/';
 const PROCESSOR = '/examples/processor/';
-const AGENTS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/agents.md';
-const DEVTOOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/devtools.md';
+const AGENTS_GUIDE = '/docs/agents/';
+const DEVTOOLS_GUIDE = '/docs/devtools/';
 const PLANT_DEVTOOLS = '/examples/dashboards/plant/isoloop/?devtools=1';
 const MARKETS_TOOLS =
   'https://github.com/isoloop/web/blob/main/apps/dashboards/markets/src/isoloop/contracts.ts';
