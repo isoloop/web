@@ -236,8 +236,7 @@ export function docPage(doc: Doc): Page {
     head: {
       title: doc.title,
       ...(doc.searchTitle ? { searchTitle: doc.searchTitle } : {}),
-      // A raw tag reads as noise in a search result. The pill, llms.txt and the docs' index keep the status.
-      description: doc.description.replaceAll(' (@experimental)', ''),
+      description: doc.description,
     },
     scripts: [COPY_SCRIPT],
     render: (data: SiteData) => <DocArticle doc={doc} data={data} />,
