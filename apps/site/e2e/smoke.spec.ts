@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { DIAGRAM_ORDER } from '../build/diagrams.ts';
 import { readManifest } from '../build/docs/pages.ts';
 import { expectAccessible } from './accessible.ts';
+import { steadyLoop } from '../../../shared/steady-loop.ts';
 
 declare global {
   interface Window {
@@ -144,6 +145,9 @@ test('the landing recording draws what basic reports, and its controls reach bas
   await expect(status).toHaveText('Recording. Everything is running.', { timeout: 15_000 });
   const blockC = rec.getByRole('button', { name: 'Block C for 3 s' });
   await expect(blockC).toBeEnabled({ timeout: 15_000 });
+  const demo = page.frames().find((f) => f.url().includes('/examples/basic/'));
+  if (!demo) throw new Error("basic's frame isn't there");
+  await steadyLoop(demo, 'C');
   await blockC.click();
   await expect(status).toContainText('C is stuck', { timeout: 5_000 });
   await expect(status).toContainText('the pool was stopped and started again', { timeout: 10_000 });

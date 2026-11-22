@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { steadyLoop } from '../../../../shared/steady-loop.ts';
 import { WEBKIT_STOPS, firstData } from './scope';
 
 // M3d task 7: the placements (decision 6, plus matched and one), what a block takes down in
@@ -74,6 +75,7 @@ for (const [placement, blast] of Object.entries(BLAST)) {
         window.crashed.push(e.id);
       });
     });
+    await steadyLoop(page, 'T3-gauges');
     await page.locator('[data-slot="T3-gauges"]').hover();
     await at(page, 'T3-gauges', 'button[name="stress-block"]').click();
     // The kernel kills a loop busy for 2 s; the block lasts 3 s.
@@ -139,6 +141,7 @@ test('one: a restarted pool reads its trend and its stats back from the retained
       window.crashed.push(e.id);
     });
   });
+  await steadyLoop(page, 'T3-gauges');
   await page.locator('[data-slot="T3-gauges"]').hover();
   await at(page, 'T3-gauges', 'button[name="stress-block"]').click();
   // In `one` the whole pool restarts: the trend and the stats engine with it.
