@@ -195,7 +195,7 @@ export const home = {
     text: [
       'Your app’s host runs on the page’s main thread. Each isolate runs in a worker, either one of its own or a pool it shares with others.',
       'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says.',
-      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it, and gives an isolate up after 3 restarts in a minute. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
+      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. The supervisor gives up on an isolate that crashes again after 3 restarts in a minute. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
     ],
     link: 'How it works, part by part',
   },
@@ -729,7 +729,7 @@ export const howItWorks = {
         text: [
           'The bus is supervised like an isolate, with the same heartbeat and restart limit. When it crashes, a new bus worker starts and every running isolate gets a new channel to it. The isolates keep running. What they publish meanwhile waits in each isolate, up to 1,000 unanswered calls, and goes out once the new bus is there.',
           "Persistent topics come back from disk: their subscriptions resume after their last commit, whatever their `from`, with no gap, and re-sent publishes aren’t stored twice. Memory topics are gone: their subscribers get a reset. `useTopic` empties and refills, a plain `ctx.bus.subscribe` gets its `onReset` callback, and an isolate that can’t handle a reset can ask to be restarted instead, with `bus: { onReset: 'restart' }` in its manifest.",
-          'If the bus crashes twice while loading, a persisted record is the likely cause: it sets the newest segment of each persistent topic aside (renamed, not deleted), starts from the one before, and the kernel emits `bus:recovered` with what it set aside. After 3 bus restarts within 60 s, the kernel emits `bus:failed`: isolates keep running, and every publish rejects with `bus_unavailable`. A contracts module that fails to load fails the bus with a code, and every isolate with it, with no retry.',
+          'If the bus crashes twice while loading, a persisted record is the likely cause. The new bus sets the newest segment of each persistent topic aside (renamed, not deleted), starts from the one before, and the kernel emits `bus:recovered` with what it set aside. After 3 bus restarts within 60 s, the kernel emits `bus:failed`: isolates keep running, and every publish rejects with `bus_unavailable`. A contracts module that fails to load fails the bus with a code, and every isolate with it, with no retry.',
         ],
       },
       code: {

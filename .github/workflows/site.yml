@@ -2,10 +2,10 @@ name: Site
 
 # The site's checks (ADR 0002, decision 11): build every app and the site,
 # assemble them as deployed (with the site, SITE=1), check every internal link
-# and that no page shows raw Markdown, then the Chromium smoke test against the assembled site: every page clean in
-# the console under its policy, axe on every page and on ui's specimens, basic
-# booting in the landing page's iframe and restarting a crashed isolate, and
-# the theme switching the frames live.
+# and that no page shows raw Markdown, then the Chromium smoke test against
+# the assembled site: every page clean in the console under its policy, axe on
+# every page and on ui's specimens, basic booting in the landing page's iframe
+# and restarting a crashed isolate, and the theme switching the frames live.
 on:
   workflow_call:
 
