@@ -273,7 +273,7 @@ function Features({ samples, features, examples }: SiteData): VNode {
               <dt>{term}</dt>
               <dd>
                 {rich(text)}
-                {term === 'No inline code' ? (
+                {term === 'No inline scripts' ? (
                   <>
                     {' '}
                     <a href={HOSTING_GUIDE}>The hosting guide</a> has the full policy.
