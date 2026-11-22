@@ -9,7 +9,7 @@ import { PageIntro } from './intro.tsx';
 import { StepTabs, type Part } from './steps.tsx';
 import type { Page, SiteData } from './types.ts';
 
-const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
+const POOLS_GUIDE = '/docs/pools/';
 const PLANT_MATCHED =
   'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/matched-v2';
 
