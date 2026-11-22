@@ -12,6 +12,8 @@
 // - The header, bar and footer: components rendered to static HTML through
 //   render(), placed where the page has a `<!-- ui:header -->` (`ui:bar`,
 //   `ui:footer`) comment, else first in <body> (last, for the footer).
+// - The title and what search engines read, on an app's pages that pass
+//   `meta` (ADR 0002, decision 9, as amended). The site renders its own.
 // - The brand (docs/brand.md): favicon.svg with its 32 px PNG fallback and the
 //   Apple touch icon on every page; on full-header pages the everyday mark,
 //   light and dark, which the header shows by theme.
@@ -21,7 +23,14 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { h } from 'preact';
 import type { Plugin } from 'vite';
-import { Bar, Footer, Header, type Current } from './components/index.ts';
+import {
+  Bar,
+  Footer,
+  Header,
+  PageMeta,
+  type Current,
+  type PageMetaProps,
+} from './components/index.ts';
 import { render } from './render.ts';
 
 export interface UiOptions {
@@ -31,6 +40,11 @@ export interface UiOptions {
   bar?: boolean;
   /** The footer. */
   footer?: boolean;
+  /**
+   * A page's title and search tags, by its path in the build (`/index.html`).
+   * Such a page writes no <title> of its own.
+   */
+  meta?: (pagePath: string) => PageMetaProps;
 }
 
 export interface Asset {
@@ -201,6 +215,16 @@ export function placePartials(
   return out;
 }
 
+/** Puts a page's title and search tags at the end of its <head>. */
+export function placeMeta(html: string, meta: PageMetaProps): string {
+  const end = html.search(/<\/head>/i);
+  if (end < 0) throw new Error('ui: a page with `meta` needs a <head>');
+  if (/<title[\s>]/i.test(html.slice(0, end))) {
+    throw new Error('ui: a page with `meta` writes no <title> of its own');
+  }
+  return `${html.slice(0, end)}${render(h(PageMeta, meta))}\n${html.slice(end)}`;
+}
+
 export function ui(opts: UiOptions = {}): Plugin {
   let base = '/';
   return {
@@ -211,7 +235,7 @@ export function ui(opts: UiOptions = {}): Plugin {
     transformIndexHtml(html, ctx) {
       const { css, theme, font, brand } = uiAssets(opts);
       const prefix = assetPrefix(base, ctx.path);
-      const page = pageCurrent(html);
+      const page = pageCurrent(opts.meta ? placeMeta(html, opts.meta(ctx.path)) : html);
       const mark = brand.mark
         ? { light: prefix + brand.mark.light.fileName, dark: prefix + brand.mark.dark.fileName }
         : undefined;

@@ -1,5 +1,5 @@
 {
-  "$comment": "The docs pages and their order (isoloop/isoloop M4c, decisions 9, 11 and 29; ADR 0006). Lists exactly the pages at the pin (library.lock): the guides in docs/guide (slug = file name) and the generated API pages in docs/api (slug = api/ + file name, page /docs/api/<name>/). A page joins here in the PR that moves the pin to a version that has it. An entry with title, href and description is a link into a page (Kernel config), shown in the sidebar and on /docs/ but not a page. Sections, in order: Start, Build, Agents and tooling, Reference; a section appears once it has a page. leadPending: the guide's lead is still being reshaped to one sentence (M4c task 5), so its description is the lead's first sentence. experimental: the page's feature is @experimental, drawn as the Experimental mark in the sidebar and the pill on /docs/ and the page's title.",
+  "$comment": "The docs pages and their order (isoloop/isoloop M4c, decisions 9, 11 and 29; ADR 0006). Lists exactly the pages at the pin (library.lock): the guides in docs/guide (slug = file name) and the generated API pages in docs/api (slug = api/ + file name, page /docs/api/<name>/). A page joins here in the PR that moves the pin to a version that has it. An entry with title, href and description is a link into a page (Kernel config), shown in the sidebar and on /docs/ but not a page. Sections, in order: Start, Build, Agents and tooling, Reference; a section appears once it has a page. leadPending: the guide's lead is still being reshaped to one sentence (M4c task 5), so its description is the lead's first sentence. experimental: the page's feature is @experimental, drawn as the Experimental mark in the sidebar and the pill on /docs/ and the page's title. searchTitle: in <title> and the link preview's title only, where the guide's own title doesn't stand on its own in search results.",
   "sections": [
     {
       "title": "Start",
@@ -16,26 +16,31 @@
       "title": "Build",
       "guides": [
         {
-          "slug": "isolates"
+          "slug": "isolates",
+          "searchTitle": "Writing isolates in React, Preact or plain DOM"
         },
         {
           "slug": "contracts"
         },
         {
-          "slug": "bus"
+          "slug": "bus",
+          "searchTitle": "The message bus: topics, retention and replay"
         },
         {
-          "slug": "supervision"
+          "slug": "supervision",
+          "searchTitle": "Supervision: restart blocked or crashed isolates"
         },
         {
-          "slug": "pools"
+          "slug": "pools",
+          "searchTitle": "Worker pools: several isolates in one worker"
         },
         {
           "slug": "balancer",
           "experimental": true
         },
         {
-          "slug": "hosting"
+          "slug": "hosting",
+          "searchTitle": "Hosting: worker URLs, headers, CSP and CORS"
         },
         {
           "slug": "bundle-size"

@@ -175,7 +175,9 @@ export function rewritePage(html: string, rules: Map<string, string>, opts: Page
     classed,
     `<meta http-equiv="Content-Security-Policy" content="${opts.csp}">` +
       `<script src="${opts.themeSrc}" data-archify></script>` +
-      `<link rel="stylesheet" href="${opts.inlineCss}">`,
+      `<link rel="stylesheet" href="${opts.inlineCss}">` +
+      // Left out of search on its own, read where How it works frames it (ADR 0002, as amended).
+      '<meta name="robots" content="noindex, indexifembedded">',
   );
   const left = inlineLeftovers(withHead);
   if (left.length) {

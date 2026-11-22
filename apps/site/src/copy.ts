@@ -217,6 +217,8 @@ export const home = {
 
 export const featuresPage = {
   title: 'Features',
+  /** <title> and the link preview only (ADR 0006, as amended). */
+  searchTitle: 'Features: fault isolation, message bus and replay',
   description:
     'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, tools for agents, devtools, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
@@ -755,6 +757,8 @@ export const howItWorks = {
 
 export const examplesPage = {
   title: 'Examples',
+  /** <title> and the link preview only (ADR 0006, as amended). */
+  searchTitle: 'Live examples: dashboards, workers and pools',
   description:
     'Isoloop examples: Basic, the plant and markets dashboards, and the processor. Each one runs live, with what it shows, what to try, and its measured results.',
   heading: 'Examples',

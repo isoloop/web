@@ -357,7 +357,7 @@ function Features({ samples, features, examples }: SiteData): VNode {
 export const featuresPage: Page = {
   path: '/features/',
   section: 'features',
-  head: { title: f.title, description: f.description },
+  head: { title: f.title, searchTitle: f.searchTitle, description: f.description },
   scripts: ['/src/demos/features.ts'],
   render: (data) => <Features {...data} />,
 };

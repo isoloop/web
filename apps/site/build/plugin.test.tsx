@@ -141,6 +141,31 @@ describe('renderDocument', () => {
     expect(html).toContain('<!-- ui:footer -->');
   });
 
+  it('writes JSON-LD as data that no text in it can close', () => {
+    const jsonLd = { name: '</script><b>"&' };
+    const html = renderDocument({ ...page, jsonLd }, data, { csp: CSP });
+    const block = /<script type="application\/ld\+json">(.*?)<\/script>/.exec(html)?.[1] ?? '';
+    expect(block).not.toContain('<');
+    expect(JSON.parse(block)).toEqual(jsonLd);
+  });
+
+  it('gives a noindex page no canonical and no preview', () => {
+    const html = renderDocument({ ...page, head: { ...page.head, robots: 'noindex' } }, data, {});
+    expect(html).toContain('<meta name="robots" content="noindex"/>');
+    expect(html).not.toContain('rel="canonical"');
+    expect(html).not.toContain('og:');
+  });
+
+  it('puts a search title in <title> and the preview only', () => {
+    const html = renderDocument(
+      { ...page, head: { ...page.head, searchTitle: 'X: more' } },
+      data,
+      {},
+    );
+    expect(html).toContain('<title>X: more · Isoloop</title>');
+    expect(html).toContain('<meta property="og:title" content="X: more · Isoloop"/>');
+  });
+
   it('leaves the policy out in dev', () => {
     expect(renderDocument(page, data, {})).not.toContain('Content-Security-Policy');
   });

@@ -3,6 +3,7 @@ import { ui } from 'ui/vite';
 import { defineConfig, type Plugin } from 'vite';
 import { browserCheck } from '../../shared/browser-check.ts';
 import { introHtml } from '../../shared/intro.ts';
+import { indexed } from '../../shared/search.ts';
 import example from './example.json' with { type: 'json' };
 
 /** The intro, from example.json: the site's examples hub draws the same text (shared/intro.ts). */
@@ -25,7 +26,16 @@ export default defineConfig({
     intro,
     browserCheck('isoloop'),
     isoloop(),
-    ui({ header: { current: 'examples' }, footer: true }),
+    ui({
+      header: { current: 'examples' },
+      footer: true,
+      meta: () =>
+        indexed(
+          'Basic example: block or crash one isolate',
+          'Four Isoloop isolates on three event loops: two on their own workers, two sharing a pool.',
+          example.links.live,
+        ),
+    }),
   ],
   base: './',
   worker: { format: 'es' },

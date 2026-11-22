@@ -168,6 +168,7 @@ function DocArticle({ doc, data }: { doc: Doc; data: SiteData }): VNode {
         </p>
         <h1>
           {doc.title}
+          {doc.experimental ? ' ' : null}
           <Pill doc={doc} />
         </h1>
         {/* Rendered from the pinned guide by renderMarkdown(), which escapes the source's HTML. */}
@@ -231,7 +232,12 @@ export function docPage(doc: Doc): Page {
   return {
     path: doc.path,
     section: 'docs',
-    head: { title: doc.title, description: doc.description },
+    head: {
+      title: doc.title,
+      ...(doc.searchTitle ? { searchTitle: doc.searchTitle } : {}),
+      // A raw tag reads as noise in a search result. The pill, llms.txt and the docs' index keep the status.
+      description: doc.description.replaceAll(' (@experimental)', ''),
+    },
     scripts: [COPY_SCRIPT],
     render: (data: SiteData) => <DocArticle doc={doc} data={data} />,
   };

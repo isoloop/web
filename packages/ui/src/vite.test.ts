@@ -1,5 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { assetPrefix, pageCurrent, placePartials, uiAssets, uiPartials } from './vite.ts';
+import {
+  assetPrefix,
+  pageCurrent,
+  placeMeta,
+  placePartials,
+  uiAssets,
+  uiPartials,
+} from './vite.ts';
+
+describe('placeMeta', () => {
+  it('gives a page its title and search tags, escaped', () => {
+    const html = placeMeta('<html><head></head><body></body></html>', {
+      title: 'A & "B"',
+      description: 'D',
+      path: '/a/',
+    });
+    expect(html).toContain('<link rel="canonical" href="https://isoloop.dev/a/"/>');
+    expect(html).toContain('content="A &amp; &quot;B&quot;"');
+  });
+
+  it('fails on a page with a title of its own, or no <head>', () => {
+    const meta = { title: 'T', robots: 'noindex' };
+    expect(() => placeMeta('<head><title>x</title></head>', meta)).toThrow(/<title>/);
+    expect(() => placeMeta('<body></body>', meta)).toThrow(/<head>/);
+  });
+});
 
 describe('uiAssets', () => {
   it('gives full-header pages the tokens, base, shell and theme.js', () => {

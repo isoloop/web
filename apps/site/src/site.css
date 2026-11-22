@@ -1236,7 +1236,10 @@
   color: var(--ui-text);
   font-weight: 650;
 }
-.docs-article h1 .ui-pill,
+/* In the h1 a space sets the pill apart, so the heading's text reads as two words. */
+.docs-article h1 .ui-pill {
+  margin-left: 0.1em;
+}
 .docs-index-section .ui-pill {
   margin-left: 0.35em;
 }

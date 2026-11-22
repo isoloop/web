@@ -4,6 +4,9 @@
 // stay inline: a CSP doesn't apply to them. Archify renders the same viewer
 // code into every page, so the files are named by content hash and shared.
 //
+// It also marks each diagram noindex (ADR 0002, decision 9, as amended): the
+// page that lists them is the one to find in search.
+//
 // Run after re-rendering (README.md): node externalize.mjs
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -11,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const dir = dirname(fileURLToPath(import.meta.url));
+const ROBOTS = '<meta name="robots" content="noindex, indexifembedded">';
 const SCRIPT = /<script(\s[^>]*)?>([\s\S]*?)<\/script>/g;
 
 for (const name of readdirSync(dir).filter((f) => f.endsWith('.html') && f !== 'index.html')) {
@@ -24,6 +28,6 @@ for (const name of readdirSync(dir).filter((f) => f.endsWith('.html') && f !== '
     moved++;
     return `<script src="./${file}"></script>`;
   });
-  writeFileSync(path, out);
+  writeFileSync(path, out.includes(ROBOTS) ? out : out.replace('<head>', `<head>${ROBOTS}`));
   console.log(`${name}: ${moved} script(s) moved`);
 }
