@@ -2,6 +2,11 @@
 .processor {
   padding-bottom: var(--ui-space-6);
 }
+/* Until the app mounts, a screen's height, so the footer starts below the fold
+   and doesn't jump as it does. Not in the hub, whose frame has no footer. */
+:root:not([data-embed]) .processor:empty {
+  min-height: 100vh;
+}
 .tabs {
   display: flex;
   gap: var(--ui-space-4);
