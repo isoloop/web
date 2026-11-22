@@ -98,7 +98,7 @@ export const createAlertTool = topic('markets.alerts.create.v1', {
   tool: {
     title: 'Create an alert',
     description:
-      "Adds an alert rule: fire when the symbol's metric (price, vwap or spread) goes above or below the threshold. The rule shows in the alerts panel and is kept across reloads. Returns the rule's id.",
+      "Adds an alert rule: fire when the symbol's metric (price, vwap or spread) goes above or below the threshold, or at once if it's already past it. price is any exchange's last trade: the rule fires once, and again only after no exchange has been past the threshold for 10 s. vwap and spread are cross-market, and fire on each crossing. The rule shows in the alerts panel and is kept across reloads. Returns the rule's id.",
     readOnly: false,
     consequential: true,
   },

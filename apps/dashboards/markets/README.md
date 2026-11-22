@@ -46,7 +46,7 @@ The Isoloop builds expose two tools to agents ([ADR 0018](https://github.com/iso
 | Tool | Answered by | What it does |
 | --- | --- | --- |
 | `markets.quote.v1` | the aggregator | Read-only. For one symbol: VWAP, cross-market spread and volume over the dashboard's window (`null` with no trades in it), and each exchange's last, bid and ask. |
-| `markets.alerts.create.v1` | the alerts isolate | Consequential. Adds an alert rule, shown in the alerts panel and kept across reloads. The rule's id comes from the request's id, so a request delivered again after a crash adds nothing new. |
+| `markets.alerts.create.v1` | the alerts isolate | Consequential. Adds an alert rule, shown in the alerts panel and kept across reloads. A `price` rule watches every exchange's last trade: it fires once, and again only after none has been past the threshold for 10 s. The rule's id comes from the request's id, so a request delivered again after a crash adds nothing new. |
 
 In development the page pairs with the `isoloop mcp` dev server, so a coding agent can call them and read the page's isolates, topics and events. Run the CLI with a fixed token, and give the page the same one:
 
