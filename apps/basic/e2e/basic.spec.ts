@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { steadyLoop } from '../../../shared/steady-loop.ts';
 
 // What basic shows (website plan task 4b), against the built app: A and B on
 // their own workers, C and D in the pool "shared". Block keeps a loop busy for
@@ -41,6 +42,7 @@ test('the four isolates run, A and B on own workers, C and D in the pool', async
 test('blocking C stalls D, both restart together, A and B carry on', async ({ page }) => {
   await surface(page, 'A').getByRole('button', { name: 'Increment' }).click();
   await expect(surface(page, 'D').locator('.log')).toContainText('A count = 1');
+  await steadyLoop(page, 'C');
   await fault(page, 'C', 'Block 3 s').click();
   // D shares C's loop, so it stops beating too.
   await expect(status(page, 'D')).toContainText('blocked', { timeout: 2_000 });
@@ -78,6 +80,7 @@ test('blocking A restarts only A, which reads its count back from the bus', asyn
   await inc.click();
   await inc.click();
   await expect(surface(page, 'A').locator('.big')).toHaveText('2');
+  await steadyLoop(page, 'A');
   await fault(page, 'A', 'Block 3 s').click();
   await expect(restarts(page, 'A')).toHaveText('restarts: 1', { timeout: 8_000 });
   await ready(page, ['A']);
@@ -133,6 +136,7 @@ test("while A is down, C and D say they have no count from A, and aren't stuck",
   const waiting = (id: string) => pane(page, id).locator('.waiting');
   await Promise.all(['C', 'D'].map((id) => expect(waiting(id)).toBeHidden()));
   // A blocked for 3 s is killed at 2 s and restarted: down for a while.
+  await steadyLoop(page, 'A');
   await fault(page, 'A', 'Block 3 s').click();
   await Promise.all(
     ['C', 'D'].map((id) => expect(waiting(id)).toHaveText('no count from A', { timeout: 8_000 })),

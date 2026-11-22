@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Frame, type Page } from '@playwright/test';
+import { steadyLoop } from '../../../shared/steady-loop.ts';
 
 // isoloop-demo@1 (src/demo.ts, README): basic embedded in a same-origin parent
 // reports what really happens and takes the demo's controls; anything from
@@ -43,6 +44,12 @@ const command = (page: Page, message: unknown): Promise<void> =>
     const frame = document.querySelector('iframe');
     frame?.contentWindow?.postMessage(m, '*');
   }, message);
+
+const basicFrame = (page: Page): Frame => {
+  const frame = page.frames().find((f) => f.parentFrame() !== null);
+  if (!frame) throw new Error("basic's frame isn't there");
+  return frame;
+};
 
 const restartsIn = (page: Page, id: string): Promise<number> =>
   page
@@ -117,6 +124,7 @@ test.describe('embedded in a same-origin parent', () => {
         timeout: 15_000,
       })
       .toBe(4);
+    await steadyLoop(basicFrame(page), 'C');
     await command(page, { v: PROTOCOL, type: 'command', act: 'block-c' });
     await expect
       .poll(
