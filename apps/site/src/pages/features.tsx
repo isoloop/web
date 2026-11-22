@@ -34,9 +34,17 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
         {entry.name.replace(/\.$/, '')} <Pill feature={entry} />
       </h2>
       <div class="ui-body">
-        {entry.text.map((t) => (
-          <p key={t}>{rich(t)}</p>
-        ))}
+        {entry.text.map((t) =>
+          typeof t === 'string' ? (
+            <p key={t}>{rich(t)}</p>
+          ) : (
+            <ul key={t.join()}>
+              {t.map((item) => (
+                <li key={item}>{rich(item)}</li>
+              ))}
+            </ul>
+          ),
+        )}
         {children}
       </div>
     </section>

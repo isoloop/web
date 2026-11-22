@@ -206,7 +206,7 @@ export const home = {
     // (declared with 0.1.0-next.9; from then on, a change to the published
     // types needs the maintainer's approval).
     label:
-      'Isoloop isn’t at 0.1 yet. The API is frozen for 0.1. These are prereleases from the main branch, published under the next tag.',
+      'The API is frozen for 0.1. Until that release, prereleases from the main branch are published under the next tag.',
     command:
       'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp@next\n# for the devtools panel (experimental):\npnpm add @isoloop/devtools@next',
     guide: 'The hosting guide',
@@ -309,7 +309,7 @@ export const featuresPage = {
   // and "Packing back", at the library pin; the defaults are its options'.
   balancer: {
     caption:
-      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes, with its quarantine, bisect and fold moves counted among the 3. Packing while a backlog holds steady, the busy time an app reports, and leaving alone an isolate the kernel gave up on are new in 0.1.0-next.1.',
+      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes, with its quarantine, bisect and fold moves counted among the 3.',
     head: ['When', 'What the balancer does'],
     rows: <Row[]>[
       [
@@ -392,11 +392,10 @@ export const howItWorks = {
   heading: 'How Isoloop works',
   intro: [
     'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
-    'Each step below covers one part, with its code and the diagram drawn from the library’s code.',
+    'Each step below covers one part, with its code and its diagram. The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it.',
   ],
-  /** Under each step, as a footnote: where the diagrams come from, then the short sha. */
-  pinned:
-    'The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it. These are from isoloop/isoloop at',
+  /** Under each step, as a footnote, before the short sha. Where the diagrams come from is in the intro. */
+  pinned: 'Diagrams from isoloop/isoloop at',
   overview: {
     heading: 'The parts at a glance',
     text: [

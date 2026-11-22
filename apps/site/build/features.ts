@@ -42,8 +42,11 @@ export const featureSchema = z.strictObject({
   experimental: z.boolean().optional(),
   /** The strip's line. */
   line: z.string().min(1),
-  /** The section's paragraphs, `backticks` set as code. Empty where the section is all figures. */
-  text: z.array(z.string().min(1)),
+  /**
+   * The section's paragraphs and lists, `backticks` set as code: a string is a
+   * paragraph, an array of strings a list. Empty where the section is all figures.
+   */
+  text: z.array(z.union([z.string().min(1), z.array(z.string().min(1)).min(2)])),
   /** Which figure or demo the section shows (src/pages/features.tsx). */
   demo: z.enum([
     'recording',

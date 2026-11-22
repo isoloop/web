@@ -31,6 +31,21 @@ const library = (files: Record<string, string>) => ({
   has: (p: string): boolean => p in files,
 });
 
+const loadText = (text: unknown) =>
+  loadFeatures(dirWith({ 'bus.json': { ...entry, text } }), library({}), '.', { proofs: false });
+
+describe('a section’s text', () => {
+  it('takes paragraphs and lists', () => {
+    expect(loadText(['A paragraph.', ['One.', 'Two.']])[0]?.text).toEqual([
+      'A paragraph.',
+      ['One.', 'Two.'],
+    ]);
+  });
+  it('refuses a list of one', () => {
+    expect(() => loadText([['One.']])).toThrow();
+  });
+});
+
 describe('exportsSymbol', () => {
   it('finds declarations and export lists', () => {
     expect(exportsSymbol('export class Broker {}', 'Broker')).toBe(true);
