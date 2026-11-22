@@ -34,7 +34,7 @@ Each device has a different role, so each is shown with what it can and can't sh
 
 ### Mid-range phone: where native runs short
 
-MediaTek MT8781V, 8 cores, 8 GB, 96 Hz screen, Firefox 156. Two rounds per page, given as a range; 96 frames/s is the ceiling ([`comparison/phone/ikko-mindone-focus156/`](comparison/phone/ikko-mindone-focus156/README.md)).
+Android, 8 cores, 8 GB, 96 Hz screen, Firefox 156. Two rounds per page, given as a range; 96 frames/s is the ceiling ([results](comparison/phone/ikko-mindone-focus156/README.md)).
 
 | Build | Frames/s, 1 and 5 kHz | Late frames | Typing median | Slowest keystroke | First data |
 | --- | --- | --- | --- | --- | --- |
@@ -48,7 +48,7 @@ Both native builds draw well below the screen's rate and keep keystrokes waiting
 
 ### Desktop machine: the main thread under load, and the cost
 
-AMD Ryzen 7 5825U, 4 physical cores fixed at 2.0 GHz. Medians of 5 interleaved rounds ([`comparison/final/`](comparison/final/README.md)).
+x86-64, 4 physical cores fixed at 2.0 GHz. Medians of 5 interleaved rounds ([`comparison/final/`](comparison/final/README.md)).
 
 | | native | Isoloop `one` | native + workers | Isoloop `matched` |
 | --- | --- | --- | --- | --- |
@@ -62,7 +62,7 @@ At 1 kHz in Chromium every build keeps up. The difference shows under the heavie
 
 ### Flagship phone: headroom, no difference
 
-Snapdragon 8 Gen 3 for Galaxy, Chrome 157, one recording per page ([`comparison/phone/galaxy-fold6-chrome157/`](comparison/phone/galaxy-fold6-chrome157/README.md)). Every build, `own` included, held 60 frames/s with no long tasks at 1 and 5 kHz, and typing stayed at 9–13 ms median. Here the builds don't differ in responsiveness, and the cost below is all that's left.
+Android, 8 cores, 12 GB, Chrome 157, one recording per page ([results](comparison/phone/galaxy-fold6-chrome157/README.md)). Every build, `own` included, held 60 frames/s with no long tasks at 1 and 5 kHz, and typing stayed at 9–13 ms median. Here the builds don't differ in responsiveness, and the cost below is all that's left.
 
 ## What it costs
 
@@ -81,15 +81,15 @@ Isoloop minus its matched native build, desktop machine, Chromium. The 16 s figu
 - **On the mid-range phone,** Isoloop takes 1.2–2.0 s to first data, against 0.4–0.9 s for the native builds.
 - **Most of the extra CPU** is moving records between threads: the bus hop, at a fixed cost per message in the browser. The [CPU investigation](https://github.com/isoloop/isoloop/blob/main/docs/investigations/plant-cpu.md) and [ADR 0016](https://github.com/isoloop/isoloop/blob/main/docs/adr/0016-fewer-messages-per-record.md) explain it.
 - **The app's own code costs no more in a pool** than on native's main thread. At 5 kHz its feeds and engines take 51 ms/s in `one`, against 62 ms/s on native's main thread ([`comparison/final/`](comparison/final/README.md#cpu-probe)).
-- **In Playwright's WebKit on Linux,** the Isoloop page freezes in `split` and varies in `matched` ([engine constraint 2](https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md)). Safari on an iPad didn't; see [Devices](#devices).
+- **In Playwright's WebKit on Linux,** the Isoloop page freezes in `split` and varies in `matched` ([engine constraint 2](https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md)). Safari on an iPadOS tablet didn't; see [Devices](#devices).
 
 ## Devices
 
-- **Mid-range phone:** iKKO MindOne. MediaTek MT8781V: 2 × Cortex-A76 at 2.2 GHz and 6 × Cortex-A55 at 2.0 GHz, per [MediaTek's MT8781 page](https://www.mediatek.com/iot/modem-based-iot/mt8781). 8 GB, a 96 Hz screen, Android 15, Firefox Focus 156. It was driven over adb, with results read from the page's Record 10 s panel ([`comparison/phone/ikko-mindone-focus156/`](comparison/phone/ikko-mindone-focus156/README.md)).
+- **Mid-range phone:** 2 performance cores at 2.2 GHz and 6 efficiency cores at 2.0 GHz, 8 GB, a 96 Hz screen, Android 15, Firefox Focus 156. It was driven over adb, with results read from the page's Record 10 s panel ([results](comparison/phone/ikko-mindone-focus156/README.md)).
   - **Chrome on this phone is untested.** Chrome 157 failed to start its renderer processes during an earlier automated attempt. The cause was our tooling (`am force-stop` before each run), not the page, and Chrome wasn't retried after the phone restarted ([details](comparison/phone/ikko-mindone-focus156/README.md)).
-- **Desktop machine:** a home server doing nothing else. AMD Ryzen 7 5825U, with the run pinned to 4 physical cores and every core fixed at 2.0 GHz. Ubuntu 24.04, in Playwright's Docker image `v1.64.1-noble`. Pairs were run interleaved, 5 rounds ([`comparison/final/`](comparison/final/README.md); memory from [`comparison/matched-v2/`](comparison/matched-v2/README.md)).
-- **Flagship phone:** Samsung Galaxy Z Fold6, inner screen. Snapdragon 8 Gen 3 for Galaxy and 12 GB, per [Samsung's specs](https://www.samsung.com/ph/smartphones/galaxy-z-fold6/specs/); the browser reports 8 cores and 8 GB. Chrome 157, recorded by hand once per page ([`comparison/phone/galaxy-fold6-chrome157/`](comparison/phone/galaxy-fold6-chrome157/README.md)).
-- **iPad, observed, not recorded:** an iPad with Apple M2, in Safari, at `plant-v0.1.0-rc.3`. The user opened `isoloop/?rate=5&placement=split` and `isoloop/?rate=5&placement=matched`. Both pages filled, kept updating and didn't crash, and the page's fps badge showed a steady 60 on both. That was one look at each page: there's no Record 10 s result and no typing figure. Playwright's headless WebKit on Linux freezes these pages ([engine constraint 2](https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md)); Safari on this iPad runs them at 60 fps, which matches the canvas repro ([isoloop#161](https://github.com/isoloop/isoloop/pull/161)).
+- **Desktop machine:** a home server doing nothing else. x86-64, with the run pinned to 4 physical cores and every core fixed at 2.0 GHz. Ubuntu 24.04, in Playwright's Docker image `v1.64.1-noble`. Pairs were run interleaved, 5 rounds ([`comparison/final/`](comparison/final/README.md); memory from [`comparison/matched-v2/`](comparison/matched-v2/README.md)).
+- **Flagship phone:** an Android foldable, inner screen, 12 GB; the browser reports 8 cores and 8 GB. Chrome 157, recorded by hand once per page ([results](comparison/phone/galaxy-fold6-chrome157/README.md)).
+- **Tablet, observed, not recorded:** an iPadOS tablet, in Safari, at `plant-v0.1.0-rc.3`. The user opened `isoloop/?rate=5&placement=split` and `isoloop/?rate=5&placement=matched`. Both pages filled, kept updating and didn't crash, and the page's fps badge showed a steady 60 on both. That was one look at each page: there's no Record 10 s result and no typing figure. Playwright's headless WebKit on Linux freezes these pages ([engine constraint 2](https://github.com/isoloop/isoloop/blob/main/docs/investigations/engine-constraints.md)); Safari on this tablet runs them at 60 fps, which matches the canvas repro ([isoloop#161](https://github.com/isoloop/isoloop/pull/161)).
 
 ## More
 

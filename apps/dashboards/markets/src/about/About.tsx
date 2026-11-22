@@ -140,8 +140,8 @@ export function About() {
         </li>
         <li>
           Heavy runs 30 isolates. On a worker each (<code>?placement=own</code>) that is within the
-          soft budget of 32 workers (ADR 0001); <code>?placement=matched</code> pools the widgets
-          into one worker, and <code>?placement=one</code> puts every isolate in one.
+          soft budget of 32 workers; <code>?placement=matched</code> pools the widgets into one
+          worker, and <code>?placement=one</code> puts every isolate in one.
         </li>
       </ul>
     </details>

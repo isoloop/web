@@ -1,5 +1,5 @@
 // The raw-Markdown check: no page of the assembled site shows a reader
-// Markdown that should have been rendered (a `backtick` span, **bold**), in
+// Markdown that should have been rendered (a `backtick` span, a [link](…), **bold**), in
 // its text or in the attributes that are read out or shown. No dependencies.
 //   node scripts/textcheck.ts <dir>
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -19,7 +19,11 @@ function htmlFiles(dir: string): string[] {
 const NOT_PROSE = /<(script|style|pre|code)\b[^>]*>[\s\S]*?<\/\1>/gi;
 const SHOWN_ATTR = /\s(?:aria-label|alt|title|content)\s*=\s*"([^"]*)"/gi;
 // Code becomes a placeholder first, so two separate spans can't read as one.
-const RAW = [/`[^`\n]{1,80}`/g, /\*\*[^*\s][^*\n]{0,80}\*\*/g];
+const RAW = [
+  /`[^`\n]{1,80}`/g,
+  /\[[^\]\n]{1,80}\]\((?:https?:|\.{0,2}\/)[^)\s]+\)/g,
+  /\*\*[^*\s][^*\n]{0,80}\*\*/g,
+];
 
 /** The raw Markdown a page shows. */
 function rawMarkdown(html: string): string[] {
