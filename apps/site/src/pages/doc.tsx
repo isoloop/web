@@ -252,12 +252,12 @@ export const docsIndexPage: Page = {
         <SearchBox id="search-top" class="docs-only-narrow" />
         <div class="docs-index-head">
           <div class="docs-index-head-text">
-          <h1>{c.heading}</h1>
-          <p class="docs-lead">{c.lede}</p>
-          <p class="docs-agents">
-            {c.agents.lead} <a href="/llms.txt">{c.agents.index}</a> {c.agents.indexNote}{' '}
-            <a href="/llms-full.txt">{c.agents.full}</a> {c.agents.fullNote}
-          </p>
+            <h1>{c.heading}</h1>
+            <p class="docs-lead">{c.lede}</p>
+            <p class="docs-agents">
+              {c.agents.lead} <a href="/llms.txt">{c.agents.index}</a> {c.agents.indexNote}{' '}
+              <a href="/llms-full.txt">{c.agents.full}</a> {c.agents.fullNote}
+            </p>
           </div>
           <img
             class="docs-index-image"
