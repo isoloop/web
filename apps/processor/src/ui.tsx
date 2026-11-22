@@ -1,6 +1,16 @@
 // What both processor pages draw the same way: a worker's lag against the
 // balancer's thresholds, the move log, and a model redrawn ten times a second.
 import { useEffect, useState, type ReactElement } from 'react';
+import { mountDevtoolsSwitch } from '../../../shared/devtools-switch';
+import {
+  RESTART_STEPS,
+  isRestartStep,
+  restartsFrom,
+  withRestarts,
+  type RestartStep,
+} from './restarts';
+import { spans, type IntroBlock } from '../../../shared/intro';
+import example from '../example.json' with { type: 'json' };
 
 /** The balancer's thresholds (ADR 0017 defaults), drawn on each worker's lag. */
 export const SUSTAINED_MS = 50;
@@ -17,11 +27,15 @@ export const REASONS: Record<string, string> = {
   crash: 'crashed',
   bisect: 'bisect',
   steady: 'steady again',
+  /** A new isolate's way out of the quarantine once measured (measuring.ts, isoloop/isoloop#346). */
+  measured: 'measured',
   restart: 'restarted',
   /** Its reported backlog kept rising (M3i). */
   backlog: 'falling behind',
   /** A quiet task joining another pool to free a worker (M3i). */
   pack: 'packed',
+  /** A second quarantine folding into the first, so a task falling behind gets its worker (M3j). */
+  room: 'making room',
   /** A first long task: noted, nothing moves (M3i). */
   noted: 'spike noted',
   /** Falling behind with nowhere to give it more CPU (M3i). */
@@ -112,5 +126,89 @@ export function MoveLog({ log }: { log: LogEntry[] }): ReactElement {
         </ol>
       )}
     </section>
+  );
+}
+
+/** One line of an intro: its `code` and **bold** spans (shared/intro.ts). */
+const line = (text: string): ReactElement[] =>
+  spans(text).map((s, i) =>
+    s.kind === 'code' ? (
+      <code key={i}>{s.text}</code>
+    ) : s.kind === 'bold' ? (
+      <strong key={i}>{s.text}</strong>
+    ) : (
+      <span key={i}>{s.text}</span>
+    ),
+  );
+
+/**
+ * A page's intro, from example.json (`embeds[].intro`): the site's examples
+ * hub draws the same text, so the two can't drift (shared/intro.ts).
+ */
+export function Intro({ id }: { id: string }): ReactElement {
+  const blocks: IntroBlock[] | undefined = example.embeds.find((e) => e.id === id)?.intro;
+  if (!blocks) throw new Error(`example.json: no intro for ${id}`);
+  return (
+    <>
+      {blocks.map((b, i) =>
+        typeof b === 'string' ? (
+          <p key={i}>{line(b)}</p>
+        ) : (
+          <ul key={i}>
+            {b.list.map((li) => (
+              <li key={li}>{line(li)}</li>
+            ))}
+          </ul>
+        ),
+      )}
+    </>
+  );
+}
+
+/**
+ * The page's own Devtools switch (shared/devtools-switch.ts, the same on the
+ * dashboards' bar): reloads the page with `?devtools=1` added or removed.
+ * Hidden when the page is framed by the site's examples hub (?embed=1),
+ * which draws the same switch over its frame.
+ */
+export function DevtoolsToggle(): ReactElement {
+  return <span className="group devtools-toggle" ref={(el) => mountDevtoolsSwitch(el)} />;
+}
+
+const STEP_LABELS: Record<RestartStep, string> = {
+  '0': 'none (fail on first crash)',
+  '1': '1',
+  '3': '3 (default)',
+  '10': '10',
+};
+
+/**
+ * The kernel's restart limit (restarts.ts): restarts allowed per isolate in
+ * 60 s before the kernel gives up on it. Kernel-wide, so a change reloads
+ * the page with `?restarts=` and applies from the start.
+ */
+export function RestartsControl(): ReactElement {
+  const { step } = restartsFrom(location.search);
+  return (
+    <label
+      className="group"
+      title="Restarts allowed per isolate within 60 s before the kernel gives up on it"
+    >
+      Restarts in 60 s
+      <select
+        value={step}
+        data-testid="restarts"
+        onChange={(e) => {
+          const next = e.currentTarget.value;
+          if (isRestartStep(next)) location.assign(withRestarts(location.href, next));
+        }}
+      >
+        {RESTART_STEPS.map((s) => (
+          <option key={s} value={s}>
+            {STEP_LABELS[s]}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

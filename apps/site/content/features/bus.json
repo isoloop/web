@@ -2,6 +2,7 @@
   "id": "bus",
   "order": 30,
   "part": "bus",
+  "tab": "bus",
   "name": "The message bus.",
   "line": "Typed topics in their own worker, every record checked against its schema.",
   "text": [
@@ -12,17 +13,17 @@
   "proof": [
     {
       "repo": "isoloop",
-      "path": "packages/bus/src/broker.ts",
+      "path": "packages/bus/src/broker/broker.ts",
       "symbol": "Broker"
     },
     {
       "repo": "isoloop",
-      "path": "packages/bus/src/standard-schema.ts",
+      "path": "packages/bus/src/contracts/standard-schema.ts",
       "symbol": "toIssues"
     },
     {
       "repo": "isoloop",
-      "path": "packages/bus/src/topic.ts",
+      "path": "packages/bus/src/contracts/topic.ts",
       "symbol": "topic"
     }
   ]

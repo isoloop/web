@@ -2,7 +2,15 @@
 // came out (queue, jobs per second, latency), the processors on their
 // workers, the latest results with a filter, and the balancer's moves.
 import { useState, type ReactElement } from 'react';
-import { LagChart, MoveLog, REASONS, useSnapshot } from '../ui';
+import {
+  DevtoolsToggle,
+  Intro,
+  LagChart,
+  MoveLog,
+  REASONS,
+  RestartsControl,
+  useSnapshot,
+} from '../ui';
 import { KIND_LABELS } from './kinds';
 import type { FileProcessor, Mode, ProcessorView, Result, WorkerView } from './model';
 
@@ -14,9 +22,8 @@ const MODES: { mode: Mode; label: string; hint: string }[] = [
 
 const ms = (v: number | undefined): string => (v === undefined ? '--' : `${Math.round(v)} ms`);
 
-export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
-  const [snap, refresh] = useSnapshot(model);
-  const d = snap.dials;
+/** The page's tabs and intro: all of it that needs no kernel (drawn before Start with ?start=manual). */
+export function FilesIntro(): ReactElement {
   return (
     <>
       <nav className="tabs" aria-label="Processor pages">
@@ -27,15 +34,18 @@ export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
       </nav>
       <section className="intro">
         <h1>File processor</h1>
-        <p>
-          A generator makes synthetic files at the rate you set: CSV to parse and sum, images to
-          scale and blur, archives to compress, and data to hash with SHA-256, each more work the
-          bigger it is. Each kind goes to its own topic, read by a group of two processors, all
-          headless isolates. A processor commits a file only once its result is out, so when the
-          balancer moves it, what it hadn’t finished goes to the group again. Poison files block a
-          processor for 2 s, heavy ones are ten times the work, corrupt ones crash it.
-        </p>
+        <Intro id="processor-files" />
       </section>
+    </>
+  );
+}
+
+export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
+  const [snap, refresh] = useSnapshot(model);
+  const d = snap.dials;
+  return (
+    <>
+      <FilesIntro />
 
       <section className="controls" aria-label="Generator">
         <div className="group">
@@ -115,6 +125,8 @@ export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
         >
           workers {snap.workerCount} · balancer pools {snap.balancerPools}/{snap.maxWorkers}
         </span>
+        <RestartsControl />
+        <DevtoolsToggle />
       </section>
 
       <section className="stats" aria-label="Figures">
@@ -152,7 +164,7 @@ export function FilesPage({ model }: { model: FileProcessor }): ReactElement {
 
       <section className="columns" aria-label="Workers">
         {snap.workers.map((w) => (
-          <Worker key={w.key} worker={w} />
+          <Worker key={w.key} worker={w} model={model} />
         ))}
       </section>
 
@@ -197,7 +209,7 @@ function Stat(props: { label: string; value: string | number; testid: string }):
   );
 }
 
-function Worker({ worker }: { worker: WorkerView }): ReactElement {
+function Worker({ worker, model }: { worker: WorkerView; model: FileProcessor }): ReactElement {
   const total = worker.processors.reduce((s, p) => s + (p.load ?? 0), 0);
   return (
     <section className="column" data-kind={worker.kind} data-pool={worker.key}>
@@ -208,14 +220,14 @@ function Worker({ worker }: { worker: WorkerView }): ReactElement {
       <LagChart lags={worker.lags} />
       <ul className="cards">
         {worker.processors.map((p) => (
-          <Processor key={`${worker.key}/${p.id}`} p={p} />
+          <Processor key={`${worker.key}/${p.id}`} p={p} model={model} />
         ))}
       </ul>
     </section>
   );
 }
 
-function Processor({ p }: { p: ProcessorView }): ReactElement {
+function Processor({ p, model }: { p: ProcessorView; model: FileProcessor }): ReactElement {
   const load = p.load === undefined ? undefined : Math.round(p.load);
   return (
     <li
@@ -227,6 +239,15 @@ function Processor({ p }: { p: ProcessorView }): ReactElement {
       <div className="card-head">
         <strong>{p.id}</strong>
         <span className="mono muted state">{p.state}</span>
+        {p.measuring && (
+          <span
+            className="badge"
+            data-reason="measuring"
+            title="New here: the balancer measures its load before placing it"
+          >
+            measuring
+          </span>
+        )}
         {p.moved && (
           <span className="badge" data-reason={p.moved.reason}>
             {REASONS[p.moved.reason] ?? p.moved.reason} · from {p.moved.from}
@@ -240,6 +261,14 @@ function Processor({ p }: { p: ProcessorView }): ReactElement {
         <span className="mono muted">load {load === undefined ? '--' : `${load} %`}</span>
         <span className="mono muted">{p.done} done</span>
       </div>
+      {p.gaveUp && (
+        <div className="gave-up" data-testid="gave-up">
+          <span className="mono">{p.gaveUp}</span>
+          <button type="button" className="ui-button" onClick={() => model.restart(p.id)}>
+            Restart
+          </button>
+        </div>
+      )}
     </li>
   );
 }

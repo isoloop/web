@@ -48,6 +48,9 @@ const PLACE: Record<string, [Track, number]> = {
   D: ['pool', 1],
 };
 /** The isolates each control acts on. */
+/** Width of the strip at the pool rows' left edge that holds the C and D names. */
+const POOL_LABELS = 22;
+
 const TARGETS: Record<string, string[]> = { 'crash-a': ['A'], 'block-c': ['C', 'D'] };
 /** A gap between frames this long is a stuck main thread. */
 const MAIN_STUCK_MS = 250;
@@ -533,8 +536,11 @@ export class Recording {
       ctx.setLineDash([]);
       ctx.font = '600 11px Archivo, system-ui';
       ctx.fillStyle = colors['muted'] ?? '#555';
-      ctx.fillText('C', 6, pool[0] + 16);
-      ctx.fillText('D', 6, pool[0] + pool[1] / 2 + 16);
+      // The row names sit in a strip of their own, left of where bars start.
+      ctx.textBaseline = 'middle';
+      ctx.fillText('C', 8, pool[0] + pool[1] / 4);
+      ctx.fillText('D', 8, pool[0] + (3 * pool[1]) / 4);
+      ctx.textBaseline = 'alphabetic';
     }
 
     for (const b of this.#bars) {
@@ -544,9 +550,11 @@ export class Recording {
       const sub = split ? r[1] / 2 : r[1];
       const y = r[0] + (split ? b.row * sub : 0) + 9;
       const h = sub - 18;
-      const x0 = x(b.start);
+      // In the pool's two rows, bars stop short of the strip with C and D.
+      const left = split ? POOL_LABELS : 0;
+      const x0 = Math.max(x(b.start), left);
       const x1 = Math.min(x(b.end), W);
-      if (x1 < 0) continue;
+      if (x1 < left) continue;
       const width = Math.max(b.track === 'main' || b.track === 'bus' ? 1.2 : 2.5, x1 - x0);
       const bad = b.kind === 'failed' || b.kind === 'rejected';
       const c = (bad ? colors['bad'] : colors[b.track]) ?? '#888';

@@ -57,6 +57,6 @@ Open the PR to the maintainer: the source PR, what changed on which page, the st
 
 ## 7. Release, on the maintainer's word
 
-When the maintainer says to release: tag `site-v<next>` on the merge commit, which must be a commit no other deploy tag sits on. Watch the release run, then check the changed pages on `isoloop.dev` once the CDN serves them (up to 10 minutes), and report what you saw.
+When the maintainer says to release: tag `site-v<next>` on the merge commit. If app tags go on the same commit, push `site-v<next>` first, one tag per push (AGENTS.md, Releases). Watch the release run, then check the changed pages on `isoloop.dev` once the CDN serves them (up to 10 minutes), and report what you saw.
 
 **Done when** the changed pages show the new content live.

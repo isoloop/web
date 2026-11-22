@@ -31,6 +31,9 @@ const PAIRS: [string, string, number][] = [
   ['ui-text', 'ui-bg', 4.5],
   ['ui-text', 'ui-surface', 4.5],
   ['ui-text-muted', 'ui-bg', 4.5],
+  // Running text, a step softer than the headings.
+  ['ui-prose', 'ui-bg', 4.5],
+  ['ui-prose', 'ui-surface', 4.5],
   ['ui-accent', 'ui-bg', 4.5],
   ['ui-on-accent', 'ui-accent', 4.5],
   ['ui-border', 'ui-bg', 3],
@@ -38,6 +41,9 @@ const PAIRS: [string, string, number][] = [
   ['ui-focus', 'ui-bg', 3],
   ['ui-bad', 'ui-bg', 4.5],
   ['ui-bad', 'ui-surface', 4.5],
+  // The experimental pill: small text and its outline in this colour.
+  ['ui-experimental', 'ui-bg', 4.5],
+  ['ui-experimental', 'ui-surface', 4.5],
   // The part colours mark tracks, bars and headings, always next to a name in text.
   ['ui-part-host', 'ui-bg', 3],
   ['ui-part-host', 'ui-surface', 3],
@@ -59,6 +65,16 @@ function colour(semantic: Map<string, string>, n: string): string {
 describe.each(Object.entries(themes))('the %s theme', (_name, semantic) => {
   it.each(PAIRS)('--%s on --%s is at least %d:1', (fg, bg, min) => {
     expect(contrast(colour(semantic, fg), colour(semantic, bg))).toBeGreaterThanOrEqual(min);
+  });
+});
+
+// The compact experimental mark (ADR 0005, amended 2026-11-20) is a graphic, so
+// it needs the 3:1 non-text level against the page and the surface.
+describe.each(Object.entries(themes))('the %s theme, the experimental mark', (_name, semantic) => {
+  it.each(['ui-bg', 'ui-surface'])('--ui-experimental on --%s is at least 3:1', (bg) => {
+    expect(
+      contrast(colour(semantic, 'ui-experimental'), colour(semantic, bg)),
+    ).toBeGreaterThanOrEqual(3);
   });
 });
 

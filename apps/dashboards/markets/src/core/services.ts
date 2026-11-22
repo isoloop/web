@@ -9,7 +9,7 @@ import { play } from './replay/player';
 import { synth } from './replay/synth';
 import { restamp } from './replay/tick';
 import { LIVE_SYMBOLS, SYMBOLS } from './symbols';
-import type { Sym } from './schemas';
+import type { AlertCreate, AlertCreated, QuoteReply, Sym } from './schemas';
 import type { Source } from './streams';
 
 export interface Stoppable {
@@ -88,8 +88,14 @@ export function runLiveFeed(
   });
 }
 
+/** The aggregator, plus what its agent tool asks (M4a). */
+export interface AggregatorService extends Stoppable {
+  /** The figures for `symbol` now, over the dashboard's window, and each exchange's latest quote. */
+  quote(symbol: Sym): QuoteReply;
+}
+
 /** Cross-market VWAP, spread and volume per symbol, once a second, into `aggregates`. */
-export function runAggregator(src: Source, everyMs = 1_000): Stoppable {
+export function runAggregator(src: Source, everyMs = 1_000): AggregatorService {
   const agg = new Aggregator();
   let windowMs = 60_000;
   const subs = [
@@ -123,6 +129,13 @@ export function runAggregator(src: Source, everyMs = 1_000): Stoppable {
     }
   }, everyMs);
   return {
+    quote(symbol) {
+      return {
+        symbol,
+        aggregate: agg.compute(symbol, Date.now(), windowMs),
+        prices: agg.quotes(symbol),
+      };
+    },
     stop() {
       clearInterval(timer);
       for (const u of subs) u();
@@ -130,12 +143,27 @@ export function runAggregator(src: Source, everyMs = 1_000): Stoppable {
   };
 }
 
+/** The alerts job, plus what its agent tool asks (M4a). */
+export interface AlertsService extends Stoppable {
+  /**
+   * Adds the rule an agent asked for. Its id comes from the request's id, so
+   * the same request delivered again (after a crash before the reply) only
+   * publishes the same rule again, under the same key: still one rule.
+   */
+  create(requestId: string, rule: AlertCreate): AlertCreated;
+}
+
+/** The id of the rule an agent's request adds. */
+export function agentRuleId(requestId: string): string {
+  return `agent-${requestId}`;
+}
+
 /**
- * Evaluates the rules in `alertRules` against `prices` (`price`, each
- * exchange's last) and `aggregates` (`vwap`, `spread`) into `alerts`. It reads
- * `alerts` back first, so a restart doesn't fire a rule twice.
+ * Evaluates the rules in `alertRules` against `prices` (`price`, every
+ * exchange's last, held per symbol) and `aggregates` (`vwap`, `spread`) into
+ * `alerts`. It reads `alerts` back first, so a restart doesn't fire a rule twice.
  */
-export function runAlerts(src: Source): Stoppable {
+export function runAlerts(src: Source): AlertsService {
   const engine = new AlertEngine();
   const fire = (list: ReturnType<AlertEngine['evaluate']>): void => {
     for (const a of list) src.publish('alerts', a);
@@ -173,6 +201,16 @@ export function runAlerts(src: Source): Stoppable {
     ),
   ];
   return {
+    create(requestId, rule) {
+      const id = agentRuleId(requestId);
+      const created = !engine.has(id);
+      const value = { removed: false as const, id, ...rule };
+      // The engine hears it back from the topic too; adding it here as well
+      // makes a second delivery of the same request see it at once.
+      if (created) engine.setRule(value);
+      src.publish('alertRules', value, id);
+      return { id, created };
+    },
     stop() {
       for (const u of subs) u();
     },

@@ -1,9 +1,15 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   decodeDataUrl,
   extractDataUrls,
   inlineLeftovers,
   patchViewerScript,
+  DIAGRAM_ORDER,
+  readDiagrams,
+  viewBoxRatio,
   rewritePage,
   stylesToClasses,
 } from './diagrams.ts';
@@ -61,7 +67,7 @@ describe('rewritePage', () => {
       },
     );
     expect(out).toMatch(
-      /^<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'"><script src="\/assets\/ui-theme-1.js" data-archify><\/script><link rel="stylesheet" href=".\/dg-inline-1.css"><title>/,
+      /^<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'"><script src="\/assets\/ui-theme-1.js" data-archify><\/script><link rel="stylesheet" href=".\/dg-inline-1.css"><meta name="robots" content="noindex, indexifembedded"><title>/,
     );
   });
 
@@ -125,5 +131,28 @@ describe('patchViewerScript', () => {
     expect(() =>
       patchViewerScript("var s = document.createElement('style'); s.textContent = x;"),
     ).toThrow(/patchViewerScript/);
+  });
+});
+
+describe('readDiagrams', () => {
+  it('takes each title from the JSON’s meta, falling back to the name', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'diagrams-'));
+    for (const name of DIAGRAM_ORDER) {
+      const json = name === 'placement' ? {} : { meta: { title: `Title of ${name}` } };
+      writeFileSync(join(dir, `${name}.json`), JSON.stringify(json));
+    }
+    const out = readDiagrams(dir);
+    expect(out[0]).toEqual({ name: 'runtime-topology', title: 'Title of runtime-topology' });
+    expect(out.find((d) => d.name === 'placement')?.title).toBe('placement');
+  });
+});
+
+describe('viewBoxRatio', () => {
+  it('reads the drawing’s viewBox, not an icon’s before it', () => {
+    const html =
+      '<svg viewBox="0 0 16 16"></svg><div class="diagram-container" id="d"><svg class="x" viewBox="0 0 1422 846"></svg></div>';
+    expect(viewBoxRatio(html)).toBeCloseTo(1422 / 846);
+    expect(viewBoxRatio('<div class="diagram-container"><svg></svg></div>')).toBeUndefined();
+    expect(viewBoxRatio('<svg viewBox="0 0 2 1"></svg>')).toBeUndefined();
   });
 });

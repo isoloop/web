@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 import { DIAGRAM_ORDER } from '../build/diagrams.ts';
+import { readManifest } from '../build/docs/pages.ts';
 import { expectAccessible } from './accessible.ts';
 
 declare global {
@@ -32,7 +34,21 @@ async function watch(page: Page): Promise<() => Promise<string[]>> {
   };
 }
 
-const PAGES = ['/', '/features/', '/how-it-works/', '/examples/', '/changelog/', '/__specimens/'];
+/** The docs pages, one per guide in content/docs.json (build/docs/pages.ts). */
+const DOCS = readManifest(
+  fileURLToPath(new URL('../content/docs.json', import.meta.url)),
+).sections.flatMap((s) => s.guides.flatMap((g) => ('slug' in g ? [`/docs/${g.slug}/`] : [])));
+
+const PAGES = [
+  '/',
+  '/features/',
+  '/how-it-works/',
+  '/examples/',
+  '/changelog/',
+  '/__specimens/',
+  '/docs/',
+  ...DOCS,
+];
 
 for (const path of PAGES) {
   test(`${path} loads cleanly and is accessible`, async ({ page }) => {
@@ -45,6 +61,49 @@ for (const path of PAGES) {
     expect(await problems()).toEqual([]);
   });
 }
+
+// The costs table has a second form below 881px (src/pages/delta.tsx), so
+// the pages that show it are checked at a phone's width too.
+for (const path of ['/', '/features/']) {
+  test(`${path} is accessible at a phone's width, with nothing wider than the screen`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    // On /features/ the costs table is in the Cost tab (ADR 0005).
+    await page.goto(path === '/features/' ? '/features/#costs' : path);
+    await expect(page.locator('.ui-delta-narrow table').first()).toBeVisible();
+    await expect(page.locator('.ui-delta-wide')).toBeHidden();
+    await expectAccessible(page, { exclude: ['iframe'] });
+    const widest = await page.evaluate(() =>
+      Math.max(
+        ...[...document.querySelectorAll('.ui-delta-narrow table')].map(
+          (t) => t.scrollWidth - (t.parentElement?.clientWidth ?? 0),
+        ),
+      ),
+    );
+    expect(widest).toBeLessThanOrEqual(0);
+  });
+}
+
+test('the code behind the landing demo folds out of the recording, as tabs', async ({ page }) => {
+  await page.goto('/');
+  const fold = page.locator('.ui-recording details.ui-demo-code');
+  const host = page.getByRole('tabpanel', { name: 'main.ts' });
+  await expect(host).toBeHidden();
+  await fold.locator('summary').click();
+  await expect(host).toBeVisible();
+  await expect(host.locator('.tok-keyword').first()).toHaveText('import');
+  await expect(host).toContainText("pool: 'shared'");
+  const counterTab = page.getByRole('tab', { name: 'counter.ts' });
+  await page.getByRole('tab', { name: 'main.ts' }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(counterTab).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel', { name: 'counter.ts' })).toContainText(
+    "from: 'earliest'",
+  );
+  await expect(host).toBeHidden();
+  await expectAccessible(page, { exclude: ['iframe'] });
+});
 
 test('a missing page gets the 404 page', async ({ page }) => {
   const problems = await watch(page);
@@ -229,7 +288,8 @@ test('/features/ shows basic’s real records, reads and a replay after a crash'
   page,
 }) => {
   const problems = await watch(page);
-  await page.goto('/features/');
+  // The bus and the replay are in the Bus tab (ADR 0005).
+  await page.goto('/features/#messaging');
   const bus = page.locator('[data-demo="bus"]');
   await bus.scrollIntoViewIfNeeded();
   await expect(bus.locator('.topic[data-topic="count.v1"] .rec').first()).toBeVisible({
@@ -253,6 +313,34 @@ test('/features/ shows basic’s real records, reads and a replay after a crash'
   await expect(status).toContainText(/D read \d+ notes? again/, { timeout: 10_000 });
   await expect(replay.locator('.tape-cells li.again').first()).toBeVisible();
   expect((await problems()).filter((e) => !/crash/i.test(e))).toEqual([]);
+});
+
+test('/features/ shows one group of features at a time, and a feature link opens its group', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/features/');
+  // The rail (ADR 0005, amended 2026-11-21): groups as headings, features as items.
+  const tabs = page.getByRole('navigation', { name: 'Features, by group' });
+  await expect(tabs.getByRole('link', { name: 'Containment' })).toHaveAttribute(
+    'aria-current',
+    'location',
+  );
+  await expect(page.locator('#containment')).toBeVisible();
+  await expect(page.locator('#balancer')).toBeHidden();
+  // From the notes: a feature in another tab opens that tab.
+  await page.locator('.fnotes a[href="#balancer"]').click();
+  await expect(page.locator('#balancer')).toBeVisible();
+  await expect(page.locator('#containment')).toBeHidden();
+  await expect(tabs.getByRole('link', { name: /Automatic placement/ })).toHaveAttribute(
+    'aria-current',
+    'location',
+  );
+  await expect(
+    page.getByRole('heading', { name: 'Automatic placement Experimental' }),
+  ).toBeVisible();
+  await page.goBack();
+  await expect(page.locator('#containment')).toBeVisible();
 });
 
 test('the framework tabs work with the keyboard', async ({ page }) => {
@@ -283,4 +371,145 @@ test('the theme switch changes the page and the diagram frames live', async ({ p
   await expect(toggle).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(frame.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+
+test('how it works shows one step at a time, kept in the URL', async ({ page }) => {
+  await page.goto('/how-it-works/');
+  const steps = page.locator('[data-step]');
+  const nav = page.getByRole('navigation', { name: 'Steps' });
+  await expect(steps.and(page.locator(':visible'))).toHaveCount(1);
+  await expect(page.locator('#overview')).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'step');
+  await nav.getByRole('link', { name: 'Bus', exact: true }).click();
+  await expect(page).toHaveURL(/#bus$/);
+  await expect(page.locator('#bus')).toBeVisible();
+  await expect(page.locator('#overview')).toBeHidden();
+  await expect(
+    page.locator('#bus iframe[src="/how-it-works/diagrams/bus-publish.html?embed=1"]'),
+  ).toHaveCount(1);
+  await page
+    .locator('#bus')
+    .getByRole('link', { name: /Next\s*Rendering/ })
+    .click();
+  await expect(page.locator('#render')).toBeVisible();
+  await page.goBack();
+  await expect(page.locator('#bus')).toBeVisible();
+  // On the page a diagram is the drawing alone; full size, the presentation stage.
+  const frame = page.locator('#bus iframe').contentFrame();
+  await expect(frame.locator('html')).toHaveAttribute('data-embed', 'true');
+  await expect(frame.locator('.toolbar')).toBeHidden();
+  await expect(page.locator('#bus a[href$="bus-publish.html?present=1"]')).toHaveCount(1);
+  await page.goto('/how-it-works/#restart');
+  await expect(page.locator('#restart')).toBeVisible();
+  await expect(page.locator('#restart iframe')).toHaveCount(2);
+});
+
+test('the rail stays in view beside the steps, and folds above them on a phone', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/how-it-works/');
+  const rail = page.locator('.rail-wide .rail');
+  await expect(rail).toBeVisible();
+  expect(await rail.evaluate((el) => getComputedStyle(el).position)).toBe('sticky');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(rail).toBeHidden();
+  const fold = page.locator('.rail-fold');
+  await expect(fold.locator('summary')).toContainText('Overview');
+  await fold.locator('summary').click();
+  await fold.getByRole('link', { name: 'Bus', exact: true }).click();
+  await expect(page.locator('#bus')).toBeVisible();
+  await expect(fold).not.toHaveAttribute('open');
+  await expect(fold.locator('summary')).toContainText('Bus');
+});
+
+test('the examples hub says the examples run without the policy on this host', async ({ page }) => {
+  // ADR 0002, decision 8, amended 2026-11-21.
+  await page.goto('/examples/');
+  const line = page.locator('.ex-policy');
+  await expect(line).toContainText('On this host the examples run without the security policy');
+  await expect(line.getByRole('link', { name: 'the hosting guide' })).toHaveAttribute(
+    'href',
+    '/docs/hosting/',
+  );
+});
+
+for (const [panel, frame] of [
+  ['basic', '/examples/basic/?embed=1&start=manual'],
+  ['processor-playground', '/examples/processor/?embed=1&start=manual'],
+] as const) {
+  test(`the hub's ${panel} panel runs its app only after Start, and again idle once left`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/examples/#${panel}`);
+    const section = page.locator(`#${panel}`);
+    await expect(section.locator(`iframe[src="${frame}"]`)).toHaveCount(1);
+    const app = section.locator('iframe').contentFrame();
+    const kernel = (): Promise<boolean> =>
+      section
+        .locator('iframe')
+        .evaluate((el: HTMLIFrameElement) => Reflect.has(el.contentWindow ?? {}, 'kernel'));
+    // Idle: the app's own UI under the hub's Start, and no kernel.
+    const start = section.locator('.ex-live-cover').getByRole('button', { name: 'Start' });
+    await expect(start).toBeVisible();
+    await expect(app.locator('body')).not.toBeEmpty();
+    expect(await kernel()).toBe(false);
+    await start.click();
+    await expect(start).toBeHidden();
+    await expect.poll(kernel).toBe(true);
+    await expect(section.getByRole('link', { name: /Open full page/ })).toHaveAttribute(
+      'href',
+      frame.split('?')[0] ?? '',
+    );
+    // Leaving the panel reloads the frame idle, with Start back over it.
+    await page.goto('/examples/#plant');
+    await page.goto(`/examples/#${panel}`);
+    await expect(start).toBeVisible();
+    await expect.poll(kernel).toBe(false);
+  });
+}
+
+test('the hub’s Devtools switch reloads a processor frame idle with ?devtools=1', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/examples/#processor-playground');
+  const section = page.locator('#processor-playground');
+  const frame = section.locator('iframe');
+  const height = Number(await frame.getAttribute('height'));
+  // The script reloads the frame through its own window, so its URL is the one to read.
+  const url = (): Promise<string> =>
+    frame.evaluate((el: HTMLIFrameElement) => el.contentWindow?.location.href ?? '');
+  const box = section.getByRole('checkbox', { name: /Devtools/ });
+  await expect(box).toBeVisible();
+  await box.check();
+  await expect.poll(url).toMatch(/devtools=1/);
+  expect(Number(await frame.getAttribute('height'))).toBeGreaterThan(height);
+  await expect(section.getByRole('link', { name: /Open full page/ })).toHaveAttribute(
+    'href',
+    /devtools=1/,
+  );
+  // Idle again under Start; the panel starts with the app.
+  await expect(section.locator('.ex-live-cover')).toBeVisible();
+  await box.uncheck();
+  await expect.poll(url).not.toMatch(/devtools=1/);
+  // Basic has no switch.
+  await page.goto('/examples/#basic');
+  await expect(page.locator('#basic').getByRole('checkbox', { name: /Devtools/ })).toHaveCount(0);
+});
+
+test('robots.txt points at a sitemap whose every page is served', async ({ request }) => {
+  const robots = await request.get('/robots.txt');
+  expect(robots.status()).toBe(200);
+  expect(await robots.text()).toContain('Sitemap: https://isoloop.dev/sitemap.xml');
+  const xml = await (await request.get('/sitemap.xml')).text();
+  const paths = [...xml.matchAll(/<loc>https:\/\/isoloop\.dev(\/[^<]*)<\/loc>/g)].map(
+    (m) => m[1] ?? '',
+  );
+  expect(paths.length).toBeGreaterThan(5);
+  const statuses = await Promise.all(
+    paths.map(async (path) => [path, (await request.get(path)).status()] as const),
+  );
+  expect(statuses.filter(([, status]) => status !== 200)).toEqual([]);
 });

@@ -1,14 +1,320 @@
 {
   "title": "Processor",
-  "summary": "Background work as headless isolates, placed by the balancer: a playground where you set each task's CPU and watch it move between worker pools, and a simulated file processor whose processors share their work through consumer groups.",
+  "tab": "Processor",
+  "summary": "Background work with no UI: headless isolates placed by the balancer. In the playground you add tasks, set how much CPU each one uses, and watch the balancer move them between worker pools. The file processor pushes a stream of files through processors that share the work through a consumer group, with poison, heavy and corrupt files mixed in.",
+  "shows": ["balancer", "bus", "restart"],
+  "try": [
+    "In the playground, add a few tasks and turn their dials up until a pool's tasks add up to 80% of a core: the balancer moves the heaviest one to a pool with room.",
+    "Watch the move log at the bottom of the page: each entry gives the time, the reason, the move, and how long the task was stopped before it ran again.",
+    "Block a task twice within a minute: it goes to the quarantine pool until it has been quiet for 30 s; each further offence doubles that wait, up to 2 minutes, and a fourth keeps it apart for good.",
+    "In the file processor, raise the share of corrupt files, the dial that crashes a processor: the kernel restarts it, and the files it hadn't finished go to the other processor in its group. With the balancer, a crashed processor also goes to the quarantine. Past the restart limit (3 in 60 s by default) the kernel gives it up, and its queue grows until you press Restart on its card: set Restarts to 1 to see it sooner.",
+    "Raise the share of poison files: each one blocks its processor's loop for 2 s, which the page's 10 s kill timeout lets pass, and stalls every processor sharing its pool. A processor that blocks twice within a minute goes to the quarantine pool; when the beat can't name it, the balancer bisects instead, sending half the pool there. Its unfinished files go to the other processor in its group."
+  ],
   "order": 40,
-  "result": {
-    "line": "On 4 cores at 2.0 GHz, 50 files a second and at most 2 workers, the balancer moves processors whose queue keeps growing into a second pool. On Chromium that's 3 workers against a worker each's 9, at a p95 latency of 83 ms against 39 ms and one pool's 153 ms. On Firefox it gets through 49.5 files a second against one pool's 43.8 and a worker each's 50.1, but its p95 reaches 15.5 s. With faults it gets through 46.3 and 33.4 files a second against one pool's 26.8 and 19.7, on 4 workers against 9. It never packed processors back together after the faults, and 3 of 23 runs with faults lost files, and in each the kernel had given up on processors (on @isoloop/*@0.0.0-next.800569e). Not measured since: 0.1.0-next.0 fixes a group commit that could cover a redelivered file before it was handled (isoloop#211), the likely but unproven cause of the loss, and 0.1.0-next.1 packs while a backlog holds steady and leaves a processor the kernel gave up on to the app.",
-    "tag": "processor-v0.2.0"
+  "group": "Processor",
+  "embeds": [
+    {
+      "id": "processor-playground",
+      "title": "Playground",
+      "src": "/examples/processor/",
+      "height": 1000,
+      "devtools": true,
+      "intro": [
+        "Background work with no UI: each task is a headless isolate that keeps a share of one core busy. Add some, turn a dial up, and watch the balancer. It reads every worker's heartbeat and moves the heaviest task out of a pool that is full (its tasks add up to 80 % of a core) or stays over 50 ms of lag for 3 s. A task that blocks its loop past 100 ms twice within a minute goes to quarantine, and comes back once it has been quiet for 30 s; each further offence doubles that wait, up to 2 minutes, and a fourth keeps it apart for good.",
+        "Give a task jobs a second and its CPU dial becomes what those jobs need. The page reports each task's backlog to the balancer, which moves a task whose backlog keeps growing to where it gets more CPU. Press Calm, and a minute later quiet tasks pack back into fewer pools.",
+        "Switch a task to work after `await` and the runtime's busy time no longer sees its work. Each task also times its own work, and the page reports that to the balancer, so the card shows both: what the kernel measured, and what the task reported. Turn its report off, and the backlog is all the balancer has to go on. A task the kernel gives up on (it crashed past its restart limit) stays where it is: the balancer never moves or restarts it."
+      ]
+    },
+    {
+      "id": "processor-files",
+      "title": "File processor",
+      "src": "/examples/processor/files/",
+      "height": 1000,
+      "devtools": true,
+      "intro": [
+        "A generator makes synthetic files at the rate you set: CSV to parse and sum, images to scale and blur, archives to compress, and data to hash with SHA-256, each more work the bigger it is. Each kind goes to its own topic, read by a consumer group of two processors, all headless isolates that share the work. A processor commits a file only once its result is out, so when the balancer moves it, what it hadn't finished goes to the group again. Poison files block a processor for 2 s, heavy ones are ten times the work, corrupt ones crash it.",
+        "With the balancer, new processors start in a Measuring pool for about 3 s, while it measures their load, then it places them."
+      ]
+    }
+  ],
+  "measurements": {
+    "status": "measured",
+    "blocks": [
+      {
+        "id": "normal",
+        "heading": "No faults",
+        "findings": [
+          "Against a worker each, the balancer runs the 8 processors on 3 workers instead of 9, with 57 MB less memory after GC and 8 points less CPU across threads. Its p95 latency is 74 ms against 39 ms.",
+          "Against one pool, it uses 1 more worker, and its p95 is 74 ms against 148 ms.",
+          "No file was lost in any run, and the kernel gave up on no processor. The balancer did 4 files twice, from the processors it moved: delivery is at least once."
+        ],
+        "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, no faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
+        "tag": "processor-v0.3.0",
+        "pairs": [
+          {
+            "a": "A worker each",
+            "b": "Balancer",
+            "label": "A worker each (own) against the balancer"
+          },
+          {
+            "a": "One pool",
+            "b": "Balancer",
+            "label": "One pool (one) against the balancer"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "Throughput and latency",
+            "rows": [
+              {
+                "label": "Files done per second",
+                "cells": [
+                  ["50.1", "50.1", ["0.0", "same"]],
+                  ["50.2", "50.1", ["−0.1", "worse"]]
+                ]
+              },
+              {
+                "label": "Latency per file, p95",
+                "cells": [
+                  ["39 ms", "74 ms", ["+36 ms", "worse"]],
+                  ["148 ms", "74 ms", ["−82 ms", "better"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Cost",
+            "rows": [
+              {
+                "label": "Workers",
+                "cells": [
+                  ["9", "3", ["−6", "better"]],
+                  ["2", "3", ["+1", "worse"]]
+                ]
+              },
+              {
+                "label": "CPU, all threads",
+                "cells": [
+                  ["138%", "130%", ["−8 pts", "better"]],
+                  ["122%", "130%", ["+8 pts", "worse"]]
+                ]
+              },
+              {
+                "label": "Memory after GC",
+                "cells": [
+                  ["225 MB", "167 MB", ["−57 MB", "better"]],
+                  ["170 MB", "167 MB", ["−2 MB", "same"]]
+                ]
+              },
+              {
+                "label": "Files done twice",
+                "cells": [
+                  ["0", "4"],
+                  ["0", "4"]
+                ]
+              }
+            ]
+          }
+        ],
+        "firefox": "Firefox: one pool falls behind, at 43.9 files a second and a p95 of 9.0 s. The balancer keeps up, at 50.1 files a second and a p95 of 94 ms, against 51 ms on a worker each.",
+        "notes": [
+          "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
+          "A Δ marked no change has a spread across the rounds that runs both ways."
+        ],
+        "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0"
+      },
+      {
+        "id": "faults",
+        "heading": "With faults",
+        "findings": [
+          "In a thousand files, 2 block their processor for 2 s, 100 take ten times the work and 1 crashes it.",
+          "The balancer does about as many files a second as a worker each, on 4 workers against 9: 52.5 against 50.0, within the rounds' spread. One pool does 26.5. No file was lost.",
+          "Its latency is much higher than a worker each: a p95 of 12.7 s against 378 ms. One pool's is 20.5 s.",
+          "It did 20 files twice, where a worker each and one pool did none: a moved or crashed processor's uncommitted files go back to its group, since delivery is at least once."
+        ],
+        "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, with faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
+        "tag": "processor-v0.3.0",
+        "pairs": [
+          {
+            "a": "A worker each",
+            "b": "Balancer",
+            "label": "A worker each (own) against the balancer"
+          },
+          {
+            "a": "One pool",
+            "b": "Balancer",
+            "label": "One pool (one) against the balancer"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "Throughput and latency",
+            "rows": [
+              {
+                "label": "Files done per second",
+                "cells": [
+                  ["50.0", "52.5", ["+2.5", "same"]],
+                  ["26.5", "52.5", ["+26.2", "better"]]
+                ]
+              },
+              {
+                "label": "Latency per file, p50",
+                "cells": [
+                  ["28 ms", "5.8 s", ["+5.7 s", "worse"]],
+                  ["16.2 s", "5.8 s", ["−10.4 s", "better"]]
+                ]
+              },
+              {
+                "label": "Latency per file, p95",
+                "cells": [
+                  ["378 ms", "12.7 s", ["+12.3 s", "worse"]],
+                  ["20.5 s", "12.7 s", ["−7.8 s", "better"]]
+                ]
+              },
+              {
+                "label": "Files without a result 2 min after the generator stops",
+                "cells": [
+                  ["0", "0", ["0", "same"]],
+                  ["0", "0", ["0", "same"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Cost",
+            "rows": [
+              {
+                "label": "Workers",
+                "cells": [
+                  ["9", "4", ["−5", "better"]],
+                  ["2", "4", ["+2", "worse"]]
+                ]
+              },
+              {
+                "label": "CPU, all threads",
+                "cells": [
+                  ["255%", "260%", ["+6 pts", "same"]],
+                  ["122%", "260%", ["+138 pts", "worse"]]
+                ]
+              },
+              {
+                "label": "Memory after GC",
+                "cells": [
+                  ["257 MB", "270 MB", ["+9 MB", "same"]],
+                  ["152 MB", "270 MB", ["+105 MB", "worse"]]
+                ]
+              },
+              {
+                "label": "Files done twice",
+                "cells": [
+                  ["0", "20"],
+                  ["0", "20"]
+                ]
+              }
+            ]
+          }
+        ],
+        "firefox": "Firefox: 47.9 files a second against 50.3 on a worker each and 20.8 in one pool, and a p95 of 15.2 s against 622 ms and 24.5 s.",
+        "notes": [
+          "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
+          "Files done per second can be above the 50 produced: the window also clears files queued before it.",
+          "A Δ marked no change has a spread across the rounds that runs both ways."
+        ],
+        "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0"
+      },
+      {
+        "id": "calm",
+        "heading": "Faults, then calm",
+        "findings": [
+          "After 60 s with faults and 5 minutes of calm, the balancer is down to 3 workers, with every processor out of the quarantine, and a p95 of 60 ms against 37 ms on a worker each.",
+          "One pool is still working through its queue, with a p95 of 89 s.",
+          "The balancer never packed its two pools into one: together they carry about a core, by the busy time the processors report, and a pool takes another only if it stays under 40 % of a core."
+        ],
+        "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, 60 s with faults, then 5 minutes calm, measured over its last 20 s, a cap of 2 workers for the balancer, 3 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
+        "tag": "processor-v0.3.0",
+        "pairs": [
+          {
+            "a": "A worker each",
+            "b": "Balancer",
+            "label": "A worker each (own) against the balancer"
+          },
+          {
+            "a": "One pool",
+            "b": "Balancer",
+            "label": "One pool (one) against the balancer"
+          }
+        ],
+        "groups": [
+          {
+            "heading": "Throughput and latency",
+            "rows": [
+              {
+                "label": "Files done per second",
+                "cells": [
+                  ["50.1", "50.1", ["0.0", "same"]],
+                  ["54.3", "50.1"]
+                ]
+              },
+              {
+                "label": "Latency per file, p95",
+                "cells": [
+                  ["37 ms", "60 ms", ["+23 ms", "worse"]],
+                  ["89.4 s", "60 ms", ["−89.3 s", "better"]]
+                ]
+              }
+            ]
+          },
+          {
+            "heading": "Cost",
+            "rows": [
+              {
+                "label": "Workers after the faults",
+                "cells": [
+                  ["9", "4"],
+                  ["2", "4"]
+                ]
+              },
+              {
+                "label": "Workers at the end",
+                "cells": [
+                  ["9", "3", ["−6", "better"]],
+                  ["2", "3", ["+1", "worse"]]
+                ]
+              },
+              {
+                "label": "Memory after GC",
+                "cells": [
+                  ["245 MB", "194 MB", ["−52 MB", "better"]],
+                  ["177 MB", "194 MB", ["+19 MB", "worse"]]
+                ]
+              },
+              {
+                "label": "Files done twice",
+                "cells": [
+                  ["0", "27"],
+                  ["0", "27"]
+                ]
+              }
+            ]
+          }
+        ],
+        "firefox": "Firefox: the balancer also ends on 3 workers, with a p95 of 87 ms against 50 ms on a worker each. One pool's p95 is 193 s, and 1,347 files still had no result 2 minutes after the generator stopped.",
+        "notes": [
+          "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
+          "One pool does more files a second than were produced here because it is still clearing the queue the faults left.",
+          "A Δ marked no change has a spread across the rounds that runs both ways."
+        ],
+        "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0"
+      }
+    ]
   },
   "links": {
     "live": "/examples/processor/",
     "source": "https://github.com/isoloop/web/tree/main/apps/processor",
-    "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.2.0"
+    "results": "https://github.com/isoloop/web/tree/main/apps/processor/comparison"
+  },
+  "screenshot": {
+    "light": "screenshot-light.webp",
+    "dark": "screenshot-dark.webp"
   }
 }

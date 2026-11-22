@@ -24,9 +24,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # The site's build fetches the pinned diagrams and checks the pin is on
-      # isoloop/isoloop's main (apps/site/build/library.ts).
+      # The site's build fetches the pinned diagrams and guides and checks the
+      # pin is on isoloop/isoloop's main (apps/site/build/library.ts).
       - run: pnpm --filter "./apps/dashboards/*" --filter ./apps/basic --filter ./apps/processor --filter ./apps/site build
+      # The pin must be a published version: on npm, built from the pin itself
+      # (ADR 0006; apps/site/build/pin.ts).
+      - run: pnpm --filter site check-pin
       - run: pnpm --filter ui build:specimens
       - name: Assemble the site, with the site's pages
         run: SITE=1 scripts/assemble-site.sh site

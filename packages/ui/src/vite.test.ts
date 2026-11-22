@@ -1,5 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { assetPrefix, pageCurrent, placePartials, uiAssets, uiPartials } from './vite.ts';
+import {
+  assetPrefix,
+  pageCurrent,
+  placeMeta,
+  placePartials,
+  uiAssets,
+  uiPartials,
+} from './vite.ts';
+
+describe('placeMeta', () => {
+  it('gives a page its title and search tags, escaped', () => {
+    const html = placeMeta('<html><head></head><body></body></html>', {
+      title: 'A & "B"',
+      description: 'D',
+      path: '/a/',
+    });
+    expect(html).toContain('<link rel="canonical" href="https://isoloop.dev/a/"/>');
+    expect(html).toContain('content="A &amp; &quot;B&quot;"');
+  });
+
+  it('fails on a page with a title of its own, or no <head>', () => {
+    const meta = { title: 'T', robots: 'noindex' };
+    expect(() => placeMeta('<head><title>x</title></head>', meta)).toThrow(/<title>/);
+    expect(() => placeMeta('<body></body>', meta)).toThrow(/<head>/);
+  });
+});
 
 describe('uiAssets', () => {
   it('gives full-header pages the tokens, base, shell and theme.js', () => {
@@ -64,6 +89,17 @@ describe('uiPartials', () => {
     expect(header).toContain('role="switch"');
   });
 
+  it('keeps GitHub out of the site nav, beside the theme switch', () => {
+    const header = uiPartials({ header: {} }).header ?? '';
+    const nav = header.slice(header.indexOf('<nav'), header.indexOf('</nav>'));
+    expect(nav).not.toContain('github.com');
+    const end = header.slice(header.indexOf('class="ui-header-end"'));
+    expect(end).toContain(
+      'href="https://github.com/isoloop/isoloop" aria-label="Isoloop on GitHub"',
+    );
+    expect(end).toContain('data-ui-theme-toggle');
+  });
+
   it('fixes the bar dark, with no toggle', () => {
     const { bar } = uiPartials({ bar: true });
     expect(bar).toContain('data-theme="dark"');
@@ -74,6 +110,30 @@ describe('uiPartials', () => {
     const { header } = uiPartials({ header: { current: 'home' } }, 'how-it-works');
     expect(header).toContain('<a href="/how-it-works/" aria-current="page">How it works</a>');
     expect(header).not.toContain('<a href="/" aria-current');
+  });
+
+  it('has Docs right after Home (ADR 0005, amended 2026-11-20)', () => {
+    const { header } = uiPartials({ header: true }, 'docs');
+    expect(header).toContain('<a href="/docs/" aria-current="page">Docs</a>');
+    const nav = /<nav class="ui-nav"[^>]*>([\s\S]*?)<\/nav>/.exec(header ?? '')?.[1] ?? '';
+    expect([...nav.matchAll(/>([^<]+)<\/a>/g)].map((m) => m[1])).toEqual([
+      'Home',
+      'Docs',
+      'Features',
+      'How it works',
+      'Examples',
+    ]);
+  });
+
+  it('shows the version as a pill before GitHub, linking to the changelog', () => {
+    const { header } = uiPartials({
+      header: { version: { label: '0.1.0-next.8', href: '/changelog/' } },
+    });
+    const end = /<div class="ui-header-end">([\s\S]*)<\/div>/.exec(header ?? '')?.[1] ?? '';
+    expect(end).toMatch(
+      /^<a class="ui-version" href="\/changelog\/"[^>]*>0\.1\.0-next\.8<\/a><a class="ui-github"/,
+    );
+    expect(uiPartials({ header: true }).header).not.toContain('ui-version');
   });
 
   it('renders only what was asked for', () => {

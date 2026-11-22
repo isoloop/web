@@ -17,8 +17,26 @@ function repo(apps: Record<string, unknown>): string {
 
 const valid = {
   title: 'Basic',
+  tab: 'Basic',
   summary: 'Four isolates.',
+  shows: ['containment'],
+  try: ['Block C.'],
+  measurements: { status: 'none', note: 'Not measured.' },
   links: { live: '/examples/basic/', source: 'https://github.com/isoloop/web' },
+};
+
+/** A measured block with a one-pair table. */
+const block = {
+  id: 'desktop',
+  heading: 'Desktop',
+  findings: ['Faster.'],
+  caption: 'Chromium, 4 cores.',
+  tag: 'plant-v0.1.0',
+  pairs: [{ a: 'Native', b: 'Isoloop', label: 'Native against Isoloop' }],
+  groups: [
+    { heading: 'Cost', rows: [{ label: 'CPU', cells: [['95%', '107%', ['+11 pts', 'worse']]] }] },
+  ],
+  results: 'https://github.com/isoloop/web',
 };
 
 describe('loadExamples', () => {
@@ -30,7 +48,7 @@ describe('loadExamples', () => {
         ...valid,
         title: 'Plant',
         order: 5,
-        result: { line: 'r', tag: 'plant-v0.1.0' },
+        measurements: { status: 'measured', blocks: [block] },
       },
     });
     expect(loadExamples(root).map((e) => [e.id, e.title])).toEqual([
@@ -67,13 +85,43 @@ describe('loadExamples', () => {
     expect(() => loadExamples(repo({ basic: { ...valid, sumary: 'x' } }))).toThrow(/sumary/);
   });
 
-  it('refuses a result without a release tag', () => {
-    const root = repo({ basic: { ...valid, result: { line: 'r', tag: 'latest' } } });
-    expect(() => loadExamples(root)).toThrow(/result.tag/);
+  it('refuses a block without a release tag', () => {
+    const m = { status: 'measured', blocks: [{ ...block, tag: 'latest' }] };
+    expect(() => loadExamples(repo({ basic: { ...valid, measurements: m } }))).toThrow(
+      /measurements.blocks.0.tag/,
+    );
   });
 
-  it('needs the screenshot it names', () => {
-    const root = repo({ basic: { ...valid, screenshot: 'screenshot.webp' } });
+  it('refuses a row with a cell missing for a pair', () => {
+    const groups = [{ heading: 'Cost', rows: [{ label: 'CPU', cells: [] }] }];
+    const m = { status: 'measured', blocks: [{ ...block, groups }] };
+    expect(() => loadExamples(repo({ basic: { ...valid, measurements: m } }))).toThrow(
+      /row "CPU" has 0 cells for 1 pairs/,
+    );
+  });
+
+  it('takes a block of findings alone, but not half a table', () => {
+    const { pairs: _p, groups: _g, ...findings } = block;
+    const ok = { status: 'measured', blocks: [findings] };
+    expect(loadExamples(repo({ basic: { ...valid, measurements: ok } }))).toHaveLength(1);
+    const { groups: _only, ...half } = block;
+    const bad = { status: 'measured', blocks: [half] };
+    expect(() => loadExamples(repo({ basic: { ...valid, measurements: bad } }))).toThrow(
+      /needs both pairs and groups/,
+    );
+  });
+
+  it('takes a run in progress with the previous one linked', () => {
+    const m = {
+      status: 'in-progress',
+      note: 'Running.',
+      previous: { href: 'https://github.com/isoloop/web', label: 'v0.2.0' },
+    };
+    expect(loadExamples(repo({ basic: { ...valid, measurements: m } }))).toHaveLength(1);
+  });
+
+  it('needs the screenshots it names, per theme', () => {
+    const root = repo({ basic: { ...valid, screenshot: { light: 'screenshot.webp' } } });
     expect(() => loadExamples(root)).toThrow(/screenshot.webp doesn't exist/);
   });
 });

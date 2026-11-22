@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { DEV_MCP, DEV_MCP_PORT, DEV_PORT, DEV_URL } from './e2e/dev-server';
 
 // Both builds, served by `vite preview` from dist/ (/isoloop/ and /native/), in
 // all three engines.
@@ -23,12 +24,25 @@ export default defineConfig({
   ...(LIVE
     ? {}
     : {
-        webServer: {
-          command: 'pnpm build && pnpm preview --port 4791 --strictPort',
-          timeout: 120_000,
-          url: 'http://localhost:4791',
-          reuseExistingServer: !process.env['CI'],
-        },
+        webServer: [
+          {
+            command: 'pnpm build && pnpm preview --port 4791 --strictPort',
+            timeout: 120_000,
+            url: 'http://localhost:4791',
+            reuseExistingServer: !process.env['CI'],
+          },
+          // The dev MCP suite's development server, paired with the CLI it starts.
+          {
+            command: `pnpm dev --port ${DEV_PORT} --strictPort`,
+            timeout: 120_000,
+            url: DEV_URL,
+            reuseExistingServer: !process.env['CI'],
+            env: {
+              VITE_ISOLOOP_MCP_TOKEN: DEV_MCP.token,
+              VITE_ISOLOOP_MCP_URL: `ws://127.0.0.1:${DEV_MCP_PORT}`,
+            },
+          },
+        ],
       }),
   // Each engine has two projects. `<engine>-load` holds the tests that measure
   // timing under load (input latency within the 200 ms budget, the table at

@@ -34,6 +34,14 @@
   --ui-navy-3: oklch(0.229 0.032 268); /* #161c2c */
   --ui-navy-4: oklch(0.186 0.034 269.8); /* #0d1222 */
   --ui-ink: oklch(0.201 0.012 270.7); /* #14161c */
+  /* the dark theme's neutral greys (2026-11-21): less blue than the navy */
+  --ui-graphite-1: oklch(0.57 0.022 266); /* #717785 */
+  --ui-graphite-2: oklch(0.345 0.022 268); /* #343945 */
+  --ui-graphite-3: oklch(0.256 0.021 269); /* #1f232d */
+  --ui-graphite-4: oklch(0.223 0.022 269); /* #171b26 */
+  /* running text, a step softer than the headings in each theme */
+  --ui-fog: oklch(0.85 0.016 267); /* #c9ced9 */
+  --ui-ink-soft: oklch(0.3 0.02 267); /* #292e38 */
 
   /* hues, each a light-theme and a dark-theme step */
   --ui-blue-1: oklch(0.501 0.187 265.6); /* #2f57cc */
@@ -46,6 +54,8 @@
   --ui-magenta-2: oklch(0.741 0.121 351.3); /* #e58ab4 */
   --ui-red-1: oklch(0.501 0.178 28.7); /* #b3261e */
   --ui-red-2: oklch(0.768 0.137 25.6); /* #ff8f86 */
+  --ui-orange-1: oklch(0.56 0.15 50); /* #b75400 */
+  --ui-orange-2: oklch(0.8 0.13 62); /* #f9aa60 */
 
   --ui-space-1: 0.25rem;
   --ui-space-2: 0.5rem;
@@ -73,15 +83,43 @@
   --ui-text-2xl: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
   --ui-text-3xl: clamp(2.4rem, 1.4rem + 4.2vw, 4.6rem);
 
-  /* The page column, the gutter of section headings, the sticky header's height. */
-  --ui-page: 82rem;
-  --ui-gutter: 13rem;
+  /* The page column; the site's one left column (the gutter: section headings,
+     the opening's mark, the rails, the docs' sidebar) and the gap after it, so
+     every page's content starts at the same x; a figure's label column; the
+     sticky header's height. */
+  --ui-page: 96rem;
+  --ui-gutter: 16rem;
+  --ui-gutter-gap: 3rem;
+  --ui-label: 13rem;
   --ui-bar-h: 4.75rem;
+}
+
+/* Between the full page and the mobile layout the left column steps down, so
+   the text beside it keeps its width; the 760px block below overrides these. */
+@media (max-width: 1280px) {
+  :root {
+    --ui-gutter: 13rem;
+    --ui-gutter-gap: 2.5rem;
+  }
+}
+@media (max-width: 1100px) {
+  :root {
+    --ui-gutter: 10.5rem;
+    --ui-gutter-gap: 2rem;
+  }
+}
+@media (max-width: 900px) {
+  :root {
+    --ui-gutter: 8rem;
+    --ui-gutter-gap: 1rem;
+  }
 }
 
 @media (max-width: 760px) {
   :root {
     --ui-gutter: 7.5rem;
+    --ui-gutter-gap: 0rem;
+    --ui-label: 7.5rem;
     --ui-bar-h: 5.7rem;
   }
 }
@@ -93,6 +131,7 @@
   --ui-bg: var(--ui-paper);
   --ui-surface: var(--ui-white);
   --ui-text: var(--ui-ink);
+  --ui-prose: var(--ui-ink-soft);
   --ui-text-muted: var(--ui-slate-6);
   --ui-rule: var(--ui-haze);
   --ui-border: var(--ui-slate-3);
@@ -104,17 +143,19 @@
   --ui-part-isolate: var(--ui-teal-1);
   --ui-part-pool: var(--ui-violet-1);
   --ui-bad: var(--ui-red-1);
+  --ui-experimental: var(--ui-orange-1);
 }
 
 /* dark */
 [data-theme='dark'] {
   color-scheme: dark;
-  --ui-bg: var(--ui-navy-3);
-  --ui-surface: var(--ui-navy-2);
+  --ui-bg: var(--ui-graphite-4);
+  --ui-surface: var(--ui-graphite-3);
   --ui-text: var(--ui-mist);
+  --ui-prose: var(--ui-fog);
   --ui-text-muted: var(--ui-slate-1);
-  --ui-rule: var(--ui-navy-1);
-  --ui-border: var(--ui-slate-4);
+  --ui-rule: var(--ui-graphite-2);
+  --ui-border: var(--ui-graphite-1);
   --ui-accent: var(--ui-blue-2);
   --ui-on-accent: var(--ui-navy-4);
   --ui-focus: var(--ui-blue-2);
@@ -123,18 +164,20 @@
   --ui-part-isolate: var(--ui-teal-2);
   --ui-part-pool: var(--ui-violet-2);
   --ui-bad: var(--ui-red-2);
+  --ui-experimental: var(--ui-orange-2);
 }
 
 /* dark, without JS: the same block as above (contrast.test.ts checks they match) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     color-scheme: dark;
-    --ui-bg: var(--ui-navy-3);
-    --ui-surface: var(--ui-navy-2);
+    --ui-bg: var(--ui-graphite-4);
+    --ui-surface: var(--ui-graphite-3);
     --ui-text: var(--ui-mist);
+    --ui-prose: var(--ui-fog);
     --ui-text-muted: var(--ui-slate-1);
-    --ui-rule: var(--ui-navy-1);
-    --ui-border: var(--ui-slate-4);
+    --ui-rule: var(--ui-graphite-2);
+    --ui-border: var(--ui-graphite-1);
     --ui-accent: var(--ui-blue-2);
     --ui-on-accent: var(--ui-navy-4);
     --ui-focus: var(--ui-blue-2);
@@ -143,5 +186,6 @@
     --ui-part-isolate: var(--ui-teal-2);
     --ui-part-pool: var(--ui-violet-2);
     --ui-bad: var(--ui-red-2);
+    --ui-experimental: var(--ui-orange-2);
   }
 }

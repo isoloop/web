@@ -241,6 +241,7 @@ for (const mix of MIXES) {
             const s = window.files.snapshot();
             return {
               givenUp: window.files.givenUp(),
+              crashes: window.files.crashes(),
               failed: window.kernel.isolates().filter((i) => i.state === 'failed').length,
               produced: s.produced,
               done: s.done,
@@ -299,6 +300,13 @@ for (const mix of MIXES) {
               kind,
               reason,
               pool: pool ?? null,
+            })),
+            crashes: end.crashes.map(({ at, id, reason, pool, message }) => ({
+              at: Math.round(at - origin),
+              id,
+              reason,
+              pool: pool ?? null,
+              message: message ?? null,
             })),
             duplicates: end.duplicates,
             produced: end.produced,

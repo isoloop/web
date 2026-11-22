@@ -13,7 +13,7 @@ type Row = [string, ...string[]];
 
 export const site = {
   description:
-    'Event-loop isolation for web apps. Each part of your app runs on its own worker or in a shared pool, talks through a message bus that keeps its records, and is restarted when it fails. React, Preact or plain DOM.',
+    'Event-loop isolation for JavaScript apps. An open-source TypeScript library: each part of your app runs on its own worker or in a shared pool, talks over a message bus, and is restarted when it fails, while the rest keeps running.',
 };
 
 // The features themselves (their strip line, heading and section text, with
@@ -52,6 +52,7 @@ export const recording = {
   },
   guard:
     'An isolate that crashes more than 3 times within a minute is marked failed, and the kernel stops restarting it.',
+  statusLabel: 'Status',
   status: {
     waiting: 'Starting basic…',
     running: 'Recording. Everything is running.',
@@ -75,118 +76,103 @@ export const recording = {
   open: 'Open basic on its own page',
 };
 
-/** A use: the lead, its sentence, and optionally a link to the figures behind it. */
-type Use = [lead: string, text: string, link?: { text: string; href: string }];
+/** A use: the pattern, then an example of it. */
+type Use = [pattern: string, example: string];
+
+/** Whether a Δ is better or worse for the reader; `same` for no change. */
+export type Verdict = 'better' | 'worse' | 'same';
+/** One pair's cells in a row: A, B, and the Δ with its verdict (none for counts). */
+export type PairCells = [a: string, b: string, delta?: [string, Verdict]];
+export interface DeltaRow {
+  label: string;
+  /** One entry per pair, in the order of `pairs`. */
+  cells: PairCells[];
+}
+export interface DeltaGroup {
+  heading: string;
+  rows: DeltaRow[];
+}
 
 export const home = {
-  title: 'Isoloop: event-loop isolation for web apps',
+  title: 'Isoloop: event-loop isolation for JavaScript apps',
   intro: {
-    heading: 'Event-loop isolation for web apps',
-    text: 'Each part of your app runs on its own worker or in a shared pool, talks through a message bus that keeps its records, and is restarted when it fails. React, Preact or plain DOM.',
+    heading: 'Event-loop isolation for JavaScript apps',
+    text: 'An open-source TypeScript library. Each part of your app runs on its own worker or in a shared pool, talks only through a message bus that keeps its records, and is restarted by a supervisor when it fails. A block or a crash stays in its part, and the rest of the app keeps running. React, Preact or plain DOM.',
     primary: 'See the features',
-    secondary: 'Examples',
+    // Basic and the processor run live on /examples/ (in its panels, idle until
+    // Start); the plant and markets dashboards open on their own pages.
+    secondary: 'The examples: two run live on the page, the dashboards on their own pages',
   },
-  try: 'Try it. Four isolates on three event loops: A and B have a worker each, C and D share a pool. Block or crash one, or block the main thread, and watch what keeps running. This is basic, the smallest example, running in this page on Isoloop. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
+  try: 'Try it. This is basic, the smallest example, running in this page: four isolates on three event loops. A and B have a worker each; C and D share a pool and read A’s count. Block or crash one, or block the main thread, and watch what keeps running.',
+  code: {
+    summary: 'Show the code behind this demo',
+    intro:
+      'basic’s setup, without its recording code. A restart needs no code of its own; A catches up by reading its topic from the earliest record it keeps. Type-checked against the published packages.',
+    label: 'Files',
+    files: { topics: 'topics.ts', isolate: 'counter.ts', host: 'main.ts' },
+    more: 'basic’s full source',
+    source: 'https://github.com/isoloop/web/tree/main/apps/basic',
+  },
+
   uses: {
     heading: 'What it’s for',
-    items: [
+    // Patterns, not examples (2026-11-18): the core promise first, then from
+    // the broadest need to the narrowest. Figures live on the examples.
+    items: <Use[]>[
+      ['Keeping one part’s load from stalling the rest.', 'live dashboards on heavy datasets'],
+      ['Moving heavy work off the UI’s thread.', 'parsing, search, simulation'],
+      ['Keeping state through a crash or a reload.', 'alarms, event logs, drafts'],
+      // Unreliable, not hostile: isolates share the origin (isoloop/isoloop README, "Hostile code").
+      ['Containing code you don’t control.', 'widgets from other teams, AI-generated components'],
+      ['Combining parts with different owners.', 'micro-frontends from several teams'],
       [
-        'Live dashboards and data-heavy UIs.',
-        'Many widgets on fast data, and one slow widget doesn’t freeze the rest.',
+        'Building apps with no server behind them.',
+        'data pipelines over public APIs, on a static host',
       ],
-      [
-        'Apps built from many teams’ parts.',
-        'Isolates built and deployed apart, with a version floor so an old host or an old isolate says so instead of breaking. On the markets dashboard, when one team’s part blocks for 3 s, the other team’s widgets keep 91–98% of their updates with a pool per team, against none on a native build that loads the part at run time; a crashed part is back in 1.3–1.8 s, for 61 KB more JavaScript and 34–49 MB more memory.',
-        {
-          text: 'The measurements',
-          href: 'https://github.com/isoloop/web/tree/main/apps/dashboards/markets/comparison/federated',
-        },
-      ],
-      [
-        'Third-party or less-trusted widgets.',
-        'Each isolate gets only the grants you give it, and its DOM is sanitised on the way to the page.',
-      ],
-      [
-        'Backend-less apps.',
-        'Headless pipelines over public APIs, all in the visitor’s tab, served from a static host.',
-      ],
-      [
-        'Heavy work next to a UI.',
-        'Parsing, search or simulation off the main thread, restarted if it hangs.',
-      ],
-    ] as Use[],
+    ],
   },
   strip: { heading: 'Features', all: 'All features, with live demos' },
   gives: {
     heading: 'What it gives',
     // Source: apps/dashboards/plant/README.md, "What each build does when
-    // something goes wrong" (comparison/final/, Chromium, 1 kHz).
+    // something goes wrong", and e2e/placements.spec.ts, both unchanged at
+    // plant-v0.3.1 (checked 2026-11-21). Behaviour only: the figures are in
+    // the costs table below.
     caption:
-      'The plant dashboard: 72 widgets on 8 machines, built three ways from the same code and data. One widget blocks for 3 s. Chromium at 1 kHz on the desktop machine, measured at plant-v0.1.0, November 2026.',
-    head: ['', 'Native', 'Native + workers', 'Isoloop (matched, the default)'],
+      'The plant dashboard: 72 widgets on 8 machines, built three ways from the same code and data. What each build does when something goes wrong, at plant-v0.3.1.',
+    head: ['', 'Native', 'Native + workers', 'Isoloop'],
     rows: <Row[]>[
       [
-        'What stalls while the widget blocks',
-        'The whole page',
-        'The whole page',
-        'The 72 widgets in its pool; the data pools keep running',
+        'One widget blocks for 3 s',
+        'Whole page stalls',
+        'Whole page stalls',
+        'Its pool stalls; data keeps flowing',
       ],
-      ['Data lost during the block', '3.8 s on every machine', 'None', 'None'],
-      ['Until every widget updates again', '3.2 s', '3.1 s', '2.9 s'],
+      ['With a pool per machine (split, opt-in)', '—', '—', 'Only that machine’s 8 widgets stall'],
       [
         'After the block',
-        'The page carries on; nothing restarts',
-        'The page carries on; nothing restarts',
-        'The pool restarts and catches up from the retained topics',
+        'Nothing restarts',
+        'Nothing restarts',
+        'The pool restarts and catches up',
       ],
+      ['A widget throws', 'Down until reload', 'Down until reload', 'Restarted'],
       [
-        'A widget throws while rendering',
-        'It shows “crashed” until a reload',
-        'The same; a data worker that errors restarts with an empty store',
-        'The isolate is restarted',
-      ],
-      [
-        'Alarms and events across a reload',
-        'localStorage, written at most once a second',
-        'The same',
-        'Persistent topics in OPFS: every acknowledged record',
+        'Alarms and events after a reload',
+        'Saved at most once a second',
+        'Saved at most once a second',
+        'Every acknowledged record',
       ],
     ],
     more: 'Every build and placement, with sources',
   },
   costs: {
     heading: 'What it costs, and where it helps',
-    // Sources: apps/dashboards/plant/README.md ("Responsiveness" and "What it
-    // costs"); comparison/final/ (desktop, at plant-v0.1.0);
-    // comparison/phone/ikko-mindone-focus156/ and galaxy-fold6-chrome157/
-    // (at plant-v0.1.0-rc.3); comparison/phone/iphone-x-safari16/ (at
-    // plant-v0.1.0-rc.5). All on @isoloop/*@0.0.0-next.b8ffdcf.
-    caption:
-      'The plant dashboard, Isoloop (one and matched) against native (alone and with workers). Measured at plant-v0.1.0, November 2026; the phones on its release candidates, with the same Isoloop packages.',
-    head: ['Device', 'What was measured', 'What it costs'],
-    rows: <Row[]>[
-      [
-        'Desktop machine, 4 cores fixed at 2.0 GHz',
-        'At 1 kHz every build keeps up in Chromium. At 5 kHz the main thread is 23–27% busy against 79–84%, and the median keystroke takes 21–41 ms against 62–82 ms. Firefox drops 0–1 frames of about 600 against 89–126.',
-        '+7 to +19 points of CPU across all threads, +36 to +51 MB after garbage collection, and +0.2 to +0.3 s to first data.',
-      ],
-      [
-        'Mid-range Android phone (MediaTek MT8781V, Firefox Focus 156)',
-        'One and matched draw 68–84 frames/s against 45–56, with a median keystroke of 15–23 ms against 32–64 ms. Split, with 18 workers on 8 cores, is the slowest build here.',
-        'First data after 1.2–2.0 s, against 0.4–0.9 s.',
-      ],
-      [
-        'Flagship Android phone (Snapdragon 8 Gen 3, Chrome 157)',
-        'No difference. Every build holds 60 frames/s, with a median keystroke of 9–13 ms.',
-        'The extra CPU and memory, for no difference in responsiveness.',
-      ],
-      [
-        'Older iPhone (iPhone X, Safari 16.6)',
-        'Native does as well or better. At 5 kHz native holds 60 frames/s, one 59.5, matched 51.9 and split 11.1: the more workers, the lower.',
-        'A known limitation. The cause isn’t established yet.',
-      ],
-    ],
-    more: 'Every recorded run, with the method',
+    // The table, its caption and notes are plant's `desktop` block
+    // (apps/dashboards/plant/example.json), shared with /examples/.
+    delta: 'Δ',
+    verdicts: { better: 'better', worse: 'worse', same: 'no change' } as Record<Verdict, string>,
+    findings: 'Findings',
+    more: 'The full results, with the method',
   },
   limits: {
     heading: 'What Isoloop can’t hide',
@@ -197,33 +183,70 @@ export const home = {
       'Drag and drop, text selection and canvas drawing tied to pointer timing. Canvas isolates can draw to an OffscreenCanvas instead.',
       'The cost. Every worker, the bus and the kernel take CPU, memory and start-up time, as the table above shows.',
     ],
+    /** The docs' page of the same name (/docs/limits/), with the full list. */
+    more: 'The full list, in the docs',
   },
   how: {
     heading: 'How it works',
-    text: 'The host runs on the main thread, each isolate on its own worker or in a pool, and the bus in a worker between them. Seven diagrams are drawn from the code and checked against it.',
-    link: 'All seven diagrams',
-  },
-  examples: {
-    heading: 'Examples',
-    all: 'All examples',
+    // Sources: isoloop/isoloop docs/diagrams (runtime topology, restarts),
+    // ADR 0015 (pools), docs/guide/pools.md (start positions, isoloop#186),
+    // docs/guide/supervision.md (the defaults: 3 restarts within 60 s, so a
+    // fourth crash in a minute fails the isolate).
+    text: [
+      'Your app’s host runs on the page’s main thread. Each isolate runs in a worker, either one of its own or a pool it shares with others.',
+      'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says.',
+      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it, and gives an isolate up after 3 restarts in a minute. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
+    ],
+    link: 'How it works, part by part',
   },
   install: {
     heading: 'Install',
+    platform: 'Isoloop runs in the browser.',
+    // The freeze: isoloop/isoloop docs/plans/m4d-release.md at the pin, task 6
+    // (declared with 0.1.0-next.9; from then on, a change to the published
+    // types needs the maintainer's approval).
     label:
-      'Isoloop isn’t at 0.1 yet, and the API may change. These are prereleases from the main branch, published under the next tag.',
+      'Isoloop isn’t at 0.1 yet. The API is frozen for 0.1. These are prereleases from the main branch, published under the next tag.',
     command:
-      'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next',
+      'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp@next\n# for the devtools panel (experimental):\npnpm add @isoloop/devtools@next',
     guide: 'The hosting guide',
+    /** The docs' first page (/docs/getting-started/), from an empty Vite app to a running isolate. */
+    start: 'Getting started',
   },
 };
 
 export const featuresPage = {
   title: 'Features',
+  /** <title> and the link preview only (ADR 0006, as amended). */
+  searchTitle: 'Features: fault isolation, message bus and replay',
   description:
-    'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, your framework, safety, and the cost.',
+    'What Isoloop gives you, and what it costs: containment, restart and catch-up, the message bus, retention and replay, durable history, placement, automatic placement, tools for agents, devtools, your framework, safety, and the cost.',
   heading: 'What Isoloop gives you, and what it costs',
-  lede: 'Code that shares data shouldn’t share an event loop. That idea runs through ten parts of one toolchain. Three run live below, on basic, the smallest example, running in this page; the rest are shown as code or as a still.',
-  changelog: 'What changed, release by release',
+  notes: { label: 'The features, one note each, by group' },
+  tabs: {
+    label: 'Features, by group',
+    /** The pager under each group (src/pages/steps.tsx, Pager). */
+    previous: 'Previous',
+    next: 'Next',
+    pager: 'Previous and next',
+    names: {
+      isolation: 'Isolation',
+      bus: 'Bus',
+      placement: 'Placement',
+      tools: 'Tools and frameworks',
+      safety: 'Safety',
+      cost: 'Cost',
+    },
+    /** The groups' anchors; a feature's own id is its section's, so these differ from every one. */
+    ids: {
+      isolation: 'isolation',
+      bus: 'messaging',
+      placement: 'pools',
+      tools: 'tools',
+      safety: 'security',
+      cost: 'costs',
+    },
+  },
   containment: {
     caption:
       'A bar is work on that loop, and time moves to the left. Hatched means the loop is stuck. A line across a track means that isolate was stopped and started again. C and D share one loop; placement decides that. C and D read A’s count, so they tick when A does. When A is down they wait for its next record; their own work carries on.',
@@ -270,7 +293,7 @@ export const featuresPage = {
   durable: {
     head: ['Topic', 'Before the reload', 'After the reload'],
     caption:
-      'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability-degraded`.',
+      'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability_degraded`.',
   },
   placement: {
     layouts: [
@@ -286,12 +309,12 @@ export const featuresPage = {
   // and "Packing back", at the library pin; the defaults are its options'.
   balancer: {
     caption:
-      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes. Packing while a backlog holds steady, the busy time an app reports, and leaving alone an isolate the kernel gave up on are new in 0.1.0-next.1.',
+      'What moves an isolate, with the defaults. The balancer decides every 500 ms over the last 3 s, and moves an isolate for load at most 3 times in 5 minutes, with its quarantine, bisect and fold moves counted among the 3. Packing while a backlog holds steady, the busy time an app reports, and leaving alone an isolate the kernel gave up on are new in 0.1.0-next.1.',
     head: ['When', 'What the balancer does'],
     rows: <Row[]>[
       [
         'An isolate blocks its pool for over 100 ms twice within 60 s, or crashes',
-        'Moves it to the quarantine pool until it has been quiet for 30 s, a window that doubles with each repeat offence, up to 2 minutes',
+        'Moves it to the quarantine pool until it has been quiet for 30 s, a window that doubles with each repeat offence, up to 2 minutes. One that has used its 3 moves stays until the oldest is 5 minutes old',
       ],
       [
         'A pool lags over 50 ms for 3 s, or its members use 80 % of a core or more',
@@ -302,12 +325,12 @@ export const featuresPage = {
         'Moves half its members to quarantine; whichever half blocks again holds the culprit',
       ],
       [
-        'The backlog the app reports for an isolate grows over 10 s',
-        'Gives the isolate a pool of its own if the cap allows, else a less loaded pool',
+        'The backlog the app reports for an isolate grows over two 10 s windows in a row',
+        'Gives the isolate a pool of its own if the cap allows, else a less loaded pool. A second quarantine pool folds into the first to free a worker for it',
       ],
       [
-        'An isolate alone in its pool stays steady for 60 s',
-        'Packs it into another pool that stays under 40 % with it, freeing a worker',
+        'Every isolate in a pool stays steady for 60 s',
+        'Moves them one at a time into another pool that stays under 40 % with all of them, freeing a worker',
       ],
       [
         'The kernel gives up on an isolate',
@@ -316,6 +339,16 @@ export const featuresPage = {
     ],
     guide: 'The balancer guide',
     example: 'Watch it move tasks in the processor example',
+  },
+  // Source: isoloop/isoloop docs/guide/agents.md, at the library pin.
+  agents: {
+    guide: 'The Agents guide',
+    example: 'The markets dashboard’s two tools',
+  },
+  // Source: isoloop/isoloop docs/guide/devtools.md, at the library pin.
+  devtools: {
+    guide: 'The devtools guide',
+    example: 'The plant dashboard with the panel open',
   },
   frameworks: {
     tabs: [
@@ -335,59 +368,422 @@ export const featuresPage = {
         'Every tag and attribute an isolate renders passes the host’s registry first. Unknown tags become `div`, script-capable tags and `on*` attributes are never created, and URLs are limited to http(s), mailto and relative ones.',
       ],
       [
-        'No inline code',
-        "The workers are same-origin module files and stylesheets are adopted, so a page can run Isoloop under `script-src 'self'` with no `'unsafe-inline'`.",
+        'No inline scripts',
+        "The workers are same-origin module files, so a page can run Isoloop under `script-src 'self'`. A page that shows a surface needs `style-src 'self' 'unsafe-inline'`: the `style` attributes isolates render count as inline styles.",
       ],
     ] as [string, string][],
   },
   cost: {
-    more: 'The full results, per device and build',
+    more: 'Every recorded run, per device and build',
   },
 };
 
+// Sources, at the library pin (apps/site/library.lock): DEFAULT_SUPERVISOR_CONFIG
+// and DEFAULT_BACKOFF (packages/host/src/supervisor), KernelConfig and
+// IsolateManifest (packages/host/src/kernel.ts), SubscribeOptions and
+// BusClientOptions (packages/runtime/src/bus-client.ts), DEFAULT_COMMIT_INTERVAL_MS
+// (packages/protocol/src/commits.ts); ADRs 0007 (the bus crash), 0008 (isolates
+// and surfaces), 0010 and 0011 (the render bridge), 0015 (visual pools);
+// docs/guide/pools.md (start positions, isoloop#186).
 export const howItWorks = {
   title: 'How Isoloop works',
   description:
-    'Seven diagrams of the Isoloop runtime, drawn from the code: the topology, placement, a publish through the bus, the isolate lifecycle, restarts, and a bus crash.',
+    'A walkthrough of the Isoloop runtime: the host and its isolates, workers and pools, the message bus, rendering from a worker, the supervisor, restarts and catch-up, persistence and bus crashes, and grants.',
   heading: 'How Isoloop works',
-  intro:
-    'Each diagram is drawn from the library’s code, and a test in the library checks its states, timings and counts against that code. Each one opens full size, with the source files it cites.',
-  pinned: 'Drawn from isoloop/isoloop at',
+  intro: [
+    'Your app’s host runs on the page’s main thread, and its parts run as isolates in workers. Isolates don’t call each other. They publish records to topics on a message bus, which runs in a worker of its own. A supervisor in the host watches every worker and restarts what fails.',
+    'Each step below covers one part, with its code and the diagram drawn from the library’s code.',
+  ],
+  /** Under each step, as a footnote: where the diagrams come from, then the short sha. */
+  pinned:
+    'The diagrams are drawn from the library’s code, and a test there checks their states, timings and counts against it. These are from isoloop/isoloop at',
+  overview: {
+    heading: 'The parts at a glance',
+    text: [
+      'Four threads: the main thread, an isolate on a worker of its own, a pool of three, and the bus worker. The main thread runs your host code and the kernel it creates: the supervisor, the compositor that applies each isolate’s DOM changes, and the bus controller.',
+    ],
+  },
   open: 'Open full size',
-  /** One paragraph per diagram, in reading order. */
-  diagrams: {
-    'runtime-topology':
-      'The host runs on the main thread: the supervisor, the compositor that applies each isolate’s DOM changes, and the bus controller. Each isolate runs on its own worker or in a pool, and the bus has a worker of its own. Isolates and the bus talk over direct message channels, not through the main thread.',
-    placement:
-      'The same isolates, each on its own worker or together in one pool. A pool saves memory and start-up time. Its members share an event loop, so they also share a fate.',
-    'bus-publish':
-      'One record through the bus. It passes the publisher’s grants and a size limit, its topic’s schema and a duplicate check, then goes into the log. A persistent record is acknowledged once it’s flushed to OPFS. Subscribers get it within their credit and commit their offsets, every 100 ms by default.',
-    'isolate-lifecycle':
-      'The supervisor’s states, with the default timings. An isolate with no heartbeat for 400 ms counts as blocked, and after 10 s it’s stopped and restarted. Restarts back off, up to 3 within 60 s; a crash after that leaves it failed.',
-    'restart-own-worker':
-      'An isolate on its own worker crashes and a new worker starts. Each subscription starts where its `from` says; the diagram shows `committed`, which reads on after the last commit, so the isolate sees again what it had read but not committed.',
-    'restart-pool':
-      'In a pool, a member’s own error restarts that member alone. A pool worker that stops responding, or throws from a timer, takes every member down, and the pool restarts in a new worker.',
-    'bus-crash-reattach':
-      'The bus worker crashes. A new one starts, every isolate reattaches, and persistent topics come back from OPFS.',
-  } as Record<string, string>,
-  policy: {
-    heading: 'These pages and their security policy',
-    text: "Every page on this site, the diagrams included, runs under the Content-Security-Policy default-src 'self'. GitHub Pages can’t send headers, so here the policy is a meta tag, and a meta tag doesn’t reach workers: basic’s workers run without a policy on this host. In a real deployment the policy goes in the response headers, which cover the workers too.",
-    link: 'The hosting guide',
+  /** The steps in the rail: one short name per step, in order. */
+  nav: {
+    label: 'Steps',
+    names: {
+      overview: 'Overview',
+      host: 'Host',
+      placement: 'Pools',
+      bus: 'Bus',
+      render: 'Rendering',
+      supervisor: 'Supervisor',
+      restart: 'Restarts',
+      busCrash: 'Persistence',
+      safety: 'Safety',
+    },
+    previous: 'Previous',
+    next: 'Next',
+    pager: 'Previous and next',
+  },
+  /**
+   * How to read each diagram, in words. Sources: each diagram's JSON at the pin
+   * (its components, connections, messages and cards), which the library's
+   * drift test checks against the code.
+   */
+  reading: {
+    heading: 'Reading the diagram',
+    parts: 'What’s in it',
+    steps: 'Follow the arrows',
+    diagrams: {
+      'runtime-topology': {
+        lead: 'Each large box is one thread. Cards inside a box are the pieces that run on that thread. Solid lines carry messages; dashed lines are heartbeats, and the import of an isolate’s module.',
+        parts: [
+          [
+            'Main thread, along the top',
+            'Your host app, which calls `createKernel`, and the kernel it creates. The supervisor, which starts workers and watches their heartbeats. The compositor, which applies isolates’ DOM changes to their surfaces once per animation frame. The bus controller, which hands out bus ports and supervises the bus worker. The host connection, the host’s own port for `kernel.subscribe`.',
+          ],
+          [
+            'Own worker, middle left',
+            'One isolate, with its own JavaScript realm and document. Isolate modules, left of it, are the files the worker imports.',
+          ],
+          [
+            'Pool worker, middle right',
+            'Three isolates on one thread: a headless member and two visual members, each with a root in one shared document.',
+          ],
+          [
+            'Bus worker, along the bottom',
+            'The broker, which checks grants, schemas and duplicates; the log engine, which encodes and stores records; and the topics’ logs.',
+          ],
+          [
+            'Below the bus worker',
+            'OPFS segments, the files persistent topics are written to. Only the tab holding the `isoloop-bus` Web Lock writes them.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'Isolate code never runs on the main thread. The main thread only runs the kernel and applies patches.',
+          'The host app calls `spawn`. The supervisor starts a worker and sends it `init`, one per member in a pool, and the worker imports the isolate’s module.',
+          'A visual isolate sends patches, its DOM changes, to the compositor, which applies them to the isolate’s surface.',
+          'Each isolate has a port of its own to the broker, one per member in a pool. Records never pass through the main thread.',
+          'The broker appends what it accepts through the log engine; persistent topics also go to OPFS.',
+          'The dashed lines back to the main thread are heartbeats: one per worker to the supervisor, and the bus worker’s beat and metrics to the bus controller.',
+        ],
+      },
+      placement: {
+        lead: 'The same three isolates, placed two ways. Each large box is one thread.',
+        parts: [
+          [
+            'Left: own workers',
+            'Isolates A and B (visual) and C (headless), each in a worker of its own: three threads.',
+          ],
+          [
+            'Right: one pool',
+            'The same three as members of the pool `charts`: one thread, one shared document with a root for each visual member.',
+          ],
+          [
+            'Top and bottom',
+            'The kernel, where the manifest’s `pool` decides the placement, and the bus worker.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'On the left the kernel starts three workers and sends each one `init`; on the right, one worker and three `init`s.',
+          'Either way the bus sees three ports. Grants, subscriptions and committed offsets stay per isolate, and so do the surface, the frame budget and the restart count.',
+          'What the pool members share: one event loop and its timers, the globals, the document, and their fate when the worker fails.',
+        ],
+      },
+      'bus-publish': {
+        lead: 'One record, from left to right, through five columns: Produce, Gate, Order, Log and Consume. Red lines end in a rejection.',
+        parts: [
+          ['Produce', 'An isolate publishing on its own port, or the host with `kernel.publish`.'],
+          [
+            'Gate',
+            'The grants and the size limit, then the schema. Topics under `isoloop.` belong to the kernel.',
+          ],
+          [
+            'Order',
+            'On a persistent topic, the duplicate check: each publish carries its producer, instance and sequence number, so a re-sent one gets its original offset. Anything that fails a gate goes to Rejected, and nothing is appended.',
+          ],
+          [
+            'Log',
+            'The log engine encodes the record, checks the storage quota and appends it. A persistent topic’s batch is written to OPFS first, then acknowledged; records evicted from memory are read back from disk.',
+          ],
+          [
+            'Consume',
+            'Subscribers, a consumer group (experimental in 0.1) whose members each get some of the records (by key), and the committed offsets.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'The publisher sends the record; the gates check it in order.',
+          'An accepted record gets an offset in the topic’s log, and the publisher gets its answer: the offset, or the error.',
+          'The bus delivers it to each subscription in order, while the subscription has credit. Delivery is at least once.',
+          'Each subscriber commits what its handlers finished, every 100 ms by default, which also returns credit.',
+        ],
+      },
+      rendering: {
+        lead: 'One visual isolate’s frame. The top row runs left to right, from the isolate’s code to the page; the rows below carry events and host calls back to the worker.',
+        parts: [
+          [
+            'Isolate’s worker',
+            'The isolate’s UI code, React, Preact or plain DOM, changes the worker’s `document`: the isoloop-dom subset. The recorder turns every change in one microtask into one batch. `ctx.host` and event dispatch live here too.',
+          ],
+          [
+            'Compositor',
+            'One queue per surface. Each animation frame it applies queued batches round-robin across surfaces while 8 ms of work lasts; the first batch of a frame always applies, and a batch is never split.',
+          ],
+          [
+            'Applier + registry',
+            'Writes each batch into the surface. Every tag, attribute and URL passes the registry first: unknown tags become `div`, and no script-capable tag or `on*` attribute is ever created.',
+          ],
+          [
+            'Surface shadow root',
+            'The `<iso-surface>` on the page. The kernel’s `styles` and the isolate’s `ctx.styles` are adopted here and don’t leak out.',
+          ],
+          [
+            'EventBridge and Router',
+            'Delegated listeners on the shadow root. An event goes back only if the isolate listens for it on the target or an ancestor; with routing on, same-origin link clicks go to the router.',
+          ],
+          [
+            'Host calls',
+            '`measure`, `focus`, `scrollIntoView` and `requestCanvas`, run in the compositor’s frame.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'The isolate renders; the subset records the changes, and at the end of the microtask they leave as one `patch`, with any new stylesheets.',
+          'The compositor queues the patch and applies it in the next frame that has budget for it; the applier sanitises and writes it.',
+          'A click on the surface reaches the EventBridge, which sends the worker an event naming its target and the listeners on its path. The worker dispatches it with capture and bubble.',
+          '`ctx.host.measure(node)` first sends what the recorder holds. The call runs after every batch sent before it, so it measures their layout. `requestCanvas` answers with an `OffscreenCanvas` instead.',
+        ],
+      },
+      'isolate-lifecycle': {
+        lead: 'The supervisor’s states for one isolate. The main path runs along the middle; failures branch off it.',
+        parts: [
+          [
+            'The main path',
+            'Restarting (a spawn queued, after the backoff), Loading (the worker started and sent `init`; ready within 10 s), Running (a heartbeat every 100 ms), Stopped (`kernel.stop`).',
+          ],
+          [
+            'Blocked',
+            'No heartbeat for 400 ms: the loop is busy but still alive, and a busy overlay covers its surface. A heartbeat brings it back to Running.',
+          ],
+          ['Crashed', 'Passed through on the way to a restart. It emits `isolate:crash`.'],
+          [
+            'Failed',
+            'The restart limit was reached: the fallback shows and the host gets `isolate:failed`.',
+          ],
+          [
+            'Suspended',
+            'Opt-in: an idle isolate’s worker is shut down and its offsets are kept. It wakes back into Loading.',
+          ],
+        ] as [string, string][],
+        steps: [
+          'An isolate crashes from Running on a fatal error or a pool crash, from Blocked after 10 s without a heartbeat, and from Loading on a timeout or a version mismatch.',
+          'Under 3 restarts within 60 s it goes back to Restarting, after a backoff that starts at 250 ms and doubles each time (at most 4 s). Past the limit it’s Failed.',
+          'Some crashes go straight to Failed, because a restart can’t change them: a render format or version the host doesn’t speak, or a bus that couldn’t load its contracts.',
+        ],
+      },
+      'restart-own-worker': {
+        lead: 'A sequence: time runs down the page. The columns are isolate C’s old worker, the kernel, the bus worker and C’s new worker.',
+        parts: [
+          ['Crash', 'C’s old worker reports a fatal error, or fails.'],
+          ['Respawn', 'After the backoff, a new worker for C.'],
+          ['Replay and first paint', 'C reads its topics back and draws again.'],
+        ] as [string, string][],
+        steps: [
+          'The kernel terminates the old worker and detaches C’s port from the bus. C’s committed offsets are kept: they belong to C, not to its worker.',
+          'After the backoff, the kernel attaches a new port for C, then starts the new worker with it.',
+          "The new C subscribes with `from: 'committed'`, and the bus delivers from the record after its last commit; up to one commit interval of what C had handled comes back.",
+          'C reports ready, sends its first paint and commits again. Every other isolate kept running throughout.',
+        ],
+      },
+      'restart-pool': {
+        lead: 'A sequence in two parts, with time running down the page. The columns are the pool’s worker with members A, B and C, the kernel, the bus worker and a new pool worker.',
+        parts: [
+          ['Top part', 'A member’s own error: only B restarts.'],
+          ['Bottom part', 'The worker fails: every member restarts.'],
+        ] as [string, string][],
+        steps: [
+          'B reports a fatal error of its own. The kernel shuts B down alone; A and C keep the worker and keep running.',
+          'After B’s backoff, the kernel gives B a new bus port and starts it again in the same worker. B subscribes from its own commits.',
+          'Later, the worker stops sending heartbeats for 10 s, or fails. Every member crashes with that reason, and the kernel terminates the worker.',
+          'The kernel gives all three members new bus ports, starts a new worker and sends each member its `init`. Each one reads on from its own commits.',
+        ],
+      },
+      'bus-crash-reattach': {
+        lead: 'A sequence in three parts, with time running down the page. The columns are an isolate, the kernel’s bus controller, the old bus worker, the new one, and OPFS.',
+        parts: [
+          ['The bus fails', 'The isolates keep running.'],
+          ['New bus, ports moved at once', 'Each isolate gets a port to the new bus.'],
+          ['Restore and resume', 'Persistent topics come back from OPFS.'],
+        ] as [string, string][],
+        steps: [
+          'An isolate publishes and gets no answer: it keeps the publish. The old bus stops beating or fails, and the kernel terminates it.',
+          'The kernel starts a new bus worker and attaches every isolate’s port to it at once; the new bus holds what arrives until it’s ready. Each isolate subscribes again and re-sends its unanswered publishes.',
+          'The new bus takes the storage lock (waiting up to 2 s) and restores the persistent topics’ segments. Their subscriptions resume after the last commit; memory topics send a reset instead.',
+          'The new bus reports ready, and suspended headless isolates wake. If the bus crashes twice while loading, it sets the newest segment aside and starts from the one before.',
+        ],
+      },
+    },
+  },
+  sections: {
+    host: {
+      heading: 'The host and its isolates',
+      text: [
+        'The host is your page’s own code. It creates one kernel with `createKernel`, giving it the topics and the worker files that `@isoloop/vite` builds, and starts each isolate with `kernel.spawn`.',
+        'Importing a module with `?isolate` gives its URL: `@isoloop/vite` builds it to run in a worker, so `src` is a URL, not code the host imports. The topics module goes in twice: as a URL, for the bus worker to import, and as a list the host reads.',
+        'An isolate is a module whose default export is `defineIsolate(…)`: a `start(ctx)` function, or a React or Preact component through an adapter. The object passed to `spawn` is its manifest. It names the module, the element the isolate renders into (its surface) and its grants. An isolate with no surface is headless: it gets the same supervision and bus, and its `ctx.root` is `undefined`.',
+        '`start` gets a context: `ctx.bus` for topics, `ctx.root` to render into, `ctx.host` for host calls (measure, focus, scroll, navigate), and `ctx.reportError` and `ctx.onShutdown`.',
+      ],
+      code: { label: 'A host and the isolate it spawns', host: 'main.ts', isolate: 'counter.ts' },
+    },
+    // Figures: isoloop/isoloop docs/guide/pools.md, "When to pool", from the
+    // plant's matched comparison (apps/dashboards/plant/comparison/matched-v2).
+    placement: {
+      heading: 'Workers and pools',
+      text: [
+        'Each isolate runs in a worker: a thread of its own, with its own event loop. By default an isolate gets a worker to itself. With `pool` in its manifest, it shares one worker with every isolate that names the same pool.',
+        'A pool saves memory. In the plant dashboard’s matched comparison, a small headless isolate cost about 0.2 MB in a pool, against 2.8 MB on its own worker; in return its members stall and restart together, as the next paragraph says. Measured with `@isoloop/*@0.0.0-next.d028bc1` in Chromium, on 4 physical cores fixed at 2.0 GHz, medians of 5 rounds, memory after GC 16 s after load.',
+        'Members share an event loop. One that blocks stalls them all, and a worker error restarts them all; an error a member reports as its own restarts only that member (the Restarts step has the details). They also share one document, so they can read each other’s DOM and input, and they can reach each other’s bus ports, so a pool holds all its members’ grants. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
+        'The kernel never pools on its own. Placement is the manifest’s choice, or that of the opt-in, experimental `@isoloop/balancer`, which moves isolates between pools as their load changes.',
+      ],
+      link: 'The pools guide: when to pool, with the plant’s figures',
+      results: 'The plant’s matched comparison',
+    },
+    // Sources: topic() options (packages/bus/src/topic.ts: retention kinds,
+    // `reply`, `durability`, the 256 KiB size limit), the broker's group
+    // assignment (packages/bus/src/broker.ts: key hash, round-robin keyless),
+    // SubscribeOptions and BusClientOptions (packages/runtime/src/bus-client.ts).
+    bus: {
+      heading: 'Topics, records and the bus',
+      text: [
+        "A topic is declared once, in a contracts module that the host, the bus and every isolate import; its default export, `contracts(…)`, is the list the host passes to `createKernel`. A topic has a name (with its major version, by convention, as in `count.v1`), a schema (from any Standard Schema library; zod here) and a retention: `{ kind: 'last-n', n }` keeps the last n records, `{ kind: 'time', ms }` the records younger than `ms`, and `{ kind: 'compacted' }` the latest record per key.",
+        "By default a topic lives in the bus worker’s memory. `durability: 'persistent'` also writes it to disk, so it survives a reload and a bus crash (the Persistence step). A topic with a `reply` schema also takes requests, which are experimental in 0.1: `ctx.bus.request` publishes one and waits for the first valid reply, 30 s at most by default.",
+      ],
+      flow: [
+        'Each isolate has a direct message channel to the bus worker, so the main thread isn’t on a record’s path.',
+        'A publish is checked in order: the publisher’s grants and the record’s size (256 KiB by default), then the topic’s schema, and on a persistent topic a duplicate check. Then it’s appended to the topic’s log and gets an offset, and `publish` resolves; on a persistent topic, once the record is written to disk. A rejected one rejects with a `BusError`.',
+        'A subscription starts where its `from` says: `latest` (the default) for new records only, `earliest` for everything the topic retains, or `committed` to read on after its last commit. It gets the topic’s records in offset order. Subscribers that name the same `group` share the topic: each record goes to one of them, by its key (round-robin when it has none), so each key’s records stay in order.',
+        'The bus sends each subscription up to 1,000 records ahead of what it has handled. The subscriber commits each record once its handler settles; the commits go out every 100 ms by default, or sooner once half the credit is used. Delivery is at least once: after a crash, up to one commit interval of records can come again, so a handler must be safe to run twice.',
+      ],
+    },
+    // Sources: ADRs 0010, 0011 and 0015 (the render bridge, pools' portal
+    // roots); packages/host/src/events.ts (forwarded events, submit, links);
+    // KernelConfig `styles`, `components`, `compositor` and IsolateContext
+    // `styles`, `portalRoot`, `host` (requestCanvas) at the pin.
+    render: {
+      heading: 'Rendering from a worker',
+      text: [
+        'A worker has no DOM. A visual isolate gets a small DOM subset as its `document`, enough for React, Preact and plain DOM code to run unchanged. The subset records each change (insert, move, remove, text, attribute, listener) and sends the host one batch per microtask.',
+        "On the host, the compositor applies each isolate’s batches to its surface, with a budget of 8 ms of DOM work per frame. Every tag, attribute and URL passes the host’s component registry first, so an isolate can’t create a script or an `on*` handler. The same registry lets isolates render the host’s own design-system elements by name: with `components: { 'iso-button': { tag: 'ds-button', attributes: ['variant'] } }`, an isolate’s `<iso-button>` becomes a `<ds-button>` on the page.",
+        'Each surface is a shadow root, so the page’s stylesheets don’t reach it; inherited properties, such as the font, still do. The kernel’s `styles` are adopted into every surface, and an isolate adds its own with `ctx.styles(css)`. Modals, tooltips and menus that libraries render into `document.body` go into `ctx.portalRoot`, inside the isolate’s own surface.',
+        'Input on a surface goes back to the worker as data, and is dispatched there with capture and bubble. Functions never cross the boundary. What needs the real page, the isolate asks the host for through host calls: `ctx.host.measure`, `focus` and `scrollIntoView` for a node, and `requestCanvas`, which hands the isolate an `OffscreenCanvas` to draw on from the worker, as charts do.',
+      ],
+      differs: {
+        heading: 'What changes for your code',
+        items: [
+          'Layout reads are asynchronous: `await ctx.host.measure(node)` instead of `getBoundingClientRect()`.',
+          'An isolate can’t call `preventDefault` in time. The host always prevents `submit`, and same-origin link clicks go to the router.',
+          'Only these events reach the worker: click, dblclick, input, change, keydown, keyup, submit, focusin, focusout, pointerdown and pointerup; pointer moves, at most one per frame; and scroll, at most one per frame for each scrolled element. There’s no wheel or drag yet.',
+        ],
+      },
+      code: 'The Host step’s counter, as a component',
+    },
+    // Sources: DEFAULT_SUPERVISOR_CONFIG, DEFAULT_BACKOFF, KernelConfig
+    // `heartbeat` and `supervisor`, IsolateManifest `fallback`, Kernel `stop`
+    // and `restart`, the worker's heartbeat timer (packages/runtime/src/bootstrap.ts).
+    supervisor: {
+      heading: 'The supervisor',
+      text: [
+        'Every worker sends a heartbeat, by default every 100 ms. The heartbeat is a timer in the worker’s own event loop, so any long task delays it; each beat also reports how late it was (`lagMs` on `isolate:beat`), which the balancer reads. With no heartbeat for 400 ms, the worker’s isolates count as blocked: busy, not dead, and a busy overlay covers their surfaces.',
+        'With no heartbeat for 10 s, the worker is terminated and its isolates are restarted. The default is long on purpose, so a slow but working loop isn’t killed; apps shorten it with `heartbeat.killAfterMs` (the landing page’s demo uses 2 s).',
+        "An isolate also crashes when its code throws a fatal error, when its worker fails, or when it isn’t ready within 10 s of its spawn. Restarts back off from 250 ms, doubling up to 4 s. After 3 restarts within 60 s, the next crash leaves it failed. A visual isolate then shows its fallback, by default a message and a Retry button, or what the manifest’s `fallback` draws, and the host gets `isolate:failed`; `kernel.restart` brings it back. `supervisor: { strategy: 'never' }` turns restarts off, for tests and debugging.",
+        'A subscription handler that throws isn’t a crash. The isolate keeps running and reports `isolate:error`, and that subscription stops committing, so its records come back on the next start.',
+        '`kernel.stop(id)` sends shutdown: the isolate’s `onShutdown` handlers get 1 s, its last commits go out, then its worker goes.',
+      ],
+    },
+    // Sources: SubscribeOptions `from` and `group` (packages/runtime/src/bus-client.ts),
+    // the compositor's `reset` on restart (packages/host/src/compositor.ts), ADR 0015
+    // decision 8; the replay cost: isoloop/isoloop docs/guide/pools.md,
+    // "When to pool", the `one` row.
+    restart: {
+      heading: 'Restarts and catch-up',
+      text: [
+        'Keep what must survive a restart in a topic: anything else in the isolate’s memory is lost. A restart is a new instance, and it rebuilds its state from the bus. Meanwhile its surface is blank, and it fills again on the new instance’s first paint.',
+        'Each subscription starts where its `from` says, as on the first start. A subscription in a consumer group (experimental in 0.1) that has committed resumes after the group’s commit, whatever its `from`.',
+      ],
+      from: [
+        '`latest`, the default: live values where only the newest matters, such as a ticker or a status.',
+        '`earliest`: state rebuilt from what the topic retains, as the counter does.',
+        '`committed`: work done once per record, such as jobs or alerts. It reads on after its last commit, so it sees again what it had read but not yet committed: the at-least-once delivery of the Bus step.',
+      ],
+      cost: 'With `earliest`, every restart replays everything the topic retains, and in a pool every member replays on the pool’s one thread. So the longer a topic’s retention, the longer such a restart takes to catch up, and the pools guide measured it growing over a long run. Keep retention to what a restart needs.',
+      costLink: 'The pools guide, with the plant’s figures',
+      pool: 'On its own worker, a crash restarts that isolate alone. In a pool, what restarts depends on who failed. An error the runtime can pin on one member restarts that member alone: `start()` throwing, an error the member reports with `ctx.reportError`, or a render error the React or Preact adapter catches (the adapters report it that way). A block, or a plain throw from an event handler, a timer or a scheduler the members share, is the worker’s error: the worker goes down, and every member restarts in a new one.',
+    },
+    // Sources: ADR 0007 (durability, group commit, reattach, dedup, safe mode),
+    // KernelEvents `bus:*` and IsolateManifest `bus.onReset` (packages/host/src/kernel.ts),
+    // SubscribeOptions `onReset`, the broker's `quota_exceeded`.
+    busCrash: {
+      heading: 'Persistence and bus crashes',
+      text: [
+        "A topic with `durability: 'persistent'` writes its records to the origin private file system (OPFS), batched every 5 ms or 256 records, so a persistent publish resolves a few milliseconds later than a memory one. After a page reload the new bus loads them from disk, and each subscription starts where its `from` says: `committed` reads on after its last commit, `earliest` from what the topic retains. A `memory` topic, the default, starts empty after a reload.",
+        'Only one tab’s bus owns the files. In a second tab, or where the browser can’t open them (some private windows), persistent topics run in memory and the kernel emits `bus:durability_degraded`. When the origin’s storage is full, publishes reject with `quota_exceeded`; the kernel reports usage with `bus:quota`.',
+      ],
+      crash: {
+        heading: 'When the bus crashes',
+        text: [
+          'The bus is supervised like an isolate, with the same heartbeat and restart limit. When it crashes, a new bus worker starts and every running isolate gets a new channel to it. The isolates keep running. What they publish meanwhile waits in each isolate, up to 1,000 unanswered calls, and goes out once the new bus is there.',
+          "Persistent topics come back from disk: their subscriptions resume after their last commit, whatever their `from`, with no gap, and re-sent publishes aren’t stored twice. Memory topics are gone: their subscribers get a reset. `useTopic` empties and refills, a plain `ctx.bus.subscribe` gets its `onReset` callback, and an isolate that can’t handle a reset can ask to be restarted instead, with `bus: { onReset: 'restart' }` in its manifest.",
+          'If the bus crashes twice while loading, a persisted record is the likely cause: it sets the newest segment of each persistent topic aside (renamed, not deleted), starts from the one before, and the kernel emits `bus:recovered` with what it set aside. After 3 bus restarts within 60 s, the kernel emits `bus:failed`: isolates keep running, and every publish rejects with `bus_unavailable`. A contracts module that fails to load fails the bus with a code, and every isolate with it, with no retry.',
+        ],
+      },
+      code: {
+        label: 'A persistent topic and a subscriber',
+        topics: 'topics.ts',
+        isolate: 'alarms.ts',
+      },
+    },
+    // Sources: isoloop/isoloop README ("Hostile code") and system design §
+    // security (same origin, trusted-but-unreliable, the iframe tier);
+    // matchTopic (packages/protocol/src/grants.ts); ADR 0010 (isTrusted);
+    // ADR 0001 amendment (frozen built-ins in pools).
+    safety: {
+      heading: 'Grants and safety',
+      threat:
+        'Isolates run on your origin, so they share its cookies and storage: an isolate can `fetch` with the origin’s cookies and read its IndexedDB. Isoloop contains unreliable code (a widget that hangs, throws or leaks), not hostile code. For code you don’t trust at all, use a cross-origin iframe.',
+      text: [
+        'Grants are checked by the bus, on every publish and subscription. A grant is a topic name or a pattern: `*` matches one or more characters, dots included, so `machine.3.*` covers `machine.3.temp.v1`; without `*` the match is exact. Topics under `isoloop.` belong to the kernel. An isolate also needs `navigate: true` to call `ctx.host.navigate`; plain link clicks need no grant, since the host’s router handles them.',
+        'Events reach the worker with `isTrusted: false`, so code that checks it must not treat forwarded input as the user’s. A pool freezes the built-ins before its first member loads, so one member can’t patch `Array.prototype` under the others; its members still share a document and can reach each other’s ports.',
+      ],
+      link: 'Safety, on the features page',
+    },
   },
 };
 
 export const examplesPage = {
-  // Shown where an example has no measured result yet (its example.json `note`).
   title: 'Examples',
+  /** <title> and the link preview only (ADR 0006, as amended). */
+  searchTitle: 'Live examples: dashboards, workers and pools',
   description:
-    'Isoloop examples: basic, the processor, and the plant and markets dashboards. Each one runs live, with its measured results.',
+    'Isoloop examples: Basic, the plant and markets dashboards, and the processor. Each one runs live, with what it shows, what to try, and its measured results.',
   heading: 'Examples',
   intro:
-    'Each example runs live in your browser on the published @isoloop packages. The dashboards come as a native build and an Isoloop build of the same code, so you can compare them side by side.',
-  measuredAt: 'measured at',
+    'Each example runs live in your browser on the published @isoloop packages. The dashboards come as native builds and Isoloop builds of the same code, so you can compare them side by side.',
+  nav: { label: 'Examples', previous: 'Previous', next: 'Next', pager: 'Previous and next' },
   links: { live: 'Open live', source: 'Source', results: 'Results', architecture: 'Architecture' },
+  shows: 'What it shows',
+  try: 'What to try',
+  measurements: 'Measurements',
+  findings: 'Findings',
+  inProgress: 'Work in progress',
+  more: 'The full results, with the method',
+  shot: 'a screenshot',
+  /**
+   * The Pages gap, under the intro (ADR 0002, decision 8, amended 2026-11-21).
+   * Source: the built site (only the site's own pages carry the meta CSP) and
+   * isoloop()'s header on every `vite preview` response (@isoloop/vite).
+   */
+  policy: {
+    before:
+      'On this host the examples run without the security policy: GitHub Pages can’t send headers. In the tests and the comparison runs they run under it, and ',
+    link: 'the hosting guide',
+    after: ' covers a real deployment.',
+  },
   support: 'They need Safari 16.4 or later, or a recent Chrome, Edge or Firefox.',
 };
 
@@ -410,9 +806,54 @@ export const changelogPage = {
   },
 };
 
+/** /docs/ and each docs page (src/pages/doc.tsx). The guides' own text comes from the library. */
+export const docsPage = {
+  title: 'Docs',
+  description:
+    'How to build with Isoloop: getting started, the guides for each part, and the reference.',
+  heading: 'Docs',
+  lede: 'How to build with Isoloop, section by section.',
+  docs: 'Docs',
+  nav: 'Docs',
+  onThisPage: 'On this page',
+  previous: 'Previous',
+  next: 'Next',
+  /** The code blocks' button once it has copied (src/demos/copy.ts); "Copy" is in the markup (build/docs/render.ts). */
+  copied: 'Copied',
+  /**
+   * The docs for agents, on /docs/ (build/docs/llms.ts writes /llms.txt, the
+   * llmstxt.org index; /llms-full.txt, every guide in nav order; and each
+   * page's /docs/<slug>.md, the guide as fetched at the pin).
+   */
+  agents: {
+    lead: 'For AI agents: these docs as plain text,',
+    index: 'llms.txt',
+    indexNote: '(an index),',
+    full: 'llms-full.txt',
+    fullNote: '(everything) and each page as Markdown.',
+  },
+  /** On a guide or an API page, its own Markdown copy (/docs/<slug>.md). */
+  markdown: 'View as Markdown',
+  /** The search at the top of the docs' sidebar (src/demos/search.ts, /docs/search.json). */
+  search: {
+    label: 'Search the docs',
+    placeholder: 'Search docs',
+    results: 'Search results',
+    /** Followed by the query in quotes. */
+    empty: 'No results for',
+    /** The key that focuses it, shown beside it. */
+    key: '/',
+  },
+};
+
 export const notFound = {
   title: 'Not found',
   description: 'This page doesn’t exist.',
   heading: 'This page doesn’t exist',
   text: 'It may have moved. Try one of these:',
+};
+
+/** Status marks next to a name (src/pages/pill.tsx). */
+export const marks = {
+  experimental: 'Experimental',
 };

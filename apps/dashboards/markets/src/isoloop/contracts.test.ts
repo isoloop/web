@@ -1,7 +1,19 @@
 import { testContracts } from '@isoloop/bus/testing';
 import { describe, expect, it } from 'vitest';
 import * as s from '../core/schemas';
-import list from './contracts';
+import list, { EXPOSED } from './contracts';
+
+type JsonSchemaOf = Record<'input' | 'output', (o: { target: string }) => unknown>;
+
+/** A schema's JSON Schema through Standard JSON Schema, as the kernel makes it at start. */
+function jsonSchema(schema: unknown, io: 'input' | 'output'): unknown {
+  const std: unknown = Reflect.get(Object(schema), '~standard');
+  const js: unknown = Reflect.get(Object(std), 'jsonSchema');
+  const fn: unknown = Reflect.get(Object(js), io);
+  if (typeof fn !== 'function') return undefined;
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- checked to be a function just above
+  return (fn as JsonSchemaOf[typeof io]).call(js, { target: 'draft-2020-12' });
+}
 
 const ts = 1_762_500_000_000;
 const samples = {
@@ -67,11 +79,44 @@ const samples = {
       ts,
     },
   ],
+  'markets.quote.v1': {
+    values: [{ symbol: 'BTC-USD' }],
+    replies: [
+      {
+        symbol: 'BTC-USD',
+        aggregate: {
+          symbol: 'BTC-USD',
+          vwap: 101_249.9,
+          spread: -0.4,
+          volume: 12.5,
+          windowMs: 60_000,
+          ts,
+        },
+        prices: [
+          { exchange: 'okx', symbol: 'BTC-USD', last: 101_250, bid: 101_249, ask: 101_251, ts },
+        ],
+      },
+      { symbol: 'ETH-USD', aggregate: null, prices: [] },
+    ],
+  },
+  'markets.alerts.create.v1': {
+    values: [{ symbol: 'BTC-USD', metric: 'price', op: 'above', threshold: 1e5 }],
+    replies: [{ id: 'agent-r1', created: true }],
+  },
 };
 
 describe('contracts', () => {
   it('accepts a sample of every topic, as plain data', async () => {
     expect(await testContracts(list, samples)).toEqual([]);
+  });
+
+  it('exposes both tools with a JSON Schema for input and reply (ADR 0018, decision 3)', () => {
+    for (const name of EXPOSED) {
+      const t = list.get(name);
+      expect(t?.tool, name).toBeDefined();
+      expect(jsonSchema(t?.schema, 'input'), name).toMatchObject({ type: 'object' });
+      expect(jsonSchema(t?.reply, 'output'), name).toMatchObject({ type: 'object' });
+    }
   });
 
   it('rejects records that are wrong in the ways feeds go wrong', () => {

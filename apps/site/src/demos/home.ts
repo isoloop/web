@@ -2,6 +2,7 @@
 import { recording } from '../copy.ts';
 import { Channel, supported, whenNear } from './channel.ts';
 import { Recording } from './recording.ts';
+import { startTabs } from './tabs.ts';
 
 const root = document.querySelector<HTMLElement>('[data-demo="recording"]');
 if (root) {
@@ -14,3 +15,5 @@ if (root) {
     whenNear(root, () => channel.start());
   }
 }
+
+for (const t of document.querySelectorAll<HTMLElement>('[data-tabs]')) startTabs(t);

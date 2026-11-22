@@ -26,7 +26,7 @@ export const kernel = createKernel({
 /** Why alarms and events are in memory only, if they are (decision 5's fallback). */
 export let durability: { degraded: string } | undefined;
 const listeners = new Set<() => void>();
-kernel.on('bus:durability-degraded', (e) => {
+kernel.on('bus:durability_degraded', (e) => {
   durability = { degraded: e.reason };
   for (const fn of listeners) fn();
 });

@@ -42,8 +42,13 @@ test('a task that blocks once stays; blocking again within 60 s sends it to quar
   await page.waitForTimeout(1_500);
   // A first spike is only noted (ADR 0017, amended for M3i).
   await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
-  await page.waitForTimeout(5_000);
-  await expect(columnOf(page, heavy)).toHaveAttribute('data-pool', 'balancer-1');
+  await expect(page.locator('.log li[data-kind="noted"]').first()).toContainText(heavy, {
+    timeout: 10_000,
+  });
+  await page.waitForTimeout(3_000);
+  // Still in a balancer pool, not the quarantine. Which pool isn't the point: on a busy runner the
+  // balancer may move it for load (another pool), which isn't a quarantine.
+  await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'pool');
   await card(page, heavy).getByRole('button', { name: 'Block 2 s' }).click();
   await expect(columnOf(page, heavy)).toHaveAttribute('data-kind', 'quarantine', {
     timeout: 15_000,
@@ -142,7 +147,7 @@ test('a task working after await that reports its busy time is moved', async ({
 // Jobs whose work the busy time can't see (promise continuations), and no
 // busy-time report: the pool is short of CPU, but neither its lag nor its
 // measured load says so. Only the backlog the page reports does (M3i).
-test('a task whose backlog keeps growing is moved within about 15 s', async ({
+test('a task whose backlog keeps growing is moved within about 25 s', async ({
   page,
   browserName,
 }) => {
@@ -163,8 +168,10 @@ test('a task whose backlog keeps growing is moved within about 15 s', async ({
     },
     [a, b] as const,
   );
+  // Two rising 10 s windows (M3j decision 16) after the jobs start to pile
+  // up: about 25 s, the title's figure. The 35 s timeout allows for slow CI.
   await expect(page.locator('.log li[data-kind="backlog"]').first()).toBeVisible({
-    timeout: 25_000,
+    timeout: 35_000,
   });
   await expect(page.locator('.log li[data-kind="backlog"]').first()).toContainText(
     /balancer-1 → balancer-/,
@@ -335,3 +342,26 @@ for (const mode of ['own', 'one'] as const) {
     await expect(page.locator('.log li[data-kind="spike"]')).toHaveCount(0);
   });
 }
+
+test('the Devtools switch in the controls reloads with ?devtools=1 and opens the panel', async ({
+  page,
+}) => {
+  const box = page.locator('.controls').getByRole('checkbox', { name: /Devtools/ });
+  await expect(box).not.toBeChecked();
+  await expect(page.locator('[data-isoloop-devtools]')).toHaveCount(0);
+  await box.check();
+  await expect(page).toHaveURL(/devtools=1/);
+  await expect(page.locator('.controls').getByRole('checkbox', { name: /Devtools/ })).toBeChecked();
+  // Connected after the kernel (src/devtools.ts).
+  await expect(page.locator('[data-isoloop-devtools]')).toHaveCount(1);
+  await expect
+    .poll(() =>
+      page.evaluate(() => window.kernel.isolates().some((i) => i.id === 'isoloop-devtools')),
+    )
+    .toBe(true);
+});
+
+test('framed by the hub (?embed=1), the page hides its own Devtools switch', async ({ page }) => {
+  await page.goto('./?embed=1');
+  await expect(page.locator('.devtools-toggle')).toBeHidden();
+});

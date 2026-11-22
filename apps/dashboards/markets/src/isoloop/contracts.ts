@@ -74,6 +74,39 @@ export const timings = topic('timings.v1', {
   retention: { kind: 'last-n', n: 600 },
 });
 
+/**
+ * Tools for agents (M4a, ADR 0018): requestable topics the kernel exposes
+ * (`agents.expose` in kernel.ts) to the dev MCP and, later, WebMCP. The tool's
+ * name is the topic's name.
+ */
+export const quoteTool = topic('markets.quote.v1', {
+  schema: s.quoteRequest,
+  reply: s.quoteReply,
+  retention: { kind: 'last-n', n: 100 },
+  tool: {
+    title: 'Quote',
+    description:
+      "The latest figures for one symbol: VWAP, cross-market spread and volume over the dashboard's window (null with no trades in it), and each exchange's last, bid and ask.",
+    readOnly: true,
+  },
+});
+
+export const createAlertTool = topic('markets.alerts.create.v1', {
+  schema: s.alertCreate,
+  reply: s.alertCreated,
+  retention: { kind: 'last-n', n: 100 },
+  tool: {
+    title: 'Create an alert',
+    description:
+      "Adds an alert rule: fire when the symbol's metric (price, vwap or spread) goes above or below the threshold, or at once if it's already past it. price is any exchange's last trade: the rule fires once, and again only after no exchange has been past the threshold for 10 s. vwap and spread are cross-market, and fire on each crossing. The rule shows in the alerts panel and is kept across reloads. Returns the rule's id.",
+    readOnly: false,
+    consequential: true,
+  },
+});
+
+/** The tools agents may call (`agents.expose` in kernel.ts): the aggregator's quote and the alerts isolate's create. */
+export const EXPOSED = [quoteTool.name, createAlertTool.name];
+
 export default contracts(
   trades,
   book,
@@ -87,4 +120,6 @@ export default contracts(
   correlations,
   depth,
   timings,
+  quoteTool,
+  createAlertTool,
 );

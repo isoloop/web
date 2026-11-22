@@ -32,6 +32,6 @@ function NotFound(): VNode {
 
 export const notFoundPage: Page = {
   path: '/404.html',
-  head: { title: notFound.title, description: notFound.description },
+  head: { title: notFound.title, description: notFound.description, robots: 'noindex' },
   render: () => <NotFound />,
 };

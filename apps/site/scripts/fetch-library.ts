@@ -1,4 +1,4 @@
-// `pnpm --filter site fetch-library`: fetches the pinned diagrams into
+// `pnpm --filter site fetch-library`: fetches the pinned diagrams and guides into
 // .library/ (build/library.ts). The build does the same on its own; this is
 // for fetching ahead, e.g. before working offline.
 import { fileURLToPath } from 'node:url';

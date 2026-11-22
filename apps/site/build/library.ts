@@ -1,14 +1,34 @@
-// The library's diagrams, fetched at the sha pinned in library.lock (ADR 0002,
-// decision 6). One mechanism for CI and for local builds: a blob-less clone of
-// isoloop/isoloop's main in apps/site/.library/, then only docs/diagrams at the
-// pin. The pin must be reachable from main, so only diagrams that passed the
-// drift test there reach the site. Once a pin has been fetched and checked, a
-// stamp file lets later builds (and offline ones) reuse it.
+// The library's diagrams and guides, fetched at the sha pinned in library.lock
+// (ADR 0002, decision 6; ADR 0006). One mechanism for CI and for local builds:
+// a blob-less clone of isoloop/isoloop's main in apps/site/.library/, then only
+// LIBRARY_PATHS at the pin. The pin must be reachable from main, so only
+// diagrams that passed the drift test there reach the site; that it is also a
+// published version is checked apart, in CI (build/pin.ts). Once a pin has been
+// fetched and checked, a stamp file lets later builds (and offline ones) reuse
+// it.
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const LIBRARY_REPO = 'https://github.com/isoloop/isoloop.git';
+
+/** The folders checked out at the pin: the core diagrams, the guides and the generated API pages. */
+export const LIBRARY_PATHS = ['docs/diagrams', 'docs/guide', 'docs/api'] as const;
+
+/** The pinned checkout's folder in `.library/`; `ensureLibrary` fills it. */
+export function libraryDir(siteDir: string): string {
+  return join(siteDir, '.library', readPin(siteDir));
+}
+
+/** The pinned `docs/guide`; call `ensureLibrary` first. */
+export function guidesDir(siteDir: string): string {
+  return join(libraryDir(siteDir), 'docs', 'guide');
+}
+
+/** The pinned `docs/api`, the generated API pages; call `ensureLibrary` first. */
+export function apiDir(siteDir: string): string {
+  return join(libraryDir(siteDir), 'docs', 'api');
+}
 
 /** The pinned sha, checked for shape. */
 export function readPin(siteDir: string): string {
@@ -19,8 +39,14 @@ export function readPin(siteDir: string): string {
   return pin;
 }
 
+// Auto-gc off: each blob read on demand adds a promisor pack, and past
+// gc.autoPackLimit (50) a lazy fetch would repack the blob-less clone and
+// leave it unable to fetch further blobs.
+// autocrlf off: the guides are read as written, whatever the machine's git config says.
+const GIT_CONFIG = ['-c', 'gc.auto=0', '-c', 'maintenance.auto=false', '-c', 'core.autocrlf=false'];
+
 function git(args: string[], cwd?: string): string {
-  return execFileSync('git', args, {
+  return execFileSync('git', [...GIT_CONFIG, ...args], {
     cwd,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -39,8 +65,9 @@ export function isAncestor(repo: string, sha: string, ref: string): boolean {
 }
 
 /**
- * Makes sure the pinned docs/diagrams is on disk and returns its folder.
- * Throws if the pin isn't on the library's main.
+ * Makes sure the pinned LIBRARY_PATHS are on disk and returns the diagrams'
+ * folder (the guides are at `guidesDir`). Throws if the pin isn't on the
+ * library's main, or if one of the paths is missing at the pin.
  */
 export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): string {
   const pin = readPin(siteDir);
@@ -48,7 +75,9 @@ export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): 
   const out = join(cache, pin);
   const diagrams = join(out, 'docs', 'diagrams');
   const stamp = join(cache, `${pin}.ok`);
-  if (existsSync(stamp) && existsSync(diagrams)) return diagrams;
+  const onDisk = (): boolean => LIBRARY_PATHS.every((p) => existsSync(join(out, p)));
+  // A stamp from before docs/guide or docs/api was fetched doesn't count, since its folder lacks them.
+  if (existsSync(stamp) && onDisk()) return diagrams;
 
   mkdirSync(cache, { recursive: true });
   const repo = join(cache, 'repo');
@@ -79,8 +108,8 @@ export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): 
   }
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
-  // Only docs/diagrams, written to its own folder; the clone's blobs come on demand.
-  git(['--work-tree', out, 'checkout', pin, '--', 'docs/diagrams'], repo);
+  // Only LIBRARY_PATHS, written to its own folder; the clone's blobs come on demand.
+  git(['--work-tree', out, 'checkout', pin, '--', ...LIBRARY_PATHS], repo);
   writeFileSync(stamp, `${new Date().toISOString()}\n`);
   return diagrams;
 }
@@ -122,4 +151,19 @@ export function libraryReader(siteDir: string): LibraryReader {
     list: (dir) =>
       git(['ls-tree', '-r', '--name-only', pin, '--', dir], repo).split('\n').filter(Boolean),
   };
+}
+
+/**
+ * The `@isoloop/*` version at the pin, the one the docs describe: every
+ * package shares it (the fixed group), so host's stands for all of them.
+ */
+export function libraryVersion(library: Pick<LibraryReader, 'read'>): string {
+  const raw = library.read('packages/host/package.json');
+  if (raw === undefined) throw new Error('the pin has no packages/host/package.json');
+  const pkg: unknown = JSON.parse(raw);
+  const version =
+    typeof pkg === 'object' && pkg !== null && 'version' in pkg ? pkg.version : undefined;
+  if (typeof version !== 'string' || !version)
+    throw new Error('packages/host/package.json at the pin has no version');
+  return version;
 }

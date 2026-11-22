@@ -1,7 +1,7 @@
 import { createKernel } from '@isoloop/host';
 import workers from 'virtual:isoloop/workers';
 import widgetCss from '../widgets/widgets.css?inline';
-import list from './contracts';
+import list, { EXPOSED } from './contracts';
 import contractsUrl from './contracts?isolate';
 
 const sheet = new CSSStyleSheet();
@@ -13,4 +13,5 @@ export const kernel = createKernel({
   contracts: { url: contractsUrl, list },
   workers,
   styles: [sheet],
+  agents: { expose: EXPOSED },
 });

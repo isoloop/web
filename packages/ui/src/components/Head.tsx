@@ -1,9 +1,12 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
+import { ORIGIN, PageMeta } from './PageMeta.tsx';
 
 export interface HeadProps {
   /** The page's own title; " · Isoloop" is added unless it's the home page. */
   title: string;
+  /** In `title`'s place, in <title> and the link preview's title only (ADR 0006, as amended). */
+  searchTitle?: string;
   description: string;
   /** The page's path on the site, e.g. `/how-it-works/`, for the canonical and og:url. */
   path: string;
@@ -14,6 +17,8 @@ export interface HeadProps {
   /** The page's CSP (ADR 0002, decision 8). Left out in dev, where Vite injects inline styles. */
   csp?: string;
   home?: boolean;
+  /** e.g. `noindex`: then no canonical and no preview tags. */
+  robots?: string;
 }
 
 /**
@@ -24,33 +29,32 @@ export interface HeadProps {
  */
 export function Head({
   title,
+  searchTitle,
   description,
   path,
-  origin = 'https://isoloop.dev',
+  origin = ORIGIN,
   image,
   csp,
   home = false,
+  robots,
 }: HeadProps): VNode {
-  const full = home ? title : `${title} · Isoloop`;
-  const url = origin + path;
+  const full = home ? title : `${searchTitle ?? title} · Isoloop`;
   return (
     <>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       {csp ? <meta http-equiv="Content-Security-Policy" content={csp} /> : null}
-      <title>{full}</title>
-      <meta name="description" content={description} />
-      <link rel="canonical" href={url} />
-      <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="Isoloop" />
-      <meta property="og:title" content={full} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={url} />
-      {image ? <meta property="og:image" content={origin + image} /> : null}
-      <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
-      <meta name="twitter:title" content={full} />
-      <meta name="twitter:description" content={description} />
-      {image ? <meta name="twitter:image" content={origin + image} /> : null}
+      {robots === undefined ? (
+        <PageMeta
+          title={full}
+          description={description}
+          path={path}
+          origin={origin}
+          {...(image ? { image } : {})}
+        />
+      ) : (
+        <PageMeta title={full} description={description} robots={robots} />
+      )}
     </>
   );
 }

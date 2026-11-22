@@ -32,16 +32,21 @@ function el<K extends keyof HTMLElementTagNameMap>(
   return e;
 }
 
+/**
+ * An isolate's pane. Without a kernel it's the idle pane drawn before Start
+ * (?start=manual): the same frame and controls, disabled, and an idle line
+ * where the isolate will draw.
+ */
 export function createPane(
   parent: HTMLElement,
   spec: { id: string; name: string; where: string; upstream?: string },
-  kernel: Kernel,
+  kernel?: Kernel,
 ): Pane {
   const pane = el('section', 'pane');
   pane.dataset['isolate'] = spec.id;
   pane.setAttribute('aria-label', spec.name);
   const head = el('div', 'pane-head');
-  const status = el('span', 'status', 'starting');
+  const status = el('span', 'status', kernel ? 'starting' : 'idle');
   const restarts = el('span', 'restarts');
   const restart = el('button', 'ui-button small', `Restart ${spec.id}`);
   restart.dataset['restart'] = spec.id;
@@ -52,10 +57,21 @@ export function createPane(
   const waiting = el('p', 'waiting', spec.upstream ? `no count from ${spec.upstream}` : '');
   waiting.hidden = true;
   restart.addEventListener('click', () => {
-    void kernel.restart(spec.id);
+    void kernel?.restart(spec.id);
   });
+  restart.disabled = !kernel;
   head.append(el('h3', 'pane-name', spec.name), el('span', 'where', spec.where), status, restarts);
   const body = el('div', 'pane-body');
+  if (!kernel) {
+    // The isolate draws its own controls; until it runs, the same ones, disabled.
+    const faults = el('div', 'row faults idle-faults');
+    for (const label of ['Block 3 s', 'Crash · 0/3']) {
+      const b = el('button', 'ui-button small', label);
+      b.disabled = true;
+      faults.append(b);
+    }
+    body.append(el('p', 'idle-line', 'Idle: nothing runs until Start.'), faults);
+  }
   const foot = el('div', 'pane-foot');
   foot.append(waiting, guard, restart);
   pane.append(head, body, foot);

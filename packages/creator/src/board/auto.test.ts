@@ -130,6 +130,9 @@ describe('balancer labels and badges', () => {
     expect(moveText({ from: 'Quarantine', to: 'Auto 1', reason: 'steady' })).toBe(
       'back in Auto 1: steady',
     );
+    expect(moveText({ from: 'Quarantine 2', to: 'Quarantine', reason: 'room' })).toBe(
+      'moved to Quarantine: making room for a widget falling behind',
+    );
   });
 });
 

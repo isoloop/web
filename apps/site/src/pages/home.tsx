@@ -2,33 +2,54 @@
 import type { VNode } from 'preact';
 import { Table } from 'ui/components';
 import { home, site } from '../copy.ts';
-import { ExampleList } from './examples.tsx';
+import { Code, CodeTabs } from './code.tsx';
+import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
+import { StripItem } from './pill.tsx';
+import { homeData } from './structured-data.ts';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
 
-/** The landing page, in the order ADR 0002's amendment sets. */
-function Home({ examples, features }: SiteData): VNode {
+/** The landing page, in the order ADR 0002's amendments set. */
+function Home({ features, samples, examples }: SiteData): VNode {
   return (
     <main class="ui-shell">
-      <PageIntro title={home.intro.heading} id="intro">
+      <PageIntro title={home.intro.heading} id="intro" image="home">
         <p class="ui-lede">{home.intro.text}</p>
         <p class="ui-actions">
           <a class="ui-button" data-primary href="/features/">
             {home.intro.primary}
           </a>
-          <a href="#examples">{home.intro.secondary}</a>
+          <a href="/examples/">{home.intro.secondary}</a>
         </p>
       </PageIntro>
 
-      <section class="ui-try-section" aria-label="Try it">
+      <section class="ui-try-section" id="try" aria-label="Try it">
         <p class="ui-try">{home.try}</p>
         <Recording
           id="rec"
           tracks={['main', 'bus', 'A', 'B', 'pool']}
           controls={['block-c', 'crash-a', 'block-main']}
+          code={
+            <details class="ui-demo-code" id="code">
+              <summary>{home.code.summary}</summary>
+              <p>{home.code.intro}</p>
+              <CodeTabs
+                id="code"
+                label={home.code.label}
+                tabs={[
+                  { key: 'host', label: home.code.files.host, code: samples.demoMain },
+                  { key: 'isolate', label: home.code.files.isolate, code: samples.demoCounter },
+                  { key: 'topics', label: home.code.files.topics, code: samples.demoTopics },
+                ]}
+              />
+              <p>
+                <a href={home.code.source}>{home.code.more}</a>
+              </p>
+            </details>
+          }
         />
       </section>
 
@@ -36,15 +57,9 @@ function Home({ examples, features }: SiteData): VNode {
         <h2 id="for-h">{home.uses.heading}</h2>
         <div class="ui-body">
           <ul class="ui-uses">
-            {home.uses.items.map(([b, t, link]) => (
-              <li key={b}>
-                <b>{b}</b> {t}
-                {link ? (
-                  <>
-                    {' '}
-                    <a href={link.href}>{link.text}</a>
-                  </>
-                ) : null}
+            {home.uses.items.map(([pattern, example]) => (
+              <li key={pattern}>
+                <b>{pattern}</b> <span class="ui-eg">e.g. {example}</span>
               </li>
             ))}
           </ul>
@@ -57,15 +72,13 @@ function Home({ examples, features }: SiteData): VNode {
           <nav class="ui-strip" aria-labelledby="features-h">
             <ul>
               {features.map((f) => (
-                <li key={f.id} data-part={f.part}>
-                  <a href={`/features/#${f.id}`}>
-                    <b>{f.name}</b> {f.line}
-                  </a>
-                </li>
+                <StripItem key={f.id} feature={f} href={`/features/#${f.id}`} />
               ))}
             </ul>
-            <a href="/features/">{home.strip.all}</a>
           </nav>
+          <p>
+            <a href="/features/">{home.strip.all}</a>
+          </p>
         </div>
       </section>
 
@@ -89,10 +102,12 @@ function Home({ examples, features }: SiteData): VNode {
       <section class="ui-gutter" id="costs" aria-labelledby="costs-h">
         <h2 id="costs-h">{home.costs.heading}</h2>
         <div class="ui-body">
-          <Table caption={home.costs.caption} head={home.costs.head} rows={home.costs.rows} />
-          <p>
-            <a href={`${PLANT_SOURCE}/comparison`}>{home.costs.more}</a>
-          </p>
+          <MeasuredBlock
+            block={findBlock(examples, 'dashboards/plant', 'desktop')}
+            findings={home.costs.findings}
+            more={home.costs.more}
+            level={3}
+          />
         </div>
       </section>
 
@@ -104,40 +119,34 @@ function Home({ examples, features }: SiteData): VNode {
               <li key={i}>{i}</li>
             ))}
           </ul>
+          <p>
+            <a href="/docs/limits/">{home.limits.more}</a>
+          </p>
         </div>
       </section>
 
       <section class="ui-gutter" id="how" aria-labelledby="how-h">
         <h2 id="how-h">{home.how.heading}</h2>
         <div class="ui-body">
-          <p>{home.how.text}</p>
+          {home.how.text.map((t) => (
+            <p key={t}>{t}</p>
+          ))}
           <p>
             <a href="/how-it-works/">{home.how.link}</a>
           </p>
         </div>
       </section>
-
-      <section class="ui-gutter" id="examples" aria-labelledby="examples-h">
-        <h2 id="examples-h">{home.examples.heading}</h2>
-        <div class="ui-body">
-          <ExampleList examples={examples} level={3} images={false} />
-          <p>
-            <a href="/examples/">{home.examples.all}</a>
-          </p>
-        </div>
-      </section>
-
       <section class="ui-gutter" id="install" aria-labelledby="install-h">
         <h2 id="install-h">{home.install.heading}</h2>
         <div class="ui-body">
+          <p>{home.install.platform}</p>
           <p>{home.install.label}</p>
-          <pre class="ui-code">
-            <code>{home.install.command}</code>
-          </pre>
+          <Code lang="sh">{home.install.command}</Code>
           <p>
-            <a href="https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md">
-              {home.install.guide}
-            </a>
+            <a href="/docs/getting-started/">{home.install.start}</a>
+          </p>
+          <p>
+            <a href="/docs/hosting/">{home.install.guide}</a>
           </p>
         </div>
       </section>
@@ -149,6 +158,7 @@ export const homePage: Page = {
   path: '/',
   section: 'home',
   head: { title: home.title, description: site.description, home: true },
+  jsonLd: homeData,
   scripts: ['/src/demos/home.ts'],
   render: (data) => <Home {...data} />,
 };

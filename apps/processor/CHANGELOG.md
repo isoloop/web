@@ -1,5 +1,48 @@
 # processor
 
+## 0.4.0
+
+### Minor Changes
+
+- 94bffdb: A Devtools switch on every page that runs Isoloop: the dashboards' Isoloop builds and their interactive pages have it on their bar, and the processor pages in their controls. It reloads the page with `?devtools=1` added or removed, which opens the devtools panel once the kernel exists (on the processor, from `@isoloop/devtools`, never before Start). On the examples hub, the same switch sits over the processor frames: it reloads the frame idle with the flag, carries it to "Open full page", and makes the frame taller for the panel.
+- 9d5b051: With `?start=manual` (the site's examples hub), both pages draw their idle view and start no kernel and no worker until told to; on the File processor, the hub's Start also starts the generator. The pages' intros come from `example.json`, the same text the hub shows. Embedded, a page shows only the working app, edge to edge.
+- 2ce8191: With the balancer, a new processor's first 3 s in the quarantine pool, while the balancer measures its load, shows as **Measuring**, and its way out as `measured`, not as an offence. The File processor has a **Restarts in 60 s** control (none, 1, 3, 10), which reloads the page with `?restarts=`; a processor past the limit shows why on its card, with a **Restart** button.
+
+### Patch Changes
+
+- d277f32: On `@isoloop/*@0.1.0-next.11`, which moves the library's source into areas and declares its scripts in `sideEffects`. Nothing in the apps changes.
+- b87db68: The dark theme's background is a neutral `#171b26`, with its surface, rules and borders to match, in place of the navy; the version pill and the Experimental pill sit centred on their text. On the site, the page is 96rem wide and its left column is shared by every page.
+
+## 0.3.1
+
+### Patch Changes
+
+- 8372ee3: On `@isoloop/*@0.1.0-next.10`, with the API's TSDoc complete. Nothing in the apps changes.
+- b5885ab: On `@isoloop/*@0.1.0-next.9`, the release that freezes the API. In the markets and plant dashboards the devtools button shows the kernel's health as a ring, and the panel has an Events tab with the kernel's history and a Messages tab (formerly Log) for the records the app publishes.
+
+## 0.3.0
+
+### Minor Changes
+
+- f2e4767: Work a task or processor does after `await` now counts toward its pool's load. Each task and each File processor times its own work and publishes the running total, and the page reports it to the balancer with the backlog (`report(id, { backlog, busyMs })`), so work the runtime's busy time doesn't see still counts. Injected faults (a task's Block, a poison file) stay out of that total, since the kernel already sees them as long tasks. The Playground's "hide work from busy time" switch becomes "after await", and applies to a task's plain CPU as well as its jobs; a second switch turns its busy-time report off; each card shows both figures, the kernel's and the reported one; and the move log shows a task the kernel gave up on. On the File processor, a processor the kernel gives up on is shown as failed, with a `given up` entry in the move log.
+
+### Patch Changes
+
+- 9d6989b: The site's header: GitHub moves out of the page links to sit beside the theme switch, as the mark alone on a phone.
+- a7c0654: On `@isoloop/*@0.1.0-next.4`. When a member sharing a pool falls behind and the worker cap leaves it nowhere to go, the balancer folds a second quarantine pool of offenders into the first, so the member gets that worker. On the interactive boards a widget moved this way shows "moved to Quarantine: making room for a widget falling behind", and in the File processor the move log says "making room".
+- c4503e5: On `@isoloop/*@0.1.0-next.5`. The balancer counts a pool toward `maxWorkers` from the moment a move claims it, so two moves in one decision can't open a pool past the cap. A second quarantine pool folds into the first like with like: offenders join offenders, and the other half of a bisect joins its first half.
+- 718f2c0: On `@isoloop/*@0.1.0-next.6`. A pool's worker stays open until the host ends it after its last member, so an isolate that starts in a pool while the others are leaving it starts normally.
+- c4503e5: `window.files.crashes()` lists every processor crash in order, with its time, reason, pool and message. The comparison writes them into each run's JSON, so a processor the kernel gave up on can be traced to the crashes before it.
+- 26265e5: The File processor's comparison records more for M3j: the workers every second, each processor's reported busy time in the trace, and the processors the kernel gave up on, with their kinds and when. Its "faults, then calm" mix now runs 5 minutes of calm (60 s in M3i), and its summary gains the fewest workers in the calm and the kinds left with every processor given up on.
+- a313a4a: The File processor's comparison is measured again on the M3j balancer, on `@isoloop/*@0.1.0-next.6` (web `718f2c0`, a 4-core bench server at 2.0 GHz): no file lost and no processor given up on in 26 balancer runs, with the normal, faults and faults-then-calm mixes, on Chromium and Firefox: [`comparison/v0.3.0/`](https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0).
+- 7cc0b55: The examples page shows the M3j measurement of the File processor, on `@isoloop/*@0.1.0-next.6` (a 4-core bench server at 2.0 GHz): three tables, for no faults, with faults, and faults then calm, each against a worker per processor and one pool, with the Firefox figures in a sentence under each. Its results link to [`comparison/v0.3.0/`](https://github.com/isoloop/web/tree/main/apps/processor/comparison/v0.3.0).
+- 601bfb8: On `@isoloop/*@0.1.0-next.2`, with three balancer fixes from M3j:
+  
+  - A never-measured isolate's first way out of the quarantine, where it starts, no longer counts toward its move budget.
+  - A quiet pool of several isolates packs back into another, one isolate a minute.
+  - A backlog has to rise over two 10 s windows in a row before anything moves.
+- 2b7e4d6: On `@isoloop/*@0.1.0-next.3`. A consumer-group member that crashes partway through a batched delivery keeps the records it settled, so they aren't sent to the next member again (ADR 0016, point 17). Before, a corrupt file that crashed its processor after the files before it in the batch were settled came back until the kernel gave up on every processor of its kind.
+
 ## 0.2.0
 
 ### Minor Changes

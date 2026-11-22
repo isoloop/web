@@ -2,8 +2,9 @@
   "id": "frameworks",
   "order": 70,
   "part": "host",
+  "tab": "tools",
   "name": "Your framework.",
-  "line": "React, Preact or plain DOM, chosen per isolate.",
+  "line": "Framework-agnostic: React and Preact adapters, or plain DOM, chosen per isolate.",
   "text": [
     "Write an isolate with React (18 or 19), Preact (10 or 11) or plain DOM. Each isolate picks its own, and one page can mix them. An isolate renders into a DOM subset inside its worker; the host applies the changes to the page once a frame."
   ],
@@ -12,17 +13,17 @@
   "proof": [
     {
       "repo": "isoloop",
-      "path": "packages/react/src/define.ts",
+      "path": "packages/react/src/isolate/define.ts",
       "symbol": "defineIsolate"
     },
     {
       "repo": "isoloop",
-      "path": "packages/preact/src/define.ts",
+      "path": "packages/preact/src/isolate/define.ts",
       "symbol": "defineIsolate"
     },
     {
       "repo": "isoloop",
-      "path": "packages/runtime/src/vanilla.ts",
+      "path": "packages/runtime/src/isolate/vanilla.ts",
       "symbol": "defineIsolate"
     },
     {

@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, for the approved design (decisions 3, 5, 6 and 7; see [the amendment](#amended-for-the-approved-design-2026-11-14))
+- **Amended:** 2026-11-14, for the approved design (decisions 3, 5, 6 and 7; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (decisions 3, 7 and 8: `--ui-experimental` and its contrast pairs; the `.ui-pill` class; GitHub beside the theme switch, out of the site nav); 2026-11-21, the page grid and calm reading (decisions 3, 6 and 8; see [the amendment](#amended-the-page-grid-and-calm-reading-2026-11-21); Proposed)
 - **Answers:** what the site and the examples share so they read as one site, how it's built, and how it changes. Grilled 2026-11-14. Amends [ADR 0002](0002-site-build.md), decision 1.
 
 ## Context
@@ -202,6 +202,49 @@ The first round of directions changed only colours on one layout, and read as ge
 - **`ThemeToggle` becomes a switch:** `role="switch"`, named "Dark theme", with `aria-checked` true in dark mode.
 - **The look:** a sun and a moon inside a pill, and a knob that slides behind the active one.
 - **It's operated** by click, Space and Enter. Its state comes from `theme.js`, as before.
+
+### Amended: inline code (2026-11-18)
+
+Code inside prose was set in the mono font only, and the maintainer couldn't tell it from the words around it on "how it works", where steps name many options. Inline code (`code` not inside `pre`) is now a chip in `base.css`: a 7% tint of the text colour, a hairline in `--ui-rule`, the small radius and a slightly smaller size, kept whole across line breaks (`box-decoration-break: clone`). Code blocks keep their frame. It applies on every page that uses `ui`.
+
+### Amended: the page grid and calm reading (2026-11-21)
+
+The maintainer's review of the whole site before 0.1, on a local prototype with a settings switcher, so each choice below was compared on the real pages before it was kept. Where this section and the decisions above disagree, this section wins.
+
+**The page is 96rem wide** (`--ui-page`, from 82rem). Compared at 82, 90 and 96rem and a fluid width. The extra width goes to the rails and the figures, not to longer lines (the two widths, below).
+
+**One grid for every page (decision 6).** `--ui-gutter` is the site's one left column, 16rem, with one gap after it, `--ui-gutter-gap` (3rem). It holds the landing page's section headings, the opening's mark, the rails on Features, How it works and Examples, and the docs' sidebar. So the content starts at the same x on every page, by construction: measured at 360px from the window's edge at 1600px, and 328px at 1280px, on every page. Below 760px the tokens keep their old values and phones look as before. A figure's own label column (the recording's track names) keeps 13rem through its own token, `--ui-label`.
+
+**The opening's mark** fills the left column, up to 15rem, centred in it and centred on the intro text beside it. A smaller mark right-aligned against the text left an empty band in the column and looked off-centre.
+
+**Two widths.**
+- **A text measure** for running text, code blocks, lists, link lists and callouts: they share one right edge (56rem at the 96rem page). Long code lines scroll inside their block.
+- **The full column for figures:** diagrams, live demos, screenshots, recordings and wide tables. A diagram's "Reading the diagram" panel and its "Open full size" link belong to the figure and share its width.
+
+**Dark background (decision 3).** The navy background read blue. It's now `#171b26`, with the surface, rule and border retinted from new neutral primitives (`--ui-graphite-1…4`): surface `#1f232d`, rule `#343945`, border `#717785`. Compared with the navy and with `#131722`. The light theme is unchanged. The apps and dashboards take the same tokens, so an embedded app no longer shows a different shade from the page around it.
+
+**Calm reading.** White text on the navy at 14:1, broken up by bright links, bordered code chips and bold lead-ins, was tiring to read for long.
+- **A prose colour:** `--ui-prose`, a step softer than the headings' `--ui-text` in each theme (dark `#c9ced9`, light `#292e38`). Headings keep `--ui-text`.
+- **Leading 1.72, and 18px body text** in the docs and the panels.
+- **Quieter links and code:** links in a mix of the accent and the prose colour with a thinner underline, full strength on hover; inline code without its border, on a lighter tint; bold lead-ins at weight 600.
+- **The rails grow with the text:** rail links 1.05rem, "On this page" 0.98rem, and the docs' "On this page" column 14rem.
+
+**Contrast (decision 8).** The test gains `--ui-prose` on `--ui-bg` and on `--ui-surface` at 4.5:1.
+
+| Theme | Text | Prose | Muted | Border on bg |
+| --- | --- | --- | --- | --- |
+| Dark | 14.6 | 10.9 | 8.1 | 3.9 |
+| Light | 16.9 | 12.7 | 7.4 | unchanged |
+
+**Pills.** The version pill and `.ui-pill` are centred optically: equal padding on a line box of 1, trimmed to the cap height where the engine supports it. In the sticky notes and the features strip, the experimental pill always sits on the name's line and the text starts below it, on every item alike, so a short name doesn't pull the first word of its line onto the pill's.
+
+**The Devtools switch.** One component for every page that runs Isoloop: a checkbox, "Devtools" and the compact experimental mark, styled by `.ui-devtools-switch` in `shell.css`. It shows and sets `?devtools=1` and reloads the page, since the panel starts with the kernel. The dashboards mount it on their bar from their Isoloop builds only; the processor pages put it in their controls ([ADR 0002](0002-site-build.md), amended 2026-11-21).
+
+**Alternatives considered.**
+- **A fluid width:** line length and layout change with every window, and the site is read mostly on laptops and desktops, where 96rem fits.
+- **One width for everything:** at 96rem lines run to about 1200px. How it works also had a third width, which put code blocks wider than the prose and narrower than the diagram.
+- **The docs with the other pages' opening** (title, lead and mark above the grid): tried and rolled back. It moved a guide's first sidebar link down by 206px and the first link on `/docs/` by 346px at 1600 by 1000px, for a title that already reads well beside the sidebar.
+- **Keeping the navy, with only the text softened:** the blue cast stayed, and embedded apps showed a box-in-a-box.
 
 ## Consequences
 

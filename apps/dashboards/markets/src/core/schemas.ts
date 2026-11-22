@@ -141,6 +141,27 @@ export const timing = z.object({
 /** Load from a widget's flood control (M3b task 14); nothing reads it. */
 export const noise = z.object({ widget: z.string().min(1), n: z.number().int().nonnegative(), ts });
 
+/** An agent's quote request (M4a): one symbol. */
+export const quoteRequest = z.object({ symbol });
+
+/** The answer: the cross-market figures, if any trades are in the window, and each exchange's latest quote. */
+export const quoteReply = z.object({
+  symbol,
+  aggregate: aggregate.nullable(),
+  prices: z.array(quote),
+});
+
+/** An agent's new alert rule (M4a). The rule's id comes from the request's id, so a redelivered call adds nothing. */
+export const alertCreate = z.object({
+  symbol,
+  metric,
+  op: z.enum(['above', 'below']),
+  threshold: z.number(),
+});
+
+/** The rule's id, and whether this call added it (false when the same request came again). */
+export const alertCreated = z.object({ id: z.string().min(1), created: z.boolean() });
+
 /** What every widget shows (compacted, key `current`). */
 export const filters = z.object({
   symbols: z.array(symbol).min(1),
@@ -163,3 +184,6 @@ export type Stats = z.infer<typeof stats>;
 export type Correlations = z.infer<typeof correlations>;
 export type Depth = z.infer<typeof depth>;
 export type Timing = z.infer<typeof timing>;
+export type QuoteReply = z.infer<typeof quoteReply>;
+export type AlertCreate = z.infer<typeof alertCreate>;
+export type AlertCreated = z.infer<typeof alertCreated>;

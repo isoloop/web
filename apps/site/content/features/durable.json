@@ -2,6 +2,7 @@
   "id": "durable",
   "order": 50,
   "part": "bus",
+  "tab": "bus",
   "name": "Durable history.",
   "line": "Persistent topics live in OPFS and survive a reload.",
   "text": [
@@ -23,7 +24,7 @@
     {
       "repo": "isoloop",
       "path": "e2e/durable.spec.ts",
-      "test": "a second tab runs in memory with bus:durability-degraded; after the first closes, a reload takes the files"
+      "test": "a second tab runs in memory with bus:durability_degraded; after the first closes, a reload takes the files"
     }
   ]
 }

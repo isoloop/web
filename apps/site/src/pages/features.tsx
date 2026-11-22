@@ -4,22 +4,34 @@ import { Table } from 'ui/components';
 import type { Feature as Entry } from '../../build/features.ts';
 import { featuresPage as f, home } from '../copy.ts';
 import { Recording } from './recording.tsx';
+import { Code, CodeTabs } from './code.tsx';
+import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
+import { FeatureNotes, TABS } from './feature-notes.tsx';
+import { Pill } from './pill.tsx';
+import { Pager, RailLayout } from './steps.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison';
-const POOLS_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/pools.md';
+const POOLS_GUIDE = '/docs/pools/';
+// On GitHub until the pin has isoloop/isoloop#372: the pinned guide still says
+// style-src needs no 'unsafe-inline', which the Safety card here corrects.
 const HOSTING_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/hosting.md';
-const BALANCER_GUIDE = 'https://github.com/isoloop/isoloop/blob/main/docs/guide/balancer.md';
+const BALANCER_GUIDE = '/docs/balancer/';
 const PROCESSOR = '/examples/processor/';
+const AGENTS_GUIDE = '/docs/agents/';
+const DEVTOOLS_GUIDE = '/docs/devtools/';
+const PLANT_DEVTOOLS = '/examples/dashboards/plant/isoloop/?devtools=1';
+const MARKETS_TOOLS =
+  'https://github.com/isoloop/web/blob/main/apps/dashboards/markets/src/isoloop/contracts.ts';
 
 /** A feature's section: its heading in the gutter, with the bar of its part of the system, then its text and its figure. */
 function Feature({ entry, children }: { entry: Entry; children: ComponentChildren }): VNode {
   return (
     <section class="ui-gutter" id={entry.id} aria-labelledby={`${entry.id}-h`}>
-      <h2 id={`${entry.id}-h`} data-part={entry.part}>
-        {entry.name.replace(/\.$/, '')}
+      <h2 class="panel-h" id={`${entry.id}-h`} data-part={entry.part}>
+        {entry.name.replace(/\.$/, '')} <Pill feature={entry} />
       </h2>
       <div class="ui-body">
         {entry.text.map((t) => (
@@ -31,15 +43,7 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
   );
 }
 
-function Code({ children }: { children: string }): VNode {
-  return (
-    <pre class="ui-code">
-      <code>{children}</code>
-    </pre>
-  );
-}
-
-function Features({ samples, features }: SiteData): VNode {
+function Features({ samples, features, examples }: SiteData): VNode {
   const demos: Record<Entry['demo'], VNode> = {
     recording: (
       <>
@@ -228,37 +232,39 @@ function Features({ samples, features }: SiteData): VNode {
         </p>
       </>
     ),
+    'agents-code': (
+      <>
+        <Code>{samples.agents}</Code>
+        <p>
+          <a href={AGENTS_GUIDE}>{f.agents.guide}</a>
+        </p>
+        <p>
+          <a href={MARKETS_TOOLS}>{f.agents.example}</a>
+        </p>
+      </>
+    ),
+    'devtools-code': (
+      <>
+        <Code>{samples.devtools}</Code>
+        <p>
+          <a href={DEVTOOLS_GUIDE}>{f.devtools.guide}</a>
+        </p>
+        <p>
+          <a href={PLANT_DEVTOOLS}>{f.devtools.example}</a>
+        </p>
+      </>
+    ),
     'framework-tabs': (
       <>
-        <div class="tabs" data-tabs>
-          <div role="tablist" aria-label="Framework" hidden>
-            {f.frameworks.tabs.map(([key, label], i) => (
-              <button
-                key={key}
-                role="tab"
-                type="button"
-                id={`tab-${key}`}
-                aria-controls={`panel-${key}`}
-                aria-selected={i === 0 ? 'true' : 'false'}
-                tabindex={i === 0 ? 0 : -1}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {f.frameworks.tabs.map(([key, label]) => (
-            <div key={key} role="tabpanel" id={`panel-${key}`} aria-labelledby={`tab-${key}`}>
-              <p class="tab-title">{label}</p>
-              <Code>
-                {key === 'react'
-                  ? samples.react
-                  : key === 'preact'
-                    ? samples.preact
-                    : samples.vanilla}
-              </Code>
-            </div>
-          ))}
-        </div>
+        <CodeTabs
+          label="Framework"
+          tabs={f.frameworks.tabs.map(([key, label]) => ({
+            key,
+            label,
+            code:
+              key === 'react' ? samples.react : key === 'preact' ? samples.preact : samples.vanilla,
+          }))}
+        />
       </>
     ),
     'safety-facts': (
@@ -269,7 +275,7 @@ function Features({ samples, features }: SiteData): VNode {
               <dt>{term}</dt>
               <dd>
                 {rich(text)}
-                {term === 'No inline code' ? (
+                {term === 'No inline scripts' ? (
                   <>
                     {' '}
                     <a href={HOSTING_GUIDE}>The hosting guide</a> has the full policy.
@@ -284,7 +290,12 @@ function Features({ samples, features }: SiteData): VNode {
     ),
     'cost-table': (
       <>
-        <Table caption={home.costs.caption} head={home.costs.head} rows={home.costs.rows} />
+        <MeasuredBlock
+          block={findBlock(examples, 'dashboards/plant', 'desktop')}
+          findings={home.costs.findings}
+          more={home.costs.more}
+          level={3}
+        />
         <p>
           <a href={PLANT_RESULTS}>{f.cost.more}</a>
         </p>
@@ -293,33 +304,54 @@ function Features({ samples, features }: SiteData): VNode {
   };
   return (
     <main class="ui-shell">
-      <PageIntro
-        title={f.heading}
-        after={
-          <nav class="ui-strip" aria-label="Features">
-            <ul>
-              {features.map((x) => (
-                <li key={x.id} data-part={x.part}>
-                  <a href={`#${x.id}`}>
-                    <b>{x.name}</b> {x.line}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        }
-      >
-        <p class="ui-lede">{f.lede}</p>
-        <p>
-          <a href="/changelog/">{f.changelog}</a>
-        </p>
+      <PageIntro title={f.heading} image="features" markTop>
+        <FeatureNotes features={features} />
       </PageIntro>
 
-      {features.map((entry) => (
-        <Feature key={entry.id} entry={entry}>
-          {demos[entry.demo]}
-        </Feature>
-      ))}
+      {/* One panel per group of features, beside the rail (src/demos/steps.ts, as on
+          /how-it-works/ and /examples/); a #feature link opens its group. Without JS
+          every group shows. */}
+      <div class="features-tabs">
+        <RailLayout
+          label={f.tabs.label}
+          groups={TABS.map(([tab, part]) => ({
+            title: { href: `#${f.tabs.ids[tab]}`, text: f.tabs.names[tab], part },
+            items: features
+              .filter((x) => x.tab === tab)
+              .map((x) => ({
+                href: `#${x.id}`,
+                text: x.name.replace(/\.$/, ''),
+                experimental: x.experimental ?? false,
+                item: true,
+              })),
+          }))}
+        >
+          {TABS.map(([tab], i) => {
+            const prev = TABS[i - 1]?.[0];
+            const nxt = TABS[i + 1]?.[0];
+            return (
+              <div class="features-tab" id={f.tabs.ids[tab]} data-step key={tab}>
+                {features
+                  .filter((x) => x.tab === tab)
+                  .map((entry) => (
+                    <Feature key={entry.id} entry={entry}>
+                      {demos[entry.demo]}
+                    </Feature>
+                  ))}
+                <Pager
+                  prev={
+                    prev ? { href: `#${f.tabs.ids[prev]}`, text: f.tabs.names[prev] } : undefined
+                  }
+                  next={nxt ? { href: `#${f.tabs.ids[nxt]}`, text: f.tabs.names[nxt] } : undefined}
+                  previous={f.tabs.previous}
+                  nextLabel={f.tabs.next}
+                  label={f.tabs.pager}
+                />
+              </div>
+            );
+          })}
+        </RailLayout>
+      </div>
     </main>
   );
 }
@@ -327,7 +359,7 @@ function Features({ samples, features }: SiteData): VNode {
 export const featuresPage: Page = {
   path: '/features/',
   section: 'features',
-  head: { title: f.title, description: f.description },
+  head: { title: f.title, searchTitle: f.searchTitle, description: f.description },
   scripts: ['/src/demos/features.ts'],
   render: (data) => <Features {...data} />,
 };

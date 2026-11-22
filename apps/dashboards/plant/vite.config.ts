@@ -3,6 +3,9 @@ import { isoloop } from '@isoloop/vite';
 import { ui } from 'ui/vite';
 import { defineConfig } from 'vite';
 import { browserCheck } from '../../../shared/browser-check.ts';
+import { indexed, unindexed } from '../../../shared/search.ts';
+import { optInOutput } from '../../../shared/opt-in.ts';
+import example from './example.json' with { type: 'json' };
 
 const src = (p: string): string => fileURLToPath(new URL(`./src/${p}`, import.meta.url));
 
@@ -23,12 +26,27 @@ type Build = 'isoloop' | 'native' | 'native-workers';
 
 const BUILDS: readonly Build[] = ['isoloop', 'native', 'native-workers'];
 
+/** Only the Isoloop build is indexed (shared/search.ts). */
+const meta = (build: Build) =>
+  build === 'isoloop'
+    ? indexed(
+        'Plant example: a live telemetry dashboard',
+        'A live telemetry dashboard for a fictional plant: 8 machines and 72 widgets, on Isoloop in six placements, with native builds to compare.',
+        example.links.live,
+      )
+    : unindexed(`Plant example (${build === 'native' ? 'native' : 'native + workers'})`);
+
 export default defineConfig(({ mode }) => {
   const build: Build = BUILDS.find((b) => b === mode) ?? 'isoloop';
   const kind = build === 'isoloop' ? 'isoloop' : 'native';
   return {
     oxc: { jsx: { runtime: 'automatic', importSource: 'react' } },
-    define: { 'import.meta.env.PLANT_BUILD': JSON.stringify(build) },
+    define: {
+      'import.meta.env.PLANT_BUILD': JSON.stringify(build),
+      // `PLANT_AGENT_COST=1` (M4a task 13): the agent-call cost's ping topic,
+      // isolate and runner. A constant, so every other build drops them.
+      'import.meta.env.PLANT_AGENT_COST': JSON.stringify(process.env['PLANT_AGENT_COST'] === '1'),
+    },
     resolve: {
       alias: [
         { find: '#main', replacement: src(`main.${build}.tsx`) },
@@ -40,12 +58,22 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       browserCheck(build === 'isoloop' ? 'isoloop' : build),
-      ...(kind === 'isoloop' ? [isoloop()] : []),
+      // `PLANT_COI=1` makes the preview and dev servers cross-origin isolated
+      // (COOP/COEP), so `?inspect=1` also measures memory per isolate (M4b
+      // task 6). Off by default; the deployed pages never get these headers.
+      ...(kind === 'isoloop'
+        ? [isoloop({ crossOriginIsolated: process.env['PLANT_COI'] === '1' })]
+        : []),
       // The thin bar back to the site, fixed dark (ADR 0003, decision 7).
-      ui({ bar: true }),
+      ui({ bar: true, meta: () => meta(build) }),
     ],
     base: './',
     worker: { format: 'es' },
-    build: { outDir: `dist/${build}`, emptyOutDir: true },
+    build: {
+      outDir: `dist/${build}`,
+      emptyOutDir: true,
+      // The devtools panel, loaded only with `?devtools=1`, as `opt-in-*`.
+      rolldownOptions: { output: optInOutput },
+    },
   };
 });

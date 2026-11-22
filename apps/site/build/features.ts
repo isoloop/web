@@ -21,7 +21,11 @@ const proofSchema = z
     /** A test title the file must contain. */
     test: z.string().min(1).optional(),
   })
-  .refine((p) => !(p.symbol && p.test), 'a proof names a symbol or a test, not both');
+  .refine((p) => !(p.symbol && p.test), 'a proof names a symbol or a test, not both')
+  .refine(
+    (p) => !/^docs\/(adr|plans)\//.test(p.path),
+    'a proof is code or a test, not an ADR or a plan: public pages say how it works, not why it was decided',
+  );
 
 export const featureSchema = z.strictObject({
   /** The anchor on /features/, and the file name. */
@@ -30,8 +34,12 @@ export const featureSchema = z.strictObject({
   order: z.number().int(),
   /** The part of the system it's about, which sets its colour (ADR 0003). */
   part: z.enum(['isolate', 'bus', 'pool', 'host', 'cost']),
+  /** Its tab on /features/ (ADR 0005); the tabs and their order are in src/pages/features.tsx. */
+  tab: z.enum(['isolation', 'bus', 'placement', 'tools', 'safety', 'cost']),
   /** The strip's lead, with its full stop; the section heading drops the stop. */
   name: z.string().regex(/\.$/, 'ends with a full stop'),
+  /** Marked with the Experimental pill wherever its name shows (ADR 0005). */
+  experimental: z.boolean().optional(),
   /** The strip's line. */
   line: z.string().min(1),
   /** The section's paragraphs, `backticks` set as code. Empty where the section is all figures. */
@@ -45,6 +53,8 @@ export const featureSchema = z.strictObject({
     'durable-still',
     'placement-still',
     'balancer-table',
+    'agents-code',
+    'devtools-code',
     'framework-tabs',
     'safety-facts',
     'cost-table',

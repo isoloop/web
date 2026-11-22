@@ -14,6 +14,8 @@ import {
   imageJobs,
   results as resultsTopic,
 } from '../contracts';
+import { Offences } from '../measuring';
+import { DEFAULT_LIMIT, gaveUpText } from '../restarts';
 import type { LogEntry } from '../ui';
 import { KINDS, type Kind } from './kinds';
 
@@ -50,6 +52,15 @@ export type GivenUp = {
   kind: Kind;
   reason: string;
   pool: string | undefined;
+};
+
+/** A processor crash as the kernel reported it (M3j): what came before a give-up. */
+export type Crash = {
+  at: number;
+  id: string;
+  reason: string;
+  pool: string | undefined;
+  message: string | undefined;
 };
 
 /** One processor at one moment, for the comparison's trace (M3i). */
@@ -96,12 +107,17 @@ export type ProcessorView = {
   /** Files it finished this run. */
   done: number;
   moved: { reason: string; from: string } | undefined;
+  /** In the quarantine to be measured, not for an offence (measuring.ts). */
+  measuring: boolean;
+  /** Why the kernel gave up on it, while it stays down (restarts.ts). */
+  gaveUp: string | undefined;
 };
 
 export type WorkerView = {
   key: string;
   label: string;
-  kind: 'pool' | 'quarantine' | 'own';
+  /** `measuring`: a quarantine holding only isolates being measured (measuring.ts). */
+  kind: 'pool' | 'quarantine' | 'measuring' | 'own';
   lags: number[];
   processors: ProcessorView[];
 };
@@ -152,10 +168,14 @@ const order = (a: string, b: string): number => {
 };
 
 export class FileProcessor {
-  readonly #kernel: Kernel;
+  /** Set by `attach`: until then the page shows the idle view (start=manual). */
+  #kernel: Kernel | undefined;
   /** Absent with `?placement=one-off`: the comparison's baseline for the balancer's own cost. */
-  readonly #balancer: Balancer | undefined;
+  #balancer: Balancer | undefined;
   readonly #src: string;
+  readonly #generatorSrc: string;
+  /** The kernel's restart limit (restarts.ts): for the gave-up line. */
+  readonly #restartLimit: number;
   readonly #maxWorkers: number;
   /** Each processor's id and kind: `csv-1`, `csv-2`, `image-1`… */
   readonly #kinds = new Map<string, Kind>(
@@ -183,6 +203,8 @@ export class FileProcessor {
   readonly #beats = new Map<string, { last: number; beats: Beat[] }>();
   readonly #lags = new Map<string, { last: number; lags: number[] }>();
   readonly #moved = new Map<string, { reason: string; from: string; at: number }>();
+  /** Who has offended, so the measuring step isn't shown as a quarantine stay. */
+  readonly #offences = new Offences();
   readonly #log: LogEntry[] = [];
   readonly #movesAt: number[] = [];
   readonly #moves: Move[] = [];
@@ -190,12 +212,19 @@ export class FileProcessor {
   readonly #busy = new Map<string, number>();
   /** Processors the kernel gave up on, in order (M3j). */
   readonly #givenUp: GivenUp[] = [];
+  /** Every processor crash, in order (M3j). */
+  readonly #crashes: Crash[] = [];
   /** Noted spikes and `behind` events, counted for the comparison (M3i). */
   #noted = 0;
   #behind = 0;
 
+  /**
+   * Without a kernel the model draws its initial state and starts nothing, so
+   * a page can show its idle view before the reader presses Start; `attach`
+   * then starts it. With one, it starts at once, as it always has.
+   */
   constructor(opts: {
-    kernel: Kernel;
+    kernel?: Kernel | undefined;
     balancer?: Balancer | undefined;
     /** Where the processors start: the balancer, a worker each, or one pool. */
     mode?: Mode;
@@ -203,20 +232,36 @@ export class FileProcessor {
     processorSrc: string;
     generatorSrc: string;
     maxWorkers: number;
+    /** The kernel's restart limit, for the gave-up line; the host's default if unset. */
+    restartLimit?: number;
   }) {
-    this.#kernel = opts.kernel;
-    this.#balancer = opts.balancer;
+    this.#restartLimit = opts.restartLimit ?? DEFAULT_LIMIT;
     this.#mode = opts.mode ?? (opts.balancer ? 'balancer' : 'one');
-    if (this.#mode === 'balancer' && !opts.balancer)
-      throw new Error('balancer placement needs a balancer');
     this.#dials = { ...this.#dials, ...opts.dials };
     this.#src = opts.processorSrc;
+    this.#generatorSrc = opts.generatorSrc;
     this.#maxWorkers = opts.maxWorkers;
+    if (opts.kernel) this.attach(opts.kernel, opts.balancer);
+  }
+
+  /** The kernel, once attached. */
+  get #k(): Kernel {
+    if (!this.#kernel) throw new Error('FileProcessor: not started (attach a kernel first)');
+    return this.#kernel;
+  }
+
+  /** Starts the model on a kernel: the generator, the processors, and every subscription. */
+  attach(kernel: Kernel, balancer?: Balancer): void {
+    if (this.#kernel) throw new Error('FileProcessor: already started');
+    if (this.#mode === 'balancer' && !balancer)
+      throw new Error('balancer placement needs a balancer');
+    this.#kernel = kernel;
+    this.#balancer = balancer;
 
     this.#publishDials();
-    this.#kernel.spawn({
+    this.#k.spawn({
       id: GENERATOR,
-      src: opts.generatorSrc,
+      src: this.#generatorSrc,
       grants: {
         publish: KINDS.map((k) => TOPICS[k].name),
         subscribe: [dialsTopic.name],
@@ -225,7 +270,7 @@ export class FileProcessor {
     for (const id of this.#ids) this.#spawn(id);
 
     for (const kind of KINDS) {
-      this.#kernel.subscribe(
+      this.#k.subscribe(
         TOPICS[kind],
         (r) => {
           if (!this.#ofRun(r.value.id) || this.#produced.has(r.value.id)) return;
@@ -235,7 +280,7 @@ export class FileProcessor {
         { from: 'latest' },
       );
     }
-    this.#kernel.subscribe(
+    this.#k.subscribe(
       resultsTopic,
       (r) => {
         const v = r.value;
@@ -271,7 +316,7 @@ export class FileProcessor {
       { from: 'latest' },
     );
 
-    this.#kernel.on('isolate:beat', (e) => {
+    this.#k.on('isolate:beat', (e) => {
       const b = this.#beats.get(e.id);
       if (b) {
         b.beats.push({ at: e.at, busy: e.busyMs ?? 0, dur: e.at - b.last });
@@ -288,21 +333,25 @@ export class FileProcessor {
       this.#lags.set(key, l);
     });
     this.#balancer?.on('move', (e) => {
-      this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
+      const kind = this.#offences.move(e);
+      this.#moved.set(e.id, { reason: kind, from: e.from, at: performance.now() });
       this.#movesAt.push(performance.now());
       this.#moves.push({ at: performance.now(), ...e });
-      this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`);
+      this.#entry(kind, `${e.id}: ${e.from} → ${e.to}`);
     });
     // What each move cost: from the stop to the first beat in its new place.
     this.#balancer?.on('arrived', (e) => {
       const m = this.#moves.findLast((x) => x.id === e.id && x.costMs === undefined);
       if (m) m.costMs = e.costMs;
       const entry = this.#log.findLast(
-        (l) => l.text.startsWith(`${e.id}: `) && l.kind === e.reason,
+        (l) =>
+          l.text.startsWith(`${e.id}: `) &&
+          (l.kind === e.reason || (e.reason === 'steady' && l.kind === 'measured')),
       );
       if (entry && entry.costMs === undefined) entry.costMs = e.costMs;
     });
     this.#balancer?.on('spike', (e) => {
+      this.#offences.spike(e);
       if (e.action !== 'noted') return;
       this.#noted++;
       this.#entry('noted', `${e.id}: one long task (${Math.round(e.lagMs)} ms), noted`);
@@ -312,9 +361,12 @@ export class FileProcessor {
       this.#entry('behind', `${e.id}: ${e.backlog} files waiting, nowhere with more CPU`);
     });
     this.#balancer?.on('failed', (e) => {
-      this.#entry('failed', `${e.id}: given up by the kernel (${e.reason}), left in ${e.pool}`);
+      this.#entry(
+        'failed',
+        `${e.id}: ${gaveUpText(this.#restartLimit, e.reason)}, left in ${e.pool}`,
+      );
     });
-    this.#kernel.subscribe(
+    this.#k.subscribe(
       busyTopic,
       (r) => {
         if (r.key && this.#kinds.has(r.key)) this.#busy.set(r.key, r.value.busyMs);
@@ -336,17 +388,33 @@ export class FileProcessor {
         });
       }
     }, REPORT_MS);
-    this.#kernel.on('isolate:crash', (e) => {
-      if (this.#ids.includes(e.id)) this.#entry('crash', `${e.id} crashed (${e.reason})`);
+    this.#k.on('isolate:crash', (e) => {
+      if (!this.#ids.includes(e.id)) return;
+      this.#offences.crash(e.id);
+      this.#crashes.push({
+        at: performance.now(),
+        id: e.id,
+        reason: e.reason,
+        pool: e.pool,
+        message: e.message,
+      });
+      this.#entry('crash', `${e.id} crashed (${e.reason})`);
     });
-    this.#kernel.on('isolate:failed', (e) => {
+    this.#k.on('isolate:failed', (e) => {
       const kind = this.#kinds.get(e.id);
       if (!kind) return;
       this.#givenUp.push({ at: performance.now(), id: e.id, kind, reason: e.reason, pool: e.pool });
       // Without a balancer, the page logs it itself.
       if (this.#mode !== 'balancer')
-        this.#entry('failed', `${e.id}: given up by the kernel (${e.reason})`);
+        this.#entry('failed', `${e.id}: ${gaveUpText(this.#restartLimit, e.reason)}`);
     });
+  }
+
+  /** Starts a processor the kernel gave up on again (`kernel.restart`, which clears its window). */
+  restart(id: string): void {
+    if (!this.#ids.includes(id)) return;
+    this.#entry('restart', `${id}: restarted by hand`);
+    void this.#k.restart(id);
   }
 
   get mode(): Mode {
@@ -379,18 +447,20 @@ export class FileProcessor {
 
   async setMode(mode: Mode): Promise<void> {
     if (mode === this.#mode || (mode === 'balancer' && !this.#balancer)) return;
+    if (!this.#kernel) return;
     const prev = this.#mode;
     this.#mode = mode;
     // Mid-move, the balancer's `stop` cancels the move and waits for the
     // stop (isoloop#209), so every one is gone when this resolves.
     await Promise.all(
       this.#ids.map((id) =>
-        prev === 'balancer' && this.#balancer ? this.#balancer.stop(id) : this.#kernel.stop(id),
+        prev === 'balancer' && this.#balancer ? this.#balancer.stop(id) : this.#k.stop(id),
       ),
     );
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
+    this.#offences.clear();
     this.#busy.clear();
     this.#entry('mode', `placement: ${mode}`);
     for (const id of this.#ids) this.#spawn(id);
@@ -418,6 +488,11 @@ export class FileProcessor {
     return structuredClone(this.#moves.filter((m) => m.at >= t));
   }
 
+  /** Every processor crash so far, with its reason (M3j). */
+  crashes(): Crash[] {
+    return structuredClone(this.#crashes);
+  }
+
   /** The processors the kernel gave up on so far, with their kinds (M3j). */
   givenUp(): GivenUp[] {
     return structuredClone(this.#givenUp);
@@ -431,7 +506,7 @@ export class FileProcessor {
   /** Every processor now: where it runs, its load as the balancer and the beats see it, its backlog. */
   trace(): TraceRow[] {
     const now = performance.now();
-    const isolates = new Map(this.#kernel.isolates().map((i) => [i.id, i]));
+    const isolates = new Map((this.#kernel?.isolates() ?? []).map((i) => [i.id, i]));
     const placements = new Map((this.#balancer?.placements() ?? []).map((p) => [p.id, p]));
     return this.#ids.map((id) => {
       const placement = placements.get(id);
@@ -462,11 +537,12 @@ export class FileProcessor {
   snapshot(): Snapshot {
     const now = performance.now();
     while ((this.#finishedAt[0] ?? Infinity) < now - RATE_WINDOW_MS) this.#finishedAt.shift();
-    const isolates = new Map(this.#kernel.isolates().map((i) => [i.id, i]));
+    const isolates = new Map((this.#kernel?.isolates() ?? []).map((i) => [i.id, i]));
     const placements = new Map((this.#balancer?.placements() ?? []).map((p) => [p.id, p]));
 
     const workers = new Map<string, WorkerView>();
-    for (const id of this.#ids) {
+    // Before `attach` nothing runs, so no worker is drawn.
+    for (const id of this.#kernel ? this.#ids : []) {
       const snap = isolates.get(id);
       const placement = placements.get(id);
       const where =
@@ -502,7 +578,22 @@ export class FileProcessor {
         done: this.#doneBy.get(id) ?? 0,
         moved:
           moved && now - moved.at < 6_000 ? { reason: moved.reason, from: moved.from } : undefined,
+        measuring: this.#mode === 'balancer' && this.#offences.measuring(id, where),
+        gaveUp:
+          snap?.state === 'failed'
+            ? gaveUpText(
+                this.#restartLimit,
+                this.#givenUp.findLast((g) => g.id === id)?.reason ?? 'error',
+              )
+            : undefined,
       });
+    }
+    // A quarantine holding only isolates being measured is the measuring step, not a quarantine.
+    for (const w of workers.values()) {
+      if (w.kind === 'quarantine' && w.processors.every((p) => p.measuring)) {
+        w.kind = 'measuring';
+        w.label = `Measuring · ${w.key}`;
+      }
     }
 
     const latencies = this.#latencies.map((l) => l.ms);
@@ -524,7 +615,7 @@ export class FileProcessor {
     const live = [...isolates.values()].filter(
       (i) => i.pool === undefined && LIVE.has(i.state),
     ).length;
-    const running = this.#kernel.pools().filter((p) => p.running);
+    const running = (this.#kernel?.pools() ?? []).filter((p) => p.running);
     return {
       mode: this.#mode,
       dials: this.#dials,
@@ -538,7 +629,7 @@ export class FileProcessor {
       p95: percentile(latencies, 95),
       kinds,
       workers: [...workers.values()].toSorted((a, b) => order(a.key, b.key)),
-      workerCount: 1 + live + running.length,
+      workerCount: this.#kernel ? 1 + live + running.length : 0,
       balancerPools: running.filter(
         (p) => p.name.startsWith('balancer-') && p.name !== 'balancer-quarantine-1',
       ).length,
@@ -564,11 +655,12 @@ export class FileProcessor {
       },
     };
     if (this.#mode === 'balancer' && this.#balancer) this.#balancer.spawn(manifest);
-    else if (this.#mode === 'one') this.#kernel.spawn({ ...manifest, pool: ONE });
-    else this.#kernel.spawn(manifest);
+    else if (this.#mode === 'one') this.#k.spawn({ ...manifest, pool: ONE });
+    else this.#k.spawn(manifest);
   }
 
   #publishDials(): void {
+    if (!this.#kernel) return;
     void this.#kernel.publish(dialsTopic, { key: 'dials', value: this.#dials });
   }
 

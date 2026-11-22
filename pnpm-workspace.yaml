@@ -21,8 +21,12 @@ catalog:
   preact-render-to-string: 6.8.3
   # The site's smoke test checks accessibility with axe, behind expectAccessible() (ADR 0002, decision 9).
   '@axe-core/playwright': 4.14.0
+  # The docs' Markdown, at build time only, behind apps/site/build/docs/render.ts (M4c, ADR 0006). Ships its own types.
+  markdown-it: 15.0.3
   # Changelogs and app versions (ADR 0004): dev tooling only, never shipped.
   '@changesets/cli': 3.0.3
+  # The dev MCP suites' client (M4a), as isoloop/isoloop uses it: tests only.
+  '@modelcontextprotocol/sdk': 1.32.2
 
 # Isoloop itself, installed from npm like any app would. One version for every
 # package (they release as one fixed group, ADR 0012), so all apps move to a
@@ -30,15 +34,18 @@ catalog:
 # isoloop/isoloop's main (its prerelease.yml); the lockfile pins them.
 catalogs:
   isoloop:
-    '@isoloop/balancer': 0.1.0-next.1
-    '@isoloop/bus': 0.1.0-next.1
-    '@isoloop/codec': 0.1.0-next.1
-    '@isoloop/host': 0.1.0-next.1
-    '@isoloop/preact': 0.1.0-next.1
-    '@isoloop/protocol': 0.1.0-next.1
-    '@isoloop/react': 0.1.0-next.1
-    '@isoloop/runtime': 0.1.0-next.1
-    '@isoloop/vite': 0.1.0-next.1
+    '@isoloop/balancer': 0.1.0-next.11
+    '@isoloop/bus': 0.1.0-next.11
+    '@isoloop/codec': 0.1.0-next.11
+    '@isoloop/devtools': 0.1.0-next.11
+    '@isoloop/host': 0.1.0-next.11
+    '@isoloop/preact': 0.1.0-next.11
+    '@isoloop/protocol': 0.1.0-next.11
+    '@isoloop/react': 0.1.0-next.11
+    '@isoloop/runtime': 0.1.0-next.11
+    '@isoloop/vite': 0.1.0-next.11
+    '@isoloop/webmcp': 0.1.0-next.11
+    isoloop: 0.1.0-next.11
   react:
     react: 19.3.1
     react-dom: 19.3.1
@@ -53,5 +60,6 @@ catalogs:
 minimumReleaseAge: 4320 # minutes: refuse versions younger than 3 days
 minimumReleaseAgeExclude:
   - '@isoloop/*'
+  - isoloop # the CLI (M4a), released with them
 strictPeerDependencies: true
 strictDepBuilds: true

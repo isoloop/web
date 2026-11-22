@@ -1,5 +1,52 @@
 # markets
 
+## 0.9.0
+
+### Minor Changes
+
+- 94bffdb: A Devtools switch on every page that runs Isoloop: the dashboards' Isoloop builds and their interactive pages have it on their bar, and the processor pages in their controls. It reloads the page with `?devtools=1` added or removed, which opens the devtools panel once the kernel exists (on the processor, from `@isoloop/devtools`, never before Start). On the examples hub, the same switch sits over the processor frames: it reloads the frame idle with the flag, carries it to "Open full page", and makes the frame taller for the panel.
+
+### Patch Changes
+
+- d277f32: On `@isoloop/*@0.1.0-next.11`, which moves the library's source into areas and declares its scripts in `sideEffects`. Nothing in the apps changes.
+- b87db68: The dark theme's background is a neutral `#171b26`, with its surface, rules and borders to match, in place of the navy; the version pill and the Experimental pill sit centred on their text. On the site, the page is 96rem wide and its left column is shared by every page.
+
+## 0.8.1
+
+### Patch Changes
+
+- 8372ee3: On `@isoloop/*@0.1.0-next.10`, with the API's TSDoc complete. Nothing in the apps changes.
+- 718f2c0: On `@isoloop/*@0.1.0-next.6`. A pool's worker stays open until the host ends it after its last member, so an isolate that starts in a pool while the others are leaving it starts normally.
+- b5885ab: On `@isoloop/*@0.1.0-next.9`, the release that freezes the API. In the markets and plant dashboards the devtools button shows the kernel's health as a ring, and the panel has an Events tab with the kernel's history and a Messages tab (formerly Log) for the records the app publishes.
+
+## 0.8.0
+
+### Minor Changes
+
+- 10b61c9: `?devtools=1` on the Isoloop build adds the devtools panel (`@isoloop/devtools`, experimental) in the bottom-right corner: each isolate's state, lag, busy time and controls, the bus's topics and subscriptions, and a live record log, drawn by an isolate of its own that keeps working through a bus restart. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it; each build's JavaScript figure leaves the panel out.
+- 10b61c9: In a browser with WebMCP (behind a flag in Chromium and Firefox), the Isoloop build lists its two agent tools, `markets.quote.v1` and `markets.alerts.create.v1`, to the browser's agent through `@isoloop/webmcp`. Without WebMCP the page loads none of its code.
+
+### Patch Changes
+
+- a7c0654: On `@isoloop/*@0.1.0-next.4`. When a member sharing a pool falls behind and the worker cap leaves it nowhere to go, the balancer folds a second quarantine pool of offenders into the first, so the member gets that worker. On the interactive boards a widget moved this way shows "moved to Quarantine: making room for a widget falling behind", and in the File processor the move log says "making room".
+- c4503e5: On `@isoloop/*@0.1.0-next.5`. The balancer counts a pool toward `maxWorkers` from the moment a move claims it, so two moves in one decision can't open a pool past the cap. A second quarantine pool folds into the first like with like: offenders join offenders, and the other half of a bisect joins its first half.
+
+## 0.7.0
+
+### Minor Changes
+
+- d0c7a19: Tools for agents (M4a): `markets.quote.v1`, a read-only quote for one symbol answered by the aggregator, and `markets.alerts.create.v1`, which adds an alert rule through the alerts isolate, once per request id. In development the page pairs with `isoloop mcp` when `VITE_ISOLOOP_MCP_TOKEN` is set, so a coding agent can call them and read the page's isolates and events. Production builds don't contain the dev MCP.
+
+### Patch Changes
+
+- On the interactive pages, an automatic widget that crashes past the kernel's restart limit is labelled "stopped: crashed too often" in its header. The balancer leaves it where it is and doesn't move or restart it.
+- On `@isoloop/*@0.1.0-next.2`, with three balancer fixes from M3j:
+  
+  - A never-measured isolate's first way out of the quarantine, where it starts, no longer counts toward its move budget.
+  - A quiet pool of several isolates packs back into another, one isolate a minute.
+  - A backlog has to rise over two 10 s windows in a row before anything moves.
+- On `@isoloop/*@0.1.0-next.3`. A consumer-group member that crashes partway through a batched delivery keeps the records it settled, so they aren't sent to the next member again (ADR 0016, point 17). Before, a corrupt file that crashed its processor after the files before it in the batch were settled came back until the kernel gave up on every processor of its kind.
+
 ## 0.6.1
 
 ### Patch Changes

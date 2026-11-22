@@ -4,6 +4,27 @@
 
 The sections below were written on 2026-11-17 from the git history, the release tags and their PRs ([ADR 0004](../../docs/adr/0004-publishing-and-governance.md), step 8). Changesets writes each release's section from the next one on. Each release is tagged `basic-v<version>` and deployed to isoloop.dev from that tag. A deploy builds every app at its commit, so a change can go live with another app's tag first; each change is listed under the first `basic-v*` tag that includes it.
 
+## 0.2.0
+
+### Minor Changes
+
+- 9d5b051: With `?start=manual` (the site's examples hub), the page draws its idle panes and starts no kernel and no worker until it's told to start; opened alone with the parameter, it shows its own Start. Its intro comes from `example.json`, the same text the hub shows. Embedded, it fills the frame edge to edge.
+
+### Patch Changes
+
+- d277f32: On `@isoloop/*@0.1.0-next.11`, which moves the library's source into areas and declares its scripts in `sideEffects`. Nothing in the apps changes.
+- b87db68: The dark theme's background is a neutral `#171b26`, with its surface, rules and borders to match, in place of the navy; the version pill and the Experimental pill sit centred on their text. On the site, the page is 96rem wide and its left column is shared by every page.
+
+## 0.1.1
+
+### Patch Changes
+
+- 9d6989b: The site's header: GitHub moves out of the page links to sit beside the theme switch, as the mark alone on a phone.
+- 8372ee3: On `@isoloop/*@0.1.0-next.10`, with the API's TSDoc complete. Nothing in the apps changes.
+- 718f2c0: On `@isoloop/*@0.1.0-next.6`. A pool's worker stays open until the host ends it after its last member, so an isolate that starts in a pool while the others are leaving it starts normally.
+- b5885ab: On `@isoloop/*@0.1.0-next.9`, the release that freezes the API. In the markets and plant dashboards the devtools button shows the kernel's health as a ring, and the panel has an Events tab with the kernel's history and a Messages tab (formerly Log) for the records the app publishes.
+- 5d44106: The docs are reachable: "Docs" is in the header right after Home, and opens `/docs/`, which lists every section and guide with its one-line description. Each guide's page has the docs layout: the section sidebar with the current page marked and the Experimental mark on the balancer and the devtools panel, the lead, "On this page" on the right, code blocks with a Copy button, and Previous and Next. Below 1100px the contents fold under the lead, and below 760px the sidebar folds into a "Docs" block at the top. The footer links `/llms.txt`, and the docs pages are in the sitemap.
+
 ## 0.1.1-rc.2
 
 Tagged 2026-11-15.

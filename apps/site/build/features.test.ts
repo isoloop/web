@@ -9,6 +9,7 @@ const entry = {
   id: 'bus',
   order: 30,
   part: 'bus',
+  tab: 'bus',
   name: 'The message bus.',
   line: 'Typed topics.',
   text: ['The bus runs in a worker.'],
@@ -84,6 +85,14 @@ describe('loadFeatures', () => {
     );
   });
 
+  it('refuses an ADR or a plan as a proof: public pages say how it works, not why', () => {
+    for (const path of ['docs/adr/0017-opt-in-balancer.md', 'docs/plans/m4c-docs.md']) {
+      const dir = dirWith({ 'bus.json': { ...entry, proof: [{ repo: 'isoloop', path }] } });
+      const lib = library({ [path]: '# ADR' });
+      expect(() => loadFeatures(dir, lib, '.')).toThrow(/not an ADR or a plan/);
+    }
+  });
+
   it('checks web proofs in the web checkout', () => {
     const root = mkdtempSync(join(tmpdir(), 'web-'));
     mkdirSync(join(root, 'apps'), { recursive: true });
@@ -129,6 +138,8 @@ describe('loadFeatures', () => {
       'durable',
       'placement',
       'balancer',
+      'agents',
+      'devtools',
       'frameworks',
       'safety',
       'cost',

@@ -2,27 +2,28 @@
   "id": "replay",
   "order": 40,
   "part": "bus",
+  "tab": "bus",
   "name": "Retention and replay.",
   "line": "Topics keep their records, so a reader can go back and read them again.",
   "text": [
-    "A topic keeps its records under a retention policy: the last n, a time window, or the latest record per key. Where a restarted reader starts is its own choice: `earliest` reads every retained record again, `committed` reads on after its last commit, `latest` takes only new records. A consumer group, whose members share a topic’s records between them, is the exception: once it has committed, it resumes after its commit whatever `from` says. D subscribes from `earliest`, which is how it rebuilds its list of notes."
+    "A topic keeps its records under a retention policy: the last n, a time window, or the latest record per key. Where a restarted reader starts is its own choice: `earliest` reads every retained record again, `committed` reads on after its last commit, `latest` takes only new records. A consumer group, whose members share a topic’s records between them (experimental in 0.1), is the exception: once it has committed, it resumes after its commit whatever `from` says. D subscribes from `earliest`, which is how it rebuilds its list of notes."
   ],
   "demo": "replay",
   "since": "site-v0.1.0",
   "proof": [
     {
       "repo": "isoloop",
-      "path": "packages/protocol/src/bus.ts",
+      "path": "packages/protocol/src/messages/bus.ts",
       "symbol": "StartPosition"
     },
     {
       "repo": "isoloop",
-      "path": "packages/bus/src/topic.ts",
+      "path": "packages/bus/src/contracts/topic.ts",
       "symbol": "topicConfig"
     },
     {
       "repo": "isoloop",
-      "path": "packages/bus/src/groups-commit-loss.test.ts",
+      "path": "packages/bus/src/broker/groups-commit-loss.test.ts",
       "test": "a group resumes from its committed offset whatever `from` says"
     },
     {

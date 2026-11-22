@@ -1,10 +1,49 @@
 {
   "title": "Basic",
-  "summary": "Four isolates on three event loops: two on their own workers, two sharing a pool. Block or crash any of them and watch what keeps running.",
+  "tab": "Basic",
+  "summary": "The smallest example: four isolates on three event loops. A and B each have a worker of their own; C and D share one, a pool. Every isolate has a Block and a Crash button, so you can break any part and watch what keeps running. The landing page runs it live.",
+  "shows": ["containment", "placement", "restart"],
+  "try": [
+    "Block C for 3 s: D stalls with it, since they share a worker, and after 2 s both restart. A and B keep running.",
+    "Crash D: only D restarts, even in the pool, because it reports the error as its own.",
+    "Crash A four times within a minute: the kernel restarts it three times, then stops, and its pane offers Restart A. B, C and D carry on.",
+    "Block the main thread: every surface freezes on screen while the loops behind them keep running; when it ends, the surfaces show where the loops got to."
+  ],
+  "order": 10,
+  "group": "Basic",
+  "embeds": [
+    {
+      "id": "basic-live",
+      "title": "Basic",
+      "src": "/examples/basic/",
+      "height": 900,
+      "intro": [
+        "The smallest example: four isolates, each with its own surface, on three event loops. A and B have a worker each; C and D share one, a pool. They talk only through topics on the bus, which runs in a worker of its own. Every isolate has a Block and a Crash button, so you can break any part and watch what keeps running. The landing page runs it live.",
+        {
+          "list": [
+            "**Block** keeps an isolate's loop busy for 3 s. The kernel kills a loop that stays busy for 2 s and restarts it, and the isolate rebuilds its state from the records its topics still hold.",
+            "**Crash** reports an error as the isolate's own. Only that isolate restarts, even in a pool.",
+            "**Block the main thread** freezes every surface on screen, while the loops behind them keep running."
+          ]
+        },
+        "C and D read A's count, so they tick when A does. When A is down they wait for its next record; their own work carries on."
+      ]
+    }
+  ],
+  "measurements": {
+    "status": "none",
+    "note": "No measurements: Basic is for watching containment and restarts, not for measuring their cost. The dashboards measure that.",
+    "see": {
+      "href": "#plant",
+      "label": "The Plant tab, with its measurements"
+    }
+  },
   "links": {
     "live": "/examples/basic/",
     "source": "https://github.com/isoloop/web/tree/main/apps/basic"
   },
-  "order": 10,
-  "screenshot": "screenshot.webp"
+  "screenshot": {
+    "light": "screenshot-light.webp",
+    "dark": "screenshot-dark.webp"
+  }
 }

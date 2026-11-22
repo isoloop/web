@@ -19,6 +19,11 @@ export class Aggregator {
     this.#quotes.set(q.symbol, m);
   }
 
+  /** Each exchange's latest quote for `symbol`. */
+  quotes(symbol: Sym): Quote[] {
+    return [...(this.#quotes.get(symbol)?.values() ?? [])];
+  }
+
   /**
    * The figures for `symbol` at `now` over the last `windowMs`, or null with
    * no trades in the window. Trades older than the window are dropped.

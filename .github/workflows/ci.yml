@@ -1,10 +1,12 @@
 # Ubuntu only, actions pinned by commit SHA (isoloop/isoloop ADR 0009, rules 9
 # and 12). `check` runs on everything; `e2e` runs per app and engine, only for
-# the apps a pull request touches (all of them when the shared setup changes,
-# none when only docs or Markdown change).
+# the apps a pull request's changes reach: their own code, a package they use,
+# their lockfile entries; all of them when the shared setup changes, none for
+# docs, Markdown, example.json, screenshots or recorded results
+# (scripts/ci/e2e-apps-rule.ts).
 name: CI
 
-# Pull requests: check, then E2E for the apps they touch (every build on
+# Pull requests: check, then E2E for the apps they reach (every build on
 # Chromium, the React pair on Firefox and WebKit). Pushes to main: check only;
 # the pull request already ran E2E. The site job (build, link check, smoke
 # test) runs on both when the site's inputs change (ADR 0002, decision 11).

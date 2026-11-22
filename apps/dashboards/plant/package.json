@@ -1,6 +1,6 @@
 {
   "name": "plant",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "A telemetry dashboard for a fictional plant of eight machines: native, native with workers, and on Isoloop.",
@@ -14,6 +14,7 @@
     "compare": "playwright test --project=comparison --project=comparison-firefox --project=comparison-webkit --workers=1; node scripts/compare.ts",
     "compare:pairs": "node comparison/run.ts",
     "compare:interactive": "node comparison/interactive.ts",
+    "compare:agent-cost": "PLANT_AGENT_COST=1 playwright test --project=agent-cost --project=agent-cost-firefox --workers=1",
     "dev:native": "vite --configLoader runner --mode native",
     "dev:native-workers": "vite --configLoader runner --mode native-workers",
     "dev:interactive": "vite --configLoader runner --config vite.interactive.config.ts",
@@ -22,6 +23,7 @@
   "dependencies": {
     "@isoloop/balancer": "catalog:isoloop",
     "@isoloop/bus": "catalog:isoloop",
+    "@isoloop/devtools": "catalog:isoloop",
     "@isoloop/host": "catalog:isoloop",
     "@isoloop/protocol": "catalog:isoloop",
     "@isoloop/react": "catalog:isoloop",
