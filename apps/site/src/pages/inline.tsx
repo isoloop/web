@@ -3,7 +3,8 @@ import type { VNode } from 'preact';
 
 /**
  * Inline Markdown as changelogs write it: `code`, [links](https://…) and
- * **bold**. Anything else stays text; Preact escapes it.
+ * **bold**, which can hold the other two. Anything else stays text; Preact
+ * escapes it.
  */
 export function inline(text: string): (string | VNode)[] {
   const out: (string | VNode)[] = [];
@@ -20,7 +21,7 @@ export function inline(text: string): (string | VNode)[] {
           {inline(m[2])}
         </a>,
       );
-    else if (m[4] !== undefined) out.push(<b key={key}>{m[4]}</b>);
+    else if (m[4] !== undefined) out.push(<b key={key}>{inline(m[4])}</b>);
     at = m.index + m[0].length;
   }
   if (at < text.length) out.push(text.slice(at));

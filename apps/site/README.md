@@ -25,7 +25,7 @@ isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the lan
 | `src/pages/doc.tsx` | A guide's page in the docs layout (M4c task 11, from the approved mock): the section sidebar, the lead and meta line, "On this page", Previous and Next; and `/docs/`, every section and guide. Below 1100px the contents fold, below 760px the sidebar folds, both as `<details>`. The guide pages have no `index.html` stubs; `docInputs` in `build/plugin.ts` names a virtual one per guide. `experimental` in `docs.json` draws the pill; `searchTitle` gives the `<title>`. `src/demos/copy.ts` turns on the code blocks' Copy buttons |
 | `build/library.ts` | Fetches the library's `docs/diagrams` and `docs/guide` at the sha in `library.lock`, and reads its other files at that sha (proofs, changelogs) |
 | `build/pin.ts` | Checks the pin is a published version: every package at the pin on npm, and npm's provenance naming the pin as the commit it was built from (ADR 0006) |
-| `scripts/` | `serve.ts` (static server, as Pages), `linkcheck.ts`, `screenshots.ts`, `fetch-library.ts`, `check-pin.ts` |
+| `scripts/` | `serve.ts` (static server, as Pages), `linkcheck.ts`, `textcheck.ts`, `screenshots.ts`, `fetch-library.ts`, `check-pin.ts` |
 | `e2e/` | The smoke test, and `expectAccessible` (axe) |
 
 ## Running it
@@ -42,6 +42,7 @@ pnpm --filter "./apps/dashboards/*" --filter ./apps/basic --filter ./apps/proces
 pnpm --filter ui build:specimens
 SITE=1 scripts/assemble-site.sh site     # from the repo root; SITE=1 includes the site's pages
 pnpm --filter site linkcheck ../../site
+pnpm --filter site textcheck ../../site
 pnpm --filter site serve                 # http://localhost:4799/
 pnpm --filter site smoke                 # Chromium smoke test against site/
 ```

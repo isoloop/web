@@ -5,6 +5,7 @@ import { mdPath } from '../../build/docs/llms.ts';
 import type { Doc, NavItem, NavSection } from '../../build/docs/pages.ts';
 import { docsPage as c, marks } from '../copy.ts';
 import { PAGE_IMAGES } from './intro.tsx';
+import { rich } from './rich.tsx';
 import type { Page, SiteData } from './types.ts';
 
 // The docs layout (isoloop/isoloop M4c task 11, from the approved mock; ADR
@@ -284,7 +285,7 @@ export const docsIndexPage: Page = {
                     <b>{d.title}</b>
                     <Pill doc={d} />
                   </a>{' '}
-                  {d.description}
+                  {rich(d.description)}
                 </li>
               ))}
             </ul>
