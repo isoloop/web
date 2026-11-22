@@ -20,7 +20,7 @@ for (const build of inScope(BUILDS)) {
     await page.goto(`/${build}/?seed=3`);
     await everyMachineShows(
       page,
-      { widget: 'gauges', css: '.gauges', attr: 'data-ts' },
+      { widget: 'gauges', css: '.gauges', attr: 'data-ts', pattern: /\d/ },
       firstData(browserName),
     );
     // Each gauge shows the generator's value at its row's time.
@@ -45,13 +45,15 @@ for (const build of inScope(BUILDS)) {
       expect(values['pressure']).toBeCloseTo(row.pressure, 1);
     }
     // Health: a score from 0 to 100 and a status.
-    await Promise.all(
-      MACHINES.map((m) =>
-        expect(at(page, `${m}-health`, '.health')).toHaveAttribute(
-          'data-status',
-          /^(ok|warn|alarm|stopped)$/,
-        ),
-      ),
+    await everyMachineShows(
+      page,
+      {
+        widget: 'health',
+        css: '.health',
+        attr: 'data-status',
+        pattern: /^(ok|warn|alarm|stopped)$/,
+      },
+      5_000, // expect's default
     );
     const score = Number(await at(page, 'T2-health', '.score').innerText());
     expect(score).toBeGreaterThanOrEqual(0);
