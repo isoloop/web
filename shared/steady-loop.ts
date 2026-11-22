@@ -1,7 +1,7 @@
 // For the E2E tests that block a loop: wait until it has been steady for a
-// second first. Just after a start or a restart the kernel is in warm-up
-// (isoloop/isoloop ADR 0001), where a block can end without a restart. A
-// person rarely clicks that early; a test always does.
+// second first, so the block lands on a settled loop and not in start-up work.
+// A person rarely clicks that early; a test always does. The kernel itself has
+// no warm-up: its kill threshold applies from `ready` on.
 
 /** The part of the page's kernel it reads; the site's tests don't have its type. */
 interface Beats {
