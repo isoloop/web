@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
 import type { DeltaGroup, PairCells, Verdict } from '../copy.ts';
+import { plain, rich } from './rich.tsx';
 
 export interface DeltaTableProps {
   caption: string;
@@ -89,9 +90,14 @@ export function DeltaTable(props: DeltaTableProps): VNode {
   const span = 1 + pairs.length * 3;
   return (
     <div class="ui-delta-tables">
-      <div class="ui-table-wrap ui-delta-wide" tabindex={0} role="region" aria-label={caption}>
+      <div
+        class="ui-table-wrap ui-delta-wide"
+        tabindex={0}
+        role="region"
+        aria-label={plain(caption)}
+      >
         <table class="ui-table ui-delta-table">
-          <caption>{caption}</caption>
+          <caption>{rich(caption)}</caption>
           <colgroup />
           {pairs.map((p) => (
             <colgroup span={3} key={p.label} />
@@ -148,7 +154,7 @@ export function DeltaTable(props: DeltaTableProps): VNode {
         </table>
       </div>
       <div class="ui-delta-narrow">
-        <p class="ui-delta-caption">{caption}</p>
+        <p class="ui-delta-caption">{rich(caption)}</p>
         {pairs.map((p, i) => (
           <PairTable
             key={p.label}

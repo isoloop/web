@@ -1,8 +1,8 @@
 name: Site
 
 # The site's checks (ADR 0002, decision 11): build every app and the site,
-# assemble them as deployed (with the site, SITE=1), check every internal link,
-# then the Chromium smoke test against the assembled site: every page clean in
+# assemble them as deployed (with the site, SITE=1), check every internal link
+# and that no page shows raw Markdown, then the Chromium smoke test against the assembled site: every page clean in
 # the console under its policy, axe on every page and on ui's specimens, basic
 # booting in the landing page's iframe and restarting a crashed isolate, and
 # the theme switching the frames live.
@@ -34,6 +34,7 @@ jobs:
       - name: Assemble the site, with the site's pages
         run: SITE=1 scripts/assemble-site.sh site
       - run: pnpm --filter site linkcheck ../../site
+      - run: pnpm --filter site textcheck ../../site
       - uses: ./.github/actions/install-browsers
         with:
           browsers: chromium

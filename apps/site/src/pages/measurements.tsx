@@ -61,7 +61,7 @@ export function MeasuredBlock({
     <div class="ex-block">
       <header class="ex-block-head">
         <H>{block.heading}</H>
-        <p class="ex-caption">{block.caption}</p>
+        <p class="ex-caption">{rich(block.caption)}</p>
       </header>
       <L class="ex-label">{findings}</L>
       <ul class="ex-findings">
