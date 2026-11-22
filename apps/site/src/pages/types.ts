@@ -5,7 +5,7 @@ import type { Doc, NavSection } from '../../build/docs/pages.ts';
 import type { Example } from '../../build/examples.ts';
 import type { Feature } from '../../build/features.ts';
 import type { Samples } from '../../build/samples.ts';
-import type { Current } from 'ui/components';
+import type { Current, HeadProps } from 'ui/components';
 
 /** What every page is rendered from, gathered at build time. */
 export interface SiteData {
@@ -32,7 +32,9 @@ export interface Page {
   path: string;
   /** The header's section, if the page is one. */
   section?: Current;
-  head: { title: string; description: string; home?: boolean };
+  head: Pick<HeadProps, 'title' | 'searchTitle' | 'description' | 'home' | 'robots'>;
+  /** A JSON-LD data block for its <head>, which doesn't execute (ADR 0002, decision 8, as amended). */
+  jsonLd?: object;
   /** Module scripts the page runs, root-absolute (the live demos), bundled by Vite. */
   scripts?: string[];
   render: (data: SiteData) => VNode;

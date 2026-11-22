@@ -346,7 +346,7 @@ function Examples({ examples, features }: SiteData): VNode {
 export const examplesHubPage: Page = {
   path: '/examples/',
   section: 'examples',
-  head: { title: t.title, description: t.description },
+  head: { title: t.title, searchTitle: t.searchTitle, description: t.description },
   scripts: ['/src/demos/examples.ts'],
   render: (data) => <Examples {...data} />,
 };

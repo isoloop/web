@@ -14,18 +14,21 @@ export function robots(origin = ORIGIN): string {
 
 /**
  * sitemap.xml: the site's pages (their own paths, the 404 left out), then each
- * deployed example's page and its architecture page; drafts aren't deployed.
+ * deployed example's page, the pages it runs in the hub and its architecture
+ * page; drafts aren't deployed.
  * Paths sorted and each listed once.
  */
 export function sitemap(
   pagePaths: string[],
-  examples: Pick<Example, 'links' | 'draft'>[],
+  examples: (Pick<Example, 'links' | 'draft'> & { embeds?: { src: string }[] | undefined })[],
   origin = ORIGIN,
 ): string {
   const paths = new Set(pagePaths.filter((p) => p.endsWith('/')));
   for (const e of examples) {
     if (e.draft) continue;
     paths.add(e.links.live);
+    // An app with a second page (the processor's files/) names it among its embeds.
+    for (const { src } of e.embeds ?? []) paths.add(src.split(/[?#]/)[0] ?? src);
     if (e.links.architecture) paths.add(e.links.architecture);
   }
   const urls = [...paths]

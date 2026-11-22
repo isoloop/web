@@ -37,10 +37,15 @@ const SHOTS: {
   oneTheme?: true;
 }[] = [
   { id: 'basic', path: '/examples/basic/', waitMs: 4_000, noHeader: true },
-  { id: 'dashboards/plant', path: '/examples/dashboards/plant/', waitMs: 10_000, oneTheme: true },
+  {
+    id: 'dashboards/plant',
+    path: '/examples/dashboards/plant/isoloop/',
+    waitMs: 10_000,
+    oneTheme: true,
+  },
   {
     id: 'dashboards/markets',
-    path: '/examples/dashboards/markets/',
+    path: '/examples/dashboards/markets/isoloop/',
     waitMs: 10_000,
     oneTheme: true,
   },

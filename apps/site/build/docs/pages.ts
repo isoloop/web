@@ -38,6 +38,8 @@ const pageEntry = z.strictObject({
   leadPending: z.literal(true).optional(),
   /** The page's feature is `@experimental`: the pill after its name (ADR 0005, decision 4). */
   experimental: z.literal(true).optional(),
+  /** For <title> and the link preview's title only (ADR 0006, as amended). */
+  searchTitle: z.string().min(1).optional(),
 });
 
 /** A link into a page, not a page of its own (Kernel config, M4c decision 29). */
@@ -82,6 +84,8 @@ export interface Doc {
   /** `/docs/<slug>/`, e.g. `/docs/pools/` or `/docs/api/host/`. */
   path: string;
   title: string;
+  /** In the title's place, in <title> and the link preview only. */
+  searchTitle?: string;
   description: string;
   html: string;
   headings: DocHeading[];
@@ -241,6 +245,7 @@ export function loadDocs(o: LoadDocsOptions): Doc[] {
           experimental: g.experimental === true,
           path: `/docs/${g.slug}/`,
           title: doc.title,
+          ...(g.searchTitle ? { searchTitle: g.searchTitle } : {}),
           description: doc.description,
           html: kind === 'api' ? apiPage.html(doc.html) : doc.html,
           headings: doc.headings,

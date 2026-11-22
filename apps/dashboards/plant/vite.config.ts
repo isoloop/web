@@ -3,7 +3,9 @@ import { isoloop } from '@isoloop/vite';
 import { ui } from 'ui/vite';
 import { defineConfig } from 'vite';
 import { browserCheck } from '../../../shared/browser-check.ts';
+import { indexed, unindexed } from '../../../shared/search.ts';
 import { optInOutput } from '../../../shared/opt-in.ts';
+import example from './example.json' with { type: 'json' };
 
 const src = (p: string): string => fileURLToPath(new URL(`./src/${p}`, import.meta.url));
 
@@ -23,6 +25,16 @@ const src = (p: string): string => fileURLToPath(new URL(`./src/${p}`, import.me
 type Build = 'isoloop' | 'native' | 'native-workers';
 
 const BUILDS: readonly Build[] = ['isoloop', 'native', 'native-workers'];
+
+/** Only the Isoloop build is indexed (shared/search.ts). */
+const meta = (build: Build) =>
+  build === 'isoloop'
+    ? indexed(
+        'Plant example: a live telemetry dashboard',
+        'A live telemetry dashboard for a fictional plant: 8 machines and 72 widgets, on Isoloop in six placements, with native builds to compare.',
+        example.links.live,
+      )
+    : unindexed(`Plant example (${build === 'native' ? 'native' : 'native + workers'})`);
 
 export default defineConfig(({ mode }) => {
   const build: Build = BUILDS.find((b) => b === mode) ?? 'isoloop';
@@ -53,7 +65,7 @@ export default defineConfig(({ mode }) => {
         ? [isoloop({ crossOriginIsolated: process.env['PLANT_COI'] === '1' })]
         : []),
       // The thin bar back to the site, fixed dark (ADR 0003, decision 7).
-      ui({ bar: true }),
+      ui({ bar: true, meta: () => meta(build) }),
     ],
     base: './',
     worker: { format: 'es' },

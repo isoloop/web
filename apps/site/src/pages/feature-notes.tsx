@@ -27,6 +27,7 @@ export const TABS = featureSchema.shape.tab.options.map((t) => [t, TAB_PARTS[t]]
 export function FeatureNotes({ features }: { features: Feature[] }): VNode {
   return (
     <figure class="fnotes" aria-label={f.notes.label}>
+      <h2 class="visually-hidden">{f.notes.label}</h2>
       {TABS.map(([tab, part]) => (
         <section class="fnotes-col" data-part={part} key={tab}>
           <h3>

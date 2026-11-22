@@ -22,6 +22,10 @@ describe('sitemap', () => {
         }),
         { ...live('/examples/soon/'), draft: true as const },
         live('/examples/basic/'),
+        {
+          ...live('/examples/processor/'),
+          embeds: [{ src: '/examples/processor/' }, { src: '/examples/processor/files/?embed=1' }],
+        },
       ],
     );
     const locs = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
@@ -31,6 +35,8 @@ describe('sitemap', () => {
       'https://isoloop.dev/examples/basic/',
       'https://isoloop.dev/examples/dashboards/plant/',
       'https://isoloop.dev/examples/dashboards/plant/architecture/',
+      'https://isoloop.dev/examples/processor/',
+      'https://isoloop.dev/examples/processor/files/',
       'https://isoloop.dev/features/',
     ]);
     expect(xml).toMatch(

@@ -3,7 +3,9 @@ import { isoloop } from '@isoloop/vite';
 import { ui } from 'ui/vite';
 import { defineConfig, type Alias, type Plugin } from 'vite';
 import { browserCheck } from '../../../shared/browser-check.ts';
+import { indexed, unindexed } from '../../../shared/search.ts';
 import { optInOutput } from '../../../shared/opt-in.ts';
+import example from './example.json' with { type: 'json' };
 
 const src = (p: string): string => fileURLToPath(new URL(`./src/${p}`, import.meta.url));
 
@@ -101,6 +103,26 @@ const PREACT: Alias[] = [
   { find: /^@isoloop\/react$/, replacement: '@isoloop/preact' },
 ];
 
+/** The builds left out of search, by what their titles call them. */
+const COMPARED: Partial<Record<Build, string>> = {
+  native: 'native',
+  'native-workers': 'native + workers',
+  'native-mixed': 'native + workers, React and Preact',
+  'isoloop-preact': 'Isoloop, Preact',
+  'native-preact': 'native, Preact',
+  mixed: 'Isoloop, React and Preact',
+};
+
+/** Only the Isoloop React build is indexed (shared/search.ts). */
+const meta = (build: Build) =>
+  build === 'isoloop'
+    ? indexed(
+        'Markets example: a live trading-data dashboard',
+        'A live markets dashboard on public exchange feeds, with trades, prices and alerts, built on Isoloop and native, in React and Preact.',
+        example.links.live,
+      )
+    : unindexed(`Markets example (${COMPARED[build] ?? build})`);
+
 export default defineConfig(({ mode }) => {
   const build: Build = BUILDS.find((b) => b === mode) ?? 'isoloop';
   if (build === 'native-mixed-parts') return partsBuild();
@@ -147,7 +169,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       browserCheck(workers ? 'native-workers' : native ? 'native' : 'isoloop'),
       ...plugins,
-      ui({ bar: true }),
+      ui({ bar: true, meta: () => meta(build) }),
     ],
     base: './',
     // The native + workers build's module workers (src/native/workers.ts).

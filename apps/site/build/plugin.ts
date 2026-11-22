@@ -26,6 +26,7 @@ import { robots, sitemap } from './crawl.ts';
 import type { LlmsFile } from './docs/llms.ts';
 import type { Doc } from './docs/pages.ts';
 import { docPage } from '../src/pages/doc.tsx';
+import { LOGO } from '../src/pages/structured-data.ts';
 import { PAGE_IMAGES, PAGE_MARK } from '../src/pages/intro.tsx';
 
 /** Every page's policy (ADR 0002, decision 8). */
@@ -36,6 +37,10 @@ export const PREVIEW = '/og-1200x630.png';
 const previewFile = (): string =>
   fileURLToPath(new URL('../../../packages/ui/brand/social/og-1200x630.png', import.meta.url));
 
+/** The Organization's logo in the home page's data, unhashed so its URL stays. */
+const logoFile = (): string =>
+  fileURLToPath(new URL('../../../packages/ui/brand/social/avatar-400.png', import.meta.url));
+
 /** The expressive mark the inner pages open with (src/pages/intro.tsx), by served path. */
 const MARKS: Record<string, string> = Object.fromEntries(
   [...Object.values(PAGE_MARK), ...Object.values(PAGE_IMAGES)].map((path) => [
@@ -43,6 +48,9 @@ const MARKS: Record<string, string> = Object.fromEntries(
     fileURLToPath(new URL(`../../../packages/ui${path}`, import.meta.url)),
   ]),
 );
+
+/** Every brand file served unhashed, by served path. */
+const BRAND: Record<string, string> = { ...MARKS, [LOGO]: logoFile() };
 
 const STUB = /^\s*<!--\s*page:([a-z0-9-]+)\s*-->\s*$/;
 const DOC_STUB = /^\s*<!--\s*doc:((?:api\/)?[a-z0-9-]+)\s*-->\s*$/;
@@ -54,6 +62,17 @@ export function docInputs(siteDir: string, docs: readonly Doc[]): Record<string,
   return Object.fromEntries(
     docs.map((d) => [`docs/${d.slug}`, `${siteDir}/docs/${d.slug}/index.html`]),
   );
+}
+
+/**
+ * A page's JSON-LD, written as text: ui's components take no raw HTML (ADR
+ * 0003), and render() would escape its quotes. `<` is escaped, so no text in
+ * the data can close the element.
+ */
+export function dataBlock(data: object | undefined): string {
+  if (!data) return '';
+  const json = JSON.stringify(data).replaceAll('<', '\\u003c');
+  return `<script type="application/ld+json">${json}</script>`;
 }
 
 /** The whole document for a page. `csp` is left out in dev, where Vite injects inline styles. */
@@ -70,6 +89,7 @@ export function renderDocument(page: Page, data: SiteData, opts: { csp?: string 
   return (
     '<!doctype html>\n<html lang="en">\n<head>\n' +
     head +
+    dataBlock(page.jsonLd) +
     '\n<link rel="stylesheet" href="/src/site.css">\n</head>\n<body>\n' +
     marker +
     '\n' +
@@ -115,6 +135,7 @@ const TYPES: Record<string, string> = {
   svg: 'image/svg+xml',
   woff2: 'font/woff2',
   woff: 'font/woff',
+  png: 'image/png',
   webp: 'image/webp',
   txt: 'text/plain; charset=utf-8',
   md: 'text/markdown; charset=utf-8',
@@ -164,10 +185,10 @@ export function site(opts: SiteOptions): Plugin {
         } else if (llms.has(path)) {
           const f = llms.get(path)!;
           file = { source: f.source, type: TYPES[f.fileName.split('.').pop() ?? ''] ?? '' };
-        } else if (MARKS[path]) {
+        } else if (BRAND[path]) {
           file = {
-            source: readFileSync(MARKS[path]),
-            type: path.endsWith('.webp') ? 'image/webp' : 'image/svg+xml',
+            source: readFileSync(BRAND[path]),
+            type: TYPES[path.split('.').pop() ?? ''] ?? '',
           };
         } else if (path === PREVIEW && existsSync(previewFile())) {
           file = { source: readFileSync(previewFile()), type: 'image/png' };
@@ -221,7 +242,7 @@ export function site(opts: SiteOptions): Plugin {
           fileName: PREVIEW.slice(1),
           source: readFileSync(previewFile()),
         });
-      for (const [path, source] of Object.entries(MARKS)) {
+      for (const [path, source] of Object.entries(BRAND)) {
         this.emitFile({ type: 'asset', fileName: path.slice(1), source: readFileSync(source) });
       }
       for (const i of opts.data.examples.flatMap((e) => imagesOf(e))) {

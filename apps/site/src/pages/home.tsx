@@ -7,6 +7,7 @@ import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
 import { StripItem } from './pill.tsx';
+import { homeData } from './structured-data.ts';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
@@ -157,6 +158,7 @@ export const homePage: Page = {
   path: '/',
   section: 'home',
   head: { title: home.title, description: site.description, home: true },
+  jsonLd: homeData,
   scripts: ['/src/demos/home.ts'],
   render: (data) => <Home {...data} />,
 };

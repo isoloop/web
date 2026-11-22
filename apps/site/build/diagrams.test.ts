@@ -67,7 +67,7 @@ describe('rewritePage', () => {
       },
     );
     expect(out).toMatch(
-      /^<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'"><script src="\/assets\/ui-theme-1.js" data-archify><\/script><link rel="stylesheet" href=".\/dg-inline-1.css"><title>/,
+      /^<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'"><script src="\/assets\/ui-theme-1.js" data-archify><\/script><link rel="stylesheet" href=".\/dg-inline-1.css"><meta name="robots" content="noindex, indexifembedded"><title>/,
     );
   });
 

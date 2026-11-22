@@ -3,6 +3,7 @@ import { isoloop } from '@isoloop/vite';
 import { ui } from 'ui/vite';
 import { defineConfig } from 'vite';
 import { browserCheck } from '../../../shared/browser-check.ts';
+import { unindexed } from '../../../shared/search.ts';
 import { optInOutput } from '../../../shared/opt-in.ts';
 
 const here = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
@@ -24,7 +25,17 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: [{ find: '#interactive', replacement: here(`./src/interactive/main.${kind}.tsx`) }],
     },
-    plugins: [browserCheck(kind), ...(kind === 'isoloop' ? [isoloop()] : []), ui({ bar: true })],
+    plugins: [
+      browserCheck(kind),
+      ...(kind === 'isoloop' ? [isoloop()] : []),
+      ui({
+        bar: true,
+        meta: () =>
+          unindexed(
+            `Markets example (interactive mode, ${kind === 'native' ? 'native' : 'Isoloop'})`,
+          ),
+      }),
+    ],
     base: './',
     worker: { format: 'es' },
     build: {

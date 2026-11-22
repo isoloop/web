@@ -117,7 +117,8 @@ export function browserCheck(needs: Needs): {
       { tag: 'script', attrs: { src: `${upTo(ctx?.path)}${FILE}` }, injectTo: 'head' },
       {
         tag: 'div',
-        attrs: { id: NOTICE_ID, role: 'status' },
+        // Kept out of search snippets: a crawler may read the page before the app removes it.
+        attrs: { id: NOTICE_ID, role: 'status', 'data-nosnippet': true },
         children: NOTICE_HTML,
         injectTo: 'body-prepend',
       },

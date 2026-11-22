@@ -9,5 +9,6 @@ export { Footer } from './Footer.tsx';
 export { Frame, type FrameProps } from './Frame.tsx';
 export { Head, type HeadProps } from './Head.tsx';
 export { Header, type Current } from './Header.tsx';
+export { PageMeta, type PageMetaProps } from './PageMeta.tsx';
 export { Table, type TableProps } from './Table.tsx';
 export { ThemeToggle } from './ThemeToggle.tsx';
