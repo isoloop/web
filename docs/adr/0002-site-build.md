@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed); 2026-11-22, search metadata (decisions 8 and 9; see [the amendment](#amended-search-metadata-2026-11-22); Proposed)
+- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed); 2026-11-22, search metadata (decisions 8 and 9; see [the amendment](#amended-search-metadata-2026-11-22); Proposed); 2026-11-22, when the site job runs (decision 11; see [the amendment](#amended-when-the-site-job-runs-2026-11-22); Proposed)
 - **Answers:** what `apps/site` is built with, which pages it has, what may run on them, how it shows the examples and the library's diagrams, and what its copy may claim. Where it lives and how it deploys is [ADR 0001](0001-what-this-repo-is.md); its look is [ADR 0003](0003-design-system.md).
 
 ## Context
@@ -292,6 +292,13 @@ This changes decisions 8 and 9. Where this section and those decisions disagree,
 - A page may carry JSON-LD in `<script type="application/ld+json">`: a data block, which doesn't execute. Inline scripts that execute stay banned.
 - Each example has one indexable build per page, with a title, a description, a self-canonical and preview tags, and the sitemap lists that URL, never a redirect.
 - Comparison builds, interactive modes and the 404 page carry `noindex`. Standalone diagrams carry `noindex, indexifembedded`. These pages need no description or preview tags.
+
+### Amended: when the site job runs (2026-11-22)
+
+The search test reads every deployed page, the other apps' included, but decision 11's paths didn't run it when those changed. This adds to decision 11's paths.
+
+- **The `site` job also runs** when `shared/`, or the processor's or a dashboard's HTML, Vite config or index-page script, changes.
+- **Other changes to those apps don't run it,** so a PR to a widget doesn't wait for the site's build.
 
 ## Consequences
 
