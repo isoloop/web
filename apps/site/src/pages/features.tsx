@@ -302,7 +302,7 @@ function Features({ samples, features, examples }: SiteData): VNode {
   };
   return (
     <main class="ui-shell">
-      <PageIntro title={f.heading}>
+      <PageIntro title={f.heading} image="features" markTop>
         <FeatureNotes features={features} />
       </PageIntro>
 

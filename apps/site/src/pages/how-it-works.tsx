@@ -253,7 +253,7 @@ function HowItWorks({ diagrams, pin, samples }: SiteData): VNode {
 
   return (
     <main class="ui-shell">
-      <PageIntro title={h.heading}>
+      <PageIntro title={h.heading} image="how-it-works">
         {h.intro.map((t, i) => (
           <p key={t} class={i === 0 ? 'ui-lede' : undefined}>
             {t}

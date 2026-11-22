@@ -76,6 +76,9 @@
   display: flex;
   justify-content: center;
 }
+.ui-intro > .ui-intro-mark[data-top] {
+  align-self: start;
+}
 .ui-intro-mark .ui-mark {
   width: 100%;
   max-width: 15rem;
@@ -2088,4 +2091,26 @@
 .panel-head > .ui-links {
   margin: 0;
   font-size: var(--ui-text-s);
+}
+
+/* The docs index's opening: the page's image beside the title and lede, as
+   wide as the other pages' (the gutter, up to 15rem) and folded away below
+   760px like theirs (src/pages/intro.tsx). */
+.docs-index-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(var(--ui-gutter), 15rem);
+  gap: 2rem;
+  align-items: center;
+}
+.docs-index-image {
+  width: 100%;
+  height: auto;
+}
+@media (max-width: 760px) {
+  .docs-index-head {
+    display: block;
+  }
+  .docs-index-image {
+    display: none;
+  }
 }

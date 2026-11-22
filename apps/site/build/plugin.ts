@@ -26,7 +26,7 @@ import { robots, sitemap } from './crawl.ts';
 import type { LlmsFile } from './docs/llms.ts';
 import type { Doc } from './docs/pages.ts';
 import { docPage } from '../src/pages/doc.tsx';
-import { PAGE_MARK } from '../src/pages/intro.tsx';
+import { PAGE_IMAGES, PAGE_MARK } from '../src/pages/intro.tsx';
 
 /** Every page's policy (ADR 0002, decision 8). */
 export const CSP = "default-src 'self'";
@@ -38,7 +38,7 @@ const previewFile = (): string =>
 
 /** The expressive mark the inner pages open with (src/pages/intro.tsx), by served path. */
 const MARKS: Record<string, string> = Object.fromEntries(
-  Object.values(PAGE_MARK).map((path) => [
+  [...Object.values(PAGE_MARK), ...Object.values(PAGE_IMAGES)].map((path) => [
     path,
     fileURLToPath(new URL(`../../../packages/ui${path}`, import.meta.url)),
   ]),
@@ -165,7 +165,10 @@ export function site(opts: SiteOptions): Plugin {
           const f = llms.get(path)!;
           file = { source: f.source, type: TYPES[f.fileName.split('.').pop() ?? ''] ?? '' };
         } else if (MARKS[path]) {
-          file = { source: readFileSync(MARKS[path]), type: 'image/svg+xml' };
+          file = {
+            source: readFileSync(MARKS[path]),
+            type: path.endsWith('.webp') ? 'image/webp' : 'image/svg+xml',
+          };
         } else if (path === PREVIEW && existsSync(previewFile())) {
           file = { source: readFileSync(previewFile()), type: 'image/png' };
         } else {

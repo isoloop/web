@@ -15,7 +15,7 @@ const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/p
 function Home({ features, samples, examples }: SiteData): VNode {
   return (
     <main class="ui-shell">
-      <PageIntro title={home.intro.heading} id="intro">
+      <PageIntro title={home.intro.heading} id="intro" image="home">
         <p class="ui-lede">{home.intro.text}</p>
         <p class="ui-actions">
           <a class="ui-button" data-primary href="/features/">
