@@ -62,7 +62,7 @@ At 1 kHz in Chromium every build keeps up. The difference shows under the heavie
 
 ### Flagship phone: headroom, no difference
 
-Android, 8 cores, 12 GB, Chrome 157, one recording per page ([results](comparison/phone/galaxy-fold6-chrome157/README.md)). Every build, `own` included, held 60 frames/s with no long tasks at 1 and 5 kHz, and typing stayed at 9–13 ms median. Here the builds don't differ in responsiveness, and the cost below is all that's left.
+An Android foldable, 8 cores, Chrome 157, one recording per page ([results](comparison/phone/galaxy-fold6-chrome157/README.md)). Every build, `own` included, held 60 frames/s with no long tasks at 1 and 5 kHz, and typing stayed at 9–13 ms median. Here the builds don't differ in responsiveness, and the cost below is all that's left.
 
 ## What it costs
 
