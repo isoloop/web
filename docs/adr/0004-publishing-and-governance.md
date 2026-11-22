@@ -4,6 +4,7 @@
 - **Date:** 2026-11-17
 - **Extended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decisions 2, 4 and 6: the library's `docs` skill and `docs/writing.md`, `docs:check` in the hook and CI, the steward reviewing docs and a weekly docs drift pass)
 - **Amended:** 2026-11-20, decision 6: the maintainer's approval gets its own label, `maintainer-approved`, apart from `steward-override` (see [the amendment](#amended-two-labels-for-the-maintainer-2026-11-20))
+- **Amended:** 2026-11-22, decision 6: the steward reviews search (see [the amendment](#amended-the-steward-reviews-search-2026-11-22)); Proposed
 - **Answers:** how a shipped change reaches the changelogs and `isoloop.dev`, who checks it, and what keeps the site in order. Grilled 2026-11-17 (Q1–Q14, G1–G14). Covers `isoloop/isoloop` and `isoloop/web`.
 
 ## Context
@@ -115,6 +116,15 @@ Since [ADR 0006](0006-docs.md), the steward reports changes that need the mainta
 - **`steward-override`** keeps its meaning: it skips the review and passes, for a finding the maintainer overrules.
 
 GitHub's own approving review can't do the first job here, since the PRs are opened from the maintainer's account and an author can't approve their own PR. The main session may add `maintainer-approved` when the maintainer approves a PR in its conversation, through a permission rule for that command only; `steward-override` stays the maintainer's to set.
+
+### Amended: the steward reviews search (2026-11-22)
+
+The SEO audit of 2026-11-22 found example pages with no canonical, redirects in the sitemap and packages with no homepage, all of which had passed review. This adds search to what decision 6 says the steward owns.
+
+- **On every PR in both repos** that touches what search engines and link previews read, the steward judges what a test can't: whether the right page is indexed, whether titles, descriptions and structured data are true and work out of context, whether moved URLs keep working, and whether links to the docs open the site.
+- **The mechanics stay in CI** (`apps/site/e2e/search.spec.ts` here, `scripts/npm-metadata.test.ts` in the library). Weakening either is a must-fix.
+- **Only breakage and false statements block.** Wording is a should-fix, and the steward doesn't predict rankings or ask for pages for search's sake.
+- **The Monday audit** checks the same signals as served. Search Console stays with the maintainer.
 
 ## Consequences
 
