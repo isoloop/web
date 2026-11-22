@@ -57,11 +57,20 @@ export function AnomalyRanking() {
   const ranked = f.machines.toSorted((a, b) => b.anomaly - a.anomaly);
   return (
     <table className="ranking">
+      {/* For screen readers: every cell has a header, the rank's included. */}
+      <thead className="ranking-head">
+        <tr>
+          <th scope="col">Rank</th>
+          <th scope="col">Machine</th>
+          <th scope="col">Anomaly</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
       <tbody>
         {ranked.map((m, i) => (
           <tr key={m.machine} data-machine={m.machine} data-anomaly={m.anomaly.toFixed(3)}>
             <td>{i + 1}</td>
-            <th>{m.machine}</th>
+            <th scope="row">{m.machine}</th>
             <td>{m.anomaly.toFixed(1)} σ</td>
             <td className={m.status}>{m.status}</td>
           </tr>

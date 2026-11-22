@@ -24,7 +24,7 @@ for (const build of inScope(BUILDS)) {
     );
     expect(shares).toBeCloseTo(1, 2);
     // Anomaly ranking sorted; every machine in the bearings table.
-    const anomalies = await at(page, 'fleet-anomaly', 'tr').evaluateAll((els) =>
+    const anomalies = await at(page, 'fleet-anomaly', 'tbody tr').evaluateAll((els) =>
       els.map((el) => Number(el.getAttribute('data-anomaly'))),
     );
     expect(anomalies).toEqual(anomalies.toSorted((a, b) => b - a));
