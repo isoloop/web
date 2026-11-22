@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed)
+- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed); 2026-11-22, search metadata (decisions 8 and 9; see [the amendment](#amended-search-metadata-2026-11-22); Proposed)
 - **Answers:** what `apps/site` is built with, which pages it has, what may run on them, how it shows the examples and the library's diagrams, and what its copy may claim. Where it lives and how it deploys is [ADR 0001](0001-what-this-repo-is.md); its look is [ADR 0003](0003-design-system.md).
 
 ## Context
@@ -284,6 +284,14 @@ The site review before 0.1 found that decision 8 described the site's own pages,
 - **The example apps carry none on Pages.** Basic, the Processor and the dashboards have no meta tag, and Pages can't send headers, so on this host their pages and their workers run without a policy. This was never decided; the apps simply never had the meta tag.
 - **They run under the policy as a header everywhere else.** `isoloop()` from `@isoloop/vite` sends it on every response from `vite preview`, native and Isoloop builds alike, and from the Isoloop builds' dev servers (the native builds' `dev:native*` servers send none). So the E2E tests and the comparison runs, served by `vite preview`, run both sides under the same policy. That policy allows inline styles, since Isoloop's surfaces set style attributes (isoloop/isoloop#357).
 - **The Examples page says so,** in place of How it works: one line under its introduction, linking the hosting guide (`/docs/hosting/`) for a real deployment, where the policy goes in headers. How it works no longer has the policy section.
+
+### Amended: search metadata (2026-11-22)
+
+This changes decisions 8 and 9. Where this section and those decisions disagree, this section wins.
+
+- A page may carry JSON-LD in `<script type="application/ld+json">`: a data block, which doesn't execute. Inline scripts that execute stay banned.
+- Each example has one indexable build per page, with a title, a description, a self-canonical and preview tags, and the sitemap lists that URL, never a redirect.
+- Comparison builds, interactive modes and the 404 page carry `noindex`. Standalone diagrams carry `noindex, indexifembedded`. These pages need no description or preview tags.
 
 ## Consequences
 
