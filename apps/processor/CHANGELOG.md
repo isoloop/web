@@ -1,5 +1,13 @@
 # processor
 
+## 0.4.1
+
+### Patch Changes
+
+- 1dc544c: On `@isoloop/*@0.1.0-next.12`. The update itself needed no change to the app's code.
+- 367e811: The footer no longer jumps while the playground and the file processor load.
+- 80f1f69: Each example page has a title of its own. The one build of each that search engines index also has a description, a canonical URL and link-preview tags. Comparison builds, interactive modes and standalone diagrams say `noindex`. The browser notice stays out of search snippets.
+
 ## 0.4.0
 
 ### Minor Changes

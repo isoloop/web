@@ -1,5 +1,19 @@
 # site
 
+## 0.7.1
+
+### Patch Changes
+
+- 031038f: Copy corrections: the crash limit is stated as the next crash after 3 restarts in a minute, the landing page's supervisor sentence and How it works' bus-crash sentence name who acts, devices are described by class and specs, and the plant's measurement note on the examples page and the markets' About panel no longer cite decision records.
+- c643dfb: Clearer copy on the site: feature descriptions say what is there today, with release history left to the changelog, the devtools' tabs and the restart options read as lists, How it works says once where its diagrams come from, and the cost, install and Basic notes are plainer.
+- 1a1a9d8: The failed-state text in the live demos now says an isolate "crashed more than 3 times within a minute", which matches the kernel: three restarts within a minute are allowed, and the next crash marks the isolate failed. It said "3 times" before. The basic README is corrected to match.
+- 2e37ff1: Features and How it works link the pools, balancer, agents and devtools guides on the site, at the version it documents, in place of GitHub's main branch.
+- 9b0ddc3: Home, Features, How it works, Examples and the Docs index each open with an image of their own instead of the one shared mark; the changelog keeps the mark. The left column now steps down between the full page and the mobile layout (13rem at 1280px, 10.5rem at 1100px, 8rem at 900px), so the text beside it keeps its width on tablets and narrow windows.
+- a5ab664: Code renders as code in three places that showed its backticks: the measurement captions on the examples page, Kernel config's description on the docs index, and the bold lead-ins in the changelog.
+- aa4f3f7: The Safety section of `/features/` says what a Content Security Policy needs: Isoloop runs under `script-src 'self'`, and a page that shows a surface needs `style-src 'self' 'unsafe-inline'` for the `style` attributes isolates render. It said that no `'unsafe-inline'` was needed.
+- 80f1f69: Search engines get clearer pages: titles that stand on their own, the site's name as structured data, a sitemap that lists each example's own URL, and `noindex` on the 404 page and standalone diagrams. An experimental docs page's heading keeps its pill a word apart, and Features' headings are in order.
+- 1dc544c: The docs and diagrams follow `@isoloop/*` 0.1.0-next.12. The Features page's link to the hosting guide opens it in the docs, where its CSP advice now matches the page.
+
 ## 0.7.0
 
 ### Minor Changes
