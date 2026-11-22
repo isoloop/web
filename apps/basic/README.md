@@ -65,7 +65,7 @@ The isolate commands travel on `control.v1`: the host can't click inside a surfa
 
 ## When an isolate fails
 
-Crash an isolate 3 times within a minute and the kernel stops restarting it: it's `failed`, and stays down. That's the crash-loop guard, the kernel's default (`supervisor.maxRestarts: 3`, `withinMs: 60_000`). Its pane turns red, says why, and offers **Restart**, which calls `kernel.restart(id)`.
+Crash an isolate more than 3 times within a minute and the kernel stops restarting it: it's `failed`, and stays down. That's the crash-loop guard, the kernel's default (`supervisor.maxRestarts: 3`, `withinMs: 60_000`). Its pane turns red, says why, and offers **Restart**, which calls `kernel.restart(id)`.
 
 Each isolate's Crash button counts the restarts used this minute ("Crash · 2/3"). The count comes from the host (`src/budget.ts`): each `isolate:crash` adds a timestamp, entries older than 60 s drop out, and a restart by hand starts it over, which is what the supervisor counts. A pool member is counted on its own: when the pool's worker goes down, every member crashes and uses one of its own restarts. The host publishes the counts on `budget.v1`, a compacted topic keyed by isolate, which each isolate reads from `earliest`, so a restarted isolate gets its count at once.
 

@@ -68,7 +68,7 @@ export const recording = {
     mainFree:
       'The main thread is free again. The hatched gap is where it was stuck; the isolates’ tracks kept going.',
     failed: (id: string): string =>
-      `${id} crashed 3 times within a minute, so the kernel’s crash-loop guard stopped restarting it. It stays down until it’s restarted.`,
+      `${id} crashed more than 3 times within a minute, so the kernel’s crash-loop guard stopped restarting it. It stays down until it’s restarted.`,
     restarted: (id: string): string =>
       `${id} was restarted with kernel.restart(), and its restart count starts over.`,
     budget: (used: number): string => `${used} of 3 restarts used this minute.`,
@@ -285,7 +285,7 @@ export const featuresPage = {
       again: (n: number): string =>
         `D read ${n} note${n === 1 ? '' : 's'} again, from the start of what note.v1 retains. None were lost.`,
       failed:
-        'D crashed 3 times within a minute, so the kernel’s crash-loop guard stopped restarting it. Restart D to bring it back.',
+        'D crashed more than 3 times within a minute, so the kernel’s crash-loop guard stopped restarting it. Restart D to bring it back.',
     },
     caption:
       'Each cell is a note and its offset. Shaded cells are notes D had read before the crash and read again after it.',
