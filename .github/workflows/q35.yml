@@ -1,0 +1,55 @@
+# Throwaway, never merged: plant's Firefox suite five times with #275's fix and
+# five times as main has it, without retries, each runner's speed measured first.
+name: Q35 proof
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  plant-firefox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [fix, main]
+        run: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ matrix.side == 'main' && github.event.pull_request.base.sha || github.event.pull_request.head.sha }}
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: This runner's speed
+        run: |
+          grep -m1 "model name" /proc/cpuinfo
+          cat > "$RUNNER_TEMP/speed.cjs" <<'JS'
+          const { Worker, isMainThread, parentPort } = require('node:worker_threads');
+          const os = require('node:os');
+          const work = () => { const t = Date.now(); let x = 0; for (let i = 0; i < 4e8; i++) x = (x + Math.imul(i, i ^ 7)) | 0; return [Date.now() - t, x]; };
+          if (!isMainThread) parentPort.postMessage(work());
+          else {
+            const one = work()[0];
+            Promise.all(os.cpus().map(() => new Promise((r) => new Worker(__filename).once('message', r))))
+              .then((all) => console.log('RUNNER-SPEED single', one, 'ms all-cores', Math.max(...all.map((a) => a[0])), 'ms cpus', os.cpus().length));
+          }
+          JS
+          node "$RUNNER_TEMP/speed.cjs"
+      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/install-browsers
+        with:
+          browsers: firefox
+      - name: Suite, without retries
+        run: pnpm --filter ./apps/dashboards/plant e2e --project=firefox ${{ matrix.side == 'fix' && '--workers=1' || '' }} --retries=0 --pass-with-no-tests
+        env:
+          E2E_SCOPE: react
+          PERF_BUDGET_SCALE: '2'
+          E2E_HEAVY: '0'
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: q35-${{ matrix.side }}-${{ matrix.run }}
+          path: apps/dashboards/plant/playwright-report
+          retention-days: 7
