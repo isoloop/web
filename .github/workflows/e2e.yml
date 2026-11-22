@@ -8,7 +8,8 @@ name: E2E
 # Full scope is split into shards, each on its own runner, and runs one page at
 # a time (--workers=1). An Isoloop page starts 20-30 workers; two or more such
 # pages side by side on a 4-core runner made a different test flaky in each run
-# (runs 42477672344, 42478292629). PR scope stays one job per engine.
+# (runs 42477672344, 42478292629). PR scope stays one job per engine; its plant
+# job on Firefox runs one page at a time as well.
 on:
   workflow_call:
     inputs:
@@ -34,7 +35,9 @@ jobs:
         shard: ${{ fromJSON(inputs.scope == 'pr' && '[1]' || '[1, 2, 3, 4]') }}
     env:
       SHARDS: ${{ inputs.scope == 'pr' && '1' || '4' }}
-      WORKERS: ${{ inputs.scope == 'pr' && '' || '--workers=1' }}
+      # One page at a time in full scope, and for plant on Firefox on a PR too:
+      # two of its pages at once starve each other there (isoloop/web#266).
+      WORKERS: ${{ (inputs.scope != 'pr' || (matrix.app == 'dashboards/plant' && matrix.browser == 'firefox')) && '--workers=1' || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1

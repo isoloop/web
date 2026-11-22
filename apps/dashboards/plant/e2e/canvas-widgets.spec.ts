@@ -2,11 +2,11 @@ import { expect, test, type Page } from '@playwright/test';
 import { MACHINES } from '../src/core/machines';
 import { faultAt } from '../src/core/sensors/faults';
 import { params, scalarsAt } from '../src/core/sensors/signals';
+import { everyMachineShows } from './first-data';
 import { BUILDS, WEBKIT_STOPS, inScope, stopsOn, firstData } from './scope';
 
 // M3d task 4: each machine's canvas widgets draw on every build, and what they
 // draw matches the seeded data, so the builds agree with each other.
-const drawn = (page: Page, slot: string) => page.locator(`[data-slot="${slot}"] canvas`).first();
 
 /** The canvas's description, inside a surface's shadow root or not. */
 async function description(page: Page, slot: string): Promise<string | null> {
@@ -36,11 +36,7 @@ for (const build of inScope(BUILDS)) {
     // Firefox's first data can take up to 45 s on CI (scope.ts, firstData): 3x the test timeout.
     test.slow(browserName === 'firefox', 'first data can take up to 45 s');
     await page.goto(`/${build}/?rate=2&seed=1`);
-    await Promise.all(
-      MACHINES.map((m) =>
-        expect(drawn(page, `${m}-spectrum`)).toBeVisible({ timeout: firstData(browserName) }),
-      ),
-    );
+    await everyMachineShows(page, { widget: 'spectrum', css: 'canvas' }, firstData(browserName));
     // Each waveform draws at the rate.
     await expect
       .poll(() => Promise.all(MACHINES.map((m) => description(page, `${m}-waveform`))), {
