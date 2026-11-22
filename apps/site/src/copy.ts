@@ -366,8 +366,8 @@ export const featuresPage = {
         'Every tag and attribute an isolate renders passes the host’s registry first. Unknown tags become `div`, script-capable tags and `on*` attributes are never created, and URLs are limited to http(s), mailto and relative ones.',
       ],
       [
-        'No inline code',
-        "The workers are same-origin module files and stylesheets are adopted, so a page can run Isoloop under `script-src 'self'` with no `'unsafe-inline'`.",
+        'No inline scripts',
+        "The workers are same-origin module files, so a page can run Isoloop under `script-src 'self'`. A page that shows a surface needs `style-src 'self' 'unsafe-inline'`: the `style` attributes isolates render count as inline styles.",
       ],
     ] as [string, string][],
   },

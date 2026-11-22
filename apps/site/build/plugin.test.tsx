@@ -184,6 +184,15 @@ describe('the pages', () => {
     expect(html).toContain('<script type="module" src="/src/demos/features.ts"></script>');
   });
 
+  it('say which inline code a page needs, beside the hosting guide', () => {
+    const html = renderDocument(named('features'), data, { csp: CSP });
+    const from = html.indexOf('<dt>No inline scripts</dt>');
+    expect(from).toBeGreaterThan(-1);
+    const card = html.slice(from, html.indexOf('</dd>', from));
+    expect(card).toContain("<code>style-src 'self' 'unsafe-inline'</code>");
+    expect(card).toContain('docs/guide/hosting.md');
+  });
+
   it('put every feature on one /features/ note and in one tab, the experimental ones with a pill', () => {
     const html = renderDocument(named('features'), data, { csp: CSP });
     const from = html.indexOf('<figure class="fnotes"');
