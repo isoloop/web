@@ -4,6 +4,15 @@
 
 The sections below were written on 2026-11-17 from the git history, the release tags and their PRs ([ADR 0004](../../docs/adr/0004-publishing-and-governance.md), step 8). Changesets writes each release's section from the next one on. Each release is tagged `basic-v<version>` and deployed to isoloop.dev from that tag. A deploy builds every app at its commit, so a change can go live with another app's tag first; each change is listed under the first `basic-v*` tag that includes it.
 
+## 0.2.1
+
+### Patch Changes
+
+- c643dfb: Clearer copy on the site: feature descriptions say what is there today, with release history left to the changelog, the devtools' tabs and the restart options read as lists, How it works says once where its diagrams come from, and the cost, install and Basic notes are plainer.
+- 1a1a9d8: The failed-state text in the live demos now says an isolate "crashed more than 3 times within a minute", which matches the kernel: three restarts within a minute are allowed, and the next crash marks the isolate failed. It said "3 times" before. The basic README is corrected to match.
+- 1dc544c: On `@isoloop/*@0.1.0-next.12`. The update itself needed no change to the app's code.
+- 80f1f69: Each example page has a title of its own. The one build of each that search engines index also has a description, a canonical URL and link-preview tags. Comparison builds, interactive modes and standalone diagrams say `noindex`. The browser notice stays out of search snippets.
+
 ## 0.2.0
 
 ### Minor Changes

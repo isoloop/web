@@ -1,5 +1,15 @@
 # markets
 
+## 0.9.1
+
+### Patch Changes
+
+- 151e88d: A price alert fires once while exchanges sit on both sides of its threshold, and again only after no exchange has been past it for 10 s. It fired on every price that came back over the threshold. A rule set again unchanged no longer re-arms, and the `markets.alerts.create.v1` tool's description says how price rules fire. The same fix applies to every build.
+- 031038f: Copy corrections: the crash limit is stated as the next crash after 3 restarts in a minute, the landing page's supervisor sentence and How it works' bus-crash sentence name who acts, devices are described by class and specs, and the plant's measurement note on the examples page and the markets' About panel no longer cite decision records.
+- 01eeb52: Markets' red text is lighter, so it meets the AA contrast ratio, and plant's anomaly ranking names its columns for screen readers.
+- 1dc544c: On `@isoloop/*@0.1.0-next.12`. The update itself needed no change to the app's code.
+- 80f1f69: Each example page has a title of its own. The one build of each that search engines index also has a description, a canonical URL and link-preview tags. Comparison builds, interactive modes and standalone diagrams say `noindex`. The browser notice stays out of search snippets.
+
 ## 0.9.0
 
 ### Minor Changes
