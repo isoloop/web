@@ -35,6 +35,9 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      # Every changeset can be versioned: none names an ignored package (ui,
+      # creator, compare, samples) beside an app (scripts/ci/changeset-ignored.ts).
+      - run: node scripts/ci/changeset-ignored.ts
       - run: pnpm build
       - id: apps
         env:
