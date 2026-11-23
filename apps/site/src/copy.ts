@@ -202,13 +202,12 @@ export const home = {
   install: {
     heading: 'Install',
     platform: 'Isoloop runs in the browser.',
-    // The freeze: isoloop/isoloop docs/plans/m4d-release.md at the pin, task 6
-    // (declared with 0.1.0-next.9; from then on, a change to the published
-    // types needs the maintainer's approval).
+    // ADR 0019 at the pin: a 0.x minor may break, a patch doesn't, and only
+    // the latest release is supported.
     label:
-      'The API is frozen for 0.1. Until that release, prereleases from the main branch are published under the next tag.',
+      'Isoloop 0.1 is out. On 0.x a minor release may contain breaking changes and a patch doesn’t; the parts marked experimental may change in any minor.',
     command:
-      'pnpm add @isoloop/host@next @isoloop/runtime@next @isoloop/bus@next\npnpm add -D @isoloop/vite@next\n# for React or Preact isolates:\npnpm add @isoloop/react@next   # or @isoloop/preact@next\n# for automatic placement (experimental):\npnpm add @isoloop/balancer@next\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp@next\n# for the devtools panel (experimental):\npnpm add @isoloop/devtools@next',
+      'pnpm add @isoloop/host @isoloop/runtime @isoloop/bus\npnpm add -D @isoloop/vite\n# for React or Preact isolates:\npnpm add @isoloop/react   # or @isoloop/preact\n# for automatic placement (experimental):\npnpm add @isoloop/balancer\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp\n# for the devtools panel (experimental):\npnpm add @isoloop/devtools',
     guide: 'The hosting guide',
     /** The docs' first page (/docs/getting-started/), from an empty Vite app to a running isolate. */
     start: 'Getting started',

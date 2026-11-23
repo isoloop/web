@@ -38,7 +38,7 @@ pnpm --filter markets dev
 pnpm --filter processor dev   # the Playground; the File processor at /files/
 ```
 
-Until Isoloop 0.1, the apps use `next` prereleases of `@isoloop/*`: one version for every package, set in `pnpm-workspace.yaml` (`catalogs.isoloop`). To move to a newer one, change it there and run `pnpm install`.
+The apps use one version of every `@isoloop/*` package, set in `pnpm-workspace.yaml` (`catalogs.isoloop`). To move to a newer one, change it there and run `pnpm install`.
 
 ## Releases
 
