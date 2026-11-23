@@ -572,31 +572,55 @@
   }
 }
 
-/* /changelog/: one section per release, each entry labelled with its package or app. */
+/* /changelog/: one section per package, its releases open and its previews
+   folded; the sidebar and the fold are the docs' (.docs-side, .docs-fold). */
+.changelog-package {
+  scroll-margin-top: calc(var(--ui-bar-h) + var(--ui-space-4));
+  margin-top: var(--ui-space-6);
+  padding-top: var(--ui-space-4);
+  border-top: 1px solid var(--ui-rule);
+}
+.changelog-package > h2 {
+  margin: 0 0 var(--ui-space-4);
+  font-size: 1.5rem;
+}
 .release + .release {
   margin-top: var(--ui-space-6);
 }
 .release h3 {
   margin: 0 0 var(--ui-space-3);
 }
-.release-date {
+.change-kind {
+  margin: var(--ui-space-4) 0 var(--ui-space-2);
   color: var(--ui-text-muted);
-  font-weight: 400;
+  font-size: var(--ui-text-s);
+  font-weight: 650;
 }
 .changes {
-  list-style: none;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 .changes > li {
   padding: var(--ui-space-3) 0;
-  border-top: 1px solid var(--ui-rule, var(--ui-border));
+  border-top: 1px solid var(--ui-rule);
 }
-.change-source {
-  margin: 0 0 var(--ui-space-2);
+.changes > li > p:first-child {
+  margin-top: 0;
 }
-.change-source span {
-  color: var(--ui-text-muted);
+.changelog-previews {
+  margin-top: var(--ui-space-5);
+}
+/* The fold's own type is the docs' narrower cut; the notes inside are body text. */
+.changelog-previews > .release {
+  padding: 0 var(--ui-space-4);
+  font-stretch: 100%;
+}
+.changelog-previews > .release:first-of-type {
+  margin-top: var(--ui-space-4);
+}
+.changelog-previews > .release:last-child {
+  padding-bottom: var(--ui-space-4);
 }
 
 /* "What it's for": the pattern, then its example, muted. */

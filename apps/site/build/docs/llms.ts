@@ -91,7 +91,10 @@ function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** /llms.txt, in the llmstxt.org format. */
+/** The "build with Isoloop" skill in the library (M4a task 12), linked from /llms.txt. */
+export const SKILL = 'skills/build-with-isoloop/SKILL.md';
+
+/** /llms.txt, in the llmstxt.org format: the docs by section, the skill, then the optional links. */
 export function llmsTxt(docs: readonly Doc[], pin: string, origin = ORIGIN): string {
   const sections: string[] = [];
   for (const d of docs) if (!sections.includes(d.section)) sections.push(d.section);
@@ -104,6 +107,10 @@ export function llmsTxt(docs: readonly Doc[], pin: string, origin = ORIGIN): str
     out.push('');
   }
   out.push(
+    '## Agent skill',
+    '',
+    `- [Build with Isoloop](${LIBRARY_GITHUB}/blob/${pin}/${SKILL}): the agent skill for building an app with Isoloop, at the version these docs were built from; \`npx isoloop skill add\` installs it into a project`,
+    '',
     '## Optional',
     '',
     `- [Examples](${origin}/examples/): the example apps, each with its measured results`,

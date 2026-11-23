@@ -787,21 +787,18 @@ export const examplesPage = {
 
 export const changelogPage = {
   title: 'Changelog',
-  description:
-    'What changed in the Isoloop packages and in the site and its examples, release by release.',
+  description: 'What changed in each Isoloop package, release by release.',
   heading: 'Changelog',
-  lede: 'What changed, release by release. The library’s packages share one version; the site and each example have their own. Every entry is the one written with the change.',
-  library: {
-    heading: 'The library',
-    unreleased:
-      'No library version has been released with a changelog yet. The packages are published as prereleases under the next tag, and the first versioned one appears here when it ships.',
-    packages: 'The packages:',
-  },
-  apps: {
-    heading: 'The site and examples',
-    unreleased: 'Earlier releases of these are listed by their tags on GitHub:',
-    tags: 'release tags',
-  },
+  lede: 'What changed in each package, release by release. The packages share one version, so they’re released together. The previews before a release are folded under it.',
+  nav: 'Changelog',
+  packages: 'Packages',
+  unreleased: 'Not released yet.',
+  /** The pill after a package that ships a command, such as `isoloop`. */
+  cli: 'CLI',
+  /** The fold under a package's releases, followed by "<oldest> to <newest>". */
+  previews: 'Previews',
+  /** Changesets' kind headings ("Minor Changes") as labels. */
+  kind: (k: string): string => k.replace(/ Changes$/, ' changes'),
 };
 
 /** /docs/ and each docs page (src/pages/doc.tsx). The guides' own text comes from the library. */

@@ -10,7 +10,7 @@ import type { Current, HeadProps } from 'ui/components';
 /** What every page is rendered from, gathered at build time. */
 export interface SiteData {
   examples: Example[];
-  /** /changelog/: the library's changelogs at the pin and the apps' (build/changelog.ts). */
+  /** /changelog/: each library package's changelog at the pin (build/changelog.ts). */
   changelog: Changelog;
   /** The features on /features/ and the landing strip, in order (content/features/). */
   features: Feature[];

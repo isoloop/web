@@ -20,10 +20,7 @@ const data: SiteData = {
   pin: 'f'.repeat(40),
   diagrams: [{ name: 'runtime-topology', title: 'Isoloop runtime topology' }],
   changelog: {
-    library: [],
-    libraryUnreleased: ['@isoloop/bus'],
-    apps: [],
-    appsUnreleased: ['site'],
+    packages: [{ name: '@isoloop/bus', id: 'bus', cli: false, releases: [] }],
   },
   features: loadFeatures(
     fileURLToPath(new URL('../content/features', import.meta.url)),

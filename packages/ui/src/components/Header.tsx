@@ -35,7 +35,7 @@ export function Header({
 }: {
   current?: Current;
   mark?: { light: string; dark: string };
-  /** The library version the site is built from, as a pill before GitHub, linking to its changelog. */
+  /** The library version the site is built from, as a pill before GitHub, linking to its changelog; a release (no `-next.N`) has a green outline. */
   version?: { label: string; href: string };
 }): VNode {
   return (
@@ -61,6 +61,7 @@ export function Header({
           <a
             class="ui-version"
             href={version.href}
+            data-release={version.label.includes('-') ? 'preview' : 'stable'}
             aria-label={`Version ${version.label}, changelog`}
           >
             {version.label}

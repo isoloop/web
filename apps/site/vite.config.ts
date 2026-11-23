@@ -75,7 +75,7 @@ export default defineConfig({
         features: loadFeatures(here('content/features'), library, here('../..')),
         diagrams: readDiagrams(diagramsDir),
         pin: readPin(siteDir),
-        changelog: loadChangelog(library, readPin(siteDir), here('../..')),
+        changelog: loadChangelog(library, readPin(siteDir)),
         samples: loadSamples(here('../samples/src')),
         docs,
         docsNav: nav,

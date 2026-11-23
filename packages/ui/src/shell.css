@@ -113,6 +113,10 @@
     text-decoration: none;
     white-space: nowrap;
   }
+  /* A release, not a preview: the outline in the released green. */
+  .ui-version[data-release='stable'] {
+    border-color: var(--ui-released);
+  }
   .ui-version:hover {
     color: var(--ui-text);
     border-color: var(--ui-text);
@@ -389,6 +393,11 @@
     text-transform: uppercase;
     vertical-align: 0.2em;
     white-space: nowrap;
+  }
+  /* A plain fact rather than a status, e.g. "CLI": the same pill, muted. */
+  .ui-pill-neutral {
+    border-color: var(--ui-border);
+    color: var(--ui-text-muted);
   }
   /* The compact form in navigation lists: a round "!" with a hidden label. */
   .ui-experimental-mark {

@@ -5,6 +5,7 @@
 - **Extended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decisions 2, 4 and 6: the library's `docs` skill and `docs/writing.md`, `docs:check` in the hook and CI, the steward reviewing docs and a weekly docs drift pass)
 - **Amended:** 2026-11-20, decision 6: the maintainer's approval gets its own label, `maintainer-approved`, apart from `steward-override` (see [the amendment](#amended-two-labels-for-the-maintainer-2026-11-20))
 - **Amended:** 2026-11-22, decision 6: the steward reviews search (see [the amendment](#amended-the-steward-reviews-search-2026-11-22)); Proposed
+- **Amended:** 2026-11-23, decision 1: `/changelog/` shows the library's public packages only, one section per package (see [the amendment](#amended-changelog-shows-the-librarys-packages-2026-11-23)); Proposed
 - **Answers:** how a shipped change reaches the changelogs and `isoloop.dev`, who checks it, and what keeps the site in order. Grilled 2026-11-17 (Q1–Q14, G1–G14). Covers `isoloop/isoloop` and `isoloop/web`.
 
 ## Context
@@ -126,7 +127,15 @@ The SEO audit of 2026-11-22 found example pages with no canonical, redirects in 
 - **Only breakage and false statements block.** Wording is a should-fix, and the steward doesn't predict rankings or ask for pages for search's sake.
 - **The Monday audit** checks the same signals as served. Search Console stays with the maintainer.
 
-## Consequences
+### Amended: /changelog/ shows the library's packages (2026-11-23)
+
+After `0.1.0`, `/changelog/` was one 250 KB list: fourteen previews, every package's "Updated dependencies" lines, a change repeated once per package it touched, then every site and example tag. Nobody could find what changed in the package they use. Decision 1's third row changes:
+
+- **One section per public package**, in a fixed order (what an app installs first), with a sidebar to jump between them. Each section shows its releases, and folds the previews (`-next.N`) below them.
+- **Only what an app imports.** Packages whose npm description starts with "Internal" (`codec`, `dom`, `protocol`) are left out. A package that ships a command is marked "CLI".
+- **Only changes.** Entries that only update dependencies are left out, and so is a release left with nothing.
+- **The apps aren't on it.** The site's and the examples' release notes stay in their own `CHANGELOG.md` and in the GitHub Release of each app tag, as the second row says.
+
 
 **Good**
 
