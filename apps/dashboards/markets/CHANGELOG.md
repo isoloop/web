@@ -1,5 +1,11 @@
 # markets
 
+## 0.9.2
+
+### Patch Changes
+
+- 865419c: On `@isoloop/*@0.1.0`, the first release. The apps' own code doesn't change.
+
 ## 0.9.1
 
 ### Patch Changes

@@ -4,6 +4,12 @@
 
 The sections below were written on 2026-11-17 from the git history, the release tags and their PRs ([ADR 0004](../../docs/adr/0004-publishing-and-governance.md), step 8). Changesets writes each release's section from the next one on. Each release is tagged `basic-v<version>` and deployed to isoloop.dev from that tag. A deploy builds every app at its commit, so a change can go live with another app's tag first; each change is listed under the first `basic-v*` tag that includes it.
 
+## 0.2.2
+
+### Patch Changes
+
+- 865419c: On `@isoloop/*@0.1.0`, the first release. The apps' own code doesn't change.
+
 ## 0.2.1
 
 ### Patch Changes
