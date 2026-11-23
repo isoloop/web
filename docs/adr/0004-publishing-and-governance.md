@@ -136,6 +136,8 @@ After `0.1.0`, `/changelog/` was one 250 KB list: fourteen previews, every packa
 - **Only changes.** Entries that only update dependencies are left out, and so is a release left with nothing.
 - **The apps aren't on it.** The site's and the examples' release notes stay in their own `CHANGELOG.md` and in the GitHub Release of each app tag, as the second row says.
 
+## Consequences
+
 
 **Good**
 
