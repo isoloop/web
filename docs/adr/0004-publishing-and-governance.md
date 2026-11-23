@@ -138,7 +138,6 @@ After `0.1.0`, `/changelog/` was one 250 KB list: fourteen previews, every packa
 
 ## Consequences
 
-
 **Good**
 
 - Nothing user-visible ships silently. The API check catches a public change even when the author didn't flag it, and the queue catches every flagged one.
