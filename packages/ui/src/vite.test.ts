@@ -133,7 +133,15 @@ describe('uiPartials', () => {
     expect(end).toMatch(
       /^<a class="ui-version" href="\/changelog\/"[^>]*>0\.1\.0-next\.8<\/a><a class="ui-github"/,
     );
+    expect(end).toContain('data-release="preview"');
     expect(uiPartials({ header: true }).header).not.toContain('ui-version');
+  });
+
+  it('marks a released version, without a prerelease part, as stable', () => {
+    const { header } = uiPartials({
+      header: { version: { label: '0.1.0', href: '/changelog/' } },
+    });
+    expect(header).toContain('data-release="stable"');
   });
 
   it('renders only what was asked for', () => {

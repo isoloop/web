@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { absoluteLinks, byTagMade, newestFirst, parseChangelog } from './changelog.ts';
+import {
+  absoluteLinks,
+  byPackageOrder,
+  isDependencyOnly,
+  isInternal,
+  newestFirst,
+  parseChangelog,
+} from './changelog.ts';
 
 // The shape Changesets 3 writes: a version per `##`, kinds per `###`, one
 // bullet per changeset, its later paragraphs indented by two spaces.
@@ -46,8 +53,79 @@ describe('parseChangelog', () => {
     ]);
   });
 
+  it('keeps a section without kinds as its intro', () => {
+    const md = `# @isoloop/host
+
+## 0.1.0
+
+The first release.
+
+- **Contained failures:** one isolate can't freeze the others.
+- **Supervision:** restarts.
+
+The previews are below.
+
+## 0.1.0-next.12
+
+### Patch Changes
+
+- 2788228: Docs of \`lagMs\`.
+`;
+    const [first, second] = parseChangelog(md);
+    expect(first).toEqual({
+      version: '0.1.0',
+      intro: [
+        { kind: 'p', text: 'The first release.' },
+        {
+          kind: 'ul',
+          items: [
+            "**Contained failures:** one isolate can't freeze the others.",
+            '**Supervision:** restarts.',
+          ],
+        },
+        { kind: 'p', text: 'The previews are below.' },
+      ],
+      groups: [],
+    });
+    expect(second?.groups[0]?.entries).toEqual([[{ kind: 'p', text: 'Docs of `lagMs`.' }]]);
+  });
+
+  it('leaves out dependency-only entries, and a section left with nothing', () => {
+    const md = `# @isoloop/host
+
+## 0.1.0-next.12
+
+### Patch Changes
+
+- cceac10: A real change.
+- Updated dependencies [2788228]
+- Updated dependencies [3afc5f8]
+  - @isoloop/protocol@0.1.0-next.12
+
+## 0.1.0-next.11
+
+### Patch Changes
+
+- @isoloop/dom@0.1.0-next.11
+  - @isoloop/protocol@0.1.0-next.11
+`;
+    const releases = parseChangelog(md);
+    expect(releases.map((r) => r.version)).toEqual(['0.1.0-next.12']);
+    expect(releases[0]?.groups[0]?.entries).toEqual([[{ kind: 'p', text: 'A real change.' }]]);
+  });
+
   it('skips sections that are not versions', () => {
     expect(parseChangelog('# site\n\n## Earlier releases\n\nTags.\n')).toEqual([]);
+  });
+});
+
+const p = (text: string): { kind: 'p'; text: string }[] => [{ kind: 'p', text }];
+
+describe('isDependencyOnly', () => {
+  it('tells a dependency bump from a change', () => {
+    expect(isDependencyOnly(p('Updated dependencies [abc1234]'))).toBe(true);
+    expect(isDependencyOnly(p('@isoloop/dom@0.1.0-next.11'))).toBe(true);
+    expect(isDependencyOnly(p('`@isoloop/dom` renders SVG.'))).toBe(false);
   });
 });
 
@@ -73,36 +151,31 @@ describe('newestFirst', () => {
   });
 });
 
-/** An app release from its tag, `<app>-v<version>`. */
-function release(tag: string): { tag: string; source: string; version: string } {
-  const [, source = '', version = ''] = /^(.+)-v(.+)$/.exec(tag) ?? [];
-  return { tag, source, version };
-}
-
-describe('byTagMade', () => {
-  it('orders same-day tags by the time they were made, then untagged releases', () => {
-    const at = new Map([
-      ['site-v0.1.2', Date.parse('2026-11-16T10:21:23+02:00')],
-      ['markets-v0.3.1', Date.parse('2026-11-16T09:12:00+02:00')],
-      // Written in another offset, it still sorts by the instant: 08:30Z is after site's 08:21Z.
-      ['plant-v0.1.1', Date.parse('2026-11-16T08:30:00Z')],
+describe('byPackageOrder', () => {
+  it('puts the listed packages in their order and the rest after, by name', () => {
+    expect(
+      [
+        '@isoloop/webmcp',
+        '@isoloop/zeta',
+        '@isoloop/bus',
+        '@isoloop/alpha',
+        '@isoloop/host',
+      ].toSorted(byPackageOrder),
+    ).toEqual([
+      '@isoloop/host',
+      '@isoloop/bus',
+      '@isoloop/webmcp',
+      '@isoloop/alpha',
+      '@isoloop/zeta',
     ]);
-    const tags = ['markets-v0.3.1', 'site-v0.2.0', 'plant-v0.1.1', 'site-v0.1.2', 'basic-v0.2.0'];
-    expect(
-      tags
-        .map(release)
-        .toSorted(byTagMade(at))
-        .map((x) => x.tag),
-    ).toEqual(['plant-v0.1.1', 'site-v0.1.2', 'markets-v0.3.1', 'basic-v0.2.0', 'site-v0.2.0']);
   });
+});
 
-  it('without any tag times, orders by app, newest version first', () => {
-    const tags = ['site-v0.1.0', 'basic-v0.1.0', 'site-v0.1.1-rc.1', 'site-v0.1.1'];
-    expect(
-      tags
-        .map(release)
-        .toSorted(byTagMade(new Map()))
-        .map((x) => x.tag),
-    ).toEqual(['basic-v0.1.0', 'site-v0.1.1', 'site-v0.1.1-rc.1', 'site-v0.1.0']);
+describe('isInternal', () => {
+  it('reads the library\'s "Internal:" description', () => {
+    expect(isInternal('Internal: the binary codec for Isoloop topic records.')).toBe(true);
+    expect(isInternal('The Isoloop message bus: typed topics in a worker.')).toBe(false);
+    expect(isInternal('Experimental devtools panel for Isoloop.')).toBe(false);
+    expect(isInternal(undefined)).toBe(false);
   });
 });

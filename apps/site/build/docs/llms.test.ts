@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { site } from '../../src/copy.ts';
-import { absoluteLink, buildLlms, llmsTxt, markdownCopy } from './llms.ts';
+import { absoluteLink, buildLlms, llmsTxt, markdownCopy, SKILL } from './llms.ts';
 import { LIBRARY_GITHUB, type LinkContext } from './links.ts';
 import type { Doc } from './pages.ts';
 import { DocError } from './render.ts';
@@ -132,6 +132,14 @@ describe('llmsTxt', () => {
         `- [Agents](${ORIGIN}/docs/agents.md): Expose tools to agents.`,
       ].join('\n'),
     );
+  });
+
+  it('links the agent skill at the pin, before the Optional section', () => {
+    const skill = txt.indexOf('## Agent skill');
+    expect(skill).toBeGreaterThan(0);
+    expect(skill).toBeLessThan(txt.indexOf('## Optional'));
+    expect(txt.slice(skill)).toContain(`(${LIBRARY_GITHUB}/blob/${PIN}/${SKILL})`);
+    expect(txt).toContain('npx isoloop skill add');
   });
 
   it('ends with an Optional section: the examples hub and the README at the pin', () => {

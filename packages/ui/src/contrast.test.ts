@@ -44,6 +44,9 @@ const PAIRS: [string, string, number][] = [
   // The experimental pill: small text and its outline in this colour.
   ['ui-experimental', 'ui-bg', 4.5],
   ['ui-experimental', 'ui-surface', 4.5],
+  // The header's version pill once the version is a release: its outline.
+  ['ui-released', 'ui-bg', 3],
+  ['ui-released', 'ui-surface', 3],
   // The part colours mark tracks, bars and headings, always next to a name in text.
   ['ui-part-host', 'ui-bg', 3],
   ['ui-part-host', 'ui-surface', 3],

@@ -1,11 +1,10 @@
-// /changelog/ (ADR 0004, decision 1): every library package's CHANGELOG.md at
-// the library pin, and every app's CHANGELOG.md in this checkout, as written by
-// Changesets. Parsed here, with no Markdown library: version sections, change
+// /changelog/ (ADR 0004, decision 1, as amended 2026-11-23): every library
+// package's CHANGELOG.md at the library pin, as written by Changesets, one
+// section per package. The apps' release notes stay in their own CHANGELOG.md
+// and GitHub Releases. Parsed here, with no Markdown library: version sections, change
 // kinds, and bullets whose indented lines continue them. Relative links are
 // resolved to GitHub, so the page links nowhere that isn't served.
-import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, posix } from 'node:path';
+import { posix } from 'node:path';
 import type { LibraryReader } from './library.ts';
 
 /** A block of an entry: a paragraph, or a list of items. Text is inline Markdown. */
@@ -13,52 +12,83 @@ export type Block = { kind: 'p'; text: string } | { kind: 'ul'; items: string[] 
 
 export interface Release {
   version: string;
+  /** Text written under the version with no change kinds, such as 0.1.0's summary. */
+  intro: Block[];
   /** Changesets' kinds, e.g. "Minor Changes", each with its entries. */
   groups: { kind: string; entries: Block[][] }[];
 }
 
-/** Parses a Changesets CHANGELOG.md: the `## <version>` sections, newest first as written. */
+/**
+ * An entry that only says which dependencies moved: "Updated dependencies [sha]",
+ * or a bare `@isoloop/x@version`. The fixed group bumps every package together,
+ * so these say nothing a reader can use.
+ */
+export function isDependencyOnly(blocks: Block[]): boolean {
+  const first = blocks[0];
+  return (
+    first?.kind === 'p' &&
+    (/^Updated dependencies\b/.test(first.text) || /^@?[\w./-]+@\d\S*$/.test(first.text))
+  );
+}
+
+/**
+ * Parses a Changesets CHANGELOG.md: the `## <version>` sections, newest first as
+ * written. A section with no `###` kinds keeps its text as `intro`. Entries that
+ * only update dependencies are left out, and so is a section left with nothing.
+ */
 export function parseChangelog(md: string): Release[] {
-  const releases: Release[] = [];
-  let release: Release | undefined;
-  let group: Release['groups'][number] | undefined;
-  let entry: string[] | undefined;
-  const close = (): void => {
-    if (entry && group) group.entries.push(toBlocks(entry));
-    entry = undefined;
-  };
+  const sections: { version: string; lines: string[] }[] = [];
+  let current: { version: string; lines: string[] } | undefined;
   for (const line of md.split('\n')) {
     const h2 = /^## (.+?)\s*$/.exec(line);
     if (h2) {
-      close();
-      group = undefined;
       const version = h2[1] ?? '';
-      release = /^\d+\.\d+\.\d+/.test(version) ? { version, groups: [] } : undefined;
-      if (release) releases.push(release);
+      current = /^\d+\.\d+\.\d+/.test(version) ? { version, lines: [] } : undefined;
+      if (current) sections.push(current);
       continue;
     }
-    if (!release) continue;
+    current?.lines.push(line);
+  }
+  return sections
+    .map(({ version, lines }) =>
+      lines.some((l) => l.startsWith('### '))
+        ? { version, intro: [], groups: parseGroups(lines) }
+        : { version, intro: toBlocks(lines), groups: [] },
+    )
+    .filter((r) => r.intro.length > 0 || r.groups.length > 0);
+}
+
+/** A section's `###` kinds and their bullets, whose indented lines continue them. */
+function parseGroups(lines: string[]): Release['groups'] {
+  const groups: Release['groups'] = [];
+  let group: Release['groups'][number] | undefined;
+  let entry: string[] | undefined;
+  const close = (): void => {
+    if (entry && group) {
+      const blocks = toBlocks(entry);
+      if (!isDependencyOnly(blocks)) group.entries.push(blocks);
+    }
+    entry = undefined;
+  };
+  for (const line of lines) {
     const h3 = /^### (.+?)\s*$/.exec(line);
     if (h3) {
       close();
       group = { kind: h3[1] ?? '', entries: [] };
-      release.groups.push(group);
+      groups.push(group);
       continue;
     }
+    if (!group) continue;
     const bullet = /^- (?:[0-9a-f]{7,40}: )?(.*)$/.exec(line);
     if (bullet) {
       close();
-      if (!group) {
-        group = { kind: '', entries: [] };
-        release.groups.push(group);
-      }
       entry = [bullet[1] ?? ''];
       continue;
     }
     if (entry) entry.push(line.replace(/^ {2}/, ''));
   }
   close();
-  return releases;
+  return groups.filter((g) => g.entries.length > 0);
 }
 
 /** An entry's lines as paragraphs and lists. */
@@ -107,17 +137,16 @@ export function absoluteLinks(text: string, base: string, folder: string): strin
 
 function absolutise(releases: Release[], base: string, folder: string): Release[] {
   const fix = (t: string): string => absoluteLinks(t, base, folder);
+  const blocks = (list: Block[]): Block[] =>
+    list.map((b) =>
+      b.kind === 'p' ? { kind: 'p', text: fix(b.text) } : { kind: 'ul', items: b.items.map(fix) },
+    );
   return releases.map((r) => ({
     ...r,
+    intro: blocks(r.intro),
     groups: r.groups.map((g) => ({
       ...g,
-      entries: g.entries.map((blocks) =>
-        blocks.map((b) =>
-          b.kind === 'p'
-            ? { kind: 'p', text: fix(b.text) }
-            : { kind: 'ul', items: b.items.map(fix) },
-        ),
-      ),
+      entries: g.entries.map(blocks),
     })),
   }));
 }
@@ -151,73 +180,82 @@ export function newestFirst(a: string, b: string): number {
   return 0;
 }
 
-export interface Entry {
-  /** The package or app it belongs to. */
-  source: string;
-  kind: string;
-  blocks: Block[];
+/** One package's changelog. */
+export interface PackageLog {
+  name: string;
+  /** Its anchor on /changelog/: the name without the `@isoloop/` scope. */
+  id: string;
+  /** It ships a command (a `bin` in its package.json), marked "CLI" on the page. */
+  cli: boolean;
+  /** Newest first. */
+  releases: Release[];
 }
 
 export interface Changelog {
-  /** The library's releases, one per shared version (the fixed group), newest first. */
-  library: { version: string; entries: Entry[] }[];
-  /** Library packages with no released version yet. */
-  libraryUnreleased: string[];
-  /** The apps' releases, one per tag, newest first by when the tag was made. */
-  apps: { tag: string; source: string; version: string; date?: string; entries: Entry[] }[];
-  /** Apps with no version in their changelog yet. */
-  appsUnreleased: string[];
+  /** Every published library package that isn't internal, in PACKAGE_ORDER, with its own releases. */
+  packages: PackageLog[];
 }
 
 const LIBRARY_BLOB = 'https://github.com/isoloop/isoloop/blob';
-const WEB_BLOB = 'https://github.com/isoloop/web/blob/main';
 
 /**
- * When a tag was made: the tag's own date for an annotated tag, its commit's
- * for a lightweight one. `date` is shown; `at` (UTC ms) orders tags made the
- * same day.
+ * The order of the packages on /changelog/: what an app installs first, then
+ * the tooling and the experimental packages. A package not listed here goes
+ * after them, by name.
  */
-function tagDate(webRoot: string, tag: string): { date: string; at: number } | undefined {
-  try {
-    const out = execFileSync(
-      'git',
-      ['for-each-ref', '--format=%(creatordate:iso-strict)', `refs/tags/${tag}`],
-      { cwd: webRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
-    ).trim();
-    const at = Date.parse(out);
-    return /^\d{4}-\d{2}-\d{2}T/.test(out) && !Number.isNaN(at)
-      ? { date: out.slice(0, 10), at }
-      : undefined;
-  } catch {
-    return undefined;
-  }
+export const PACKAGE_ORDER = [
+  '@isoloop/host',
+  '@isoloop/runtime',
+  '@isoloop/bus',
+  '@isoloop/react',
+  '@isoloop/preact',
+  '@isoloop/vite',
+  'isoloop',
+  '@isoloop/devtools',
+  '@isoloop/balancer',
+  '@isoloop/webmcp',
+];
+
+function rank(name: string): number {
+  const i = PACKAGE_ORDER.indexOf(name);
+  return i < 0 ? PACKAGE_ORDER.length : i;
 }
 
-/** The apps with a CHANGELOG.md: apps/<name>/ and apps/<group>/<name>/. */
-function appFolders(webRoot: string): string[] {
-  const apps = join(webRoot, 'apps');
-  const out: string[] = [];
-  for (const name of readdirSync(apps)) {
-    const dir = join('apps', name);
-    if (existsSync(join(webRoot, dir, 'CHANGELOG.md'))) out.push(dir);
-    else if (!existsSync(join(webRoot, dir, 'package.json'))) {
-      for (const sub of readdirSync(join(webRoot, dir))) {
-        if (existsSync(join(webRoot, dir, sub, 'CHANGELOG.md'))) out.push(join(dir, sub));
-      }
-    }
-  }
-  return out.toSorted();
+/** Orders package names by PACKAGE_ORDER, then by name. */
+export function byPackageOrder(a: string, b: string): number {
+  return rank(a) - rank(b) || a.localeCompare(b);
 }
 
-function nameOf(pkgJson: string | undefined): { name?: string; private?: boolean } {
+/**
+ * A package the library marks as internal: its npm description starts with
+ * "Internal" (codec, dom, protocol). App code doesn't import it, so its
+ * changelog isn't on /changelog/.
+ */
+export function isInternal(description: string | undefined): boolean {
+  return /^Internal\b/.test(description ?? '');
+}
+
+function nameOf(pkgJson: string | undefined): {
+  name?: string;
+  private?: boolean;
+  description?: string;
+  bin?: boolean;
+} {
   if (!pkgJson) return {};
   try {
     const parsed: unknown = JSON.parse(pkgJson);
     if (typeof parsed !== 'object' || parsed === null) return {};
-    const { name, private: priv } = parsed as { name?: unknown; private?: unknown };
+    const {
+      name,
+      private: priv,
+      description,
+      bin,
+    } = parsed as { name?: unknown; private?: unknown; description?: unknown; bin?: unknown };
     return {
       ...(typeof name === 'string' ? { name } : {}),
       ...(priv === true ? { private: true } : {}),
+      ...(typeof description === 'string' ? { description } : {}),
+      ...(bin !== undefined && bin !== null ? { bin: true } : {}),
     };
   } catch {
     return {};
@@ -227,11 +265,7 @@ function nameOf(pkgJson: string | undefined): { name?: string; private?: boolean
 export function loadChangelog(
   library: Pick<LibraryReader, 'read' | 'list'>,
   pin: string,
-  webRoot: string,
 ): Changelog {
-  // The library: published packages only, grouped by their shared version.
-  const byVersion = new Map<string, Entry[]>();
-  const libraryUnreleased: string[] = [];
   const pkgDirs = [
     ...new Set(
       library
@@ -239,74 +273,22 @@ export function loadChangelog(
         .map((p) => /^packages\/([^/]+)\/package\.json$/.exec(p)?.[1])
         .filter((d): d is string => d !== undefined),
     ),
-  ].toSorted();
+  ];
+  const packages: PackageLog[] = [];
   for (const dir of pkgDirs) {
     const pkg = nameOf(library.read(`packages/${dir}/package.json`));
-    if (!pkg.name || pkg.private) continue;
+    if (!pkg.name || pkg.private || isInternal(pkg.description)) continue;
     const md = library.read(`packages/${dir}/CHANGELOG.md`);
     const releases = md
       ? absolutise(parseChangelog(md), `${LIBRARY_BLOB}/${pin}`, `packages/${dir}`)
       : [];
-    if (releases.length === 0) libraryUnreleased.push(pkg.name);
-    for (const r of releases) {
-      const list = byVersion.get(r.version) ?? [];
-      for (const g of r.groups) {
-        for (const blocks of g.entries) list.push({ source: pkg.name, kind: g.kind, blocks });
-      }
-      byVersion.set(r.version, list);
-    }
+    packages.push({
+      name: pkg.name,
+      cli: pkg.bin === true,
+      id: pkg.name.replace(/^@isoloop\//, ''),
+      releases: releases.toSorted((a, b) => newestFirst(a.version, b.version)),
+    });
   }
-  const libraryReleases = [...byVersion.entries()]
-    .toSorted(([a], [b]) => newestFirst(a, b))
-    .map(([version, entries]) => ({ version, entries }));
-
-  // The apps: one release per tag, dated by the tag.
-  const apps: Changelog['apps'] = [];
-  const tagAt = new Map<string, number>();
-  const appsUnreleased: string[] = [];
-  for (const dir of appFolders(webRoot)) {
-    const name = nameOf(readFileSync(join(webRoot, dir, 'package.json'), 'utf8')).name ?? dir;
-    const md = readFileSync(join(webRoot, dir, 'CHANGELOG.md'), 'utf8');
-    const releases = absolutise(parseChangelog(md), WEB_BLOB, dir);
-    if (releases.length === 0) appsUnreleased.push(name);
-    for (const r of releases) {
-      const tag = `${name}-v${r.version}`;
-      const made = tagDate(webRoot, tag);
-      if (made) tagAt.set(tag, made.at);
-      apps.push({
-        tag,
-        source: name,
-        version: r.version,
-        ...(made ? { date: made.date } : {}),
-        entries: r.groups.flatMap((g) =>
-          g.entries.map((blocks) => ({ source: name, kind: g.kind, blocks })),
-        ),
-      });
-    }
-  }
-  const appReleases = apps.toSorted(byTagMade(tagAt));
-  return { library: libraryReleases, libraryUnreleased, apps: appReleases, appsUnreleased };
-}
-
-/**
- * Orders app releases newest first by when their tag was made (`tagAt`, UTC ms
- * by tag). Releases without a tag time go after those with one, newest version
- * first within an app, apps by name.
- */
-export function byTagMade(
-  tagAt: ReadonlyMap<string, number>,
-): (
-  a: { tag: string; source: string; version: string },
-  b: { tag: string; source: string; version: string },
-) => number {
-  return (a, b) => {
-    const x = tagAt.get(a.tag);
-    const y = tagAt.get(b.tag);
-    if (x !== undefined && y !== undefined) return y - x;
-    if (x !== undefined) return -1;
-    if (y !== undefined) return 1;
-    return a.source === b.source
-      ? newestFirst(a.version, b.version)
-      : a.source.localeCompare(b.source);
-  };
+  packages.sort((a, b) => byPackageOrder(a.name, b.name));
+  return { packages };
 }

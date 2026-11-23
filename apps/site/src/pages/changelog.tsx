@@ -1,12 +1,9 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
-import type { Block, Entry } from '../../build/changelog.ts';
+import type { Block, PackageLog, Release } from '../../build/changelog.ts';
 import { changelogPage as c } from '../copy.ts';
 import { inline } from './inline.tsx';
-import { PageIntro } from './intro.tsx';
 import type { Page, SiteData } from './types.ts';
-
-const WEB_TAGS = 'https://github.com/isoloop/web/tags';
 
 function Blocks({ blocks }: { blocks: Block[] }): VNode {
   return (
@@ -26,72 +23,105 @@ function Blocks({ blocks }: { blocks: Block[] }): VNode {
   );
 }
 
-/** One release's entries, each labelled with its package or app and its kind. */
-function Entries({ entries }: { entries: Entry[] }): VNode {
+/** "CLI" after a package that ships a command. */
+function CliPill({ pkg }: { pkg: PackageLog }): VNode | null {
+  return pkg.cli ? <span class="ui-pill ui-pill-neutral">{c.cli}</span> : null;
+}
+
+/** One version of one package: its intro, then its changes by kind. */
+function ReleaseNotes({ pkg, release }: { pkg: PackageLog; release: Release }): VNode {
+  const id = `${pkg.id}-${release.version}`;
   return (
-    <ul class="changes">
-      {entries.map((e) => (
-        <li key={`${e.source}:${JSON.stringify(e.blocks)}`}>
-          <p class="change-source">
-            <b>{e.source}</b>
-            {e.kind ? <span> · {e.kind.replace(/ Changes$/, '').toLowerCase()}</span> : null}
-          </p>
-          <Blocks blocks={e.blocks} />
-        </li>
+    <section class="release" aria-labelledby={id}>
+      <h3 id={id}>{release.version}</h3>
+      {release.intro.length > 0 ? <Blocks blocks={release.intro} /> : null}
+      {release.groups.map((g) => (
+        <div key={g.kind}>
+          {g.kind ? <p class="change-kind">{c.kind(g.kind)}</p> : null}
+          <ul class="changes">
+            {g.entries.map((blocks) => (
+              <li key={JSON.stringify(blocks)}>
+                <Blocks blocks={blocks} />
+              </li>
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </section>
+  );
+}
+
+/** A package: its releases open, its previews (`-next.N`) folded below them. */
+function PackageSection({ pkg }: { pkg: PackageLog }): VNode {
+  const releases = pkg.releases.filter((r) => !r.version.includes('-'));
+  const previews = pkg.releases.filter((r) => r.version.includes('-'));
+  return (
+    <section class="changelog-package" id={pkg.id} aria-labelledby={`${pkg.id}-h`}>
+      <h2 id={`${pkg.id}-h`}>
+        {pkg.name}
+        {pkg.cli ? ' ' : null}
+        <CliPill pkg={pkg} />
+      </h2>
+      {pkg.releases.length === 0 ? <p>{c.unreleased}</p> : null}
+      {releases.map((r) => (
+        <ReleaseNotes key={r.version} pkg={pkg} release={r} />
+      ))}
+      {previews.length > 0 ? (
+        <details class="docs-fold changelog-previews">
+          <summary>
+            {c.previews}{' '}
+            <span>
+              {previews.at(-1)?.version} to {previews[0]?.version}
+            </span>
+          </summary>
+          {previews.map((r) => (
+            <ReleaseNotes key={r.version} pkg={pkg} release={r} />
+          ))}
+        </details>
+      ) : null}
+    </section>
+  );
+}
+
+function SideNav({ packages }: { packages: PackageLog[] }): VNode {
+  return (
+    <nav class="docs-side" aria-label={c.nav}>
+      <div>
+        <h2>{c.packages}</h2>
+        <ul>
+          {packages.map((p) => (
+            <li key={p.id}>
+              <a href={`#${p.id}`}>
+                {p.name}
+                {p.cli ? ' ' : null}
+                <CliPill pkg={p} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
   );
 }
 
 function Changelog({ changelog }: SiteData): VNode {
   return (
-    <main class="ui-shell">
-      <PageIntro title={c.heading}>
-        <p class="ui-lede">{c.lede}</p>
-      </PageIntro>
-
-      <section class="ui-gutter" id="library" aria-labelledby="library-h">
-        <h2 id="library-h">{c.library.heading}</h2>
-        <div class="ui-body">
-          {changelog.library.length === 0 ? (
-            <>
-              <p>{c.library.unreleased}</p>
-              <p>
-                {c.library.packages} {changelog.libraryUnreleased.join(', ')}.
-              </p>
-            </>
-          ) : (
-            changelog.library.map((r) => (
-              <section class="release" key={r.version} aria-labelledby={`lib-${r.version}`}>
-                <h3 id={`lib-${r.version}`}>{r.version}</h3>
-                <Entries entries={r.entries} />
-              </section>
-            ))
-          )}
-        </div>
-      </section>
-
-      <section class="ui-gutter" id="apps" aria-labelledby="apps-h">
-        <h2 id="apps-h">{c.apps.heading}</h2>
-        <div class="ui-body">
-          {changelog.apps.map((r) => (
-            <section class="release" key={r.tag} aria-labelledby={`tag-${r.tag}`}>
-              <h3 id={`tag-${r.tag}`}>
-                {r.tag}
-                {r.date ? <span class="release-date"> · {r.date}</span> : null}
-              </h3>
-              <Entries entries={r.entries} />
-            </section>
-          ))}
-          {changelog.appsUnreleased.length > 0 ? (
-            <p>
-              {c.apps.unreleased} {changelog.appsUnreleased.join(', ')} (
-              <a href={WEB_TAGS}>{c.apps.tags}</a>).
-            </p>
-          ) : null}
-        </div>
-      </section>
-    </main>
+    <div class="docs-layout docs-layout-index">
+      <div class="docs-only-wide">
+        <SideNav packages={changelog.packages} />
+      </div>
+      <main class="docs-article">
+        <h1>{c.heading}</h1>
+        <p class="docs-lead">{c.lede}</p>
+        <details class="docs-fold docs-only-narrow">
+          <summary>{c.packages}</summary>
+          <SideNav packages={changelog.packages} />
+        </details>
+        {changelog.packages.map((p) => (
+          <PackageSection key={p.id} pkg={p} />
+        ))}
+      </main>
+    </div>
   );
 }
 
