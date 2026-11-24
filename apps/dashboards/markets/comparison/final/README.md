@@ -1,6 +1,6 @@
 # Markets dashboard, final server run
 
-The figures that ship with `markets-v0.3.0`: the M3f head-to-head, run on the bench server on 2026-11-15. They replace the [M3b and M3c recording](../README.md), which compared native on one thread with Isoloop on a worker per isolate.
+The figures that ship with `markets-v0.3.0`: the M3f head-to-head, run on bench machine 1 on 2026-11-15. They replace the [M3b and M3c recording](../README.md), which compared native on one thread with Isoloop on a worker per isolate.
 
 ## What we found
 

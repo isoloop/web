@@ -1,6 +1,6 @@
 # plant-bench
 
-The benchmark build: a frozen copy of the [plant dashboard](../../dashboards/plant/README.md), measured at every minor and major Isoloop release on the bench server. Its results are the figures the site publishes (`/benchmarks/` and the landing page). It's never deployed. The plan is [`docs/plans/0.1.1-site.md`](../../../docs/plans/0.1.1-site.md), decisions 1–8.
+The benchmark build: a frozen copy of the [plant dashboard](../../dashboards/plant/README.md), measured at every minor and major Isoloop release on bench machine 1. Its results are the figures the site publishes (`/benchmarks/` and the landing page). It's never deployed. The plan is [`docs/plans/0.1.1-site.md`](../../../docs/plans/0.1.1-site.md), decisions 1–8.
 
 ## The rules
 
@@ -10,10 +10,10 @@ The benchmark build: a frozen copy of the [plant dashboard](../../dashboards/pla
 4. **A run:**
    1. Open a branch and bump every `@isoloop/*` in `package.json` to the release, then `pnpm install`.
    2. If the release breaks an API the bench uses, run `isoloop migrate` on this folder, never a hand fix. If the codemod fails here, that blocks the release. If it changed anything, say what in `results/<version>/ADAPTED.md` (one paragraph); the summary prints it.
-   3. Run it on the bench server ([below](#on-the-bench-server)).
+   3. Run it on bench machine 1 ([below](#on-bench-machine-1)).
    4. Open a PR to `main` with only `results/<version>/`: the raw JSON, `summary.md`, `summary.json`, `environment.json` (the exact versions, the browser builds, the machine) and `run.json` (the arguments). Never the bump.
    5. Delete the branch.
-5. **When:** at every minor and major release (0.1.0 as the baseline, then 0.2.0, 0.3.0 … 1.0.0), never at a patch. Always on the bench server, on the maintainer's go.
+5. **When:** at every minor and major release (0.1.0 as the baseline, then 0.2.0, 0.3.0 … 1.0.0), never at a patch. Always on bench machine 1, on the maintainer's go.
 6. **The matrix is fixed** in [`run.ts`](run.ts) and takes no arguments:
    - builds: native, native + workers, Isoloop `one`, `matched` and `split`, as two pairs (native against `one`, native + workers against `matched`) and `split` alongside;
    - load: 1 and 5 kHz;
@@ -45,7 +45,7 @@ node apps/bench/plant/run.ts --summary-only --out results/0.1.0   # rebuild summ
 
 Each page: load, 6 s of warm-up, a 10 s window with no input (frames, CPU), 5 keystrokes into a widget's filter (typing), memory after a forced GC in the page and every worker (Chromium on Linux only), then a 3 s block of one machine's gauges (recovery). What each figure covers is at the top of [`e2e/comparison.spec.ts`](e2e/comparison.spec.ts).
 
-### On the bench server
+### On bench machine 1
 
 From a clone used only for this, with the server in bench mode and the lock held. Build the image first; rebuild it whenever the Dockerfile changes.
 

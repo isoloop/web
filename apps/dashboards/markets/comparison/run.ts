@@ -3,7 +3,7 @@
 // interleaved for N rounds, one page at a time, by e2e/comparison.spec.ts. The
 // runner is the shared `compare/pairs` (packages/compare); this file says
 // what's the markets dashboard's: its projects, its load knob (the size) and
-// its figures. final/README.md has the bench server's command.
+// its figures. final/README.md has bench machine 1's command.
 //
 // M3g's federated comparison (federated/README.md) runs the React and Preact
 // builds with the alerts panel's faults in place of the price chart's:

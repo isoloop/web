@@ -1,6 +1,6 @@
 # Markets dashboard, federated comparison
 
-M3g's head-to-head, run on the bench server on 2026-11-16: the dashboard built from two teams' parts, natively and on Isoloop. The React team owns the charts and tables; the Preact team ships the filters and the alerts panel, built apart and loaded at run time.
+M3g's head-to-head, run on bench machine 1 on 2026-11-16: the dashboard built from two teams' parts, natively and on Isoloop. The React team owns the charts and tables; the Preact team ships the filters and the alerts panel, built apart and loaded at run time.
 
 - **native + workers, React and Preact** (`/native-mixed/`): the native + workers build, with the Preact part loaded by `import()` from its own manifest, as teams combine parts today. The data runs in six hand-written workers, the widgets on the main thread. Each part has its own error boundary; nothing restarts a part.
 - **Isoloop `mixed`** (`/mixed/`): the same split, each widget an isolate, in three placements:

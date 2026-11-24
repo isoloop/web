@@ -13,7 +13,7 @@ A new task's dial is given to the balancer as its declared load, so it's placed 
 
 ## Measured
 
-The File processor, run on a worker per processor, in one pool and placed by the balancer, on the bench server: [comparison/README.md](comparison/README.md). The comparison itself is [`comparison/run.ts`](comparison/run.ts) and [`e2e/comparison.spec.ts`](e2e/comparison.spec.ts).
+The File processor, run on a worker per processor, in one pool and placed by the balancer, on bench machine 1: [comparison/README.md](comparison/README.md). The comparison itself is [`comparison/run.ts`](comparison/run.ts) and [`e2e/comparison.spec.ts`](e2e/comparison.spec.ts).
 
 ## The File processor
 

@@ -110,7 +110,7 @@ M3e decision 22: on plant's interactive page (`/interactive/native/` against `/i
 4. **Drawer → dashboard, typical:** the draft made a typical widget (`plant.scalars`, bearing temp p95 over 120 s, every 1 s, by machine, a line: about 4,800 records), then a window with a keystroke into the title every 500 ms; each one makes the preview rebuild its pipeline from its buffer.
 5. **Drawer → dashboard, heavy:** the drawer's "Try a heavy widget" preset (`plant.vib`, the 99th percentile of every raw vibration sample over 30 s, every 1 s, by machine, a line). At 5 kHz that's about 1.2 million samples, sorted into eight percentiles each second, and each rebuild backfills the 30 s; then the same typed window. On native it runs on the main thread, on Isoloop in the preview's own worker.
 
-**Widget work yields in slices** (`packages/creator`, `SLICE_MS` = 10 ms), on both pages, with the same code. A widget's pipeline advances in units (one aggregate, for one group at one tick), and the widget hands its thread back after each 10 ms slice and goes on in the next task. The first heavy read replays all 30 s, about 1.3 s of sorting on a fast core and 3–4 s on the bench server's 2.0 GHz cores. In one block, that's longer than the page's heartbeat `killAfterMs` (2 s), so the kernel took the preview's worker for hung: `blocked`, then `crashed` (`unresponsive`), restarted it into the same work, and after the restart limit left it `failed`. The first server run (`76efc0e`, 2026-11-16) stopped every Isoloop round there for that reason. Slicing costs the same work in total; the largest unit is one sort of one machine's 30 s (about 150k samples, ~15 ms on a fast core). On the native page it also breaks the main thread's long tasks up: on a 4-core dev slice, the heavy preview's 11 long tasks (the longest 1.2 s) became none over 50 ms.
+**Widget work yields in slices** (`packages/creator`, `SLICE_MS` = 10 ms), on both pages, with the same code. A widget's pipeline advances in units (one aggregate, for one group at one tick), and the widget hands its thread back after each 10 ms slice and goes on in the next task. The first heavy read replays all 30 s, about 1.3 s of sorting on a fast core and 3–4 s on bench machine 1's 2.0 GHz cores. In one block, that's longer than the page's heartbeat `killAfterMs` (2 s), so the kernel took the preview's worker for hung: `blocked`, then `crashed` (`unresponsive`), restarted it into the same work, and after the restart limit left it `failed`. The first server run (`76efc0e`, 2026-11-16) stopped every Isoloop round there for that reason. Slicing costs the same work in total; the largest unit is one sort of one machine's 30 s (about 150k samples, ~15 ms on a fast core). On the native page it also breaks the main thread's long tasks up: on a 4-core dev slice, the heavy preview's 11 long tasks (the longest 1.2 s) became none over 50 ms.
 
 `plant.vib` is each machine's raw vibration chunks, also published to one topic keyed by machine. On the Isoloop page the feed isolates publish that copy at all times, so it's in every window's figures, drawer open or closed; on the native page the merged topic is read from the machines' own streams only while a widget reads it.
 
@@ -132,10 +132,9 @@ pnpm --filter ./apps/dashboards/plant compare:interactive \
 
 On CI, the `interactive` job of *Comparison (plant)* runs 3 rounds per engine, report-only. With a preview already on port 4792 from another checkout, serve this one elsewhere and pass `LIVE_URL=http://localhost:<port>`, so the runs don't measure the other build.
 
-On the dedicated machine, as above, after `sudo ~/bench-mode on`, holding the lock other runs on that machine take:
+On bench machine 1, as above, after `sudo ~/bench-mode on`, holding the lock other runs on that machine take:
 
 ```bash
-ssh hauseserver
 cd ~/bench/web && git fetch origin && git checkout --detach origin/main
 docker build -t plant-compare apps/dashboards/plant/comparison
 flock ~/bench/.lock docker run --rm --init --cpuset-cpus=2,4,6,8 --shm-size=2g \

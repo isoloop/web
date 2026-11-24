@@ -48,7 +48,7 @@
           "Against one pool, it uses 1 more worker, and its p95 is 74 ms against 148 ms.",
           "No file was lost in any run, and the kernel gave up on no processor. The balancer did 4 files twice, from the processors it moved: delivery is at least once."
         ],
-        "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, no faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
+        "caption": "The File processor's 8 processors on bench machine 1 (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, no faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
         "tag": "processor-v0.3.0",
         "pairs": [
           {
@@ -132,7 +132,7 @@
           "Its latency is much higher than a worker each: a p95 of 12.7 s against 378 ms. One pool's is 20.5 s.",
           "It did 20 files twice, where a worker each and one pool did none: a moved or crashed processor's uncommitted files go back to its group, since delivery is at least once."
         ],
-        "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, with faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
+        "caption": "The File processor's 8 processors on bench machine 1 (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, with faults, a cap of 2 workers for the balancer, 5 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
         "tag": "processor-v0.3.0",
         "pairs": [
           {
@@ -230,7 +230,7 @@
           "One pool is still working through its queue, with a p95 of 89 s.",
           "The balancer never packed its two pools into one: together they carry about a core, by the busy time the processors report, and a pool takes another only if it stays under 40 % of a core."
         ],
-        "caption": "The File processor's 8 processors on the bench server (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, 60 s with faults, then 5 minutes calm, measured over its last 20 s, a cap of 2 workers for the balancer, 3 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
+        "caption": "The File processor's 8 processors on bench machine 1 (4 cores fixed at 2.0 GHz), Chromium, 50 files a second, 60 s with faults, then 5 minutes calm, measured over its last 20 s, a cap of 2 workers for the balancer, 3 interleaved rounds, on @isoloop/*@0.1.0-next.6, measured at processor-v0.3.0, November 2026.",
         "tag": "processor-v0.3.0",
         "pairs": [
           {
