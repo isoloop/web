@@ -306,7 +306,7 @@ From the site plan for 0.1.1 (`docs/plans/0.1.1-site.md`, decisions 9–13, gril
 
 **A new page (decision 2):** `/benchmarks/`, in the header's nav ([ADR 0005](0005-page-navigation-and-status-marks.md), amended 2026-11-24). In this order:
 1. the latest results as charts, the full A | B | Δ tables folded under them;
-2. the history across versions, shown once there are two runs;
+2. the history across versions, shown once there are two runs of the same build (plant-bench); an older build’s run stays under the raw results;
 3. the method: the machine, the rounds, the paired Δ;
 4. the feature benchmarks;
 5. links to the raw results.

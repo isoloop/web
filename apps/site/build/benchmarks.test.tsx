@@ -182,22 +182,25 @@ describe('/benchmarks/', () => {
     expect(html).toContain('<td>2.3 s</td><td>1.5 s</td>');
   });
 
-  it('hides the history until there are two runs, then flags a change beyond the spread', () => {
-    const first = b.runs[0];
-    if (!first) throw new Error('no runs');
-    expect(page({ runs: [first], latest: first })).not.toContain('id="history"');
-    expect(page(b)).toContain('id="history"');
+  it('hides the history until there are two runs of the same build, then flags a change beyond the spread', () => {
+    // plant at next.b8ffdcf is another build, so 0.1.0 alone has no history; it stays under Raw results.
+    expect(page(b)).not.toContain('id="history"');
+    expect(page(b)).not.toContain('href="#history"');
+    expect(page(b)).toContain('plant at 0.0.0-next.b8ffdcf, 2026-11-13');
     const next: BenchRun = {
       ...b.latest,
       name: 'plant-bench',
-      version: '0.1.0',
+      version: '0.2.0',
       pairs: b.latest.pairs.map(shift),
     };
-    const html = page({ runs: [b.latest, next], latest: next });
+    const html = page({ runs: [...b.runs, next], latest: next });
     expect(html).toContain('id="history"');
+    const history = html.slice(html.indexOf('id="history"'), html.indexOf('id="method"'));
+    expect(history).toContain('0.1.0');
+    expect(history).not.toContain('b8ffdcf');
     expect(html).toContain(
       '<td data-changed>+10 ms<span class="ui-verdict"> changed beyond the spread</span></td>',
     );
-    expect(html).toContain('Measured on plant-bench at <code>@isoloop/*@0.1.0</code>');
+    expect(html).toContain('Measured on plant-bench at <code>@isoloop/*@0.2.0</code>');
   });
 });
