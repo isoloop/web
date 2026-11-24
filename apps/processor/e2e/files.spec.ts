@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
 // The File processor (M3h decision 29), against the built app, in real time.
-// Processors start in the quarantine until measured (about 3 s; the page
-// shows that as Measuring, src/measuring.ts), then the balancer places them; a consumer group per kind hands a stopped
-// processor's unfinished files to the group again.
+// Processors are placed at once from a declared load, never in the quarantine
+// (isoloop#346); a consumer group per kind hands a stopped processor's
+// unfinished files to the group again.
 
 declare global {
   interface Window {
@@ -36,14 +36,29 @@ test('files flow through: results, jobs per second and latency', async ({ page }
   await drained(page);
 });
 
+test('no processor is quarantined or measured at start', async ({ page }) => {
+  await page.getByRole('button', { name: 'Start' }).click();
+  // All eight sit in a balancer pool at once, and stay there past the 3 s the
+  // balancer would have spent measuring them in its quarantine.
+  await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(8, {
+    timeout: 10_000,
+  });
+  for (const _ of [0, 1, 2, 3]) {
+    await expect(page.locator('section.column[data-kind="quarantine"]')).toHaveCount(0);
+    await expect(page.locator('section.column[data-kind="measuring"]')).toHaveCount(0);
+    await page.waitForTimeout(1_000);
+  }
+  await expect(page.locator('.log li[data-kind="measured"]')).toHaveCount(0);
+  await drained(page);
+});
+
 test('no file is lost when processors move', async ({ page }) => {
   test.setTimeout(90_000);
   await page.evaluate(() => window.files.setDials({ running: true, rate: 30 }));
-  // The balancer's own moves (out of the quarantine once measured, logged as measured)…
-  await expect(page.locator('.log li[data-kind="measured"]').first()).toBeVisible({
-    timeout: 15_000,
+  await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(8, {
+    timeout: 20_000,
   });
-  // …and every processor stopped and started again, twice.
+  // Every processor stopped and started again, twice.
   await page.getByRole('radio', { name: 'One pool' }).check();
   await page.waitForTimeout(3_000);
   await page.getByRole('radio', { name: 'Balancer' }).check();
