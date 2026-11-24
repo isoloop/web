@@ -1,0 +1,28 @@
+{
+  "started": "2026-11-24T15:41:15.915Z",
+  "args": {
+    "pair": [
+      "native=isoloop:one",
+      "native-workers=isoloop:matched"
+    ],
+    "extra": [
+      "isoloop:split"
+    ],
+    "rates": "1,5",
+    "rounds": "5",
+    "hold": "0",
+    "warm": "6",
+    "window": "10",
+    "engines": "chromium,firefox,webkit",
+    "out": "/work/apps/bench/plant/results/0.1.0",
+    "summary-only": false
+  },
+  "configs": [
+    "native",
+    "isoloop:one",
+    "native-workers",
+    "isoloop:matched",
+    "isoloop:split"
+  ],
+  "cpus": "2,4,6,8"
+}

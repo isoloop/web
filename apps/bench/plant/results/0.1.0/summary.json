@@ -1,0 +1,1217 @@
+{
+  "version": "0.1.0",
+  "environment": {
+    "version": "0.1.0",
+    "packages": {
+      "@isoloop/bus": "0.1.0",
+      "@isoloop/codec": "0.1.0",
+      "@isoloop/host": "0.1.0",
+      "@isoloop/protocol": "0.1.0",
+      "@isoloop/react": "0.1.0",
+      "@isoloop/runtime": "0.1.0",
+      "@isoloop/vite": "0.1.0",
+      "react": "19.3.1",
+      "react-dom": "19.3.1",
+      "@playwright/test": "1.65.0"
+    },
+    "browsers": {
+      "chromium": "158.0.8127.18",
+      "firefox": "159.0",
+      "webkit": "27.2"
+    },
+    "machine": {
+      "cpu": "AMD Ryzen 7 5825U with Radeon Graphics",
+      "cpus": "2,4,6,8",
+      "clock": "2.0 GHz",
+      "memoryGb": 31,
+      "os": "Ubuntu 24.04.5 LTS",
+      "node": "26.13.0",
+      "image": "mcr.microsoft.com/playwright:v1.65.0-noble, Node 26.13.0, pnpm 12.16.1"
+    },
+    "started": "2026-11-24T15:41:15.912Z",
+    "rounds": 5
+  },
+  "pairs": [
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "mainThreadCpuPct",
+      "unit": "%",
+      "aMedian": 65.9,
+      "bMedian": 22.8,
+      "delta": -43.2,
+      "spread": [
+        -49.60000000000001,
+        -40.3
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "rendererCpuPct",
+      "unit": "%",
+      "aMedian": 75.4,
+      "bMedian": 91.9,
+      "delta": 10.800000000000011,
+      "spread": [
+        5.299999999999997,
+        22.200000000000003
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 34,
+      "bMedian": 24,
+      "delta": -10,
+      "spread": [
+        -32,
+        12
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 287,
+      "bMedian": 484,
+      "delta": 225,
+      "spread": [
+        147,
+        291
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1359,
+      "bMedian": 2364,
+      "delta": 1005,
+      "spread": [
+        288,
+        1070
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3167,
+      "bMedian": 3475,
+      "delta": 288,
+      "spread": [
+        279,
+        398
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "rendererPssGcMb",
+      "unit": "MB",
+      "aMedian": 158,
+      "bMedian": 193,
+      "delta": 36,
+      "spread": [
+        34,
+        39
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "mainThreadCpuPct",
+      "unit": "%",
+      "aMedian": 65.4,
+      "bMedian": 24.8,
+      "delta": -41.2,
+      "spread": [
+        -47.8,
+        -38.400000000000006
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "rendererCpuPct",
+      "unit": "%",
+      "aMedian": 80,
+      "bMedian": 93.2,
+      "delta": 12.5,
+      "spread": [
+        10.5,
+        15.799999999999997
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 33,
+      "bMedian": 26,
+      "delta": -11,
+      "spread": [
+        -12,
+        11
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 434,
+      "bMedian": 603,
+      "delta": 210,
+      "spread": [
+        126,
+        353
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 2296,
+      "bMedian": 1611,
+      "delta": -678,
+      "spread": [
+        -696,
+        -473
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3154,
+      "bMedian": 2859,
+      "delta": -286,
+      "spread": [
+        -487,
+        -203
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "rendererPssGcMb",
+      "unit": "MB",
+      "aMedian": 199,
+      "bMedian": 238,
+      "delta": 39,
+      "spread": [
+        35,
+        43
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "mainThreadCpuPct",
+      "unit": "%",
+      "aMedian": 80.4,
+      "bMedian": 22.3,
+      "delta": -57.800000000000004,
+      "spread": [
+        -60.400000000000006,
+        -55.800000000000004
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "rendererCpuPct",
+      "unit": "%",
+      "aMedian": 91.1,
+      "bMedian": 105.5,
+      "delta": 15,
+      "spread": [
+        13.900000000000006,
+        25.60000000000001
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 65,
+      "bMedian": 38,
+      "delta": -32,
+      "spread": [
+        -49,
+        -16
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 222,
+      "bMedian": 504,
+      "delta": 276,
+      "spread": [
+        221,
+        284
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1181,
+      "bMedian": 2377,
+      "delta": 1200,
+      "spread": [
+        1078,
+        1301
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3182,
+      "bMedian": 3422,
+      "delta": 250,
+      "spread": [
+        175,
+        321
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "rendererPssGcMb",
+      "unit": "MB",
+      "aMedian": 168,
+      "bMedian": 207,
+      "delta": 39,
+      "spread": [
+        33,
+        42
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "mainThreadCpuPct",
+      "unit": "%",
+      "aMedian": 78.2,
+      "bMedian": 24.4,
+      "delta": -54,
+      "spread": [
+        -60.6,
+        -50.8
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "rendererCpuPct",
+      "unit": "%",
+      "aMedian": 97,
+      "bMedian": 112.4,
+      "delta": 18.80000000000001,
+      "spread": [
+        7.599999999999994,
+        22.200000000000003
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 58,
+      "bMedian": 41,
+      "delta": -18,
+      "spread": [
+        -40,
+        1
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 366,
+      "bMedian": 557,
+      "delta": 207,
+      "spread": [
+        84,
+        308
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 2302,
+      "bMedian": 1521,
+      "delta": -787,
+      "spread": [
+        -813,
+        157
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3187,
+      "bMedian": 2939,
+      "delta": -248,
+      "spread": [
+        -296,
+        -86
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "rendererPssGcMb",
+      "unit": "MB",
+      "aMedian": 227,
+      "bMedian": 272,
+      "delta": 46,
+      "spread": [
+        42,
+        49
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 118,
+      "bMedian": 76,
+      "delta": -31,
+      "spread": [
+        -49,
+        -30
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 333,
+      "bMedian": 761,
+      "delta": 417,
+      "spread": [
+        162,
+        501
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1349,
+      "bMedian": 2547,
+      "delta": 1071,
+      "spread": [
+        351,
+        1210
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3371,
+      "bMedian": 3634,
+      "delta": 287,
+      "spread": [
+        210,
+        402
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 114,
+      "bMedian": 80,
+      "delta": -34,
+      "spread": [
+        -43,
+        -14
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 475,
+      "bMedian": 1082,
+      "delta": 599,
+      "spread": [
+        489,
+        721
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 2411,
+      "bMedian": 2019,
+      "delta": -320,
+      "spread": [
+        -409,
+        409
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3363,
+      "bMedian": 3702,
+      "delta": 343,
+      "spread": [
+        77,
+        374
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 129,
+      "bMedian": 109,
+      "delta": -14,
+      "spread": [
+        -28,
+        2
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 350,
+      "bMedian": 834,
+      "delta": 482,
+      "spread": [
+        353,
+        546
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1236,
+      "bMedian": 2664,
+      "delta": 1415,
+      "spread": [
+        1392,
+        1514
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3374,
+      "bMedian": 3670,
+      "delta": 307,
+      "spread": [
+        222,
+        415
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 134,
+      "bMedian": 82,
+      "delta": -52,
+      "spread": [
+        -63,
+        -9
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 418,
+      "bMedian": 1034,
+      "delta": 558,
+      "spread": [
+        541,
+        672
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1538,
+      "bMedian": 1915,
+      "delta": 377,
+      "spread": [
+        -606,
+        1315
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3381,
+      "bMedian": 3706,
+      "delta": 320,
+      "spread": [
+        313,
+        401
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 23,
+      "bMedian": 117,
+      "delta": 94,
+      "spread": [
+        61,
+        206
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 361,
+      "bMedian": 722,
+      "delta": 293,
+      "spread": [
+        -93,
+        551
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1471,
+      "bMedian": 2780,
+      "delta": 1295,
+      "spread": [
+        -209,
+        1348
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3503,
+      "bMedian": 3798,
+      "delta": 247,
+      "spread": [
+        208,
+        469
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 31,
+      "bMedian": 230.5,
+      "delta": 181.5,
+      "spread": [
+        96,
+        209
+      ],
+      "rounds": 4
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 376,
+      "bMedian": 994,
+      "delta": 622.5,
+      "spread": [
+        439,
+        821
+      ],
+      "rounds": 4
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1549,
+      "bMedian": 2374,
+      "delta": 468,
+      "spread": [
+        -480,
+        1224
+      ],
+      "rounds": 4
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3483,
+      "bMedian": 3590,
+      "delta": 113.5,
+      "spread": [
+        -310,
+        325
+      ],
+      "rounds": 4
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 29,
+      "bMedian": 224,
+      "delta": 198,
+      "spread": [
+        158,
+        204
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 366,
+      "bMedian": 700,
+      "delta": 335,
+      "spread": [
+        301,
+        378
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 1312,
+      "bMedian": 2932,
+      "delta": 1634,
+      "spread": [
+        588,
+        1670
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native",
+      "b": "isoloop:one",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3505,
+      "bMedian": 3976,
+      "delta": 457,
+      "spread": [
+        134,
+        573
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "typingMedianMs",
+      "unit": "ms",
+      "aMedian": 26,
+      "bMedian": 234,
+      "delta": 211,
+      "spread": [
+        194,
+        219
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "firstDataMs",
+      "unit": "ms",
+      "aMedian": 379,
+      "bMedian": 957,
+      "delta": 578,
+      "spread": [
+        497,
+        611
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "allWidgetsMs",
+      "unit": "ms",
+      "aMedian": 2299,
+      "bMedian": 2246,
+      "delta": 514,
+      "spread": [
+        -142,
+        663
+      ],
+      "rounds": 5
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "a": "native-workers",
+      "b": "isoloop:matched",
+      "figure": "recoveryMs",
+      "unit": "ms",
+      "aMedian": 3481,
+      "bMedian": 3343,
+      "delta": -118,
+      "spread": [
+        -288,
+        718
+      ],
+      "rounds": 5
+    }
+  ],
+  "extras": [
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "mainThreadCpuPct",
+      "median": 27.3
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "rendererCpuPct",
+      "median": 113.5
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "typingMedianMs",
+      "median": 24
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "firstDataMs",
+      "median": 815
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "allWidgetsMs",
+      "median": 1819
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "recoveryMs",
+      "median": 3330
+    },
+    {
+      "engine": "chromium",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "rendererPssGcMb",
+      "median": 293
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "mainThreadCpuPct",
+      "median": 27.2
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "rendererCpuPct",
+      "median": 129.4
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "typingMedianMs",
+      "median": 43
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "firstDataMs",
+      "median": 886
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "allWidgetsMs",
+      "median": 1650
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "recoveryMs",
+      "median": 3423
+    },
+    {
+      "engine": "chromium",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "rendererPssGcMb",
+      "median": 331
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "typingMedianMs",
+      "median": 76
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "firstDataMs",
+      "median": 1276
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "allWidgetsMs",
+      "median": 2580
+    },
+    {
+      "engine": "firefox",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "recoveryMs",
+      "median": 3356
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "typingMedianMs",
+      "median": 96
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "firstDataMs",
+      "median": 1322
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "allWidgetsMs",
+      "median": 2246
+    },
+    {
+      "engine": "firefox",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "recoveryMs",
+      "median": 3527
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "typingMedianMs",
+      "median": 228
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "firstDataMs",
+      "median": 1266
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "allWidgetsMs",
+      "median": 2789
+    },
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "config": "isoloop:split",
+      "figure": "recoveryMs",
+      "median": 3738
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "typingMedianMs",
+      "median": 234
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "firstDataMs",
+      "median": 1306
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "allWidgetsMs",
+      "median": 2835
+    },
+    {
+      "engine": "webkit",
+      "rate": 5,
+      "config": "isoloop:split",
+      "figure": "recoveryMs",
+      "median": 3846
+    }
+  ],
+  "stopped": [
+    {
+      "engine": "webkit",
+      "rate": 1,
+      "config": "isoloop:matched",
+      "round": 3,
+      "why": "page stopped during warm-up (page.waitForTimeout: Page crashed)"
+    }
+  ]
+}

@@ -244,10 +244,20 @@ function findings(s: Summary): string[] {
   if (s.stopped.length > 0) {
     out.push(
       '',
-      `- ${s.stopped.length} page${s.stopped.length === 1 ? '' : 's'} stopped before a result; they're listed under the details and left out of every figure.`,
+      `- ${s.stopped.length} page${s.stopped.length === 1 ? '' : 's'} stopped before a result; ${s.stopped.length === 1 ? "it's" : "they're"} listed under the details and left out of every figure.`,
     );
   }
   return out;
+}
+
+/**
+ * The CPU as a class, never its brand or model (those stay in environment.json):
+ * `An x64 CPU`, `An arm64 CPU`, else `A CPU`.
+ */
+export function cpuClass(cpu: string): string {
+  if (/\b(AMD|Intel)\b/i.test(cpu)) return 'An x64 CPU';
+  if (/\b(Apple|ARM|Neoverse|Ampere|Graviton|Cortex)\b/i.test(cpu)) return 'An arm64 CPU';
+  return 'A CPU';
 }
 
 function measuredOn(env: Environment): string {
@@ -257,7 +267,7 @@ function measuredOn(env: Environment): string {
     .map(([e, v]) => `${engineName(e)} ${v}`)
     .join(', ');
   const parts = [
-    `${m.cpu}, CPUs ${m.cpus || '(all)'}${m.clock ? ` at ${m.clock}` : ''}, ${m.memoryGb} GB`,
+    `${cpuClass(m.cpu)}, CPUs ${m.cpus || '(all)'}${m.clock ? ` at ${m.clock}` : ''}, ${m.memoryGb} GB`,
     m.os,
     m.image ? `in \`${m.image}\`` : '',
     `Node ${m.node}`,
