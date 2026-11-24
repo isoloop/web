@@ -2,7 +2,7 @@
 
 - **Status:** Proposed
 - **Date:** 2026-11-19
-- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20)); 2026-11-20 (decision 1a: Docs right after Home, and the library version as a pill before GitHub; see [the amendment](#amended-docs-first-and-the-version-pill-2026-11-20)); 2026-11-21 (decisions 1, 2 and 3: the step tabs give way to a left rail, one panel heading style, one pager; see [the amendment](#amended-the-rail-2026-11-21); Proposed); 2026-11-24 (decisions 1a and 2: Benchmarks in the header's nav, and a Compared group on `/features/`; see [the amendment](#amended-benchmarks-and-compared-2026-11-24); Proposed)
+- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20)); 2026-11-20 (decision 1a: Docs right after Home, and the library version as a pill before GitHub; see [the amendment](#amended-docs-first-and-the-version-pill-2026-11-20)); 2026-11-21 (decisions 1, 2 and 3: the step tabs give way to a left rail, one panel heading style, one pager; see [the amendment](#amended-the-rail-2026-11-21); Proposed); 2026-11-24 (decision 5: orange also marks a chart's "worse"; see [the amendment](#amended-orange-for-a-charts-worse-2026-11-24)); 2026-11-24 (decisions 1a and 2: Benchmarks in the header's nav, and a Compared group on `/features/`; see [the amendment](#amended-benchmarks-and-compared-2026-11-24); Proposed)
 - **Answers:** how a reader moves through a long page on the site, and how a feature that isn't stable yet is marked. Grilled 2026-11-19 (Q1–Q12), after a local prototype the maintainer reviewed. Amends [ADR 0002](0002-site-build.md) (the features page, the step tabs) and [ADR 0003](0003-design-system.md) (a status colour, the pill, the header's GitHub link).
 
 ## Context
@@ -168,7 +168,14 @@ In navigation lists, the docs sidebar and later the API reference's symbol lists
   | Light | 4.60 | 4.93 |
   | Dark | 8.83 | 8.06 |
 
-- **It means only "not stable yet" on the site's pages.** The dashboards have their own orange (`#f0a35e`, in their fixed-dark header) for React and Preact on one page. It's close to the dark `--ui-experimental` in hue, but the two never share a page: the dashboards take only ui's bar, and the pill is drawn only by the site.
+- **It means only "not stable yet" on the site's pages,** apart from charts (amended 2026-11-24, below). The dashboards have their own orange (`#f0a35e`, in their fixed-dark header) for React and Preact on one page. It's close to the dark `--ui-experimental` in hue, but the two never share a page: the dashboards take only ui's bar, and the pill is drawn only by the site.
+
+#### Amended: orange for a chart's "worse" (2026-11-24)
+
+The maintainer's review of the local preview of `/benchmarks/` and the home page: red reads as an error, and a chart's "worse" bar is a measured cost, not a fault.
+- **A new semantic token, `--ui-worse`,** on the same orange primitives as `--ui-experimental` (orange-1 in light, orange-2 in dark), fills a chart's worse bar and its legend swatch (`PairedBars`, [ADR 0003](0003-design-system.md)). `--ui-bad` stays red, for errors and rejections.
+- **Why the same orange:** blue against orange is the pair readers with the common colour-vision deficiencies still tell apart, and the delta under every pair says "better" or "worse" in words, so the bar's colour is never the only signal.
+- **The two meanings don't meet.** The pill and the compact mark are outlined text and a round "!" on feature names; a worse bar is a filled bar inside a chart with its legend. The contrast test holds `--ui-worse` to 3:1 on `--ui-bg` and `--ui-surface`, as a graphic.
 
 ## Consequences
 

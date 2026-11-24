@@ -41,6 +41,9 @@ const PAIRS: [string, string, number][] = [
   ['ui-focus', 'ui-bg', 3],
   ['ui-bad', 'ui-bg', 4.5],
   ['ui-bad', 'ui-surface', 4.5],
+  // A chart's worse bar is a graphic: 3:1.
+  ['ui-worse', 'ui-bg', 3],
+  ['ui-worse', 'ui-surface', 3],
   // The experimental pill: small text and its outline in this colour.
   ['ui-experimental', 'ui-bg', 4.5],
   ['ui-experimental', 'ui-surface', 4.5],
