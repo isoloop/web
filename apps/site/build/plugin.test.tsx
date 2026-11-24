@@ -296,15 +296,15 @@ describe('the pages', () => {
     expect(html).not.toContain('ui-delta-table');
     expect(html.match(/<figure class="ui-chart"/g)).toHaveLength(4);
     for (const words of [
-      '53 points lower, better',
-      '28 ms lower, better',
+      '54 points lower, better',
+      '18 ms lower, within the spread',
       '19 points higher, worse',
-      '51 MB higher, worse',
+      '46 MB higher, worse',
     ]) {
       expect(html).toContain(words);
     }
     expect(html).toContain(
-      'Measured on plant at <code>@isoloop/*@0.0.0-next.b8ffdcf</code>, 13 November 2026, on 4 cores fixed at 2.0 GHz.',
+      'Measured on plant-bench at <code>@isoloop/*@0.1.0</code>, 24 November 2026, on 4 cores fixed at 2.0 GHz.',
     );
     expect(html).toContain('href="/benchmarks/"');
     expect(html).toContain('Isoloop matched</th>');

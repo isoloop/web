@@ -19,12 +19,12 @@
         "id": "desktop",
         "heading": "Desktop",
         "findings": [
-          "Isoloop moves the widgets off the main thread: it's 23–27% busy against 79–84% on the native builds, and typing answers 28–55 ms sooner.",
-          "In the default placement, `matched`, against native + workers: a 3 s block loses no data on the other machines on either build, and the page is back to normal 0.2 s sooner.",
-          "It costs CPU, memory and start-up: +11 to +19 points of CPU across threads, +40 to +51 MB after GC, and first data 0.19–0.29 s later."
+          "Isoloop moves the widgets off the main thread: it's 22–24% busy against 78–80% on the native builds. Typing answers 32 ms sooner in `one`; in `matched` the rounds disagree, 18 ms sooner at the median.",
+          "In the default placement, `matched`, against native + workers: after a 3 s block, the page is back to normal 0.25 s sooner.",
+          "It costs CPU, memory and start-up: +15 to +19 points of CPU across threads, +39 to +46 MB after GC, and first data 0.21–0.28 s later."
         ],
-        "caption": "The plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured at plant-v0.1.0, November 2026. Each native build is measured against the Isoloop placement shaped like it.",
-        "tag": "plant-v0.1.0",
+        "caption": "The plant dashboard on the desktop machine (4 cores fixed at 2.0 GHz), Chromium at 5 kHz, 5 interleaved rounds, measured on plant-bench (plant at plant-v0.4.2 on `@isoloop/*@0.1.0`), November 2026. Each native build is measured against the Isoloop placement shaped like it.",
+        "tag": "plant-v0.4.2",
         "pairs": [
           {
             "a": "Native",
@@ -44,15 +44,15 @@
               {
                 "label": "Main thread busy",
                 "cells": [
-                  ["84%", "23%", ["−60 pts", "better"]],
-                  ["79%", "27%", ["−53 pts", "better"]]
+                  ["80%", "22%", ["−58 pts", "better"]],
+                  ["78%", "24%", ["−54 pts", "better"]]
                 ]
               },
               {
                 "label": "Typing, median",
                 "cells": [
-                  ["82 ms", "21 ms", ["−55 ms", "better"]],
-                  ["62 ms", "41 ms", ["−28 ms", "better"]]
+                  ["65 ms", "38 ms", ["−32 ms", "better"]],
+                  ["58 ms", "41 ms", ["−18 ms", "same"]]
                 ]
               }
             ]
@@ -61,31 +61,24 @@
             "heading": "Faults and start-up",
             "rows": [
               {
-                "label": "Data lost on the other machines during a 3 s block",
-                "cells": [
-                  ["3.0 s", "2.6 s", ["−0.5 s", "better"]],
-                  ["0 s", "0 s", ["0", "same"]]
-                ]
-              },
-              {
                 "label": "Back to normal after the block",
                 "cells": [
-                  ["3.2 s", "3.5 s", ["+0.3 s", "worse"]],
-                  ["3.2 s", "2.9 s", ["−0.2 s", "better"]]
+                  ["3.2 s", "3.4 s", ["+0.25 s", "worse"]],
+                  ["3.2 s", "2.9 s", ["−0.25 s", "better"]]
                 ]
               },
               {
                 "label": "All 72 widgets with data",
                 "cells": [
                   ["1.2 s", "2.4 s", ["+1.2 s", "worse"]],
-                  ["2.3 s", "1.5 s", ["−0.7 s", "better"]]
+                  ["2.3 s", "1.5 s", ["−0.8 s", "same"]]
                 ]
               },
               {
                 "label": "First data",
                 "cells": [
-                  ["0.29 s", "0.47 s", ["+0.19 s", "worse"]],
-                  ["0.35 s", "0.68 s", ["+0.29 s", "worse"]]
+                  ["0.22 s", "0.50 s", ["+0.28 s", "worse"]],
+                  ["0.37 s", "0.56 s", ["+0.21 s", "worse"]]
                 ]
               }
             ]
@@ -96,15 +89,15 @@
               {
                 "label": "CPU, all threads",
                 "cells": [
-                  ["95%", "107%", ["+11 pts", "worse"]],
-                  ["97%", "116%", ["+19 pts", "worse"]]
+                  ["91%", "106%", ["+15 pts", "worse"]],
+                  ["97%", "112%", ["+19 pts", "worse"]]
                 ]
               },
               {
                 "label": "Memory after GC, at 16 s",
                 "cells": [
-                  ["164 MB", "203 MB", ["+40 MB", "worse"]],
-                  ["222 MB", "275 MB", ["+51 MB", "worse"]]
+                  ["168 MB", "207 MB", ["+39 MB", "worse"]],
+                  ["227 MB", "272 MB", ["+46 MB", "worse"]]
                 ]
               },
               {
@@ -117,12 +110,11 @@
             ]
           }
         ],
-        "firefox": "Firefox drops 89–126 fewer late frames on Isoloop, where Chromium drops none on either build; its first data is 0.4–0.5 s later.",
         "notes": [
           "Δ is the median of the gaps measured in each round, so it can differ from the difference of the two medians.",
           "The native builds keep their data in a small store written for this app, with no message bus. They don't contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features."
         ],
-        "results": "https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison/final"
+        "results": "https://github.com/isoloop/web/blob/main/apps/bench/plant/results/0.1.0/summary.md"
       },
       {
         "id": "interactive",

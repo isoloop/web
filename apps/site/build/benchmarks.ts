@@ -30,6 +30,11 @@ const manifestSchema = z.strictObject({
         name: z.string().min(1),
         /** The run's summary.json, relative to the repo root. */
         summary: z.string().regex(/summary\.json$/, 'a summary.json path'),
+        /**
+         * Engines left off the site, their figures and browser version both,
+         * while a figure is under investigation; the raw results keep them.
+         */
+        withhold: z.array(z.string().min(1)).optional(),
         links: z.strictObject({
           /** The run's summary.md on GitHub. */
           summary: https,
@@ -129,12 +134,18 @@ export function loadBenchmarks(manifest: string, repoRoot: string): Benchmarks {
   const runs = m.runs.map((r): BenchRun => {
     const file = join(repoRoot, r.summary);
     const s = parse(summarySchema, readJson(file, r.summary), r.summary);
+    const shown = (engine: string): boolean => !r.withhold?.includes(engine);
     return {
       name: r.name,
       version: s.version,
       date: s.environment.started.slice(0, 10),
-      environment: s.environment,
-      pairs: s.pairs,
+      environment: {
+        ...s.environment,
+        browsers: Object.fromEntries(
+          Object.entries(s.environment.browsers).filter(([e]) => shown(e)),
+        ),
+      },
+      pairs: s.pairs.filter((p) => shown(p.engine)),
       links: r.links,
     };
   });
