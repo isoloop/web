@@ -354,7 +354,7 @@ The plant sections don't change. "Raw results" lists both benchmarks.
 
 **Where its figures come from (decision 7):**
 - **js-bench** (`apps/bench/js/`) measures plain JavaScript work, such as sorts, Maps, Sets, JSON and `structuredClone`, on the main thread, in plain Workers and in three Isoloop placements. Its results under `apps/bench/js/results/<version>/` are what the section shows.
-- **It runs before every release,** patches included, as the release's comparison with the one before. The page updates only at minor and major releases, together with plant-bench, so the page's two benchmarks always come from the same version.
+- **It runs before every minor and major release,** never for a patch (amended 2026-11-24), as the release's comparison with the one before. The page updates at the same releases, together with plant-bench, so the page's two benchmarks always come from the same version.
 - **The machine has a name: "bench machine 1"** (`bench-machine-1` in data), described in `apps/bench/machines.md`. A new machine gets the next number, and its first run is the previous release again, as its own baseline. No hostname goes into the repo.
 - Decision 7's rules stay: figures are copied, labelled and linked, a labelled copy never changes, and every row stays, in both directions. A Chromium-only run says so in its label.
 

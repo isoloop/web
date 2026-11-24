@@ -7,8 +7,8 @@ It measures plain JavaScript work (no components, no DOM) on the main thread, in
 1. **A private package, pinned exactly.** Every dependency in `package.json` is an exact version, with no `catalog:` and no workspace package. Changesets ignores it. The browsers come from the Playwright image at `playwright`'s version, with Node and pnpm pinned there too ([`Dockerfile`](Dockerfile)).
 2. **The code changes only at a generation,** as plant-bench's does. A change to a workload, the harness (`src/`), the Docker image or `calibration.json` means running the last release again before comparing with it. Between generations, only the runner (`runner/`) changes, and never what it measures.
 3. **CI only checks that it still runs:** `check.yml` typechecks it and runs its unit tests, and [`bench.yml`](../../../.github/workflows/bench.yml) runs a smoke round of one workload per tier in Chromium, about 2 minutes, and fails if a page stops. The real runs are only on bench machine 1.
-4. **It runs before every release,** patches included, on the release candidate, on bench machine 1 in the `base` profile, on the maintainer's go ([below](#before-every-release)).
-5. **Each run's results come in their own PR:** `results/<version>/base/` and the comparison with the last release, nothing else. Patch runs are kept too, as the record.
+4. **It runs before every minor and major release,** never for a patch, on the release candidate, on bench machine 1 in the `base` profile, on the maintainer's go ([below](#before-a-minor-or-major-release)).
+5. **Each run's results come in their own PR:** `results/<version>/base/` and the comparison with the last release, nothing else.
 6. **The CPU-limited profiles** (`two-core`, `quota`) are internal: run them when useful, never on the site.
 
 ## What it measures
@@ -73,9 +73,9 @@ pnpm --filter js-bench summary results/0.1.0/base   # rewrite summary.md and sum
 | `--tier regular --scenario` | 153 | 3.4 h |
 | `--scenario-only` | 9 | 0.4 h |
 
-## Before every release
+## Before a minor or major release
 
-Before each Isoloop release, patches included, run js-bench on the release candidate and compare it with the last release. On the maintainer's go.
+Before each minor or major Isoloop release, run js-bench on the release candidate and compare it with the last one. Patch releases aren't run. On the maintainer's go.
 
 1. **Open a branch and set the version** (a prerelease such as `0.2.0-next.3`, or the release itself). The bump is for the run only, and is never merged:
    ```bash
