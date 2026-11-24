@@ -247,7 +247,7 @@ export function docPage(doc: Doc): Page {
 export const docsIndexPage: Page = {
   path: '/docs/',
   section: 'docs',
-  head: { title: c.title, description: c.description },
+  head: { title: c.title, searchTitle: c.searchTitle, description: c.description },
   scripts: ['/src/demos/search.ts'],
   render: (data: SiteData) => (
     <div class="docs-layout docs-layout-index">
