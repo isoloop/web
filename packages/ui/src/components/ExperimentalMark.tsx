@@ -5,6 +5,8 @@ import type { VNode } from 'preact';
  * The compact experimental mark for navigation lists (ADR 0005, amended
  * 2026-11-20): a round "!" in --ui-experimental. The label is read by screen
  * readers and shown as a tooltip, so the mark never relies on colour alone.
+ * The label starts with a space, so a word before the mark and the label read
+ * apart in the text ("Devtools Experimental", not "DevtoolsExperimental").
  * The full pill (.ui-pill) stays on headings and the docs index.
  */
 export function ExperimentalMark({ label = 'Experimental' }: { label?: string }): VNode {
@@ -21,7 +23,7 @@ export function ExperimentalMark({ label = 'Experimental' }: { label?: string })
         />
         <circle cx="8" cy="11.4" r="1.05" fill="currentColor" />
       </svg>
-      <span class="ui-sr-only">{label}</span>
+      <span class="ui-sr-only">{` ${label}`}</span>
     </span>
   );
 }
