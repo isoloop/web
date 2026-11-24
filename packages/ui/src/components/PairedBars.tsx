@@ -7,7 +7,7 @@ import type { ComponentChildren, VNode } from 'preact';
  * script on the page, so `default-src 'self'` holds.
  *
  * - The baseline is grey; the Isoloop bar is the accent when it's better and
- *   `--ui-bad` when it's worse, and the delta under it says so in words, so
+ *   `--ui-worse` (orange) when it's worse, and the delta under it says so in words, so
  *   colour is never the only signal.
  * - Names and values are real text beside the bars, read in order by a screen
  *   reader; the SVG itself is hidden from assistive tech.
