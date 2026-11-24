@@ -1,6 +1,6 @@
 # js-bench: plain JavaScript work, measured each release
 
-**Goal:** measure plain JavaScript work (no components, no DOM) on the main thread, in plain Workers and in Isoloop's placements, as operations per second. Run it before every release to see what the release changed, and show the latest minor or major release on `/benchmarks/`.
+**Goal:** measure plain JavaScript work (no components, no DOM) on the main thread, in plain Workers and in Isoloop's placements, as operations per second. Run it before every minor and major release to see what the release changed, and show the latest minor or major release on `/benchmarks/`.
 
 **Done when:** the tasks below are merged, `apps/bench/js/` holds the code and the 0.1.0 results, `/benchmarks/` has the **Plain JavaScript work** section on those results, and the private `isoloop/jsbench` repo is archived.
 
@@ -23,12 +23,12 @@
 
 ### Runs and comparisons
 
-6. **It runs before every release,** patches included, on bench machine 1 in the `base` profile (4 cores fixed at 2.0 GHz), on the maintainer's go. About 9 hours.
+6. **It runs before every minor and major release,** never for a patch (amended 2026-11-24), on bench machine 1 in the `base` profile (4 cores fixed at 2.0 GHz), on the maintainer's go. About 9 hours.
 7. **`pnpm compare <before> <after>`** writes `compare-<before version>.md` in plain English, in operations per second:
    - A figure has changed when the difference is bigger than 3 % or the spread between its rounds, whichever is larger.
    - The native figures are the control, and each Isoloop figure is also given as a share of the plain Workers' rate.
    - It refuses to compare runs from two machines unless `--allow-machine-change` is given.
-8. **Each run's results come in their own PR,** `apps/bench/js/results/<version>/base/` and the comparison only, on the maintainer's go. Patch runs are kept too, as the record.
+8. **Each run's results come in their own PR,** `apps/bench/js/results/<version>/base/` and the comparison only, on the maintainer's go.
 9. **The CPU-limited profiles** (`two-core`, `quota`) stay internal: run when useful, never on the site.
 
 ### The machine
