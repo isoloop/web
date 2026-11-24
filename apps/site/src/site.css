@@ -2275,6 +2275,9 @@
    shape says it (tick, half circle, cross), so it never rests on colour; the colour
    sets "yes" apart at a glance. */
 .alt-mark {
+  /* Holds its screen-reader label (.ui-sr-only, absolute), so the label stays
+     inside the table's scrolling wrap instead of widening the page on a phone. */
+  position: relative;
   display: inline-flex;
   vertical-align: middle;
   color: var(--ui-text);
