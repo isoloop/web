@@ -1,6 +1,6 @@
 # js-bench
 
-It measures plain JavaScript work (no components, no DOM) on the main thread, in plain Workers and in each Isoloop placement, as operations per second. It runs before every Isoloop release, on [bench machine 1](../machines.md), to show what the release changed. The latest minor or major release's results are on `/benchmarks/`. These are measurements, reported whichever way they go. It's never deployed. The plan is [`docs/plans/js-bench.md`](../../../docs/plans/js-bench.md).
+It measures plain JavaScript work (no components, no DOM) on the main thread, in plain Workers and in each Isoloop placement, as operations per second. It runs before every Isoloop release, on [bench machine 1](../machines.md), to show what the release changed. Its `summary.json` is for a section of the site's `/benchmarks/` page, which is to show the latest minor or major release (the plan's decisions 13–15). These are measurements, reported whichever way they go. It's never deployed. The plan is [`docs/plans/js-bench.md`](../../../docs/plans/js-bench.md).
 
 ## The rules
 
