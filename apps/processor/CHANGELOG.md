@@ -1,5 +1,11 @@
 # processor
 
+## 0.4.4
+
+### Patch Changes
+
+- 7877667: The File processor's measurement captions name the machine as "bench machine 1" instead of "the bench server". The figures, dates and tags don't change.
+
 ## 0.4.3
 
 ### Patch Changes
