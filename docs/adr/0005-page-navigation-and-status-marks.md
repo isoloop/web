@@ -2,7 +2,7 @@
 
 - **Status:** Proposed
 - **Date:** 2026-11-19
-- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20)); 2026-11-20 (decision 1a: Docs right after Home, and the library version as a pill before GitHub; see [the amendment](#amended-docs-first-and-the-version-pill-2026-11-20)); 2026-11-21 (decisions 1, 2 and 3: the step tabs give way to a left rail, one panel heading style, one pager; see [the amendment](#amended-the-rail-2026-11-21); Proposed)
+- **Amended:** 2026-11-20, by [ADR 0006](0006-docs.md) (decision 1a: "Docs" joins the header's nav after Examples; Proposed); 2026-11-20 (decision 4: in navigation lists the experimental mark is a compact round "!"; see [the amendment](#amended-the-compact-mark-in-navigation-lists-2026-11-20)); 2026-11-20 (decision 1a: Docs right after Home, and the library version as a pill before GitHub; see [the amendment](#amended-docs-first-and-the-version-pill-2026-11-20)); 2026-11-21 (decisions 1, 2 and 3: the step tabs give way to a left rail, one panel heading style, one pager; see [the amendment](#amended-the-rail-2026-11-21); Proposed); 2026-11-24 (decisions 1a and 2: Benchmarks in the header's nav, and a Compared group on `/features/`; see [the amendment](#amended-benchmarks-and-compared-2026-11-24); Proposed)
 - **Answers:** how a reader moves through a long page on the site, and how a feature that isn't stable yet is marked. Grilled 2026-11-19 (Q1–Q12), after a local prototype the maintainer reviewed. Amends [ADR 0002](0002-site-build.md) (the features page, the step tabs) and [ADR 0003](0003-design-system.md) (a status colour, the pill, the header's GitHub link).
 
 ## Context
@@ -80,6 +80,31 @@ The dashboards' bar is unchanged.
 The maintainer's review before the docs go live:
 - **The nav:** Home, Docs, Features, How it works, Examples. Docs is where people who already know Isoloop go most, so it comes right after Home. This replaces ADR 0006's place for it, after Examples.
 - **The version:** the `@isoloop/*` version the site is built from (`library.lock`) is a pill at the far end, before GitHub, linking to the changelog. It replaces the row under each docs page's title, which also linked the guide's source on GitHub and its Markdown copy. The Markdown copies stay, for `llms.txt`.
+
+#### Amended: Benchmarks and Compared (2026-11-24)
+
+From the site plan for 0.1.1 (`docs/plans/0.1.1-site.md`, decisions 9 and 11, grilled Q1–Q26). Where this section and decisions 1a and 2 disagree, this section wins.
+
+**The header's nav:** Home, Docs, Features, How it works, Examples, Benchmarks.
+- `/benchmarks/` is a page of its own ([ADR 0002](0002-site-build.md), amended 2026-11-24), so it's in the nav. It goes last: a reader comes to the figures after seeing what Isoloop does.
+- Below 760px the nav already wraps its links; a sixth one wraps the same way. The header test checks that it still fits at 360px with no sideways scroll.
+
+**A Compared group on `/features/`:**
+- **The seventh group in the rail,** after Cost, anchor `#compared`, with one item: Isoloop next to the alternatives.
+- **Its panel holds the comparison table:** Isoloop and six alternatives as rows (Remote DOM, Partytown, worker-dom, Comlink with workers, cross-origin iframes, `scheduler.yield()`); columns for UI in a worker, supervision and restart, a durable bus with replay, a security boundary, browser support and the main cost. Each mark is yes, no or partial, with the link to that project's docs it was read from and the date it was checked. Under the table: where an alternative is the better choice.
+- **It isn't a feature.** Its data is `content/alternatives.json`, with its own schema, not a feature entry, so the features' `tab` list stays six and the sticky notes keep six columns. The rail's groups are the six tabs plus Compared, last.
+- **Its heading takes the text colour,** as decision 1's amendment gives a panel with no part. It's about other projects, so no part colour fits.
+- **Cost links to `/benchmarks/`:** the cost feature's panel keeps its short table and adds a link to the full figures.
+
+**Alternatives considered.**
+- **Benchmarks under Examples,** since the figures come from the plant example: they'd be one panel among the examples, while every release's run adds to them.
+- **Compared as a page of its own** (`/compared/`): a seventh page in the nav for one table. A group on Features keeps it next to what Isoloop does.
+- **Compared as a feature entry in the Cost tab:** the comparison is wider than cost, and one feature entry can't hold a table of other projects with sources.
+
+**Consequences.**
+- The figures and the comparison each have one place, linked from the home page.
+- (Bad) Six links in the nav. A seventh page would need the nav looked at again.
+- (Bad) The marks describe other projects and go stale as those projects change. Each carries its date, and a recheck belongs to each minor release's site pass.
 
 ### 2. Features in six tabs
 

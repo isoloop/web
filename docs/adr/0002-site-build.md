@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed); 2026-11-22, search metadata (decisions 8 and 9; see [the amendment](#amended-search-metadata-2026-11-22); Proposed); 2026-11-22, when the site job runs (decision 11; see [the amendment](#amended-when-the-site-job-runs-2026-11-22); Proposed)
+- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed); 2026-11-22, search metadata (decisions 8 and 9; see [the amendment](#amended-search-metadata-2026-11-22); Proposed); 2026-11-22, when the site job runs (decision 11; see [the amendment](#amended-when-the-site-job-runs-2026-11-22); Proposed); 2026-11-24, benchmarks and alternatives (decisions 2, 3 and 7; see [the amendment](#amended-benchmarks-and-alternatives-2026-11-24); Proposed)
 - **Answers:** what `apps/site` is built with, which pages it has, what may run on them, how it shows the examples and the library's diagrams, and what its copy may claim. Where it lives and how it deploys is [ADR 0001](0001-what-this-repo-is.md); its look is [ADR 0003](0003-design-system.md).
 
 ## Context
@@ -299,6 +299,41 @@ The search test reads every deployed page, the other apps' included, but decisio
 
 - **The `site` job also runs** when `shared/`, or the processor's or a dashboard's HTML, Vite config or index-page script, changes.
 - **Other changes to those apps don't run it,** so a PR to a widget doesn't wait for the site's build.
+
+### Amended: benchmarks and alternatives (2026-11-24)
+
+From the site plan for 0.1.1 (`docs/plans/0.1.1-site.md`, decisions 9–13, grilled Q1–Q26). This changes decisions 2, 3 and 7, and the 2026-11-18 landing order. Where this section and those disagree, this section wins.
+
+**A new page (decision 2):** `/benchmarks/`, in the header's nav ([ADR 0005](0005-page-navigation-and-status-marks.md), amended 2026-11-24). In this order:
+1. the latest results as charts, the full A | B | Δ tables folded under them;
+2. the history across versions, shown once there are two runs;
+3. the method: the machine, the rounds, the paired Δ;
+4. the feature benchmarks;
+5. links to the raw results.
+
+**Where the figures come from (decision 7):**
+- **plant-bench** (`apps/bench/plant/`), a frozen copy of the plant example, runs at every minor and major release on the bench server. Its results under `apps/bench/plant/results/<version>/` are what the site shows.
+- **Each figure is labelled with what it was measured on:** the build, the `@isoloop/*` version, the date and the machine. Until the first plant-bench run, the pages show the current plant figures, labelled "plant at `@isoloop/*@0.0.0-next.b8ffdcf`, 2026-11-13, 4 cores fixed at 2.0 GHz".
+- **Charts are our own static SVG**, from a component in `packages/ui` rendered at build time from the results JSON ([ADR 0003](0003-design-system.md)). No chart library and no script in the page, so `default-src 'self'` holds. Paired bars: grey for the baseline, one colour for better and one for worse, and the sign also in words, so colour is never the only signal.
+- Decision 7's rules stay: figures are copied, labelled and linked, a labelled copy never changes, and every row stays, in both directions.
+
+**The landing page (decision 3, as amended 2026-11-18):**
+1. Introduction, the recording, what it's for, features: unchanged.
+2. **What it gives:** unchanged, with its Isoloop column labelled `matched`.
+3. **What it costs, and where it helps:** four small charts in place of the table, each `matched` against native with workers: main-thread busy and typing median, then all-thread CPU and memory after GC. Then a link to `/benchmarks/`. The note on what the native baseline lacks stays.
+4. **Limits:** unchanged.
+5. **Alternatives, new:** a short table of Isoloop and the six alternatives with 3–4 columns of marks, from the same data as `/features/#compared`, then a link there.
+6. How it works, install (now listing `zod` with the packages, since the sample uses it), footer: unchanged.
+
+**Alternatives considered.**
+- **Keeping the costs table on the landing page:** its rows of A, B and Δ for two pairs are easy to skim past. Four charts show the two gains and the two costs at a glance; the tables stay one click away.
+- **Benchmarking the alternatives:** they do different jobs, and a figure taken on our own setup of someone else's project invites the wrong reading. The comparison stays to what each one does, from its own docs.
+- **A chart library:** it would ship script to the page and break `default-src 'self'` or add a build dependency we'd have to wrap; the bars are simple enough to draw ourselves.
+
+**Consequences.**
+- The figures live in one place and are measured the same way each release, so a change between versions shows.
+- (Bad) The site's figures wait on a manual server run each minor release.
+- (Bad) The landing page gains a section.
 
 ## Consequences
 
