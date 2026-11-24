@@ -11,7 +11,8 @@ const git = (...args: string[]): string => execFileSync('git', args, { encoding:
 /**
  * The workspace's packages, from pnpm-workspace.yaml's `packages:` globs (one
  * `*` at the end, as it uses them). An app has E2E when it has a
- * playwright.config.ts, except the site, whose smoke test is site.yml's.
+ * playwright.config.ts, except the site, whose smoke test is site.yml's, and
+ * the frozen benchmarks under apps/bench/, whose smoke is bench.yml's.
  */
 export function workspace(root = '.'): Pkg[] {
   const yaml = readFileSync(join(root, 'pnpm-workspace.yaml'), 'utf8');
@@ -40,7 +41,10 @@ export function workspace(root = '.'): Pkg[] {
       dir,
       name: typeof name === 'string' ? name : dir,
       deps,
-      e2e: dir !== 'apps/site' && existsSync(join(root, dir, 'playwright.config.ts')),
+      e2e:
+        dir !== 'apps/site' &&
+        !dir.startsWith('apps/bench/') &&
+        existsSync(join(root, dir, 'playwright.config.ts')),
     };
   });
 }
