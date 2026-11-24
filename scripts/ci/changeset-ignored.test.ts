@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 import { findings, ignoreList, packagesOf, readChangesets } from './changeset-ignored.ts';
 
-const IGNORE = ['ui', 'creator', 'compare', 'samples'];
+const IGNORE = ['ui', 'creator', 'compare', 'samples', 'plant-bench'];
 const cs = (front: string): string => `---\n${front}\n---\n\nSome change.\n`;
 
 void describe('packagesOf', () => {

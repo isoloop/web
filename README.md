@@ -4,7 +4,7 @@ The [Isoloop](https://github.com/isoloop/isoloop) website, its examples and its 
 
 - **Decisions** about this repo are in [`docs/adr`](docs/adr): what the repo is (0001), how the site is built (0002), the design system (0003), publishing and governance (0004).
 - **Plans** are in [`docs/plans`](docs/plans), starting with the [website plan](docs/plans/site.md).
-- **Apps** are packages under `apps/`, grouped by kind (`apps/dashboards/<name>`). The live examples are at [isoloop.dev/examples](https://isoloop.dev/examples/).
+- **Apps** are packages under `apps/`, grouped by kind (`apps/dashboards/<name>`, and `apps/bench/<name>` for the frozen benchmark builds). The live examples are at [isoloop.dev/examples](https://isoloop.dev/examples/).
 - **Shared packages** are under `packages/`: [`ui`](packages/ui), the design system, and [`compare`](packages/compare), the head-to-head comparison runner the dashboards share. Both are private.
 
 | App | What it shows |
@@ -13,6 +13,7 @@ The [Isoloop](https://github.com/isoloop/isoloop) website, its examples and its 
 | [`apps/basic`](apps/basic) | The smallest example: four vanilla isolates on three event loops, A and B on their own workers, C and D sharing a pool. Block or crash any of them; a pool is a unit of failure. It's embedded on the landing page. [Live](https://isoloop.dev/examples/basic/) |
 | [`apps/dashboards/markets`](apps/dashboards/markets) | A backend-less markets dashboard: public exchange feeds, cross-market aggregates and alerts, all in the visitor's tab. One code base, six builds (native and Isoloop, each with React and with Preact; native + workers with React; a mixed React and Preact Isoloop build), three Isoloop placements (`own`, `matched`, `one`), in Lite, Normal and Heavy sizes, with live metrics. An interactive page adds and edits widgets; the Isoloop builds expose two tools to agents, and `?devtools=1` adds the devtools panel. [Live](https://isoloop.dev/examples/dashboards/markets/) |
 | [`apps/dashboards/plant`](apps/dashboards/plant) | A telemetry dashboard for a fictional plant of eight machines: 72 widgets on seeded high-rate sensor data. Three builds (native, native with a data worker per machine, Isoloop), and placements of the Isoloop build's isolates in workers and pools. An interactive page adds and edits widgets, and `?devtools=1` adds the devtools panel. [Live](https://isoloop.dev/examples/dashboards/plant/) |
+| [`apps/bench/plant`](apps/bench/plant) | plant-bench: a frozen copy of the plant dashboard, pinned exactly, measured on the bench server at every minor and major Isoloop release. Its results are the figures the site publishes. Never deployed. |
 | [`apps/processor`](apps/processor) | Background work as headless isolates, placed by `@isoloop/balancer`. The Playground: add tasks, set each one's CPU, block or crash it, and watch the balancer move it between worker pools. The File processor: groups of processors share a seeded stream of synthetic files through the bus's consumer groups, measured on a worker each, in one pool and with the balancer ([results](apps/processor/comparison/README.md)). [Live](https://isoloop.dev/examples/processor/) |
 
 ## Browser support

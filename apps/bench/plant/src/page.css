@@ -1,0 +1,298 @@
+body {
+  margin: 0;
+  background: #15171a;
+  color: #ddd;
+  font:
+    14px/1.4 system-ui,
+    sans-serif;
+}
+.page header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid #333;
+}
+.page h1 {
+  margin: 0;
+  font-size: 18px;
+}
+/* The header's controls: the kernel switch, then each setting as a small
+   segmented control with a label; the current item is filled. React and
+   Preact on one page (mixed) is shown in orange. */
+.page .seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.page .seg-label {
+  color: #9aa0a6;
+  font-size: 12px;
+}
+.page .seg-items {
+  display: inline-flex;
+  border: 1px solid #3a3f45;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.page .seg-items > a,
+.page .seg-items > span {
+  padding: 2px 9px;
+  color: #8ab4f8;
+  text-decoration: none;
+}
+.page .seg-items > * + * {
+  border-left: 1px solid #3a3f45;
+}
+.page .seg-items > a:hover {
+  background: #22262b;
+}
+.page .seg-items > [aria-current] {
+  background: #3a4a63;
+  color: #fff;
+}
+/* A fixed width that fits either side's builds, so switching sides doesn't
+   move the header; the items share it. */
+.page .builds .seg-items {
+  width: 14rem;
+}
+.page .builds .seg-items > * {
+  flex: 1;
+  text-align: center;
+}
+.page .seg-items > [aria-disabled='true'] {
+  color: #5f6368;
+  cursor: not-allowed;
+}
+.page .seg-items > [data-mixed] {
+  color: #f0a35e;
+}
+.page .seg-items > [data-mixed][aria-current] {
+  background: #4a3524;
+  color: #ffd2a8;
+}
+.page .kernel {
+  margin-left: auto;
+}
+.page .seg[data-disabled] .seg-label {
+  color: #5f6368;
+}
+.page > .description [data-disabled] dt,
+.page > .description [data-disabled] dd {
+  color: #6b7076;
+}
+.page .architecture,
+.page .interactive-link {
+  color: #8ab4f8;
+}
+.page h2 {
+  margin: 0;
+  padding: 4px 12px 0;
+  font-size: 14px;
+  color: #9aa0a6;
+}
+.machines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+  gap: 8px;
+  padding: 8px;
+}
+.machine,
+.fleet {
+  border: 1px solid #2a2d31;
+  border-radius: 4px;
+}
+.fleet {
+  margin: 8px;
+}
+.widgets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 150px;
+  gap: 4px;
+  padding: 4px;
+}
+/* A widget's header: name, where it runs, updates/s on the left; the
+   widget's own stress controls on the right (widgets.css). */
+.page .slot {
+  --head-height: 22px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #1b1e22;
+}
+.widget-head {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: var(--head-height);
+  padding: 0 6px;
+  font-size: 11px;
+  color: #9aa0a6;
+  border-bottom: 1px solid #2a2d31;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.widget-head .widget-name {
+  color: #ddd;
+  font-weight: 600;
+}
+.widget-head [data-head='updates'] {
+  font-variant-numeric: tabular-nums;
+}
+.widget-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+/* The box under the header: what runs where, and what a block takes down.
+   The plant's notice box, with a blue rule: information, where a warning's is
+   yellow. */
+.page > .description {
+  margin: 8px;
+  padding: 8px 12px;
+  border-left: 3px solid #8ab4f8;
+  background: #22262b;
+  line-height: 1.45;
+}
+.page > .description h2 {
+  margin: 0 0 4px;
+  padding: 0;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.page > .description dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 3px 14px;
+  margin: 0;
+}
+.page > .description dl > div {
+  display: contents;
+}
+.page > .description dt {
+  padding-top: 2px;
+  color: #9aa0a6;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.page > .description dd {
+  margin: 0;
+  color: #bbb;
+}
+.page > .description [data-mixed] dt {
+  color: #f0a35e;
+}
+@media (max-width: 1100px) {
+  .page > .description dl {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .page > .description dd {
+    margin-bottom: 4px;
+  }
+}
+.notice {
+  margin: 8px;
+  padding: 6px 10px;
+  border-left: 3px solid #edc948;
+  background: #22262b;
+}
+.metrics dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  padding: 6px 16px;
+  border-bottom: 1px solid #333;
+  font-size: 12px;
+}
+.metrics dl div {
+  display: flex;
+  gap: 6px;
+}
+.metrics dt {
+  color: #999;
+}
+.metrics dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  /* As wide as the longest value ("no input yet"), so the row wraps the same
+     way while values change and nothing below it moves. */
+  min-width: 12ch;
+}
+
+/* Responsiveness on the page (as in the markets app). */
+.responsiveness {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 4px 16px;
+  border-bottom: 1px solid #333;
+  font-size: 12px;
+}
+.tape-strip {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #8ab4f8;
+}
+.tape-track {
+  display: inline-block;
+  will-change: transform;
+}
+.echo input {
+  width: 140px;
+}
+.echo output {
+  display: inline-block;
+  min-width: 80px;
+  margin-left: 6px;
+  color: #aaa;
+}
+.badge {
+  display: inline-flex;
+  gap: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Time per category (M3c task 10). */
+.categories {
+  padding: 4px 16px;
+  border-bottom: 1px solid #333;
+  font-size: 12px;
+}
+.categories table {
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+.categories td,
+.categories th {
+  padding: 1px 10px 1px 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.categories td:first-child,
+.categories th:first-child {
+  text-align: left;
+}
+.record {
+  padding: 4px 16px;
+  border-bottom: 1px solid #333;
+  font-size: 12px;
+}
+.record summary {
+  cursor: pointer;
+  color: #8ab4f8;
+}
+.record pre {
+  white-space: pre-wrap;
+  user-select: all;
+}

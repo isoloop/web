@@ -1,0 +1,36 @@
+{
+  "name": "plant-bench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The frozen benchmark build: plant at plant-v0.4.2, measured at every minor and major Isoloop release. Never deployed.",
+  "scripts": {
+    "build": "vite build --configLoader runner && vite build --configLoader runner --mode native && vite build --configLoader runner --mode native-workers && node scripts/index-page.ts && node scripts/check-builds.ts && node scripts/build-stats.ts",
+    "preview": "vite preview --configLoader runner --outDir dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bench": "node run.ts",
+    "bench:smoke": "node run.ts --smoke"
+  },
+  "dependencies": {
+    "@isoloop/bus": "0.1.0",
+    "@isoloop/host": "0.1.0",
+    "@isoloop/protocol": "0.1.0",
+    "@isoloop/react": "0.1.0",
+    "@isoloop/runtime": "0.1.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@isoloop/codec": "0.1.0",
+    "@isoloop/vite": "0.1.0",
+    "@playwright/test": "1.65.0",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.0.5"
+  }
+}
