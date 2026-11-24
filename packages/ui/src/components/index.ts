@@ -10,5 +10,16 @@ export { Frame, type FrameProps } from './Frame.tsx';
 export { Head, type HeadProps } from './Head.tsx';
 export { Header, type Current } from './Header.tsx';
 export { PageMeta, type PageMetaProps } from './PageMeta.tsx';
+export {
+  ChartLegend,
+  formatDelta,
+  formatValue,
+  PairedBars,
+  type ChartLegendProps,
+  type ChartUnit,
+  type PairedBarsProps,
+  type PairedBarsRow,
+  type Verdict,
+} from './PairedBars.tsx';
 export { Table, type TableProps } from './Table.tsx';
 export { ThemeToggle } from './ThemeToggle.tsx';
