@@ -169,6 +169,7 @@ The first round of directions changed only colours on one layout, and read as ge
 | `--ui-part-isolate` | `#0b7480` | `#4cc6d3` | an isolate on its own worker (the recording's second isolate, B, takes `--ui-accent`, so the two own-worker tracks stay apart) |
 | `--ui-part-pool` | `#6e46c2` | `#b79af6` | a pool |
 | `--ui-bad` | `#b3261e` | `#ff8f86` | a rejected record, a failure |
+| `--ui-worse` | `#b75400` | `#f9aa60` | a chart's "worse" bar, a measured cost (added 2026-11-24, [ADR 0005](0005-page-navigation-and-status-marks.md#amended-orange-for-a-charts-worse-2026-11-24)) |
 
 - **The `--ui-part-*` tokens are new,** and they're information, not decoration. The same colour always means the same part of the system: in the recording's tracks, the bars beside feature lines, and the section headings on `/features/`.
 - **The contrast test (decision 8)** gains each part colour against `--ui-bg` and `--ui-surface` at 3:1, and `--ui-bad` at 4.5:1.

@@ -795,7 +795,8 @@
   }
 
   /* Paired bars (PairedBars.tsx): grey for the baseline, the accent when
-     Isoloop is better, --ui-bad when it's worse; the delta says it in words.
+     Isoloop is better, --ui-worse (orange: a cost, not an error) when it's
+     worse; the delta says it in words.
      Bars are SVG sized by a width attribute, so no inline style is needed. */
   .ui-chart {
     margin: 0;
@@ -894,7 +895,7 @@
     fill: var(--ui-accent);
   }
   .ui-chart-line[data-verdict='worse'] rect {
-    fill: var(--ui-bad);
+    fill: var(--ui-worse);
   }
   .ui-chart-line[data-verdict='same'] rect {
     fill: var(--ui-text-muted);
@@ -927,7 +928,7 @@
     background: var(--ui-accent);
   }
   .ui-chart-legend [data-verdict='worse']::before {
-    background: var(--ui-bad);
+    background: var(--ui-worse);
   }
   .ui-chart-legend [data-verdict='same']::before {
     background: var(--ui-text-muted);

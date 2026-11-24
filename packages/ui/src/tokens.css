@@ -146,6 +146,8 @@
   --ui-part-pool: var(--ui-violet-1);
   --ui-bad: var(--ui-red-1);
   --ui-experimental: var(--ui-orange-1);
+  /* A chart's "worse" bar (PairedBars): a cost, not an error, so not --ui-bad. */
+  --ui-worse: var(--ui-orange-1);
   --ui-released: var(--ui-green-1);
 }
 
@@ -168,6 +170,7 @@
   --ui-part-pool: var(--ui-violet-2);
   --ui-bad: var(--ui-red-2);
   --ui-experimental: var(--ui-orange-2);
+  --ui-worse: var(--ui-orange-2);
   --ui-released: var(--ui-green-2);
 }
 
@@ -191,6 +194,7 @@
     --ui-part-pool: var(--ui-violet-2);
     --ui-bad: var(--ui-red-2);
     --ui-experimental: var(--ui-orange-2);
+    --ui-worse: var(--ui-orange-2);
     --ui-released: var(--ui-green-2);
   }
 }

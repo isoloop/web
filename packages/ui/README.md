@@ -41,7 +41,7 @@ The dashboards take `ui({ bar: true })`. Their configs load through Vite's runne
 />
 ```
 
-- **Colours:** the baseline is `--ui-border` grey; Isoloop's bar is `--ui-accent` when better and `--ui-bad` when worse (`--ui-text-muted` for a row marked `verdict: 'same'`). The delta under each pair says it in words ("52 points lower, better"), so colour is never the only signal.
+- **Colours:** the baseline is `--ui-border` grey; Isoloop's bar is `--ui-accent` when better and `--ui-worse` (orange, a cost rather than an error) when worse (`--ui-text-muted` for a row marked `verdict: 'same'`). The delta under each pair says it in words ("52 points lower, better"), so colour is never the only signal.
 - **Better or worse** comes from the sign and `lowerIsBetter` (default true, shown as "Lower is better." under the title; `note` replaces that line, `null` drops it). A row's `verdict` overrides it, e.g. `'same'` for a change inside the run's spread.
 - **One scale per chart,** from zero to `max` (default 100 for `%`, else the largest value).
 - **Small charts side by side:** `compact` hides the series names visually (screen readers still read them) and `legend={false}` drops each chart's legend; put one `ChartLegend` beside them.
