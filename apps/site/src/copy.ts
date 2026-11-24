@@ -685,7 +685,11 @@ export const howItWorks = {
         'An isolate is a module whose default export is `defineIsolate(…)`: a `start(ctx)` function, or a React or Preact component through an adapter. The object passed to `spawn` is its manifest. It names the module, the element the isolate renders into (its surface) and its grants. An isolate with no surface is headless: it gets the same supervision and bus, and its `ctx.root` is `undefined`.',
         '`start` gets a context: `ctx.bus` for topics, `ctx.root` to render into, `ctx.host` for host calls (measure, focus, scroll, navigate), and `ctx.reportError` and `ctx.onShutdown`.',
       ],
-      code: { label: 'A host and the isolate it spawns', host: 'main.ts', isolate: 'counter.ts' },
+      code: {
+        label: 'A host and the isolate it spawns',
+        host: 'main.ts',
+        isolate: 'counter.ts',
+      },
     },
     // Figures: isoloop/isoloop docs/guide/pools.md, "When to pool", from the
     // plant's matched comparison (apps/dashboards/plant/comparison/matched-v2).
@@ -820,8 +824,18 @@ export const examplesPage = {
   heading: 'Examples',
   intro:
     'Each example runs live in your browser on the published @isoloop packages. The dashboards come as native builds and Isoloop builds of the same code, so you can compare them side by side.',
-  nav: { label: 'Examples', previous: 'Previous', next: 'Next', pager: 'Previous and next' },
-  links: { live: 'Open live', source: 'Source', results: 'Results', architecture: 'Architecture' },
+  nav: {
+    label: 'Examples',
+    previous: 'Previous',
+    next: 'Next',
+    pager: 'Previous and next',
+  },
+  links: {
+    live: 'Open live',
+    source: 'Source',
+    results: 'Results',
+    architecture: 'Architecture',
+  },
   shows: 'What it shows',
   try: 'What to try',
   measurements: 'Measurements',
@@ -875,7 +889,7 @@ export const benchmarksPage = {
   description:
     'Isoloop measured against native builds of the same dashboard: main-thread time, typing, start-up, recovery, CPU and memory, on one machine, in interleaved rounds.',
   heading: 'Benchmarks',
-  lede: 'The plant dashboard, built natively and with Isoloop, measured on one machine in interleaved rounds. Isoloop takes the widgets off the main thread, and it costs CPU, memory and start-up time. The figures below show both.',
+  lede: 'The plant dashboard, built natively and with Isoloop, measured on one machine in interleaved rounds. Isoloop takes the widgets off the main thread, and it costs CPU, memory and start-up time. The figures below show both. Plain JavaScript work, such as sorts and Maps, is measured on its own further down.',
   /** The label on every figure: what it was measured on. `date` is YYYY-MM-DD, shown as "13 November 2026". */
   measuredOn: (run: {
     name: string;
@@ -892,6 +906,7 @@ export const benchmarksPage = {
     history: 'Across versions',
     method: 'How it’s measured',
     features: 'Feature benchmarks',
+    js: 'Plain JavaScript work',
     raw: 'Raw results',
   },
   /** The builds, as the runs name them. */
@@ -905,7 +920,11 @@ export const benchmarksPage = {
   pair: (b: string, a: string) => `${b} against ${a.toLowerCase()}`,
   /** After the pair's heading, for the default placement. */
   defaultPlacement: 'the default placement',
-  engines: { chromium: 'Chromium', firefox: 'Firefox', webkit: 'WebKit' } as Record<string, string>,
+  engines: {
+    chromium: 'Chromium',
+    firefox: 'Firefox',
+    webkit: 'WebKit',
+  } as Record<string, string>,
   rate: (khz: number) => `${khz} kHz`,
   figures: {
     mainThreadCpuPct: 'Main thread busy',
@@ -1006,7 +1025,161 @@ export const benchmarksPage = {
     summary: 'the summary',
     results: 'the raw results',
     environment: 'the machine and versions',
+    /** js-bench's line: its machine is described in apps/bench/machines.md. */
+    machine: 'the machine',
     bench: 'plant-bench, the build each release is measured on',
+    /** js-bench's line in the list: "js-bench at 0.1.0, 2026-11-24:". */
+    jsBench: 'js-bench, the plain JavaScript work each release is measured on',
+  },
+  /**
+   * "Plain JavaScript work" (ADR 0002, amended 2026-11-24): js-bench's latest
+   * minor or major run (build/benchmarks.ts). Every figure is read from its
+   * summary.json; the sentences are templates around them.
+   */
+  js: {
+    /** The label. `date` is YYYY-MM-DD, shown as "24 November 2026". */
+    measuredOn: (r: {
+      version: string;
+      date: string;
+      browsers: string;
+      cores: number | null;
+      clock: string | null;
+      machine: string;
+      machineHref: string;
+    }) =>
+      `Measured on js-bench at \`@isoloop/*@${r.version}\`, ${longDate(r.date)}, ${r.browsers}, on [${r.machine}](${r.machineHref})${r.cores ? `, ${r.cores} cores` : ''}${r.clock ? ` fixed at ${r.clock}` : ''}.`,
+    /** `bench-machine-1` as "bench machine 1". */
+    machine: (id: string) => id.replaceAll('-', ' '),
+    lede: 'Plain JavaScript work, such as sorts, Maps, Sets, JSON and `structuredClone`, with no components and no DOM. Each workload runs on the main thread, in plain Workers and in three Isoloop placements, and the figure is how many operations it completes per second. Higher is better.',
+    /** Under the label when the run has one browser only. */
+    oneBrowser: (browser: string) =>
+      `This run is ${browser} only. Firefox joins at the next minor release.`,
+    found: 'What we found',
+    /** The placements, as the page names them. */
+    placements: {
+      'native-main': 'Main thread',
+      'native-worker': 'Plain Workers',
+      'isoloop-own': 'Isoloop, a worker each',
+      'isoloop-one': 'Isoloop, one shared worker',
+      'isoloop-balancer': 'Isoloop balancer',
+    } as Record<string, string>,
+    /** A plain Worker, for one copy. */
+    oneWorker: 'Plain Worker',
+    tiers: {
+      cheap: 'Cheap work',
+      regular: 'Regular work',
+      heavy: 'Heavy work',
+    } as Record<string, string>,
+    /** After a tier's name: how long one op takes on the main thread, e.g. "about 1 µs to 5 µs an op". */
+    tierTime: (lo: string, hi: string) => `${lo} to ${hi} an operation`,
+    workloads: {
+      'map-get-set': 'Map get/set',
+      'set-add-has-delete': 'Set add/has/delete',
+      'array-push-pop-indexof': 'Array push/pop/indexOf',
+      'object-read-write': 'Object read/write',
+      'small-filter-map': 'Small filter/map/reduce',
+      'sort-numbers-10k': 'Sorting 10k numbers',
+      'sort-objects-2k': 'Sorting 2k objects',
+      'filter-map-reduce-10k': 'Filter/map/reduce on 10k objects',
+      'map-build-lookup-10k': 'Building and reading a 10k Map',
+      'set-dedupe-groupby-10k': 'Dedupe and group 10k',
+      'json-roundtrip-50kb': 'JSON round trip, 50 KB',
+      'sort-numbers-1m': 'Sorting 1M numbers',
+      'sort-typed-1m': 'Sorting a 1M Float64Array',
+      'sort-objects-200k': 'Sorting 200k objects',
+      'map-insert-iterate-1m': '1M Map inserts',
+      'structured-clone-5mb': '`structuredClone` of 5 MB',
+      'matmul-300': '300×300 matrix multiply',
+    } as Record<string, string>,
+    /** "Map get/set: 2,429,644 against 2,430,537". */
+    against: (name: string, value: string, base: string) => `${name}: ${value} against ${base}`,
+    /** The findings, each from the run's figures. */
+    findings: {
+      oneCopy: (same: number, total: number) =>
+        `**One copy runs at about the same speed wherever it runs.** On ${same} of ${total} workloads, the main thread, a plain Worker and Isoloop are within 5% of each other.`,
+      oneCopyOther: 'The others (main thread, plain Worker, Isoloop)',
+      fourOwn: (same: number, total: number, lo: string, hi: string) =>
+        `**Four copies, a worker each: Isoloop does what plain Workers do,** within 2% on ${same} of ${total} workloads. That's ${lo} to ${hi} times the main thread, which runs the copies one at a time.`,
+      fourOwnOther: 'The others (Isoloop against plain Workers)',
+      fourOne: (same: number, total: number) =>
+        `**All four copies in one Isoloop worker do about what the main thread does,** since both have one core: within 5% on ${same} of ${total} workloads.`,
+      fourOneOther: 'The others (one shared worker against the main thread)',
+      balancer: (lo: string, hi: string, same: number, total: number, moves: string) =>
+        `**The balancer gets ${lo} to ${hi} of plain Workers on ${same} of ${total} workloads.** It measures every copy first and moves it, and a typical run makes ${moves} moves inside the window.`,
+      balancerOther: 'The others (the balancer against plain Workers)',
+      timer: (main1: string, main4: string, mainMax: string, off: string) =>
+        `**The page stays responsive while the work is off the main thread.** The page's 100 ms timer fires late by ${off} or less (p95) in plain Workers and in every Isoloop placement. With the work on the main thread, it's about ${main1} late with one copy, ${main4} with four, and up to ${mainMax} with heavy work.`,
+      notMeasured:
+        'Not measured here: start-up time, memory per worker and the cost of the bus. These figures are throughput only.',
+    },
+    /** A difference as a share: "19% fewer", "66% more". */
+    share: (pct: number) => `${Math.abs(pct)}% ${pct < 0 ? 'fewer' : 'more'}`,
+    /** An open cost, with its issue (decision 14). Shown while the workload still differs. */
+    openCost: {
+      workload: 'structured-clone-5mb',
+      issue: 'https://github.com/isoloop/isoloop/issues/441',
+      text: (one: string, oneBase: string, four: string, fourBase: string) =>
+        `**One open cost: \`structuredClone\` of a 5 MB object is slower in an Isoloop worker.** With one copy, Isoloop does ${one} operations per second against ${oneBase} in a plain Worker; with four, ${four} against ${fourBase}. The cause isn't measured yet.`,
+      link: 'The issue tracks it',
+    },
+    charts: {
+      heading: 'Four copies at once',
+      note: 'Four copies of each workload at once, each in its own worker. Each chart shows plain Workers in grey and Isoloop, a worker each, in colour: the median of the rounds, in operations per second. Higher is better. A difference inside both sides’ lowest-to-highest range reads “within the spread”.',
+    },
+    tables: {
+      all: 'All five placements, four copies at once',
+      allCaption:
+        'Operations per second, four copies at once, the median of the rounds. The balancer’s moves are per round.',
+      workload: 'Workload',
+      moves: 'Balancer moves',
+      oneCopy: 'One copy',
+      oneCopyNote:
+        'One copy of each workload: the main thread, a plain Worker and Isoloop. With one copy, Isoloop’s placements are the same, and the balancer has nothing to place.',
+      oneCopyCaption: 'Operations per second, one copy, the median of the rounds.',
+      timer: 'How late the page’s timer fires',
+      timerNote:
+        'The page runs a 100 ms timer during each measurement and records how late it fires, p95. That’s the cost to the page, which the operation count alone doesn’t show.',
+      timerCaption:
+        'The p95 lateness of the page’s 100 ms timer, the median of the rounds, across the workloads.',
+      placement: 'Placement',
+      typical: (n: number) => `${n === 1 ? 'One copy' : 'Four copies'}, typical`,
+      highest: (n: number) => `${n === 1 ? 'One copy' : 'Four copies'}, highest`,
+      none: '–',
+    },
+    scenario: {
+      heading: 'The balancer scenario',
+      text: (own: string, ownWorkers: string, bal: string, balWorkers: string, fewer: string) =>
+        `Two heavy copies and six cheap ones at once. Summed over the copies, a worker each does ${own} operations per second on ${ownWorkers} workers, and the balancer does ${bal} on ${balWorkers} workers, ${fewer}.`,
+      fold: 'The scenario, copy by copy',
+      caption:
+        'Operations per second per copy, the median of the rounds, then the workers in use and the page timer’s p95 lateness.',
+      copy: 'Copy',
+      total: 'All copies, summed',
+      workers: 'Workers',
+      lateness: 'Timer lateness, p95',
+    },
+    method: {
+      heading: 'How it’s measured',
+      items: [
+        [
+          'Each measurement',
+          'The copies start together and share one clock window: a 10 s warm-up (30 s for the balancer, so it can place the copies), then 60 s counted. The scenario warms up for 30 s and counts 120 s.',
+        ],
+        [
+          'Operations',
+          'Each operation is deterministic from a seed and returns a number the engine can’t drop. Operations run in batches of about 1 ms, in slices of about 50 ms, and every event loop keeps turning between slices. Every placement uses the same batch sizes.',
+        ],
+      ] as [string, string][],
+      placementsLabel: 'Placements',
+      placementsText: (maxWorkers: number) =>
+        `The main thread runs the copies interleaved, slice by slice. Plain Workers are one module Worker per copy, with no Isoloop. Isoloop runs one isolate per copy: each in its own worker (the default), all in one worker, or placed by the balancer with up to ${maxWorkers} workers.`,
+      rounds: (n: number) =>
+        `${n} interleaved rounds, each running every workload's placements in an order rotated per round. A figure is the median of the rounds.`,
+      roundsLabel: 'Rounds',
+      when: 'When',
+      whenText:
+        'js-bench runs before every release, patches included, as the release’s comparison with the one before. This page shows the latest minor or major release, the same version as plant-bench’s figures.',
+    },
   },
 };
 

@@ -146,7 +146,7 @@ test('the header fits six links at 360px, with no sideways scroll', async ({ pag
 // figures carry what they were measured on (ADR 0002, amended 2026-11-24).
 test('/benchmarks/ shows its charts, then the tables when unfolded', async ({ page }) => {
   await page.goto('/benchmarks/');
-  await expect(page.locator('.bench-measured')).toContainText('Measured on plant-bench at');
+  await expect(page.locator('.bench-measured').first()).toContainText('Measured on plant-bench at');
   await expect(page.locator('#figures .ui-chart').first()).toBeVisible();
   const fold = page.locator('#figures details.bench-fold').first();
   await expect(fold.locator('table').first()).toBeHidden();
@@ -155,6 +155,24 @@ test('/benchmarks/ shows its charts, then the tables when unfolded', async ({ pa
   await expectAccessible(page, { exclude: ['iframe'] });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/benchmarks/');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+// "Plain JavaScript work": js-bench's charts per tier, and its tables folded.
+test('/benchmarks/#js shows js-bench, its tables when unfolded', async ({ page }) => {
+  await page.goto('/benchmarks/#js');
+  const js = page.locator('#js');
+  await expect(js.locator('.bench-measured')).toContainText('Measured on js-bench at');
+  await expect(js.locator('.ui-chart').first()).toBeVisible();
+  const folds = js.locator('details.bench-fold');
+  await expect(folds).toHaveCount(2);
+  await folds.nth(0).locator('summary').click();
+  await folds.nth(1).locator('summary').click();
+  await expect(folds.nth(0).locator('table')).toBeVisible();
+  await expect(folds.nth(1).locator('table')).toBeVisible();
+  await expectAccessible(page, { exclude: ['iframe'] });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/benchmarks/#js');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 

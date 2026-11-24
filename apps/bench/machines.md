@@ -10,7 +10,7 @@ The benchmarks' labels link here: [plant-bench](plant/README.md) and [js-bench](
 
 | | |
 | --- | --- |
-| CPU | AMD Ryzen 7 5825U: 8 cores, 16 threads, x64 |
+| CPU | an x64 laptop CPU: 8 cores, 16 threads. Its model is in each run's raw results, not here |
 | Memory | 30 GB |
 | OS | Ubuntu 24.04 |
 | Cores used | 2, 4, 6 and 8: 4 physical cores, one thread each (`--cpuset-cpus=2,4,6,8`). Core 0 is left out because it takes most interrupts. |

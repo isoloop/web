@@ -139,6 +139,8 @@ describe('formatting', () => {
     [1240, 'ms', '1.2 s'],
     [0.2, 's', '0.2 s'],
     [44.4, 'MB', '44 MB'],
+    [2429644.2, 'ops/s', '2,429,644 ops/s'],
+    [20.46, 'ops/s', '20.5 ops/s'],
   ] as const)('%d %s is %s', (n, unit, text) => {
     expect(formatValue(n, unit)).toBe(text);
   });
@@ -150,6 +152,17 @@ describe('formatting', () => {
     expect(formatDelta(3.2, 2.9, 's').text).toBe('0.3 s lower, better');
     expect(formatDelta(0, 0, 's')).toEqual({ text: 'the same', verdict: 'same' });
     expect(formatDelta(41, 41.2, 'ms')).toEqual({ text: 'the same', verdict: 'same' });
+  });
+
+  it('says an ops/s difference as a share of the baseline, higher being better', () => {
+    // js-bench 0.1.0: structuredClone of 5 MB, plain Workers 25.1, Isoloop 20.5.
+    expect(formatDelta(25.1, 20.5, 'ops/s', { lowerIsBetter: false }).text).toBe(
+      '18% lower, worse',
+    );
+    expect(formatDelta(4974, 5010, 'ops/s', { lowerIsBetter: false }).text).toBe(
+      '1% higher, better',
+    );
+    expect(formatDelta(1000, 1002, 'ops/s', { lowerIsBetter: false }).text).toBe('the same');
   });
 
   it('uses a measured paired delta over the difference of the two values', () => {
