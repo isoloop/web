@@ -2,7 +2,7 @@
 // one exact version (a release or a prerelease such as 0.2.0-next.3) and
 // install it. The workspace's pnpm-workspace.yaml already lets @isoloop/*
 // through on the day it's published. A bump is for a run's branch only and is
-// never merged (README.md, "Before every release").
+// never merged (README.md, "Before a minor or major release").
 import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';

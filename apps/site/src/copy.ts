@@ -1178,7 +1178,7 @@ export const benchmarksPage = {
       roundsLabel: 'Rounds',
       when: 'When',
       whenText:
-        'js-bench runs before every release, patches included, as the release’s comparison with the one before. This page shows the latest minor or major release, the same version as plant-bench’s figures.',
+        'js-bench runs before every minor and major release, never for a patch, as the release’s comparison with the one before. This page shows the latest of those, the same version as plant-bench’s figures.',
     },
   },
 };
