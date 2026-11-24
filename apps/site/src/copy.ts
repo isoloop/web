@@ -538,7 +538,7 @@ export const howItWorks = {
           ],
           [
             'Host calls',
-            '`measure`, `focus`, `scrollIntoView` and `requestCanvas`, run in the compositor’s frame.',
+            '`measure`, `focus`, `scrollIntoView` and `requestCanvas` run in the compositor’s frame; `navigate` goes to the router, and needs the `navigate` grant.',
           ],
         ] as [string, string][],
         steps: [
@@ -635,7 +635,7 @@ export const howItWorks = {
       heading: 'Workers and pools',
       text: [
         'Each isolate runs in a worker: a thread of its own, with its own event loop. By default an isolate gets a worker to itself. With `pool` in its manifest, it shares one worker with every isolate that names the same pool.',
-        'A pool saves memory. In the plant dashboard’s matched comparison, a small headless isolate cost about 0.2 MB in a pool, against 2.8 MB on its own worker; in return its members stall and restart together, as the next paragraph says. Measured with `@isoloop/*@0.0.0-next.d028bc1` in Chromium, on 4 physical cores fixed at 2.0 GHz, medians of 5 rounds, memory after GC 16 s after load.',
+        'A pool saves memory. In the plant dashboard’s matched comparison, a small headless isolate cost about 0.2 MB in a pool, against 2.8 MB on its own worker; in return its members stall and restart together, as the next paragraph says. Measured on a build before 0.1 (`@isoloop/*@0.0.0-next.d028bc1`) in Chromium, on 4 physical cores fixed at 2.0 GHz, medians of 5 rounds, memory after GC 16 s after load.',
         'Members share an event loop. One that blocks stalls them all, and a worker error restarts them all; an error a member reports as its own restarts only that member (the Restarts step has the details). They also share one document, so they can read each other’s DOM and input, and they can reach each other’s bus ports, so a pool holds all its members’ grants. Pool only isolates you trust together, and keep widgets that handle secrets on their own worker.',
         'The kernel never pools on its own. Placement is the manifest’s choice, or that of the opt-in, experimental `@isoloop/balancer`, which moves isolates between pools as their load changes.',
       ],
@@ -669,7 +669,7 @@ export const howItWorks = {
         'A worker has no DOM. A visual isolate gets a small DOM subset as its `document`, enough for React, Preact and plain DOM code to run unchanged. The subset records each change (insert, move, remove, text, attribute, listener) and sends the host one batch per microtask.',
         "On the host, the compositor applies each isolate’s batches to its surface, with a budget of 8 ms of DOM work per frame. Every tag, attribute and URL passes the host’s component registry first, so an isolate can’t create a script or an `on*` handler. The same registry lets isolates render the host’s own design-system elements by name: with `components: { 'iso-button': { tag: 'ds-button', attributes: ['variant'] } }`, an isolate’s `<iso-button>` becomes a `<ds-button>` on the page.",
         'Each surface is a shadow root, so the page’s stylesheets don’t reach it; inherited properties, such as the font, still do. The kernel’s `styles` are adopted into every surface, and an isolate adds its own with `ctx.styles(css)`. Modals, tooltips and menus that libraries render into `document.body` go into `ctx.portalRoot`, inside the isolate’s own surface.',
-        'Input on a surface goes back to the worker as data, and is dispatched there with capture and bubble. Functions never cross the boundary. What needs the real page, the isolate asks the host for through host calls: `ctx.host.measure`, `focus` and `scrollIntoView` for a node, and `requestCanvas`, which hands the isolate an `OffscreenCanvas` to draw on from the worker, as charts do.',
+        'Input on a surface goes back to the worker as data, and is dispatched there with capture and bubble. Functions never cross the boundary. What needs the real page, the isolate asks the host for through host calls: `ctx.host.measure`, `focus` and `scrollIntoView` for a node, `requestCanvas`, which hands the isolate an `OffscreenCanvas` to draw on from the worker, as charts do, and `navigate` for a URL change, which needs the `navigate` grant.',
       ],
       differs: {
         heading: 'What changes for your code',

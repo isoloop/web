@@ -10,15 +10,26 @@ it('renders the round mark, hidden from assistive tech, with a hidden label and 
   expect(html).toContain('<circle cx="8" cy="8" r="6.9"');
   expect(html).toContain('<path d="M8 4.3v4.5"');
   expect(html).toContain('<circle cx="8" cy="11.4" r="1.05"');
-  expect(html).toContain('<span class="ui-sr-only">Experimental</span>');
+  expect(html).toContain('<span class="ui-sr-only"> Experimental</span>');
 });
 
 it('takes another label', () => {
   const html = render(<ExperimentalMark label="Eksperimentell" />);
   expect(html).toContain('title="Eksperimentell"');
-  expect(html).toContain('<span class="ui-sr-only">Eksperimentell</span>');
+  expect(html).toContain('<span class="ui-sr-only"> Eksperimentell</span>');
 });
 
 it('has no inline style (CSP: default-src self)', () => {
   expect(render(<ExperimentalMark />)).not.toContain('style=');
+});
+
+it('keeps a space between the word before it and its label in the text', () => {
+  const html = render(
+    <p>
+      Devtools
+      <ExperimentalMark />
+    </p>,
+  );
+  const text = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+  expect(text).toBe('Devtools Experimental');
 });

@@ -517,3 +517,11 @@ test('robots.txt points at a sitemap whose every page is served', async ({ reque
   );
   expect(statuses.filter(([, status]) => status !== 200)).toEqual([]);
 });
+
+test('how it works names every host call of the API at the pin', async ({ page }) => {
+  await page.goto('/how-it-works/');
+  const text = (await page.locator('main').textContent()) ?? '';
+  for (const call of ['measure', 'focus', 'scrollIntoView', 'requestCanvas', 'navigate']) {
+    expect(text, call).toContain(call);
+  }
+});

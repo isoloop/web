@@ -4,6 +4,7 @@ import {
   byPackageOrder,
   isDependencyOnly,
   isInternal,
+  loadChangelog,
   newestFirst,
   parseChangelog,
 } from './changelog.ts';
@@ -177,5 +178,50 @@ describe('isInternal', () => {
     expect(isInternal('The Isoloop message bus: typed topics in a worker.')).toBe(false);
     expect(isInternal('Experimental devtools panel for Isoloop.')).toBe(false);
     expect(isInternal(undefined)).toBe(false);
+  });
+});
+
+describe('loadChangelog', () => {
+  const names = [
+    'host',
+    'runtime',
+    'bus',
+    'react',
+    'preact',
+    'vite',
+    'cli',
+    'devtools',
+    'balancer',
+    'webmcp',
+  ];
+  const files: Record<string, string> = {};
+  for (const n of names) {
+    const name = n === 'cli' ? 'isoloop' : `@isoloop/${n}`;
+    files[`packages/${n}/package.json`] = JSON.stringify({ name, description: 'A package.' });
+    files[`packages/${n}/CHANGELOG.md`] =
+      `# ${name}\n\n## 0.1.0\n\nThe first release.\n\n## 0.1.0-next.1\n\n### Patch Changes\n\n- 1a2b3c4: A fix.\n`;
+  }
+  for (const n of ['codec', 'dom', 'protocol']) {
+    files[`packages/${n}/package.json`] = JSON.stringify({
+      name: `@isoloop/${n}`,
+      description: 'Internal glue.',
+    });
+    files[`packages/${n}/CHANGELOG.md`] = '# x\n\n## 0.1.0\n\nInternal.\n';
+  }
+  const library = {
+    read: (path: string) => files[path],
+    list: () => Object.keys(files),
+  };
+
+  it('gives each of the 10 public packages its 0.1.0 entry, and leaves the internal ones out', () => {
+    const { packages } = loadChangelog(library, 'sha');
+    expect(packages).toHaveLength(10);
+    for (const pkg of packages) {
+      expect(
+        pkg.releases.map((r) => r.version),
+        pkg.name,
+      ).toContain('0.1.0');
+      expect(pkg.releases.find((r) => r.version === '0.1.0')?.intro).not.toEqual([]);
+    }
   });
 });

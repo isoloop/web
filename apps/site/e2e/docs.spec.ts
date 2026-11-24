@@ -144,6 +144,8 @@ test('an experimental guide has the round mark in the sidebar and the full pill 
   await expect(link.locator('.ui-pill')).toHaveCount(0);
   // The accessible name carries it, so colour isn't the only signal.
   await expect(link).toHaveAccessibleName(/ Experimental$/);
+  // The raw text keeps a space before the label, so a copy of it doesn't glue the two words.
+  expect(await link.evaluate((el) => el.textContent)).toMatch(/\S Experimental\s*$/);
   // The label is there for screen readers only: it takes no room.
   const box = await link.locator('.ui-sr-only').boundingBox();
   expect(box?.width).toBeLessThanOrEqual(1);
