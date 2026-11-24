@@ -430,7 +430,7 @@ function Raw({ runs }: { runs: BenchRun[] }): VNode {
 
 function SideNav({ runs }: { runs: number }): VNode {
   return (
-    <nav class="docs-side" aria-label={c.nav}>
+    <nav class="docs-side bench-nav" aria-label={c.nav}>
       <div>
         <h2>{c.nav}</h2>
         <ul>
@@ -487,5 +487,6 @@ export const benchmarksPage: Page = {
   path: '/benchmarks/',
   section: 'benchmarks',
   head: { title: c.title, searchTitle: c.searchTitle, description: c.description },
+  scripts: ['/src/demos/benchmarks.ts'],
   render: (data) => <Benchmarks {...data} />,
 };

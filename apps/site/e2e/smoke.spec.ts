@@ -158,6 +158,17 @@ test('/benchmarks/ shows its charts, then the tables when unfolded', async ({ pa
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 
+// Its side nav marks the section in view, as the docs' "On this page" does.
+test('/benchmarks/ marks the section the reader is at in its side nav', async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await page.goto('/benchmarks/');
+  const nav = page.locator('.docs-only-wide .bench-nav');
+  await expect(nav.locator('a[aria-current="location"]')).toHaveAttribute('href', '#found');
+  await nav.locator('a[href="#method"]').click();
+  await expect(nav.locator('a[aria-current="location"]')).toHaveAttribute('href', '#method');
+  await expect(nav.locator('a[aria-current="location"]')).toHaveCount(1);
+});
+
 test('the code behind the landing demo folds out of the recording, as tabs', async ({ page }) => {
   await page.goto('/');
   const fold = page.locator('.ui-recording details.ui-demo-code');
