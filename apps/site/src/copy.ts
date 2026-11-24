@@ -210,12 +210,13 @@ export const home = {
     heading: 'How it works',
     // Sources: isoloop/isoloop docs/diagrams (runtime topology, restarts),
     // ADR 0015 (pools), docs/guide/pools.md (start positions, isoloop#186),
-    // docs/guide/supervision.md (the defaults: 3 restarts within 60 s, so a
-    // fourth crash in a minute fails the isolate).
+    // docs/guide/supervision.md (supervisor.maxRestarts and withinMs, 3 and
+    // 60 000 by default; old restarts age out of the window), docs/guide/bus.md
+    // (`from`, persistent topics), the how-it-works rendering step (the compositor).
     text: [
-      'Your app’s host runs on the page’s main thread. Each isolate runs in a worker, either one of its own or a pool it shares with others.',
-      'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says.',
-      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. The supervisor gives up on an isolate that crashes again after 3 restarts in a minute. A restarted isolate picks its topics up where each subscription says: only new records, everything retained, or after its last commit. In a consumer group that has committed, it resumes after the commit.',
+      'Your app’s host runs on the page’s main thread. Each isolate runs in a worker, either one of its own or a pool it shares with others. A visual isolate renders with React, Preact or plain DOM in its worker, and the host applies its DOM changes to the page once per frame and sends input back.',
+      'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says. A persistent topic is also written to disk, so it survives a reload.',
+      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. It restarts a crashed isolate up to a set number of times within a time window, 3 in 60 s by default, and fails it on the next crash in that window; one that crashes now and then keeps being restarted. A restarted isolate reads each topic from where its subscription says: only new records, everything retained, or after its last commit.',
     ],
     link: 'How it works, part by part',
   },
