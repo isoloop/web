@@ -146,7 +146,7 @@ test('the header fits six links at 360px, with no sideways scroll', async ({ pag
 // figures carry what they were measured on (ADR 0002, amended 2026-11-24).
 test('/benchmarks/ shows its charts, then the tables when unfolded', async ({ page }) => {
   await page.goto('/benchmarks/');
-  await expect(page.locator('.bench-measured')).toContainText('Measured on plant at');
+  await expect(page.locator('.bench-measured')).toContainText('Measured on plant-bench at');
   await expect(page.locator('#figures .ui-chart').first()).toBeVisible();
   const fold = page.locator('#figures details.bench-fold').first();
   await expect(fold.locator('table').first()).toBeHidden();
