@@ -1,0 +1,61 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T13:21:49.516Z",
+  "job": {
+    "key": "map-build-lookup-10k-n1",
+    "tier": "regular",
+    "workloads": [
+      "map-build-lookup-10k"
+    ],
+    "copies": "map-build-lookup-10k*1",
+    "n": 1,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795526519641,
+      "endAt": 1795526579641
+    },
+    "copies": [
+      {
+        "id": "c1-map-build-lookup-10k",
+        "workload": "map-build-lookup-10k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 61864,
+          "opsPerMin": 61864,
+          "opP50Us": 899.90234375,
+          "opP95Us": 1000,
+          "batches": 61864,
+          "checksum": 49995000
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 61864,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.10009765625,
+      "maxMs": 0.199951171875,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-map-build-lookup-10k": "c1-map-build-lookup-10k"
+    },
+    "setupMs": 67,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

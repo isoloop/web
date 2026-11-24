@@ -1,0 +1,59 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T10:29:37.287Z",
+  "job": {
+    "key": "map-build-lookup-10k-n1",
+    "tier": "regular",
+    "workloads": [
+      "map-build-lookup-10k"
+    ],
+    "copies": "map-build-lookup-10k*1",
+    "n": 1,
+    "placement": "native-main",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-main",
+    "window": {
+      "startAt": 1795516187364.9001,
+      "endAt": 1795516247364.9001
+    },
+    "copies": [
+      {
+        "id": "c1-map-build-lookup-10k",
+        "workload": "map-build-lookup-10k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 62182,
+          "opsPerMin": 62182,
+          "opP50Us": 899.90234375,
+          "opP95Us": 1000,
+          "batches": 62182,
+          "checksum": 49995000
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 62182,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 9.5,
+      "p95Ms": 10,
+      "maxMs": 10.699951171875,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 10.699999809265137,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

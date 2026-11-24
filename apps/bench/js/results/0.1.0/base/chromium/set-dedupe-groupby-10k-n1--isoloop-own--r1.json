@@ -1,0 +1,61 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-23T19:04:08.482Z",
+  "job": {
+    "key": "set-dedupe-groupby-10k-n1",
+    "tier": "regular",
+    "workloads": [
+      "set-dedupe-groupby-10k"
+    ],
+    "copies": "set-dedupe-groupby-10k*1",
+    "n": 1,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795460658607.2998,
+      "endAt": 1795460718607.2998
+    },
+    "copies": [
+      {
+        "id": "c1-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 68381,
+          "opsPerMin": 68381,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 68381,
+          "checksum": 11000
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 68381,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.099853515625,
+      "maxMs": 0.5,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-set-dedupe-groupby-10k": "c1-set-dedupe-groupby-10k"
+    },
+    "setupMs": 66.69999980926514,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

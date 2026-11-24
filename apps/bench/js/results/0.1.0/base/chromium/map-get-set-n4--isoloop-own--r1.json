@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-23T17:39:34.277Z",
+  "job": {
+    "key": "map-get-set-n4",
+    "tier": "cheap",
+    "workloads": [
+      "map-get-set"
+    ],
+    "copies": "map-get-set*4",
+    "n": 4,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795455584421.8,
+      "endAt": 1795455644421.8
+    },
+    "copies": [
+      {
+        "id": "c1-map-get-set",
+        "workload": "map-get-set",
+        "seed": 1,
+        "batch": 531,
+        "result": {
+          "ops": 36288009,
+          "opsPerMin": 36288009,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 1.6951911193502824,
+          "batches": 68339,
+          "checksum": 44227347
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-map-get-set",
+        "workload": "map-get-set",
+        "seed": 2,
+        "batch": 531,
+        "result": {
+          "ops": 36481293,
+          "opsPerMin": 36481293,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 1.6951911193502824,
+          "batches": 68703,
+          "checksum": 50845768
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-map-get-set",
+        "workload": "map-get-set",
+        "seed": 3,
+        "batch": 531,
+        "result": {
+          "ops": 36572625,
+          "opsPerMin": 36572625,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 1.6951911193502824,
+          "batches": 68875,
+          "checksum": 53048508
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-map-get-set",
+        "workload": "map-get-set",
+        "seed": 4,
+        "batch": 531,
+        "result": {
+          "ops": 36552978,
+          "opsPerMin": 36552978,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 1.6951911193502824,
+          "batches": 68838,
+          "checksum": 55776496
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 145894905,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.800048828125,
+      "maxMs": 2.900146484375,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-map-get-set": "c1-map-get-set",
+      "c2-map-get-set": "c2-map-get-set",
+      "c3-map-get-set": "c3-map-get-set",
+      "c4-map-get-set": "c4-map-get-set"
+    },
+    "setupMs": 82.09999990463257,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

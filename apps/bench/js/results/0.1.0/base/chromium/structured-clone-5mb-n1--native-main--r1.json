@@ -1,0 +1,59 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-24T08:41:43.948Z",
+  "job": {
+    "key": "structured-clone-5mb-n1",
+    "tier": "heavy",
+    "workloads": [
+      "structured-clone-5mb"
+    ],
+    "copies": "structured-clone-5mb*1",
+    "n": 1,
+    "placement": "native-main",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-main",
+    "window": {
+      "startAt": 1795509714235.1,
+      "endAt": 1795509774235.1
+    },
+    "copies": [
+      {
+        "id": "c1-structured-clone-5mb",
+        "workload": "structured-clone-5mb",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 437,
+          "opsPerMin": 437,
+          "opP50Us": 125000,
+          "opP95Us": 174700.1953125,
+          "batches": 437,
+          "checksum": 20077.93633090332
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 437,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 33.199951171875,
+      "p95Ms": 86.5,
+      "maxMs": 89,
+      "samples": 437
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 223,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

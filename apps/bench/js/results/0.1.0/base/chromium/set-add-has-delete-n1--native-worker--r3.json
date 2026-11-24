@@ -1,0 +1,59 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T12:15:38.946Z",
+  "job": {
+    "key": "set-add-has-delete-n1",
+    "tier": "cheap",
+    "workloads": [
+      "set-add-has-delete"
+    ],
+    "copies": "set-add-has-delete*1",
+    "n": 1,
+    "placement": "native-worker",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-worker",
+    "window": {
+      "startAt": 1795522549036.2,
+      "endAt": 1795522609036.2
+    },
+    "copies": [
+      {
+        "id": "c1-set-add-has-delete",
+        "workload": "set-add-has-delete",
+        "seed": 1,
+        "batch": 200,
+        "result": {
+          "ops": 11622400,
+          "opsPerMin": 11622400,
+          "opP50Us": 4.500732421875,
+          "opP95Us": 5,
+          "batches": 58112,
+          "checksum": 1025
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 11622400,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.2001953125,
+      "maxMs": 0.60009765625,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 26.5,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

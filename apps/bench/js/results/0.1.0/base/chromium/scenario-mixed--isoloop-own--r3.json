@@ -1,0 +1,179 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T14:52:57.418Z",
+  "job": {
+    "key": "scenario-mixed",
+    "tier": "scenario",
+    "workloads": [
+      "sort-typed-1m",
+      "structured-clone-5mb",
+      "map-get-set",
+      "set-add-has-delete",
+      "array-push-pop-indexof",
+      "object-read-write",
+      "small-filter-map"
+    ],
+    "copies": "sort-typed-1m,structured-clone-5mb,map-get-set,set-add-has-delete,array-push-pop-indexof,object-read-write,small-filter-map,map-get-set",
+    "n": 8,
+    "placement": "isoloop-own",
+    "warmMs": 30000,
+    "windowMs": 120000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795532007831.6,
+      "endAt": 1795532127831.6
+    },
+    "copies": [
+      {
+        "id": "c1-sort-typed-1m",
+        "workload": "sort-typed-1m",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 295,
+          "opsPerMin": 147.5,
+          "opP50Us": 402100.09765625,
+          "opP95Us": 436500,
+          "batches": 295,
+          "checksum": 499989693.2858974
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-structured-clone-5mb",
+        "workload": "structured-clone-5mb",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 385,
+          "opsPerMin": 192.5,
+          "opP50Us": 303299.8046875,
+          "opP95Us": 389599.853515625,
+          "batches": 385,
+          "checksum": 20008.745700400323
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-map-get-set",
+        "workload": "map-get-set",
+        "seed": 3,
+        "batch": 531,
+        "result": {
+          "ops": 36828036,
+          "opsPerMin": 18414018,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 7.532956685499058,
+          "batches": 69356,
+          "checksum": 53048508
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-set-add-has-delete",
+        "workload": "set-add-has-delete",
+        "seed": 4,
+        "batch": 200,
+        "result": {
+          "ops": 11940800,
+          "opsPerMin": 5970400,
+          "opP50Us": 5,
+          "opP95Us": 22.5,
+          "batches": 59704,
+          "checksum": 1025
+        },
+        "lives": 1
+      },
+      {
+        "id": "c5-array-push-pop-indexof",
+        "workload": "array-push-pop-indexof",
+        "seed": 5,
+        "batch": 1142,
+        "result": {
+          "ops": 76141708,
+          "opsPerMin": 38070854,
+          "opP50Us": 0.7882193383318739,
+          "opP95Us": 3.5900643744527145,
+          "batches": 66674,
+          "checksum": 3195
+        },
+        "lives": 1
+      },
+      {
+        "id": "c6-object-read-write",
+        "workload": "object-read-write",
+        "seed": 6,
+        "batch": 408,
+        "result": {
+          "ops": 26500008,
+          "opsPerMin": 13250004,
+          "opP50Us": 2.205642999387255,
+          "opP95Us": 10.784074371936274,
+          "batches": 64951,
+          "checksum": 26359
+        },
+        "lives": 1
+      },
+      {
+        "id": "c7-small-filter-map",
+        "workload": "small-filter-map",
+        "seed": 7,
+        "batch": 553,
+        "result": {
+          "ops": 38524745,
+          "opsPerMin": 19262372.5,
+          "opP50Us": 1.4467429080018084,
+          "opP95Us": 7.956423768083183,
+          "batches": 69665,
+          "checksum": 47732
+        },
+        "lives": 1
+      },
+      {
+        "id": "c8-map-get-set",
+        "workload": "map-get-set",
+        "seed": 8,
+        "batch": 531,
+        "result": {
+          "ops": 36813699,
+          "opsPerMin": 18406849.5,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 7.532956685499058,
+          "batches": 69329,
+          "checksum": 55028247
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 113374838,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.10009765625,
+      "maxMs": 5.099853515625,
+      "samples": 1200
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-sort-typed-1m": "c1-sort-typed-1m",
+      "c2-structured-clone-5mb": "c2-structured-clone-5mb",
+      "c3-map-get-set": "c3-map-get-set",
+      "c4-set-add-has-delete": "c4-set-add-has-delete",
+      "c5-array-push-pop-indexof": "c5-array-push-pop-indexof",
+      "c6-object-read-write": "c6-object-read-write",
+      "c7-small-filter-map": "c7-small-filter-map",
+      "c8-map-get-set": "c8-map-get-set"
+    },
+    "setupMs": 353.3999996185303,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

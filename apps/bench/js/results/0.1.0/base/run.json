@@ -1,0 +1,209 @@
+{
+  "args": {
+    "profile": "base",
+    "max-workers": "4",
+    "scenario": true,
+    "resume": true,
+    "out": "results/2026-11-23-base",
+    "tier": "all",
+    "n": "1,4",
+    "scenario-only": false,
+    "engines": "chromium",
+    "quick": false,
+    "seed": "1"
+  },
+  "opts": {
+    "tiers": [
+      "cheap",
+      "regular",
+      "heavy"
+    ],
+    "ns": [
+      1,
+      4
+    ],
+    "scenario": true,
+    "scenarioOnly": false,
+    "warmMs": 10000,
+    "windowMs": 60000,
+    "balancerWarmMs": 30000,
+    "scenarioWarmMs": 30000,
+    "scenarioWindowMs": 120000
+  },
+  "rounds": 3,
+  "engines": [
+    "chromium"
+  ],
+  "maxWorkers": 4,
+  "env": {
+    "machine": "bench-machine-1",
+    "date": "2026-11-24T08:25:35.877Z",
+    "git": "e5dcf86",
+    "gitDirty": false,
+    "isoloop": {
+      "@isoloop/host": "0.1.0",
+      "@isoloop/runtime": "0.1.0",
+      "@isoloop/bus": "0.1.0",
+      "@isoloop/balancer": "0.1.0",
+      "@isoloop/vite": "0.1.0"
+    },
+    "node": "v26.13.1",
+    "cpu": "AMD Ryzen 7 5825U with Radeon Graphics",
+    "logicalCpus": 16,
+    "mhz": {
+      "min": 400,
+      "max": 1996.406
+    },
+    "cpusetEffective": "2,4,6,8",
+    "cpuMax": "max 100000",
+    "kernel": "6.8.0-147-generic"
+  },
+  "calibration": {
+    "engine": "chromium",
+    "env": {
+      "machine": "bench-machine-1",
+      "date": "2026-11-23T17:12:39.242Z",
+      "git": "8adda5d",
+      "gitDirty": false,
+      "isoloop": {
+        "@isoloop/host": "0.1.0",
+        "@isoloop/runtime": "0.1.0",
+        "@isoloop/bus": "0.1.0",
+        "@isoloop/balancer": "0.1.0",
+        "@isoloop/vite": "0.1.0"
+      },
+      "node": "v26.13.1",
+      "cpu": "AMD Ryzen 7 5825U with Radeon Graphics",
+      "logicalCpus": 16,
+      "mhz": {
+        "min": 400,
+        "max": 1996.455
+      },
+      "cpusetEffective": "2,4,6,8",
+      "cpuMax": "max 100000",
+      "kernel": "6.8.0-147-generic"
+    },
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "workloads": [
+      {
+        "id": "map-get-set",
+        "tier": "cheap",
+        "title": "Map: 100 gets + 10 sets on 1k keys",
+        "perOpUs": 1.8843132180803621,
+        "batch": 531
+      },
+      {
+        "id": "set-add-has-delete",
+        "tier": "cheap",
+        "title": "Set: 50 adds, 50 has, 50 deletes on 1k values",
+        "perOpUs": 5.006007208650381,
+        "batch": 200
+      },
+      {
+        "id": "array-push-pop-indexof",
+        "tier": "cheap",
+        "title": "Array: 50 push, 50 pop, 5 indexOf on 1k numbers",
+        "perOpUs": 0.8757451861746691,
+        "batch": 1142
+      },
+      {
+        "id": "object-read-write",
+        "tier": "cheap",
+        "title": "Object: read 50 keys, write 10, Object.keys, on a 50-key object",
+        "perOpUs": 2.4481602076039857,
+        "batch": 408
+      },
+      {
+        "id": "small-filter-map",
+        "tier": "cheap",
+        "title": "filter + map + reduce on 100 numbers",
+        "perOpUs": 1.8087478279953166,
+        "batch": 553
+      },
+      {
+        "id": "sort-numbers-10k",
+        "tier": "regular",
+        "title": "Sort a copy of 10k numbers",
+        "perOpUs": 4087.7384203980987,
+        "batch": 1
+      },
+      {
+        "id": "sort-objects-2k",
+        "tier": "regular",
+        "title": "Sort a copy of 2k objects by a string key, then a number",
+        "perOpUs": 760.0810537463867,
+        "batch": 1
+      },
+      {
+        "id": "filter-map-reduce-10k",
+        "tier": "regular",
+        "title": "filter \u2192 map \u2192 reduce on 10k objects",
+        "perOpUs": 347.9703084909841,
+        "batch": 3
+      },
+      {
+        "id": "map-build-lookup-10k",
+        "tier": "regular",
+        "title": "Build a Map of 10k string keys, then look up 10k",
+        "perOpUs": 889.8576513586802,
+        "batch": 1
+      },
+      {
+        "id": "set-dedupe-groupby-10k",
+        "tier": "regular",
+        "title": "Dedupe 10k values with a Set, then Object.groupBy 10k objects",
+        "perOpUs": 918.6160440322305,
+        "batch": 1
+      },
+      {
+        "id": "json-roundtrip-50kb",
+        "tier": "regular",
+        "title": "JSON.stringify + JSON.parse of a ~50 KB document",
+        "perOpUs": 295.3918865695156,
+        "batch": 3
+      },
+      {
+        "id": "sort-numbers-1m",
+        "tier": "heavy",
+        "title": "Sort a copy of 1M numbers (plain array)",
+        "perOpUs": 811100.0000635782,
+        "batch": 1
+      },
+      {
+        "id": "sort-typed-1m",
+        "tier": "heavy",
+        "title": "Sort a copy of 1M Float64Array numbers",
+        "perOpUs": 212125,
+        "batch": 1
+      },
+      {
+        "id": "sort-objects-200k",
+        "tier": "heavy",
+        "title": "Sort a copy of 200k objects on two keys",
+        "perOpUs": 145590.9090909091,
+        "batch": 1
+      },
+      {
+        "id": "map-insert-iterate-1m",
+        "tier": "heavy",
+        "title": "Insert 1M entries into a new Map, then iterate it",
+        "perOpUs": 117515.38463739249,
+        "batch": 1
+      },
+      {
+        "id": "structured-clone-5mb",
+        "tier": "heavy",
+        "title": "structuredClone of a nested ~5 MB object",
+        "perOpUs": 132508.33336512247,
+        "batch": 1
+      },
+      {
+        "id": "matmul-300",
+        "tier": "heavy",
+        "title": "300\u00d7300 matrix multiply (Float64Array)",
+        "perOpUs": 46160.606051936295,
+        "batch": 1
+      }
+    ]
+  }
+}

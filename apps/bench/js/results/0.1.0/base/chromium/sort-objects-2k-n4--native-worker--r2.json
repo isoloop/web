@@ -1,0 +1,104 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T10:11:13.437Z",
+  "job": {
+    "key": "sort-objects-2k-n4",
+    "tier": "regular",
+    "workloads": [
+      "sort-objects-2k"
+    ],
+    "copies": "sort-objects-2k*4",
+    "n": 4,
+    "placement": "native-worker",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-worker",
+    "window": {
+      "startAt": 1795515083540.9,
+      "endAt": 1795515143540.9
+    },
+    "copies": [
+      {
+        "id": "c1-sort-objects-2k",
+        "workload": "sort-objects-2k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 75163,
+          "opsPerMin": 75163,
+          "opP50Us": 700.1953125,
+          "opP95Us": 800.048828125,
+          "batches": 75163,
+          "checksum": 1637
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-sort-objects-2k",
+        "workload": "sort-objects-2k",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 74945,
+          "opsPerMin": 74945,
+          "opP50Us": 700.1953125,
+          "opP95Us": 800.048828125,
+          "batches": 74945,
+          "checksum": 376
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-sort-objects-2k",
+        "workload": "sort-objects-2k",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 75215,
+          "opsPerMin": 75215,
+          "opP50Us": 700.1953125,
+          "opP95Us": 800.048828125,
+          "batches": 75215,
+          "checksum": 573
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-sort-objects-2k",
+        "workload": "sort-objects-2k",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 72961,
+          "opsPerMin": 72961,
+          "opP50Us": 799.8046875,
+          "opP95Us": 800.048828125,
+          "batches": 72961,
+          "checksum": 839
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 298284,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.599853515625,
+      "maxMs": 3.699951171875,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 45.19999980926514,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

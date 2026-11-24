@@ -1,0 +1,59 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-24T08:51:35.489Z",
+  "job": {
+    "key": "matmul-300-n1",
+    "tier": "heavy",
+    "workloads": [
+      "matmul-300"
+    ],
+    "copies": "matmul-300*1",
+    "n": 1,
+    "placement": "native-main",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-main",
+    "window": {
+      "startAt": 1795510305623.7,
+      "endAt": 1795510365623.7
+    },
+    "copies": [
+      {
+        "id": "c1-matmul-300",
+        "workload": "matmul-300",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 1306,
+          "opsPerMin": 1306,
+          "opP50Us": 43699.951171875,
+          "opP95Us": 44000,
+          "batches": 1306,
+          "checksum": 153.2091253496149
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 1306,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 83.699951171875,
+      "maxMs": 84.400146484375,
+      "samples": 594
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 68.90000009536743,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

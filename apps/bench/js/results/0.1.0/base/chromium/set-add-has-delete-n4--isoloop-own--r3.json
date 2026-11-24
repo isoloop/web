@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T12:16:50.063Z",
+  "job": {
+    "key": "set-add-has-delete-n4",
+    "tier": "cheap",
+    "workloads": [
+      "set-add-has-delete"
+    ],
+    "copies": "set-add-has-delete*4",
+    "n": 4,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795522620221.2,
+      "endAt": 1795522680221.2
+    },
+    "copies": [
+      {
+        "id": "c1-set-add-has-delete",
+        "workload": "set-add-has-delete",
+        "seed": 1,
+        "batch": 200,
+        "result": {
+          "ops": 11691400,
+          "opsPerMin": 11691400,
+          "opP50Us": 4.500732421875,
+          "opP95Us": 5,
+          "batches": 58457,
+          "checksum": 1025
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-set-add-has-delete",
+        "workload": "set-add-has-delete",
+        "seed": 2,
+        "batch": 200,
+        "result": {
+          "ops": 11673600,
+          "opsPerMin": 11673600,
+          "opP50Us": 4.500732421875,
+          "opP95Us": 5,
+          "batches": 58368,
+          "checksum": 1025
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-set-add-has-delete",
+        "workload": "set-add-has-delete",
+        "seed": 3,
+        "batch": 200,
+        "result": {
+          "ops": 11654200,
+          "opsPerMin": 11654200,
+          "opP50Us": 4.500732421875,
+          "opP95Us": 5,
+          "batches": 58271,
+          "checksum": 1025
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-set-add-has-delete",
+        "workload": "set-add-has-delete",
+        "seed": 4,
+        "batch": 200,
+        "result": {
+          "ops": 11631000,
+          "opsPerMin": 11631000,
+          "opP50Us": 4.500732421875,
+          "opP95Us": 5,
+          "batches": 58155,
+          "checksum": 1025
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 46650200,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.39990234375,
+      "maxMs": 3.5,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-set-add-has-delete": "c1-set-add-has-delete",
+      "c2-set-add-has-delete": "c2-set-add-has-delete",
+      "c3-set-add-has-delete": "c3-set-add-has-delete",
+      "c4-set-add-has-delete": "c4-set-add-has-delete"
+    },
+    "setupMs": 97.90000009536743,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

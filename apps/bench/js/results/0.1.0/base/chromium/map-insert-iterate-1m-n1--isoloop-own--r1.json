@@ -1,0 +1,61 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-24T08:34:16.822Z",
+  "job": {
+    "key": "map-insert-iterate-1m-n1",
+    "tier": "heavy",
+    "workloads": [
+      "map-insert-iterate-1m"
+    ],
+    "copies": "map-insert-iterate-1m*1",
+    "n": 1,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795509267099.4,
+      "endAt": 1795509327099.4
+    },
+    "copies": [
+      {
+        "id": "c1-map-insert-iterate-1m",
+        "workload": "map-insert-iterate-1m",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 551,
+          "opsPerMin": 551,
+          "opP50Us": 98600.09765625,
+          "opP95Us": 117699.951171875,
+          "batches": 551,
+          "checksum": 128493856
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 551,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.099853515625,
+      "maxMs": 0.5,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-map-insert-iterate-1m": "c1-map-insert-iterate-1m"
+    },
+    "setupMs": 215,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

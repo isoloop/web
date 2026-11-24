@@ -1,0 +1,61 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T14:30:46.541Z",
+  "job": {
+    "key": "structured-clone-5mb-n1",
+    "tier": "heavy",
+    "workloads": [
+      "structured-clone-5mb"
+    ],
+    "copies": "structured-clone-5mb*1",
+    "n": 1,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795530656903,
+      "endAt": 1795530716903
+    },
+    "copies": [
+      {
+        "id": "c1-structured-clone-5mb",
+        "workload": "structured-clone-5mb",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 381,
+          "opsPerMin": 381,
+          "opP50Us": 150700.1953125,
+          "opP95Us": 187500,
+          "batches": 381,
+          "checksum": 20077.93633090332
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 381,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.199951171875,
+      "maxMs": 3.60009765625,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-structured-clone-5mb": "c1-structured-clone-5mb"
+    },
+    "setupMs": 301.7999997138977,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

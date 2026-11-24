@@ -1,0 +1,179 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T11:55:55.029Z",
+  "job": {
+    "key": "scenario-mixed",
+    "tier": "scenario",
+    "workloads": [
+      "sort-typed-1m",
+      "structured-clone-5mb",
+      "map-get-set",
+      "set-add-has-delete",
+      "array-push-pop-indexof",
+      "object-read-write",
+      "small-filter-map"
+    ],
+    "copies": "sort-typed-1m,structured-clone-5mb,map-get-set,set-add-has-delete,array-push-pop-indexof,object-read-write,small-filter-map,map-get-set",
+    "n": 8,
+    "placement": "isoloop-one",
+    "warmMs": 30000,
+    "windowMs": 120000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-one",
+    "window": {
+      "startAt": 1795521385660,
+      "endAt": 1795521505660
+    },
+    "copies": [
+      {
+        "id": "c1-sort-typed-1m",
+        "workload": "sort-typed-1m",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 180,
+          "opsPerMin": 90,
+          "opP50Us": 210799.8046875,
+          "opP95Us": 211600.09765625,
+          "batches": 180,
+          "checksum": 499989693.2858974
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-structured-clone-5mb",
+        "workload": "structured-clone-5mb",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 180,
+          "opsPerMin": 90,
+          "opP50Us": 139200.1953125,
+          "opP95Us": 186600.09765625,
+          "batches": 180,
+          "checksum": 20008.745700400323
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-map-get-set",
+        "workload": "map-get-set",
+        "seed": 3,
+        "batch": 531,
+        "result": {
+          "ops": 5953041,
+          "opsPerMin": 2976520.5,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 1.6951911193502824,
+          "batches": 11211,
+          "checksum": 53048508
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-set-add-has-delete",
+        "workload": "set-add-has-delete",
+        "seed": 4,
+        "batch": 200,
+        "result": {
+          "ops": 1880600,
+          "opsPerMin": 940300,
+          "opP50Us": 5,
+          "opP95Us": 5.499267578125,
+          "batches": 9403,
+          "checksum": 1025
+        },
+        "lives": 1
+      },
+      {
+        "id": "c5-array-push-pop-indexof",
+        "workload": "array-push-pop-indexof",
+        "seed": 5,
+        "batch": 1142,
+        "result": {
+          "ops": 14977330,
+          "opsPerMin": 7488665,
+          "opP50Us": 0.6129169631129597,
+          "opP95Us": 0.7005681507224168,
+          "batches": 13115,
+          "checksum": 3195
+        },
+        "lives": 1
+      },
+      {
+        "id": "c6-object-read-write",
+        "workload": "object-read-write",
+        "seed": 6,
+        "batch": 408,
+        "result": {
+          "ops": 4287672,
+          "opsPerMin": 2143836,
+          "opP50Us": 2.205642999387255,
+          "opP95Us": 2.206241383272059,
+          "batches": 10509,
+          "checksum": 26359
+        },
+        "lives": 1
+      },
+      {
+        "id": "c7-small-filter-map",
+        "workload": "small-filter-map",
+        "seed": 7,
+        "batch": 553,
+        "result": {
+          "ops": 6024935,
+          "opsPerMin": 3012467.5,
+          "opP50Us": 1.4467429080018084,
+          "opP95Us": 1.6277513279837252,
+          "batches": 10895,
+          "checksum": 47732
+        },
+        "lives": 1
+      },
+      {
+        "id": "c8-map-get-set",
+        "workload": "map-get-set",
+        "seed": 8,
+        "batch": 531,
+        "result": {
+          "ops": 5901534,
+          "opsPerMin": 2950767,
+          "opP50Us": 1.5066832921374764,
+          "opP95Us": 1.6951911193502824,
+          "batches": 11114,
+          "checksum": 55028247
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 19512736,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.099853515625,
+      "maxMs": 2.599853515625,
+      "samples": 1200
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-sort-typed-1m": "bench-one",
+      "c2-structured-clone-5mb": "bench-one",
+      "c3-map-get-set": "bench-one",
+      "c4-set-add-has-delete": "bench-one",
+      "c5-array-push-pop-indexof": "bench-one",
+      "c6-object-read-write": "bench-one",
+      "c7-small-filter-map": "bench-one",
+      "c8-map-get-set": "bench-one"
+    },
+    "setupMs": 572.0999999046326,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

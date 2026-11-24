@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T10:22:11.043Z",
+  "job": {
+    "key": "filter-map-reduce-10k-n4",
+    "tier": "regular",
+    "workloads": [
+      "filter-map-reduce-10k"
+    ],
+    "copies": "filter-map-reduce-10k*4",
+    "n": 4,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795515741198.5,
+      "endAt": 1795515801198.5
+    },
+    "copies": [
+      {
+        "id": "c1-filter-map-reduce-10k",
+        "workload": "filter-map-reduce-10k",
+        "seed": 1,
+        "batch": 3,
+        "result": {
+          "ops": 158526,
+          "opsPerMin": 158526,
+          "opP50Us": 366.6178385416667,
+          "opP95Us": 433.349609375,
+          "batches": 52842,
+          "checksum": 99821922
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-filter-map-reduce-10k",
+        "workload": "filter-map-reduce-10k",
+        "seed": 2,
+        "batch": 3,
+        "result": {
+          "ops": 157161,
+          "opsPerMin": 157161,
+          "opP50Us": 366.6178385416667,
+          "opP95Us": 433.349609375,
+          "batches": 52387,
+          "checksum": 99590038
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-filter-map-reduce-10k",
+        "workload": "filter-map-reduce-10k",
+        "seed": 3,
+        "batch": 3,
+        "result": {
+          "ops": 158172,
+          "opsPerMin": 158172,
+          "opP50Us": 366.6178385416667,
+          "opP95Us": 433.349609375,
+          "batches": 52724,
+          "checksum": 100711516
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-filter-map-reduce-10k",
+        "workload": "filter-map-reduce-10k",
+        "seed": 4,
+        "batch": 3,
+        "result": {
+          "ops": 157917,
+          "opsPerMin": 157917,
+          "opP50Us": 366.6178385416667,
+          "opP95Us": 433.349609375,
+          "batches": 52639,
+          "checksum": 99865264
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 631776,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.199951171875,
+      "maxMs": 3.199951171875,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-filter-map-reduce-10k": "c1-filter-map-reduce-10k",
+      "c2-filter-map-reduce-10k": "c2-filter-map-reduce-10k",
+      "c3-filter-map-reduce-10k": "c3-filter-map-reduce-10k",
+      "c4-filter-map-reduce-10k": "c4-filter-map-reduce-10k"
+    },
+    "setupMs": 94.5,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

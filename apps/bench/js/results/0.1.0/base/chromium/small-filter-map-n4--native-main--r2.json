@@ -1,0 +1,104 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T09:56:43.990Z",
+  "job": {
+    "key": "small-filter-map-n4",
+    "tier": "cheap",
+    "workloads": [
+      "small-filter-map"
+    ],
+    "copies": "small-filter-map*4",
+    "n": 4,
+    "placement": "native-main",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-main",
+    "window": {
+      "startAt": 1795514214051.4001,
+      "endAt": 1795514274051.4001
+    },
+    "copies": [
+      {
+        "id": "c1-small-filter-map",
+        "workload": "small-filter-map",
+        "seed": 1,
+        "batch": 553,
+        "result": {
+          "ops": 10683407,
+          "opsPerMin": 10683407,
+          "opP50Us": 1.4467429080018084,
+          "opP95Us": 1.6273098440325497,
+          "batches": 19319,
+          "checksum": 53352
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-small-filter-map",
+        "workload": "small-filter-map",
+        "seed": 2,
+        "batch": 553,
+        "result": {
+          "ops": 10666264,
+          "opsPerMin": 10666264,
+          "opP50Us": 1.4467429080018084,
+          "opP95Us": 1.6273098440325497,
+          "batches": 19288,
+          "checksum": 54072
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-small-filter-map",
+        "workload": "small-filter-map",
+        "seed": 3,
+        "batch": 553,
+        "result": {
+          "ops": 10780735,
+          "opsPerMin": 10780735,
+          "opP50Us": 1.4467429080018084,
+          "opP95Us": 1.6273098440325497,
+          "batches": 19495,
+          "checksum": 66104
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-small-filter-map",
+        "workload": "small-filter-map",
+        "seed": 4,
+        "batch": 553,
+        "result": {
+          "ops": 10803961,
+          "opsPerMin": 10803961,
+          "opP50Us": 1.4463014240506329,
+          "opP95Us": 1.6273098440325497,
+          "batches": 19537,
+          "checksum": 47260
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 42934367,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 101.699951171875,
+      "p95Ms": 202.60009765625,
+      "maxMs": 203.199951171875,
+      "samples": 277
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 0.5999999046325684,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T11:52:01.492Z",
+  "job": {
+    "key": "matmul-300-n4",
+    "tier": "heavy",
+    "workloads": [
+      "matmul-300"
+    ],
+    "copies": "matmul-300*4",
+    "n": 4,
+    "placement": "isoloop-one",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-one",
+    "window": {
+      "startAt": 1795521131876.7,
+      "endAt": 1795521191876.7
+    },
+    "copies": [
+      {
+        "id": "c1-matmul-300",
+        "workload": "matmul-300",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 342,
+          "opsPerMin": 342,
+          "opP50Us": 43800.048828125,
+          "opP95Us": 44199.951171875,
+          "batches": 342,
+          "checksum": 153.2091253496149
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-matmul-300",
+        "workload": "matmul-300",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 342,
+          "opsPerMin": 342,
+          "opP50Us": 43800.048828125,
+          "opP95Us": 44100.09765625,
+          "batches": 342,
+          "checksum": 141.14258849752656
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-matmul-300",
+        "workload": "matmul-300",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 342,
+          "opsPerMin": 342,
+          "opP50Us": 43799.8046875,
+          "opP95Us": 44099.853515625,
+          "batches": 342,
+          "checksum": 150.99999338895884
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-matmul-300",
+        "workload": "matmul-300",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 342,
+          "opsPerMin": 342,
+          "opP50Us": 43899.90234375,
+          "opP95Us": 44199.951171875,
+          "batches": 342,
+          "checksum": 152.4552430739082
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 1368,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.10009765625,
+      "maxMs": 0.5,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-matmul-300": "bench-one",
+      "c2-matmul-300": "bench-one",
+      "c3-matmul-300": "bench-one",
+      "c4-matmul-300": "bench-one"
+    },
+    "setupMs": 326.90000009536743,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

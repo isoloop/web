@@ -1,0 +1,390 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-23T18:11:19.358Z",
+  "job": {
+    "key": "object-read-write-n4",
+    "tier": "cheap",
+    "workloads": [
+      "object-read-write"
+    ],
+    "copies": "object-read-write*4",
+    "n": 4,
+    "placement": "isoloop-balancer",
+    "warmMs": 30000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-balancer",
+    "window": {
+      "startAt": 1795457509481.6,
+      "endAt": 1795457569481.6
+    },
+    "copies": [
+      {
+        "id": "c1-object-read-write",
+        "workload": "object-read-write",
+        "seed": 1,
+        "batch": 408,
+        "result": {
+          "ops": 27477168,
+          "opsPerMin": 27477168,
+          "opP50Us": 1.960903990502451,
+          "opP95Us": 2.206241383272059,
+          "batches": 67346,
+          "checksum": 25786
+        },
+        "lives": 5
+      },
+      {
+        "id": "c2-object-read-write",
+        "workload": "object-read-write",
+        "seed": 2,
+        "batch": 408,
+        "result": {
+          "ops": 26095680,
+          "opsPerMin": 26095680,
+          "opP50Us": 1.960903990502451,
+          "opP95Us": 2.206241383272059,
+          "batches": 56097,
+          "checksum": 24460
+        },
+        "lives": 6
+      },
+      {
+        "id": "c3-object-read-write",
+        "workload": "object-read-write",
+        "seed": 3,
+        "batch": 408,
+        "result": {
+          "ops": 27228696,
+          "opsPerMin": 27228696,
+          "opP50Us": 1.960903990502451,
+          "opP95Us": 2.206241383272059,
+          "batches": 66737,
+          "checksum": 25754
+        },
+        "lives": 5
+      },
+      {
+        "id": "c4-object-read-write",
+        "workload": "object-read-write",
+        "seed": 4,
+        "batch": 408,
+        "result": {
+          "ops": 26067936,
+          "opsPerMin": 26067936,
+          "opP50Us": 1.960903990502451,
+          "opP95Us": 2.206241383272059,
+          "batches": 63892,
+          "checksum": 25976
+        },
+        "lives": 2
+      }
+    ],
+    "totalOpsPerMin": 106869480,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 1.900146484375,
+      "maxMs": 3,
+      "samples": 600
+    },
+    "events": [
+      {
+        "at": -28884.699951171875,
+        "kind": "move",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28884.5,
+        "kind": "move",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28650.800048828125,
+        "kind": "arrived",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 435
+        }
+      },
+      {
+        "at": -28650.699951171875,
+        "kind": "arrived",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 434.7999997138977
+        }
+      },
+      {
+        "at": -28531.10009765625,
+        "kind": "move",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28349,
+        "kind": "arrived",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 434.90000009536743
+        }
+      },
+      {
+        "at": -28196.10009765625,
+        "kind": "move",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28008.199951171875,
+        "kind": "arrived",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "costMs": 238.59999990463257
+        }
+      },
+      {
+        "at": -26513.5,
+        "kind": "move",
+        "id": "c4-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -26331.199951171875,
+        "kind": "arrived",
+        "id": "c4-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 212.5
+        }
+      },
+      {
+        "at": -25535.800048828125,
+        "kind": "move",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -25526.199951171875,
+        "kind": "move",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -25371.300048828125,
+        "kind": "arrived",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 172.40000009536743
+        }
+      },
+      {
+        "at": -25371.300048828125,
+        "kind": "arrived",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "costMs": 172.2999997138977
+        }
+      },
+      {
+        "at": -25269.10009765625,
+        "kind": "move",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "reason": "spike"
+        }
+      },
+      {
+        "at": -25084.10009765625,
+        "kind": "arrived",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 287.1000003814697
+        }
+      },
+      {
+        "at": -25016.5,
+        "kind": "move",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -24966.10009765625,
+        "kind": "arrived",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "costMs": 77.5
+        }
+      },
+      {
+        "at": -24106.699951171875,
+        "kind": "move",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -24106.60009765625,
+        "kind": "move",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23873.89990234375,
+        "kind": "arrived",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 484.59999990463257
+        }
+      },
+      {
+        "at": -23873.89990234375,
+        "kind": "arrived",
+        "id": "c1-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 484.59999990463257
+        }
+      },
+      {
+        "at": -23416.10009765625,
+        "kind": "move",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23233.199951171875,
+        "kind": "arrived",
+        "id": "c3-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 236.59999990463257
+        }
+      },
+      {
+        "at": 4992.300048828125,
+        "kind": "move",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": 5157.10009765625,
+        "kind": "arrived",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 200.80000019073486
+        }
+      },
+      {
+        "at": 9649.300048828125,
+        "kind": "move",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": 9843,
+        "kind": "arrived",
+        "id": "c2-object-read-write",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 244.30000019073486
+        }
+      }
+    ],
+    "poolsAtEnd": {
+      "c1-object-read-write": "balancer-quarantine-1",
+      "c2-object-read-write": "balancer-quarantine-2",
+      "c3-object-read-write": "balancer-quarantine-3",
+      "c4-object-read-write": "balancer-1"
+    },
+    "setupMs": 62,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

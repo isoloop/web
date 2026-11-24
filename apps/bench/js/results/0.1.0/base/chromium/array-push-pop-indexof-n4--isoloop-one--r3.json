@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T12:27:48.538Z",
+  "job": {
+    "key": "array-push-pop-indexof-n4",
+    "tier": "cheap",
+    "workloads": [
+      "array-push-pop-indexof"
+    ],
+    "copies": "array-push-pop-indexof*4",
+    "n": 4,
+    "placement": "isoloop-one",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-one",
+    "window": {
+      "startAt": 1795523278660,
+      "endAt": 1795523338660
+    },
+    "copies": [
+      {
+        "id": "c1-array-push-pop-indexof",
+        "workload": "array-push-pop-indexof",
+        "seed": 1,
+        "batch": 1142,
+        "result": {
+          "ops": 24163578,
+          "opsPerMin": 24163578,
+          "opP50Us": 0.6129169631129597,
+          "opP95Us": 0.7005681507224168,
+          "batches": 21159,
+          "checksum": 3195
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-array-push-pop-indexof",
+        "workload": "array-push-pop-indexof",
+        "seed": 2,
+        "batch": 1142,
+        "result": {
+          "ops": 24442226,
+          "opsPerMin": 24442226,
+          "opP50Us": 0.6129169631129597,
+          "opP95Us": 0.7005681507224168,
+          "batches": 21403,
+          "checksum": 3195
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-array-push-pop-indexof",
+        "workload": "array-push-pop-indexof",
+        "seed": 3,
+        "batch": 1142,
+        "result": {
+          "ops": 24149874,
+          "opsPerMin": 24149874,
+          "opP50Us": 0.6129169631129597,
+          "opP95Us": 0.7005681507224168,
+          "batches": 21147,
+          "checksum": 3195
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-array-push-pop-indexof",
+        "workload": "array-push-pop-indexof",
+        "seed": 4,
+        "batch": 1142,
+        "result": {
+          "ops": 24127034,
+          "opsPerMin": 24127034,
+          "opP50Us": 0.6129169631129597,
+          "opP95Us": 0.7005681507224168,
+          "batches": 21127,
+          "checksum": 3195
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 96882712,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.10009765625,
+      "maxMs": 0.39990234375,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-array-push-pop-indexof": "bench-one",
+      "c2-array-push-pop-indexof": "bench-one",
+      "c3-array-push-pop-indexof": "bench-one",
+      "c4-array-push-pop-indexof": "bench-one"
+    },
+    "setupMs": 60.59999990463257,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}
