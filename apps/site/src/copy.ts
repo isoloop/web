@@ -140,7 +140,7 @@ export const home = {
     // the costs table below.
     caption:
       'The plant dashboard: 72 widgets on 8 machines, built three ways from the same code and data. What each build does when something goes wrong, at plant-v0.3.1.',
-    head: ['', 'Native', 'Native + workers', 'Isoloop'],
+    head: ['', 'Native', 'Native + workers', 'Isoloop matched'],
     rows: <Row[]>[
       [
         'One widget blocks for 3 s',
@@ -167,8 +167,28 @@ export const home = {
   },
   costs: {
     heading: 'What it costs, and where it helps',
-    // The table, its caption and notes are plant's `desktop` block
-    // (apps/dashboards/plant/example.json), shared with /examples/.
+    // The charts' figures are the latest run in content/benchmarks.json
+    // (build/benchmarks.ts): Chromium at 5 kHz, native + workers against
+    // Isoloop matched, plant's DEFAULT_PLACEMENT (apps/dashboards/plant/src/url.ts).
+    // The label under the intro is /benchmarks/' own (benchmarksPage.measuredOn).
+    intro:
+      'The plant dashboard, built natively with workers and with Isoloop in the dashboard’s default placement, `matched`. Chromium at 5 kHz, medians of 5 interleaved rounds.',
+    base: 'Native + workers',
+    value: 'Isoloop matched',
+    helps: 'Where it helps',
+    costs: 'What it costs',
+    charts: {
+      mainThread: 'Main thread busy',
+      typing: 'Typing, median',
+      cpu: 'CPU, all threads',
+      memory: 'Memory after GC',
+    },
+    notes: [
+      'Each difference is the median of the differences measured in each round, so it can differ from the difference of the two medians.',
+      'The native builds keep their data in a small store written for this app, with no message bus. They don’t contain a blocked widget, restart a crashed one, replay data to it, check grants or schemas, or keep acknowledged history. The extra CPU and memory pay for those features.',
+    ],
+    benchmarks: 'Every figure, at both rates and in every engine, with the method',
+    // The examples' tables (plant's `desktop` block) still use these.
     delta: 'Δ',
     verdicts: { better: 'better', worse: 'worse', same: 'no change' } as Record<Verdict, string>,
     findings: 'Findings',
@@ -181,7 +201,7 @@ export const home = {
       'Synchronous layout reads (getBoundingClientRect, offsetWidth) and synchronous focus and scroll. An isolate asks the host and gets a promise back.',
       'Third-party code that reaches for window, document.body or localStorage. An isolate gets a DOM subset sized to what Preact and React use.',
       'Drag and drop, text selection and canvas drawing tied to pointer timing. Canvas isolates can draw to an OffscreenCanvas instead.',
-      'The cost. Every worker, the bus and the kernel take CPU, memory and start-up time, as the table above shows.',
+      'The cost. Every worker, the bus and the kernel take CPU, memory and start-up time, as the charts above show.',
     ],
     /** The docs' page of the same name (/docs/limits/), with the full list. */
     more: 'The full list, in the docs',
@@ -207,7 +227,7 @@ export const home = {
     label:
       'Isoloop 0.1 is out. On 0.x a minor release may contain breaking changes and a patch doesn’t; the parts marked experimental may change in any minor.',
     command:
-      'pnpm add @isoloop/host @isoloop/runtime @isoloop/bus\npnpm add -D @isoloop/vite\n# for React or Preact isolates:\npnpm add @isoloop/react   # or @isoloop/preact\n# for automatic placement (experimental):\npnpm add @isoloop/balancer\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp\n# for the devtools panel (experimental):\npnpm add @isoloop/devtools',
+      'pnpm add @isoloop/host @isoloop/runtime @isoloop/bus\n# the topics’ schemas (zod here; any Standard Schema library works):\npnpm add zod\npnpm add -D @isoloop/vite\n# for React or Preact isolates:\npnpm add @isoloop/react   # or @isoloop/preact\n# for automatic placement (experimental):\npnpm add @isoloop/balancer\n# for tools a browser agent can call (experimental):\npnpm add @isoloop/webmcp\n# for the devtools panel (experimental):\npnpm add @isoloop/devtools',
     guide: 'The hosting guide',
     /** The docs' first page (/docs/getting-started/), from an empty Vite app to a running isolate. */
     start: 'Getting started',

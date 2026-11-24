@@ -798,6 +798,25 @@
 .ui-notes li {
   margin-bottom: 0.4rem;
 }
+/* The landing's four charts: where Isoloop helps, then what it costs, side
+   by side on a wide screen, one under the other on a phone. */
+.home-measured {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+}
+.home-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--ui-space-6) 2.5rem;
+  margin-top: 1.5rem;
+}
+.home-charts h3 {
+  margin: 0 0 1rem;
+  font-size: var(--ui-text-m);
+}
+.home-charts + .ui-chart-legend {
+  margin-top: 1.5rem;
+}
 @media (max-width: 760px) {
   .ui-delta-narrow .ui-delta-table {
     font-size: var(--ui-text-s);

@@ -10,6 +10,7 @@ import {
   archOf,
   changedBeyondSpread,
   cpuCount,
+  figure,
   loadBenchmarks,
   withinSpread,
   type BenchRun,
@@ -78,6 +79,30 @@ describe('loadBenchmarks', () => {
     expect(() => loadBenchmarks(m, dir)).toThrow(/summary\.json is invalid:\n {2}environment/);
     const [bad, dir2] = fixture({ runs: [] }, {});
     expect(() => loadBenchmarks(bad, dir2)).toThrow(/benchmarks\.json is invalid/);
+  });
+});
+
+// The home page's four figures: plant's comparison/final summary.md, Chromium
+// at 5 kHz, native-workers (A) against isoloop:matched (B).
+describe('figure', () => {
+  const { latest } = loadBenchmarks(manifest, repo);
+  const q = { engine: 'chromium', rate: 5, a: 'native-workers', b: 'isoloop:matched' };
+  const at = (f: PairFigure['figure']): number[] => {
+    const { aMedian, bMedian, delta } = figure(latest, { ...q, figure: f });
+    return [Math.round(aMedian), Math.round(bMedian), Math.round(delta)];
+  };
+
+  it('gives the landing page’s four figures, with the paired Δ', () => {
+    expect(at('mainThreadCpuPct')).toEqual([79, 27, -53]);
+    expect(at('typingMedianMs')).toEqual([62, 41, -28]);
+    expect(at('rendererCpuPct')).toEqual([97, 116, 19]);
+    expect(at('rendererPssGcMb')).toEqual([222, 275, 51]);
+  });
+
+  it('names a figure the run doesn’t have', () => {
+    expect(() => figure(latest, { ...q, engine: 'webkit', figure: 'typingMedianMs' })).toThrow(
+      /no typingMedianMs for native-workers against isoloop:matched, webkit at 5 kHz/,
+    );
   });
 });
 

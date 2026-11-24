@@ -280,8 +280,27 @@ describe('the pages', () => {
     expect(section).toContain('href="/features/#compared"');
   });
 
-  it('give the landing costs table in both forms, every Δ with its verdict in words', () => {
+  it('give the landing four charts, matched against native + workers, each Δ in words', () => {
     const html = renderDocument(named('home'), data, { csp: CSP });
+    expect(html).not.toContain('ui-delta-table');
+    expect(html.match(/<figure class="ui-chart"/g)).toHaveLength(4);
+    for (const words of [
+      '53 points lower, better',
+      '28 ms lower, better',
+      '19 points higher, worse',
+      '51 MB higher, worse',
+    ]) {
+      expect(html).toContain(words);
+    }
+    expect(html).toContain(
+      'Measured on plant at <code>@isoloop/*@0.0.0-next.b8ffdcf</code>, 13 November 2026, on 4 cores fixed at 2.0 GHz.',
+    );
+    expect(html).toContain('href="/benchmarks/"');
+    expect(html).toContain('Isoloop matched</th>');
+  });
+
+  it('give the features page’s costs table in both forms, every Δ with its verdict in words', () => {
+    const html = renderDocument(named('features'), data, { csp: CSP });
     expect(html).toContain('ui-delta-wide');
     expect(html).toContain('ui-delta-narrow');
     expect(html.match(/<table class="ui-table ui-delta-table">/g)).toHaveLength(3);

@@ -64,15 +64,40 @@ for (const path of PAGES) {
   });
 }
 
+// The landing's four charts (ui's PairedBars), at a phone's width and a wide
+// one, in both themes: accessible, and nothing wider than the screen.
+for (const [width, scheme] of [
+  [390, 'light'],
+  [390, 'dark'],
+  [1400, 'dark'],
+] as const) {
+  test(`/ shows its four charts at ${width}px in ${scheme}, accessible and within the screen`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto('/#costs');
+    const charts = page.locator('#costs figure.ui-chart');
+    await expect(charts).toHaveCount(4);
+    await Promise.all((await charts.all()).map((chart) => expect(chart).toBeVisible()));
+    await expect(page.locator('#costs .ui-chart-legend')).toBeVisible();
+    await expectAccessible(page, { exclude: ['iframe'] });
+    const over = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(over).toBeLessThanOrEqual(0);
+  });
+}
+
 // The costs table has a second form below 881px (src/pages/delta.tsx), so
-// the pages that show it are checked at a phone's width too.
-for (const path of ['/', '/features/']) {
+// the page that shows it is checked at a phone's width too.
+for (const path of ['/features/']) {
   test(`${path} is accessible at a phone's width, with nothing wider than the screen`, async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     // On /features/ the costs table is in the Cost tab (ADR 0005).
-    await page.goto(path === '/features/' ? '/features/#costs' : path);
+    await page.goto('/features/#costs');
     await expect(page.locator('.ui-delta-narrow table').first()).toBeVisible();
     await expect(page.locator('.ui-delta-wide')).toBeHidden();
     await expectAccessible(page, { exclude: ['iframe'] });

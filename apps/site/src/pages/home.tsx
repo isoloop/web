@@ -1,20 +1,81 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
-import { Table } from 'ui/components';
+import { ChartLegend, PairedBars, Table } from 'ui/components';
+import { figure, withinSpread, type BenchRun, type FigureKey } from '../../build/benchmarks.ts';
 import { compared, home, site } from '../copy.ts';
 import { AlternativesSummary } from './alternatives.tsx';
+import { measuredOn } from './benchmarks.tsx';
 import { Code, CodeTabs } from './code.tsx';
-import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { Recording } from './recording.tsx';
 import { PageIntro } from './intro.tsx';
 import { StripItem } from './pill.tsx';
+import { rich } from './rich.tsx';
 import { homeData } from './structured-data.ts';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
 
+/** The landing's charts: native + workers against Isoloop matched, Chromium at 5 kHz (ADR 0002, amended 2026-11-24). */
+const PAIR = { engine: 'chromium', rate: 5, a: 'native-workers', b: 'isoloop:matched' } as const;
+
+/** One small chart: one figure, the two bars and the measured difference in words. */
+function Chart({ run, title, fig }: { run: BenchRun; title: string; fig: FigureKey }): VNode {
+  const f = figure(run, { ...PAIR, figure: fig });
+  return (
+    <PairedBars
+      title={title}
+      unit={f.unit}
+      base={home.costs.base}
+      value={home.costs.value}
+      rows={[
+        {
+          base: f.aMedian,
+          value: f.bMedian,
+          delta: f.delta,
+          ...(withinSpread(f) ? { verdict: 'same' as const } : {}),
+        },
+      ]}
+      {...(f.unit === '%' ? { max: Math.max(100, f.aMedian, f.bMedian) } : {})}
+      legend={false}
+      compact
+    />
+  );
+}
+
+/** "What it costs, and where it helps": two charts where Isoloop helps, two for what it costs, one legend. */
+function Costs({ run }: { run: BenchRun }): VNode {
+  const c = home.costs.charts;
+  return (
+    <>
+      <p>{rich(home.costs.intro)}</p>
+      <p class="home-measured">{rich(measuredOn(run))}</p>
+      <div class="home-charts">
+        <div>
+          <h3>{home.costs.helps}</h3>
+          <Chart run={run} title={c.mainThread} fig="mainThreadCpuPct" />
+          <Chart run={run} title={c.typing} fig="typingMedianMs" />
+        </div>
+        <div>
+          <h3>{home.costs.costs}</h3>
+          <Chart run={run} title={c.cpu} fig="rendererCpuPct" />
+          <Chart run={run} title={c.memory} fig="rendererPssGcMb" />
+        </div>
+      </div>
+      <ChartLegend base={home.costs.base} value={home.costs.value} />
+      <ul class="ui-notes">
+        {home.costs.notes.map((n) => (
+          <li key={n}>{rich(n)}</li>
+        ))}
+      </ul>
+      <p>
+        <a href="/benchmarks/">{home.costs.benchmarks}</a>
+      </p>
+    </>
+  );
+}
+
 /** The landing page, in the order ADR 0002's amendments set. */
-function Home({ features, samples, examples, alternatives }: SiteData): VNode {
+function Home({ features, samples, alternatives, benchmarks }: SiteData): VNode {
   return (
     <main class="ui-shell">
       <PageIntro title={home.intro.heading} id="intro" image="home">
@@ -103,12 +164,7 @@ function Home({ features, samples, examples, alternatives }: SiteData): VNode {
       <section class="ui-gutter" id="costs" aria-labelledby="costs-h">
         <h2 id="costs-h">{home.costs.heading}</h2>
         <div class="ui-body">
-          <MeasuredBlock
-            block={findBlock(examples, 'dashboards/plant', 'desktop')}
-            findings={home.costs.findings}
-            more={home.costs.more}
-            level={3}
-          />
+          <Costs run={benchmarks.latest} />
         </div>
       </section>
 
