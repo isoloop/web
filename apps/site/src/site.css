@@ -1383,7 +1383,8 @@
   color: var(--ui-text);
   text-decoration: underline;
 }
-.docs-side li a[aria-current='page'] {
+.docs-side li a[aria-current='page'],
+.bench-nav li a[aria-current='location'] {
   border-left: 4px solid var(--ui-accent);
   padding-left: calc(0.85rem - 3px);
   color: var(--ui-text);
