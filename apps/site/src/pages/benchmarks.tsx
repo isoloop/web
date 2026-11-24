@@ -6,6 +6,7 @@
 import type { VNode } from 'preact';
 import { ChartLegend, formatDelta, formatValue, PairedBars, type Verdict } from 'ui/components';
 import {
+  archOf,
   changedBeyondSpread,
   cpuCount,
   FIGURE_KEYS,
@@ -329,7 +330,19 @@ function Method({ run }: { run: BenchRun }): VNode {
     .map(([e, v]) => `${engine(e)} ${v}`)
     .join(', ');
   const items: [string, string][] = [
-    [c.method.machine, c.method.machineText({ ...env.machine, cores: cpuCount(env.machine.cpus) })],
+    [
+      c.method.machine,
+      c.method.machineText({
+        arch: archOf(env.machine),
+        cores: cpuCount(env.machine.cpus),
+        cpus: env.machine.cpus,
+        clock: env.machine.clock,
+        memoryGb: env.machine.memoryGb,
+        os: env.machine.os,
+        node: env.machine.node,
+        image: env.machine.image,
+      }),
+    ],
     [
       c.method.versions,
       c.method.versionsText({
@@ -403,7 +416,8 @@ function Raw({ runs }: { runs: BenchRun[] }): VNode {
         {runs.toReversed().map((r) => (
           <li key={r.version}>
             {c.raw.run(r.name, r.version, r.date)} <a href={r.links.summary}>{c.raw.summary}</a>,{' '}
-            <a href={r.links.results}>{c.raw.results}</a>
+            <a href={r.links.results}>{c.raw.results}</a>,{' '}
+            <a href={r.links.environment}>{c.raw.environment}</a>
           </li>
         ))}
         <li>

@@ -35,6 +35,8 @@ const manifestSchema = z.strictObject({
           summary: https,
           /** The folder with the raw results on GitHub. */
           results: https,
+          /** The run's environment.json on GitHub: the exact machine, CPU model included, and versions. */
+          environment: https,
         }),
       }),
     )
@@ -48,7 +50,10 @@ const summarySchema = z.object({
     packages: z.record(z.string(), z.string()),
     browsers: z.record(z.string(), z.string()),
     machine: z.object({
+      /** The CPU model. Kept in the raw results; the page names only the architecture. */
       cpu: z.string(),
+      /** The architecture, where the run recorded it; else read from `cpu` (archOf). */
+      arch: z.enum(['x64', 'arm64']).optional(),
       cpus: z.string(),
       clock: z.string(),
       memoryGb: z.number(),
@@ -89,7 +94,7 @@ export interface BenchRun {
   date: string;
   environment: Summary['environment'];
   pairs: PairFigure[];
-  links: { summary: string; results: string };
+  links: { summary: string; results: string; environment: string };
 }
 
 export interface Benchmarks {
@@ -134,6 +139,20 @@ export function loadBenchmarks(manifest: string, repoRoot: string): Benchmarks {
     };
   });
   return { runs, latest: runs.at(-1)! };
+}
+
+/**
+ * The CPU's architecture, for the page, which names no CPU brand or model: the
+ * run's own `arch`, else read from the model string. Undefined when neither says.
+ */
+export function archOf(machine: {
+  cpu: string;
+  arch?: 'x64' | 'arm64' | undefined;
+}): 'x64' | 'arm64' | undefined {
+  if (machine.arch) return machine.arch;
+  if (/\b(AMD|Intel)\b/i.test(machine.cpu)) return 'x64';
+  if (/\b(Apple|ARM|Neoverse|Ampere|Graviton|Cortex)\b/i.test(machine.cpu)) return 'arm64';
+  return undefined;
 }
 
 /** The CPUs a run was allowed, counted: `2,4,6,8` and `2-5` are 4. */

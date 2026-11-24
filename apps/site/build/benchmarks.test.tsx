@@ -7,6 +7,7 @@ import { render } from 'ui/render';
 import { describe, expect, it } from 'vitest';
 import { Benchmarks } from '../src/pages/benchmarks.tsx';
 import {
+  archOf,
   changedBeyondSpread,
   cpuCount,
   loadBenchmarks,
@@ -64,7 +65,11 @@ describe('loadBenchmarks', () => {
           {
             name: 'plant',
             summary: 'summary.json',
-            links: { summary: 'https://x.test/s', results: 'https://x.test/r' },
+            links: {
+              summary: 'https://x.test/s',
+              results: 'https://x.test/r',
+              environment: 'https://x.test/e',
+            },
           },
         ],
       },
@@ -88,6 +93,14 @@ describe('spreads', () => {
     expect(changedBeyondSpread({ spread: [-41, -14] }, { spread: [-10, 4] })).toBe(true);
   });
 
+  it('names the architecture, never the CPU model', () => {
+    expect(archOf({ cpu: 'AMD Example 8-Core' })).toBe('x64');
+    expect(archOf({ cpu: 'Intel(R) Xeon(R) CPU' })).toBe('x64');
+    expect(archOf({ cpu: 'Neoverse-N1' })).toBe('arm64');
+    expect(archOf({ cpu: 'Some CPU', arch: 'arm64' })).toBe('arm64');
+    expect(archOf({ cpu: 'unknown' })).toBeUndefined();
+  });
+
   it('counts the CPUs a run was allowed', () => {
     expect(cpuCount('2,4,6,8')).toBe(4);
     expect(cpuCount('2-5,8')).toBe(5);
@@ -100,6 +113,18 @@ describe('/benchmarks/', () => {
   it('labels the figures with what they were measured on', () => {
     expect(page(b)).toContain(
       'Measured on plant at <code>@isoloop/*@0.0.0-next.b8ffdcf</code>, 2026-11-13, 4 cores fixed at 2.0 GHz.',
+    );
+  });
+
+  it('describes the machine generically, the model only in the raw environment.json', () => {
+    const html = page(b);
+    expect(html).toContain(
+      'An x64 CPU, 4 cores capped at 2.0 GHz (CPUs 2, 4, 6, 8), 30 GB, Ubuntu 24.04.3, Node 26.13.0, in <code>mcr.microsoft.com/playwright:v1.64.1-noble</code>. The machine does nothing else during a run.',
+    );
+    expect(html).not.toContain(b.latest.environment.machine.cpu);
+    expect(html).not.toMatch(/\b(AMD|Intel)\b/);
+    expect(html).toContain(
+      '<a href="https://github.com/isoloop/web/blob/main/apps/dashboards/plant/comparison/final/environment.json">the machine and versions</a>',
     );
   });
 

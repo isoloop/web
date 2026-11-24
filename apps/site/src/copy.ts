@@ -884,8 +884,9 @@ export const benchmarksPage = {
   },
   method: {
     machine: 'Machine',
+    /** Names the architecture only, never the CPU's brand or model (environment.json keeps it). */
     machineText: (m: {
-      cpu: string;
+      arch: 'x64' | 'arm64' | undefined;
       cores: number;
       cpus: string;
       clock: string;
@@ -894,7 +895,7 @@ export const benchmarksPage = {
       node: string;
       image: string;
     }) =>
-      `${m.cpu}, ${m.cores} cores (CPUs ${m.cpus}) fixed at ${m.clock}, ${m.memoryGb} GB, ${m.os}, Node ${m.node}${m.image ? `, in \`${m.image}\`` : ''}. The machine does nothing else during a run.`,
+      `${m.arch ? `An ${m.arch} CPU` : 'A CPU'}, ${m.cores} cores capped at ${m.clock} (CPUs ${m.cpus.split(',').join(', ')}), ${m.memoryGb} GB, ${m.os}, Node ${m.node}${m.image ? `, in \`${m.image}\`` : ''}. The machine does nothing else during a run.`,
     versions: 'Versions',
     versionsText: (v: { version: string; react: string; playwright: string; browsers: string }) =>
       `\`@isoloop/*@${v.version}\`, React ${v.react}, Playwright ${v.playwright}. Browsers: ${v.browsers}.`,
@@ -928,6 +929,7 @@ export const benchmarksPage = {
     run: (name: string, version: string, date: string) => `${name} at ${version}, ${date}:`,
     summary: 'the summary',
     results: 'the raw results',
+    environment: 'the machine and versions',
     bench: 'plant-bench, the build each release is measured on',
   },
 };
