@@ -905,11 +905,17 @@ export const benchmarksPage = {
     deltaText:
       'Δ is the Isoloop build minus its native build within each round, and its median over the rounds, so it can differ from the difference of the two medians. Its spread is the lowest and the highest round. When the rounds disagree on its sign, the chart says “within the spread” and colours it neither better nor worse.',
     page: 'Each page',
-    pageText:
-      'Load, 6 s of warm-up, then a 10 s window with no input (main-thread busy and all-thread CPU, each as a share of one core), 5 keystrokes into a widget’s filter (typing), memory after a forced garbage collection in the page and every worker (Chromium on Linux), then a 3 s block of one machine’s gauges (recovery: until every affected widget shows data from after the block).',
+    /** The steps on each page, in order. */
+    pageSteps: [
+      'Load the page and warm up for 6 s.',
+      'A 10 s window with no input: main-thread busy and all-thread CPU, each as a share of one core.',
+      '5 keystrokes into a widget’s filter: typing.',
+      'A forced garbage collection in the page and every worker, then its memory (Chromium on Linux).',
+      'A 3 s block of one machine’s gauges. Recovery is the time until every affected widget shows data from after the block.',
+    ],
     when: 'When',
     whenText:
-      'From 0.1.0 on, every minor and major release runs on plant-bench, a copy of the plant dashboard whose code changes only at a new generation (1.0, 2.0), so the dashboard is the same from one version to the next.',
+      'Each minor and major release is measured on plant-bench, a copy of the plant dashboard whose code changes only at a new generation (1.0, 2.0), so the dashboard is the same from one version to the next.',
   },
   features: {
     lede: 'Single features and the other examples, each measured on its own run. Their findings are with each example on ',

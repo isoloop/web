@@ -341,8 +341,6 @@ function Method({ run }: { run: BenchRun }): VNode {
     ],
     [c.method.rounds, c.method.roundsText(env.rounds)],
     [c.method.delta, c.method.deltaText],
-    [c.method.page, c.method.pageText],
-    [c.method.when, c.method.whenText],
   ];
   return (
     <dl class="bench-method">
@@ -352,6 +350,20 @@ function Method({ run }: { run: BenchRun }): VNode {
           <dd>{inline(v)}</dd>
         </div>
       ))}
+      <div>
+        <dt>{c.method.page}</dt>
+        <dd>
+          <ol>
+            {c.method.pageSteps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </dd>
+      </div>
+      <div>
+        <dt>{c.method.when}</dt>
+        <dd>{c.method.whenText}</dd>
+      </div>
     </dl>
   );
 }
