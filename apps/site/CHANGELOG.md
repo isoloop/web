@@ -1,5 +1,23 @@
 # site
 
+## 0.10.0
+
+### Minor Changes
+
+- 88568d8: The home page shows four charts in place of the costs table: Isoloop `matched` against native + workers, for main-thread busy and typing (where it helps) and CPU across threads and memory after GC (what it costs), each labelled with what it was measured on and linking to `/benchmarks/`. "What it gives" labels its Isoloop column `matched`, Install lists `zod` for the topics' schemas, and the landing sample's counter shows `0` before the first click.
+- 13238f1: A new page, /benchmarks/, in the header's nav after Examples: the plant dashboard measured natively and with Isoloop, as charts with the full tables folded under them. It opens with what we found (what is better, what is worse, and what stays within the rounds' spread), then the charts per browser and pair, how it's measured, the feature benchmarks and links to the raw results. Every figure is labelled with what it was measured on, today plant at `@isoloop/*@0.0.0-next.b8ffdcf`, 13 November 2026, on 4 cores fixed at 2.0 GHz. The cost panel on /features/ links to it.
+- 31759e5: Isoloop next to six alternatives (Remote DOM, Partytown, worker-dom, Comlink with workers, cross-origin iframes, `scheduler.yield()`): a short table on the home page after "What Isoloop can’t hide", and a Compared group on /features/ with every mark’s note, its source and the date it was checked, and where each alternative is the better choice.
+
+### Patch Changes
+
+- afa9668: The search titles of /docs/ and Getting started now say what Isoloop is for: "Docs: isolate TypeScript apps in Web Workers" and "Getting started: isolates in Web Workers". A test pins the titles of the home page, Features, Examples, the main guides and the example pages.
+- 6ca4bb3: Charts show a worse figure in orange rather than red: it's a measured cost, not an error.
+- da43294: The Compared tables show their marks as icons (a tick, a half circle, a cross) with a key, on the home page and on `/features/`. Each project's docs and the date they were checked sit under its name.
+- 2f17b3c: The home page's "How it works" section moves up, between "What it's for" and "Features".
+- 1f2e464: The home page's How it works says how a visual isolate renders and that persistent topics survive a reload, and the restart limits read as defaults there and in the restart feature.
+- 0a2ba89: How it works lists all five host calls (`navigate` was missing) and says what each needs, the pre-0.1 measurement's build is labelled as such, and the Experimental mark keeps a space before its label in the page's text.
+- a841fa5: Clearer wording in two places: How it works's host calls (`navigate` in a sentence of its own) and the `scheduler.yield()` note on the Compared tab.
+
 ## 0.9.0
 
 ### Minor Changes

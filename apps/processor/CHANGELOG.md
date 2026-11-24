@@ -1,5 +1,12 @@
 # processor
 
+## 0.4.3
+
+### Patch Changes
+
+- d1f537b: The File processor passes a declared load to the balancer, so no processor starts in the quarantine or shows as Measuring.
+- a841fa5: The example's note says plainly that the balancer's own measurements replace the declared load.
+
 ## 0.4.2
 
 ### Patch Changes
