@@ -142,4 +142,20 @@ describe('formatting', () => {
     expect(formatDelta(0, 0, 's')).toEqual({ text: 'the same', verdict: 'same' });
     expect(formatDelta(41, 41.2, 'ms')).toEqual({ text: 'the same', verdict: 'same' });
   });
+
+  it('uses a measured paired delta over the difference of the two values', () => {
+    // plant: typing median 62 ms → 41 ms, paired Δ −28 ms.
+    expect(formatDelta(62, 41, 'ms', { delta: -28 }).text).toBe('28 ms lower, better');
+    const html = render(
+      <PairedBars
+        title="Typing, median"
+        unit="ms"
+        base="Native + workers"
+        value="Isoloop matched"
+        rows={[{ base: 62, value: 41, delta: -28 }]}
+      />,
+    );
+    expect(html).toContain('28 ms lower, better');
+    expect(html).not.toContain('21 ms');
+  });
 });

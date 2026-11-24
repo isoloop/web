@@ -29,6 +29,12 @@ export interface PairedBarsRow {
    * difference is inside the run's own spread.
    */
   verdict?: Verdict;
+  /**
+   * The measured difference, Isoloop minus the baseline, when it isn't
+   * `value - base`: a paired Δ (the median of each round's difference) can
+   * differ from the difference of the two medians. Sets the words and verdict.
+   */
+  delta?: number;
 }
 
 export interface PairedBarsProps {
@@ -88,10 +94,12 @@ export function formatDelta(
     lowerIsBetter?: boolean;
     decimals?: number | undefined;
     verdict?: Verdict | undefined;
+    /** The measured difference (value minus base), when it isn't `value - base`. */
+    delta?: number | undefined;
   } = {},
 ): { text: string; verdict: Verdict } {
   const { lowerIsBetter = true, decimals } = options;
-  const diff = value - base;
+  const diff = options.delta ?? value - base;
   const size = magnitude(Math.abs(diff), unit, decimals);
   const zero = Number(size.number) === 0;
   const verdict: Verdict =
@@ -195,7 +203,12 @@ export function PairedBars({
   const shown =
     note === undefined ? (lowerIsBetter ? 'Lower is better.' : 'Higher is better.') : note;
   const deltas = rows.map((r) =>
-    formatDelta(r.base, r.value, unit, { lowerIsBetter, decimals, verdict: r.verdict }),
+    formatDelta(r.base, r.value, unit, {
+      lowerIsBetter,
+      decimals,
+      verdict: r.verdict,
+      delta: r.delta,
+    }),
   );
   const used = (['better', 'worse'] as const).filter((v) => deltas.some((d) => d.verdict === v));
   return (
