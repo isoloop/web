@@ -1,0 +1,59 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T14:12:17.813Z",
+  "job": {
+    "key": "sort-objects-200k-n1",
+    "tier": "heavy",
+    "workloads": [
+      "sort-objects-200k"
+    ],
+    "copies": "sort-objects-200k*1",
+    "n": 1,
+    "placement": "native-main",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-main",
+    "window": {
+      "startAt": 1795529548103.3,
+      "endAt": 1795529608103.3
+    },
+    "copies": [
+      {
+        "id": "c1-sort-objects-200k",
+        "workload": "sort-objects-200k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 419,
+          "opsPerMin": 419,
+          "opP50Us": 137800.048828125,
+          "opP95Us": 141600.09765625,
+          "batches": 419,
+          "checksum": 0.8230891881976277
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 419,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 42.300048828125,
+      "p95Ms": 46.099853515625,
+      "maxMs": 85.400146484375,
+      "samples": 419
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 230.80000019073486,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

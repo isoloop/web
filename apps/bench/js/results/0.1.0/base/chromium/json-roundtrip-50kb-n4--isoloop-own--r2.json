@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T10:51:33.932Z",
+  "job": {
+    "key": "json-roundtrip-50kb-n4",
+    "tier": "regular",
+    "workloads": [
+      "json-roundtrip-50kb"
+    ],
+    "copies": "json-roundtrip-50kb*4",
+    "n": 4,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795517504076.4001,
+      "endAt": 1795517564076.4001
+    },
+    "copies": [
+      {
+        "id": "c1-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 1,
+        "batch": 3,
+        "result": {
+          "ops": 185433,
+          "opsPerMin": 185433,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 61811,
+          "checksum": 37251
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 2,
+        "batch": 3,
+        "result": {
+          "ops": 188271,
+          "opsPerMin": 188271,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 62757,
+          "checksum": 37241
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 3,
+        "batch": 3,
+        "result": {
+          "ops": 188475,
+          "opsPerMin": 188475,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 62825,
+          "checksum": 37218
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 4,
+        "batch": 3,
+        "result": {
+          "ops": 186234,
+          "opsPerMin": 186234,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 62078,
+          "checksum": 37234
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 748413,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.099853515625,
+      "maxMs": 3.199951171875,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-json-roundtrip-50kb": "c1-json-roundtrip-50kb",
+      "c2-json-roundtrip-50kb": "c2-json-roundtrip-50kb",
+      "c3-json-roundtrip-50kb": "c3-json-roundtrip-50kb",
+      "c4-json-roundtrip-50kb": "c4-json-roundtrip-50kb"
+    },
+    "setupMs": 80.7999997138977,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

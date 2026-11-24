@@ -1,0 +1,430 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T13:47:19.620Z",
+  "job": {
+    "key": "json-roundtrip-50kb-n4",
+    "tier": "regular",
+    "workloads": [
+      "json-roundtrip-50kb"
+    ],
+    "copies": "json-roundtrip-50kb*4",
+    "n": 4,
+    "placement": "isoloop-balancer",
+    "warmMs": 30000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-balancer",
+    "window": {
+      "startAt": 1795528069748.9,
+      "endAt": 1795528129748.9
+    },
+    "copies": [
+      {
+        "id": "c1-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 1,
+        "batch": 3,
+        "result": {
+          "ops": 187533,
+          "opsPerMin": 187533,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 62511,
+          "checksum": 37251
+        },
+        "lives": 6
+      },
+      {
+        "id": "c2-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 2,
+        "batch": 3,
+        "result": {
+          "ops": 182334,
+          "opsPerMin": 182334,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 56553,
+          "checksum": 37241
+        },
+        "lives": 5
+      },
+      {
+        "id": "c3-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 3,
+        "batch": 3,
+        "result": {
+          "ops": 187914,
+          "opsPerMin": 187914,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 62638,
+          "checksum": 37218
+        },
+        "lives": 6
+      },
+      {
+        "id": "c4-json-roundtrip-50kb",
+        "workload": "json-roundtrip-50kb",
+        "seed": 4,
+        "batch": 3,
+        "result": {
+          "ops": 180432,
+          "opsPerMin": 180432,
+          "opP50Us": 299.9674479166667,
+          "opP95Us": 333.3333333333333,
+          "batches": 51948,
+          "checksum": 37234
+        },
+        "lives": 3
+      }
+    ],
+    "totalOpsPerMin": 738213,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 1.900146484375,
+      "maxMs": 2.89990234375,
+      "samples": 600
+    },
+    "events": [
+      {
+        "at": -28886.39990234375,
+        "kind": "move",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28886.199951171875,
+        "kind": "move",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28651.800048828125,
+        "kind": "arrived",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 436.19999980926514
+        }
+      },
+      {
+        "at": -28651.800048828125,
+        "kind": "arrived",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 436
+        }
+      },
+      {
+        "at": -28531.800048828125,
+        "kind": "move",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28348,
+        "kind": "arrived",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 438.09999990463257
+        }
+      },
+      {
+        "at": -28143.800048828125,
+        "kind": "move",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -27949.800048828125,
+        "kind": "arrived",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "costMs": 297.5
+        }
+      },
+      {
+        "at": -26517.39990234375,
+        "kind": "move",
+        "id": "c4-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -26330.39990234375,
+        "kind": "arrived",
+        "id": "c4-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 217.59999990463257
+        }
+      },
+      {
+        "at": -25536.199951171875,
+        "kind": "move",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -25525.300048828125,
+        "kind": "move",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -25319.599853515625,
+        "kind": "arrived",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 228.5
+        }
+      },
+      {
+        "at": -25319.599853515625,
+        "kind": "arrived",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "costMs": 228.30000019073486
+        }
+      },
+      {
+        "at": -25017.89990234375,
+        "kind": "move",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -24964.39990234375,
+        "kind": "arrived",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "costMs": 83.59999990463257
+        }
+      },
+      {
+        "at": -24964,
+        "kind": "move",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "reason": "spike"
+        }
+      },
+      {
+        "at": -24786.5,
+        "kind": "arrived",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 533
+        }
+      },
+      {
+        "at": -24104,
+        "kind": "move",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -24103.89990234375,
+        "kind": "move",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23871.300048828125,
+        "kind": "arrived",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 485.80000019073486
+        }
+      },
+      {
+        "at": -23871.199951171875,
+        "kind": "arrived",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 485.90000009536743
+        }
+      },
+      {
+        "at": -23414.89990234375,
+        "kind": "move",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23226.199951171875,
+        "kind": "arrived",
+        "id": "c1-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 241.09999990463257
+        }
+      },
+      {
+        "at": -21029.300048828125,
+        "kind": "move",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -20847,
+        "kind": "arrived",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 198.90000009536743
+        }
+      },
+      {
+        "at": -20694.89990234375,
+        "kind": "move",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-4",
+          "reason": "spike"
+        }
+      },
+      {
+        "at": -20512.300048828125,
+        "kind": "arrived",
+        "id": "c3-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-4",
+          "costMs": 334.6000003814697
+        }
+      },
+      {
+        "at": 4998.400146484375,
+        "kind": "move",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": 5153.699951171875,
+        "kind": "arrived",
+        "id": "c2-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 201.90000009536743
+        }
+      },
+      {
+        "at": 10048.800048828125,
+        "kind": "move",
+        "id": "c4-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": 10242.60009765625,
+        "kind": "arrived",
+        "id": "c4-json-roundtrip-50kb",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 347.2999997138977
+        }
+      }
+    ],
+    "poolsAtEnd": {
+      "c1-json-roundtrip-50kb": "balancer-quarantine-3",
+      "c2-json-roundtrip-50kb": "balancer-1",
+      "c3-json-roundtrip-50kb": "balancer-quarantine-4",
+      "c4-json-roundtrip-50kb": "balancer-quarantine-1"
+    },
+    "setupMs": 66.09999990463257,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

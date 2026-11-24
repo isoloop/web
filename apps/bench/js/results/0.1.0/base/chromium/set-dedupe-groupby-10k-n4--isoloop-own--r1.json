@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-23T19:07:41.077Z",
+  "job": {
+    "key": "set-dedupe-groupby-10k-n4",
+    "tier": "regular",
+    "workloads": [
+      "set-dedupe-groupby-10k"
+    ],
+    "copies": "set-dedupe-groupby-10k*4",
+    "n": 4,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795460871235.3,
+      "endAt": 1795460931235.3
+    },
+    "copies": [
+      {
+        "id": "c1-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 68697,
+          "opsPerMin": 68697,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 68697,
+          "checksum": 11000
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 68334,
+          "opsPerMin": 68334,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 68334,
+          "checksum": 11000
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 68255,
+          "opsPerMin": 68255,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 68255,
+          "checksum": 11000
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 68632,
+          "opsPerMin": 68632,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 68632,
+          "checksum": 11000
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 273918,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.300048828125,
+      "maxMs": 6.2001953125,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-set-dedupe-groupby-10k": "c1-set-dedupe-groupby-10k",
+      "c2-set-dedupe-groupby-10k": "c2-set-dedupe-groupby-10k",
+      "c3-set-dedupe-groupby-10k": "c3-set-dedupe-groupby-10k",
+      "c4-set-dedupe-groupby-10k": "c4-set-dedupe-groupby-10k"
+    },
+    "setupMs": 95.5,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

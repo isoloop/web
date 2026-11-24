@@ -1,0 +1,400 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-23T19:29:53.266Z",
+  "job": {
+    "key": "sort-numbers-1m-n4",
+    "tier": "heavy",
+    "workloads": [
+      "sort-numbers-1m"
+    ],
+    "copies": "sort-numbers-1m*4",
+    "n": 4,
+    "placement": "isoloop-balancer",
+    "warmMs": 30000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-balancer",
+    "window": {
+      "startAt": 1795462227119.7,
+      "endAt": 1795462287119.7
+    },
+    "copies": [
+      {
+        "id": "c1-sort-numbers-1m",
+        "workload": "sort-numbers-1m",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 70,
+          "opsPerMin": 70,
+          "opP50Us": 840700.1953125,
+          "opP95Us": 857299.8046875,
+          "batches": 70,
+          "checksum": 499989693.2858974
+        },
+        "lives": 3
+      },
+      {
+        "id": "c2-sort-numbers-1m",
+        "workload": "sort-numbers-1m",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 70,
+          "opsPerMin": 70,
+          "opP50Us": 840500,
+          "opP95Us": 862199.951171875,
+          "batches": 70,
+          "checksum": 500066936.48174405
+        },
+        "lives": 3
+      },
+      {
+        "id": "c3-sort-numbers-1m",
+        "workload": "sort-numbers-1m",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 71,
+          "opsPerMin": 71,
+          "opP50Us": 837199.951171875,
+          "opP95Us": 862300.048828125,
+          "batches": 71,
+          "checksum": 499883838.6964053
+        },
+        "lives": 4
+      },
+      {
+        "id": "c4-sort-numbers-1m",
+        "workload": "sort-numbers-1m",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 70,
+          "opsPerMin": 70,
+          "opP50Us": 840799.8046875,
+          "opP95Us": 871199.951171875,
+          "batches": 70,
+          "checksum": 499065864.13271725
+        },
+        "lives": 4
+      }
+    ],
+    "totalOpsPerMin": 281,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.10009765625,
+      "maxMs": 2.89990234375,
+      "samples": 600
+    },
+    "events": [
+      {
+        "at": -28774.099853515625,
+        "kind": "move",
+        "id": "c1-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28773.699951171875,
+        "kind": "move",
+        "id": "c2-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -26816.300048828125,
+        "kind": "arrived",
+        "id": "c1-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 2959.0999999046326
+        }
+      },
+      {
+        "at": -26816.199951171875,
+        "kind": "arrived",
+        "id": "c2-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 2958.8999996185303
+        }
+      },
+      {
+        "at": -24867,
+        "kind": "move",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -24775.300048828125,
+        "kind": "move",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -24314.300048828125,
+        "kind": "spike",
+        "id": "c1-sort-numbers-1m",
+        "detail": {
+          "pool": "balancer-quarantine-2",
+          "lagMs": 2401.7999997138977,
+          "action": "noted"
+        }
+      },
+      {
+        "at": -23790.099853515625,
+        "kind": "arrived",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 2077.5999999046326
+        }
+      },
+      {
+        "at": -23666.699951171875,
+        "kind": "arrived",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 2109.3999996185303
+        }
+      },
+      {
+        "at": -23274.800048828125,
+        "kind": "move",
+        "id": "c1-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -22248.89990234375,
+        "kind": "arrived",
+        "id": "c1-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "costMs": 2027.2000002861023
+        }
+      },
+      {
+        "at": -22072.800048828125,
+        "kind": "spike",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "pool": "balancer-quarantine-3",
+          "lagMs": 1617.2000002861023,
+          "action": "noted"
+        }
+      },
+      {
+        "at": -21964.300048828125,
+        "kind": "spike",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "pool": "balancer-1",
+          "lagMs": 1602.4000000953674,
+          "action": "noted"
+        }
+      },
+      {
+        "at": -20539.099853515625,
+        "kind": "spike",
+        "id": "c1-sort-numbers-1m",
+        "detail": {
+          "pool": "balancer-quarantine-4",
+          "lagMs": 1609.7000002861023,
+          "action": "quarantined"
+        }
+      },
+      {
+        "at": -19275.300048828125,
+        "kind": "move",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -19146.199951171875,
+        "kind": "move",
+        "id": "c2-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -18549.199951171875,
+        "kind": "arrived",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "costMs": 1726.7999997138977
+        }
+      },
+      {
+        "at": -18549.199951171875,
+        "kind": "arrived",
+        "id": "c2-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 1227
+        }
+      },
+      {
+        "at": -17548.5,
+        "kind": "move",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -17548.39990234375,
+        "kind": "move",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -15662,
+        "kind": "arrived",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 2887
+        }
+      },
+      {
+        "at": -15662,
+        "kind": "arrived",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 2887
+        }
+      },
+      {
+        "at": -13158.099853515625,
+        "kind": "spike",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "pool": "balancer-quarantine-1",
+          "lagMs": 2403.9000000953674,
+          "action": "quarantined"
+        }
+      },
+      {
+        "at": -11775.5,
+        "kind": "move",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -10738.39990234375,
+        "kind": "arrived",
+        "id": "c3-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 2037.8000001907349
+        }
+      },
+      {
+        "at": -9275.89990234375,
+        "kind": "move",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -9015.39990234375,
+        "kind": "arrived",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 1260.9000000953674
+        }
+      },
+      {
+        "at": -9008.5,
+        "kind": "move",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -7872.300048828125,
+        "kind": "arrived",
+        "id": "c4-sort-numbers-1m",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 1142.9000000953674
+        }
+      }
+    ],
+    "poolsAtEnd": {
+      "c1-sort-numbers-1m": "balancer-quarantine-4",
+      "c2-sort-numbers-1m": "balancer-1",
+      "c3-sort-numbers-1m": "balancer-quarantine-2",
+      "c4-sort-numbers-1m": "balancer-quarantine-1"
+    },
+    "setupMs": 3794.7000002861023,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

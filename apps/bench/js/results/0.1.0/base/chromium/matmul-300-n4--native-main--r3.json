@@ -1,0 +1,104 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T14:48:04.135Z",
+  "job": {
+    "key": "matmul-300-n4",
+    "tier": "heavy",
+    "workloads": [
+      "matmul-300"
+    ],
+    "copies": "matmul-300*4",
+    "n": 4,
+    "placement": "native-main",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-main",
+    "window": {
+      "startAt": 1795531694466.3,
+      "endAt": 1795531754466.3
+    },
+    "copies": [
+      {
+        "id": "c1-matmul-300",
+        "workload": "matmul-300",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 342,
+          "opsPerMin": 342,
+          "opP50Us": 43699.951171875,
+          "opP95Us": 44000,
+          "batches": 342,
+          "checksum": 153.2091253496149
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-matmul-300",
+        "workload": "matmul-300",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 342,
+          "opsPerMin": 342,
+          "opP50Us": 43700.1953125,
+          "opP95Us": 44000,
+          "batches": 342,
+          "checksum": 141.14258849752656
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-matmul-300",
+        "workload": "matmul-300",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 342,
+          "opsPerMin": 342,
+          "opP50Us": 43799.8046875,
+          "opP95Us": 44200.1953125,
+          "batches": 342,
+          "checksum": 150.99999338895884
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-matmul-300",
+        "workload": "matmul-300",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 344,
+          "opsPerMin": 344,
+          "opP50Us": 43700.1953125,
+          "opP95Us": 44000,
+          "batches": 344,
+          "checksum": 152.4552430739082
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 1370,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 250,
+      "p95Ms": 335.800048828125,
+      "maxMs": 341,
+      "samples": 169
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 269,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

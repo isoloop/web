@@ -1,0 +1,104 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-23T19:06:29.931Z",
+  "job": {
+    "key": "set-dedupe-groupby-10k-n4",
+    "tier": "regular",
+    "workloads": [
+      "set-dedupe-groupby-10k"
+    ],
+    "copies": "set-dedupe-groupby-10k*4",
+    "n": 4,
+    "placement": "native-worker",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "native-worker",
+    "window": {
+      "startAt": 1795460800050.5,
+      "endAt": 1795460860050.5
+    },
+    "copies": [
+      {
+        "id": "c1-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 69024,
+          "opsPerMin": 69024,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 69024,
+          "checksum": 11000
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 68672,
+          "opsPerMin": 68672,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 68672,
+          "checksum": 11000
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 68729,
+          "opsPerMin": 68729,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 68729,
+          "checksum": 11000
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 69111,
+          "opsPerMin": 69111,
+          "opP50Us": 800.048828125,
+          "opP95Us": 900.146484375,
+          "batches": 69111,
+          "checksum": 11000
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 275536,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2,
+      "maxMs": 3.199951171875,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {},
+    "setupMs": 58.299999713897705,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

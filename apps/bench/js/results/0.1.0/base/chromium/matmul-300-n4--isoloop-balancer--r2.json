@@ -1,0 +1,440 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 2,
+  "started": "2026-11-24T11:53:12.609Z",
+  "job": {
+    "key": "matmul-300-n4",
+    "tier": "heavy",
+    "workloads": [
+      "matmul-300"
+    ],
+    "copies": "matmul-300*4",
+    "n": 4,
+    "placement": "isoloop-balancer",
+    "warmMs": 30000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-balancer",
+    "window": {
+      "startAt": 1795521222995.5,
+      "endAt": 1795521282995.5
+    },
+    "copies": [
+      {
+        "id": "c1-matmul-300",
+        "workload": "matmul-300",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 1306,
+          "opsPerMin": 1306,
+          "opP50Us": 43800.048828125,
+          "opP95Us": 44199.951171875,
+          "batches": 1306,
+          "checksum": 153.2091253496149
+        },
+        "lives": 5
+      },
+      {
+        "id": "c2-matmul-300",
+        "workload": "matmul-300",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 1315,
+          "opsPerMin": 1315,
+          "opP50Us": 43500,
+          "opP95Us": 43800.048828125,
+          "batches": 1315,
+          "checksum": 141.14258849752656
+        },
+        "lives": 6
+      },
+      {
+        "id": "c3-matmul-300",
+        "workload": "matmul-300",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 1320,
+          "opsPerMin": 1320,
+          "opP50Us": 43300.048828125,
+          "opP95Us": 43699.951171875,
+          "batches": 1320,
+          "checksum": 150.99999338895884
+        },
+        "lives": 6
+      },
+      {
+        "id": "c4-matmul-300",
+        "workload": "matmul-300",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 1305,
+          "opsPerMin": 1305,
+          "opP50Us": 43899.90234375,
+          "opP95Us": 44199.951171875,
+          "batches": 1305,
+          "checksum": 152.4552430739082
+        },
+        "lives": 2
+      }
+    ],
+    "totalOpsPerMin": 5246,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2,
+      "maxMs": 3.10009765625,
+      "samples": 600
+    },
+    "events": [
+      {
+        "at": -29708.89990234375,
+        "kind": "spike",
+        "id": "c1-matmul-300",
+        "detail": {
+          "pool": "balancer-quarantine-1",
+          "lagMs": 190.59999990463257,
+          "action": "noted"
+        }
+      },
+      {
+        "at": -27953.5,
+        "kind": "move",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -27953.199951171875,
+        "kind": "move",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -27952.89990234375,
+        "kind": "move",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -27780.699951171875,
+        "kind": "arrived",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 962.2000002861023
+        }
+      },
+      {
+        "at": -27780.699951171875,
+        "kind": "arrived",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 962
+        }
+      },
+      {
+        "at": -27734.300048828125,
+        "kind": "arrived",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 569.8000001907349
+        }
+      },
+      {
+        "at": -26930.800048828125,
+        "kind": "move",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -26795.60009765625,
+        "kind": "arrived",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "costMs": 316.90000009536743
+        }
+      },
+      {
+        "at": -26731.5,
+        "kind": "move",
+        "id": "c4-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -26507.60009765625,
+        "kind": "arrived",
+        "id": "c4-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 301.90000009536743
+        }
+      },
+      {
+        "at": -24749,
+        "kind": "move",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -24741.300048828125,
+        "kind": "move",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -24698.699951171875,
+        "kind": "arrived",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "costMs": 109.5
+        }
+      },
+      {
+        "at": -24698.60009765625,
+        "kind": "arrived",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 109.7999997138977
+        }
+      },
+      {
+        "at": -23762.60009765625,
+        "kind": "move",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -23660.300048828125,
+        "kind": "arrived",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "costMs": 149.5
+        }
+      },
+      {
+        "at": -23395.300048828125,
+        "kind": "move",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23395.10009765625,
+        "kind": "move",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23236.10009765625,
+        "kind": "arrived",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 424.09999990463257
+        }
+      },
+      {
+        "at": -23236.10009765625,
+        "kind": "arrived",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 424
+        }
+      },
+      {
+        "at": -22901.800048828125,
+        "kind": "move",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -22831.699951171875,
+        "kind": "arrived",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 475.40000009536743
+        }
+      },
+      {
+        "at": -22336.800048828125,
+        "kind": "move",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -22336.699951171875,
+        "kind": "move",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -22175.800048828125,
+        "kind": "arrived",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 391.40000009536743
+        }
+      },
+      {
+        "at": -22175.699951171875,
+        "kind": "arrived",
+        "id": "c1-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 391.5
+        }
+      },
+      {
+        "at": -21326.300048828125,
+        "kind": "move",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -21102.60009765625,
+        "kind": "arrived",
+        "id": "c2-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-3",
+          "costMs": 403.7999997138977
+        }
+      },
+      {
+        "at": -19798.199951171875,
+        "kind": "move",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -19769.199951171875,
+        "kind": "arrived",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 40.5
+        }
+      },
+      {
+        "at": -19019.39990234375,
+        "kind": "move",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -18797.39990234375,
+        "kind": "arrived",
+        "id": "c3-matmul-300",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 311.2000002861023
+        }
+      }
+    ],
+    "poolsAtEnd": {
+      "c1-matmul-300": "balancer-quarantine-2",
+      "c2-matmul-300": "balancer-quarantine-3",
+      "c3-matmul-300": "balancer-quarantine-1",
+      "c4-matmul-300": "balancer-1"
+    },
+    "setupMs": 327.19999980926514,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

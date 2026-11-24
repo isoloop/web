@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T14:25:42.098Z",
+  "job": {
+    "key": "map-insert-iterate-1m-n4",
+    "tier": "heavy",
+    "workloads": [
+      "map-insert-iterate-1m"
+    ],
+    "copies": "map-insert-iterate-1m*4",
+    "n": 4,
+    "placement": "isoloop-one",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-one",
+    "window": {
+      "startAt": 1795530352704.9001,
+      "endAt": 1795530412704.9001
+    },
+    "copies": [
+      {
+        "id": "c1-map-insert-iterate-1m",
+        "workload": "map-insert-iterate-1m",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 129,
+          "opsPerMin": 129,
+          "opP50Us": 116500,
+          "opP95Us": 118899.90234375,
+          "batches": 129,
+          "checksum": 128493856
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-map-insert-iterate-1m",
+        "workload": "map-insert-iterate-1m",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 129,
+          "opsPerMin": 129,
+          "opP50Us": 117000,
+          "opP95Us": 153400.146484375,
+          "batches": 129,
+          "checksum": 128493856
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-map-insert-iterate-1m",
+        "workload": "map-insert-iterate-1m",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 130,
+          "opsPerMin": 130,
+          "opP50Us": 116699.951171875,
+          "opP95Us": 153600.09765625,
+          "batches": 130,
+          "checksum": 128493856
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-map-insert-iterate-1m",
+        "workload": "map-insert-iterate-1m",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 129,
+          "opsPerMin": 129,
+          "opP50Us": 117000,
+          "opP95Us": 119000,
+          "batches": 129,
+          "checksum": 128493856
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 517,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 0.099853515625,
+      "maxMs": 0.199951171875,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-map-insert-iterate-1m": "bench-one",
+      "c2-map-insert-iterate-1m": "bench-one",
+      "c3-map-insert-iterate-1m": "bench-one",
+      "c4-map-insert-iterate-1m": "bench-one"
+    },
+    "setupMs": 550.0999999046326,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

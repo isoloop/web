@@ -1,0 +1,450 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 3,
+  "started": "2026-11-24T13:37:31.462Z",
+  "job": {
+    "key": "set-dedupe-groupby-10k-n4",
+    "tier": "regular",
+    "workloads": [
+      "set-dedupe-groupby-10k"
+    ],
+    "copies": "set-dedupe-groupby-10k*4",
+    "n": 4,
+    "placement": "isoloop-balancer",
+    "warmMs": 30000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-balancer",
+    "window": {
+      "startAt": 1795527481626.2,
+      "endAt": 1795527541626.2
+    },
+    "copies": [
+      {
+        "id": "c1-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 56035,
+          "opsPerMin": 56035,
+          "opP50Us": 1000,
+          "opP95Us": 1099.853515625,
+          "batches": 56035,
+          "checksum": 11000
+        },
+        "lives": 5
+      },
+      {
+        "id": "c2-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 52661,
+          "opsPerMin": 52661,
+          "opP50Us": 1000,
+          "opP95Us": 1199.951171875,
+          "batches": 44092,
+          "checksum": 11000
+        },
+        "lives": 7
+      },
+      {
+        "id": "c3-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 57440,
+          "opsPerMin": 57440,
+          "opP50Us": 1000,
+          "opP95Us": 1099.853515625,
+          "batches": 57440,
+          "checksum": 11000
+        },
+        "lives": 5
+      },
+      {
+        "id": "c4-set-dedupe-groupby-10k",
+        "workload": "set-dedupe-groupby-10k",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 54153,
+          "opsPerMin": 54153,
+          "opP50Us": 1000,
+          "opP95Us": 1100.09765625,
+          "batches": 44551,
+          "checksum": 11000
+        },
+        "lives": 4
+      }
+    ],
+    "totalOpsPerMin": 220289,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.39990234375,
+      "maxMs": 3.400146484375,
+      "samples": 600
+    },
+    "events": [
+      {
+        "at": -28931.5,
+        "kind": "move",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28931.199951171875,
+        "kind": "move",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28680.7998046875,
+        "kind": "arrived",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 452.19999980926514
+        }
+      },
+      {
+        "at": -28680.699951171875,
+        "kind": "arrived",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 452
+        }
+      },
+      {
+        "at": -28628.699951171875,
+        "kind": "move",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28435.699951171875,
+        "kind": "arrived",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 395.09999990463257
+        }
+      },
+      {
+        "at": -28225.099853515625,
+        "kind": "move",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -28022.199951171875,
+        "kind": "arrived",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-quarantine-4",
+          "costMs": 254.5
+        }
+      },
+      {
+        "at": -26552.39990234375,
+        "kind": "move",
+        "id": "c4-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -26358.599853515625,
+        "kind": "arrived",
+        "id": "c4-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-1",
+          "costMs": 228.7999997138977
+        }
+      },
+      {
+        "at": -25555.099853515625,
+        "kind": "move",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -25548.89990234375,
+        "kind": "move",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -25492,
+        "kind": "arrived",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 95.40000009536743
+        }
+      },
+      {
+        "at": -25492,
+        "kind": "arrived",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-3",
+          "to": "balancer-1",
+          "costMs": 95.40000009536743
+        }
+      },
+      {
+        "at": -24724,
+        "kind": "move",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "reason": "spike"
+        }
+      },
+      {
+        "at": -24538.7998046875,
+        "kind": "move",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": -24536.7998046875,
+        "kind": "arrived",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 541.4000000953674
+        }
+      },
+      {
+        "at": -24472.099853515625,
+        "kind": "arrived",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-4",
+          "to": "balancer-1",
+          "costMs": 115.5
+        }
+      },
+      {
+        "at": -23960,
+        "kind": "move",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23809.099853515625,
+        "kind": "move",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -23771.39990234375,
+        "kind": "arrived",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 289.30000019073486
+        }
+      },
+      {
+        "at": -23771.39990234375,
+        "kind": "arrived",
+        "id": "c1-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 289.40000009536743
+        }
+      },
+      {
+        "at": -22646.199951171875,
+        "kind": "move",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": -22449.39990234375,
+        "kind": "arrived",
+        "id": "c3-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-3",
+          "costMs": 298.30000019073486
+        }
+      },
+      {
+        "at": 5431,
+        "kind": "move",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": 5523.10009765625,
+        "kind": "arrived",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 110.80000019073486
+        }
+      },
+      {
+        "at": 9064.10009765625,
+        "kind": "move",
+        "id": "c4-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": 9167.2001953125,
+        "kind": "move",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "reason": "spike"
+        }
+      },
+      {
+        "at": 9206.400146484375,
+        "kind": "arrived",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-1",
+          "costMs": 39.89999961853027
+        }
+      },
+      {
+        "at": 9265.900146484375,
+        "kind": "arrived",
+        "id": "c4-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 303
+        }
+      },
+      {
+        "at": 12422.800048828125,
+        "kind": "move",
+        "id": "c4-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "reason": "steady"
+        }
+      },
+      {
+        "at": 12609.800048828125,
+        "kind": "arrived",
+        "id": "c4-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-2",
+          "to": "balancer-1",
+          "costMs": 197.5
+        }
+      },
+      {
+        "at": 12656.5,
+        "kind": "move",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "reason": "bisect"
+        }
+      },
+      {
+        "at": 12866.10009765625,
+        "kind": "arrived",
+        "id": "c2-set-dedupe-groupby-10k",
+        "detail": {
+          "from": "balancer-quarantine-1",
+          "to": "balancer-quarantine-2",
+          "costMs": 312.80000019073486
+        }
+      }
+    ],
+    "poolsAtEnd": {
+      "c1-set-dedupe-groupby-10k": "balancer-quarantine-1",
+      "c2-set-dedupe-groupby-10k": "balancer-quarantine-2",
+      "c3-set-dedupe-groupby-10k": "balancer-quarantine-3",
+      "c4-set-dedupe-groupby-10k": "balancer-1"
+    },
+    "setupMs": 104.5,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}

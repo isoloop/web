@@ -1,0 +1,109 @@
+{
+  "engine": "chromium",
+  "browserVersion": "158.0.8127.18",
+  "round": 1,
+  "started": "2026-11-23T18:28:30.797Z",
+  "job": {
+    "key": "sort-numbers-10k-n4",
+    "tier": "regular",
+    "workloads": [
+      "sort-numbers-10k"
+    ],
+    "copies": "sort-numbers-10k*4",
+    "n": 4,
+    "placement": "isoloop-own",
+    "warmMs": 10000,
+    "windowMs": 60000
+  },
+  "profile": "base",
+  "maxWorkers": 4,
+  "state": "done",
+  "result": {
+    "placement": "isoloop-own",
+    "window": {
+      "startAt": 1795458520967.0999,
+      "endAt": 1795458580967.0999
+    },
+    "copies": [
+      {
+        "id": "c1-sort-numbers-10k",
+        "workload": "sort-numbers-10k",
+        "seed": 1,
+        "batch": 1,
+        "result": {
+          "ops": 13643,
+          "opsPerMin": 13643,
+          "opP50Us": 4000,
+          "opP95Us": 4399.90234375,
+          "batches": 13643,
+          "checksum": 499213.0659520626
+        },
+        "lives": 1
+      },
+      {
+        "id": "c2-sort-numbers-10k",
+        "workload": "sort-numbers-10k",
+        "seed": 2,
+        "batch": 1,
+        "result": {
+          "ops": 13670,
+          "opsPerMin": 13670,
+          "opP50Us": 4000,
+          "opP95Us": 4300.048828125,
+          "batches": 13670,
+          "checksum": 501371.0856437683
+        },
+        "lives": 1
+      },
+      {
+        "id": "c3-sort-numbers-10k",
+        "workload": "sort-numbers-10k",
+        "seed": 3,
+        "batch": 1,
+        "result": {
+          "ops": 13621,
+          "opsPerMin": 13621,
+          "opP50Us": 4099.853515625,
+          "opP95Us": 4399.90234375,
+          "batches": 13621,
+          "checksum": 501164.1865130514
+        },
+        "lives": 1
+      },
+      {
+        "id": "c4-sort-numbers-10k",
+        "workload": "sort-numbers-10k",
+        "seed": 4,
+        "batch": 1,
+        "result": {
+          "ops": 13721,
+          "opsPerMin": 13721,
+          "opP50Us": 4000,
+          "opP95Us": 4299.8046875,
+          "batches": 13721,
+          "checksum": 500580.6596018374
+        },
+        "lives": 1
+      }
+    ],
+    "totalOpsPerMin": 54655,
+    "checksumsMatch": true,
+    "lateness": {
+      "p50Ms": 0,
+      "p95Ms": 2.5,
+      "maxMs": 3.5,
+      "samples": 600
+    },
+    "events": [],
+    "poolsAtEnd": {
+      "c1-sort-numbers-10k": "c1-sort-numbers-10k",
+      "c2-sort-numbers-10k": "c2-sort-numbers-10k",
+      "c3-sort-numbers-10k": "c3-sort-numbers-10k",
+      "c4-sort-numbers-10k": "c4-sort-numbers-10k"
+    },
+    "setupMs": 104.60000038146973,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+    "hardwareConcurrency": 4
+  },
+  "console": []
+}
