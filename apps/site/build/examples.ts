@@ -217,12 +217,12 @@ function appDirs(appsDir: string, prefix = ''): string[] {
   return out;
 }
 
-/** The hub's examples, validated, in hub order. The site and its code samples aren't examples. */
+/** The hub's examples, validated, in hub order. The site, its code samples and the frozen benchmark builds (apps/bench/) aren't examples. */
 export function loadExamples(repoRoot: string): Example[] {
   const appsDir = join(repoRoot, 'apps');
   const examples: Example[] = [];
   for (const id of appDirs(appsDir)) {
-    if (id === 'site' || id === 'samples') continue;
+    if (id === 'site' || id === 'samples' || id.startsWith('bench/')) continue;
     const file = join(appsDir, id, 'example.json');
     const where = relative(repoRoot, file);
     if (!existsSync(file)) throw new Error(`${where} is missing: every app needs one for the hub`);

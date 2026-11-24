@@ -40,9 +40,11 @@ const block = {
 };
 
 describe('loadExamples', () => {
-  it('reads every app at any depth, skips the site, and sorts by order', () => {
+  it('reads every app at any depth, skips the site and apps/bench/, and sorts by order', () => {
     const root = repo({
       site: undefined,
+      // plant-bench: a frozen benchmark build, never on the hub, with no example.json.
+      'bench/plant': undefined,
       basic: { ...valid, order: 10 },
       'dashboards/plant': {
         ...valid,
