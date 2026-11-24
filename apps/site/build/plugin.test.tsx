@@ -241,7 +241,7 @@ describe('the pages', () => {
     expect(map.match(/class="fnotes-col"/g)).toHaveLength(6);
   });
 
-  it('put every alternative in the Compared panel, each mark in words with its source and date', () => {
+  it('put every alternative in the Compared panel, each mark in words linking to its source, the docs and date under the name', () => {
     const html = renderDocument(named('features'), data, { csp: CSP });
     const from = html.indexOf('id="compared"');
     expect(from).toBeGreaterThan(-1);
@@ -256,11 +256,16 @@ describe('the pages', () => {
       expect(panel).toContain(`href="${row.url}"`);
       for (const k of ['ui', 'supervision', 'bus', 'security'] as const) {
         expect(panel).toContain(`data-mark="${row[k].mark}"`);
-        expect(panel).toContain(`href="${row[k].source}"`);
+        expect(panel).toContain(
+          `class="alt-mark" data-mark="${row[k].mark}" href="${row[k].source}"`,
+        );
       }
       expect(panel).toContain(`href="${row.browsers.source}"`);
     }
-    expect(panel).toMatch(/<time datetime="\d{4}-\d{2}-\d{2}">/);
+    expect(panel).toMatch(/<time datetime="\d{4}-\d{2}-\d{2}">\d{1,2} \w+ \d{4}<\/time>/);
+    // The source is said once per row, not in every cell.
+    expect(panel).not.toContain('Source,');
+    expect(panel.match(/<time /g)).toHaveLength(data.alternatives.rows.length);
     const better = html.slice(html.indexOf('class="alt-better"'));
     expect(better.slice(0, better.indexOf('</ul>')).match(/<li>/g)).toHaveLength(
       data.alternatives.rows.length - 1,

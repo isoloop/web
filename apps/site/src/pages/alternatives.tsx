@@ -7,11 +7,10 @@ import {
   type Alternative,
   type Alternatives,
 } from '../../build/alternatives.ts';
-import { compared as c } from '../copy.ts';
+import { compared as c, longDate } from '../copy.ts';
 import { plain, rich } from './rich.tsx';
 
 type Mark = Alternative['ui'];
-type Text = Alternative['browsers'];
 
 /** A mark in words ("Yes", "Partial", "No"), so it never rests on colour alone. */
 function MarkWord({ mark }: { mark: Mark['mark'] }): VNode {
@@ -22,18 +21,34 @@ function MarkWord({ mark }: { mark: Mark['mark'] }): VNode {
   );
 }
 
-/** Where a cell's claim comes from, and when it was checked. */
-function Source({ cell }: { cell: Text }): VNode {
+/**
+ * A mark in words that links to the page of the project's docs it was read from
+ * (/features/#compared): the claim's source, without a "Source" line in every cell.
+ */
+function MarkLink({ cell }: { cell: Mark }): VNode {
   return (
-    <span class="alt-source">
-      <a href={cell.source}>{c.source}</a>, {c.checked}{' '}
-      <time dateTime={cell.checked}>{cell.checked}</time>
-    </span>
+    <a class="alt-mark" data-mark={cell.mark} href={cell.source}>
+      {c.marks[cell.mark]}
+    </a>
   );
 }
 
-function rowHeading(row: Alternative, link: boolean): VNode {
-  return link ? <a href={row.url}>{rich(row.name)}</a> : <>{rich(row.name)}</>;
+/** The oldest date any of a row's cells was checked, so the row never claims a later check. */
+function checkedOn(row: Alternative): string {
+  return [...MARK_COLUMNS, ...TEXT_COLUMNS].map((k) => row[k].checked).toSorted()[0]!;
+}
+
+function rowHeading(row: Alternative, full: boolean): VNode {
+  if (!full) return <>{rich(row.name)}</>;
+  const date = checkedOn(row);
+  return (
+    <>
+      {rich(row.name)}
+      <span class="alt-source">
+        <a href={row.url}>{c.docs}</a>, {c.checked} <time dateTime={date}>{longDate(date)}</time>
+      </span>
+    </>
+  );
 }
 
 /**
@@ -58,7 +73,8 @@ export function AlternativesSummary({ data }: { data: Alternatives }): VNode {
 
 /**
  * The full table on /features/#compared (ADR 0005, amended 2026-11-24): every
- * column, each cell with its note, its source and the date it was checked; then
+ * column. Under each name, its docs and the date checked; each mark links to the
+ * page it was read from, and each text cell ends with that page's link. Then
  * where each alternative is the better choice.
  */
 export function AlternativesFull({ data }: { data: Alternatives }): VNode {
@@ -76,16 +92,17 @@ export function AlternativesFull({ data }: { data: Alternatives }): VNode {
             plain(row.name),
             ...MARK_COLUMNS.map((k) => (
               <>
-                <MarkWord mark={row[k].mark} />
+                <MarkLink cell={row[k]} />
                 <span class="alt-note">{rich(row[k].note)}</span>
-                <Source cell={row[k]} />
               </>
             )),
             ...TEXT_COLUMNS.map((k) => (
-              <>
-                <span class="alt-note">{rich(row[k].note)}</span>
-                <Source cell={row[k]} />
-              </>
+              <span class="alt-note" key={k}>
+                {rich(row[k].note)}{' '}
+                <a class="alt-page" href={row[k].source}>
+                  {c.page}
+                </a>
+              </span>
             )),
           ])}
           rowHeadings={data.rows.map((row) => rowHeading(row, true))}
