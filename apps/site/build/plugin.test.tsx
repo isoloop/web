@@ -241,7 +241,7 @@ describe('the pages', () => {
     expect(map.match(/class="fnotes-col"/g)).toHaveLength(6);
   });
 
-  it('put every alternative in the Compared panel, each mark in words with its source and date', () => {
+  it('put every alternative in the Compared panel, each mark as an icon with its word for screen readers, the docs and date under the name', () => {
     const html = renderDocument(named('features'), data, { csp: CSP });
     const from = html.indexOf('id="compared"');
     expect(from).toBeGreaterThan(-1);
@@ -256,11 +256,14 @@ describe('the pages', () => {
       expect(panel).toContain(`href="${row.url}"`);
       for (const k of ['ui', 'supervision', 'bus', 'security'] as const) {
         expect(panel).toContain(`data-mark="${row[k].mark}"`);
-        expect(panel).toContain(`href="${row[k].source}"`);
+        // No per-cell links: the row's docs link, under its name, is the source.
+        if (row[k].source !== row.url) expect(panel).not.toContain(`href="${row[k].source}"`);
       }
-      expect(panel).toContain(`href="${row.browsers.source}"`);
     }
-    expect(panel).toMatch(/<time datetime="\d{4}-\d{2}-\d{2}">/);
+    expect(panel).toMatch(/<time datetime="\d{4}-\d{2}-\d{2}">\d{1,2} \w+ \d{4}<\/time>/);
+    // The source is said once per row, not in every cell.
+    expect(panel).not.toContain('Source,');
+    expect(panel.match(/<time /g)).toHaveLength(data.alternatives.rows.length);
     const better = html.slice(html.indexOf('class="alt-better"'));
     expect(better.slice(0, better.indexOf('</ul>')).match(/<li>/g)).toHaveLength(
       data.alternatives.rows.length - 1,
@@ -277,9 +280,14 @@ describe('the pages', () => {
     expect(html.indexOf('id="how"')).toBeLessThan(html.indexOf('id="features"'));
     const section = html.slice(from, html.indexOf('</section>', from));
     expect(section.match(/<tr>/g)).toHaveLength(data.alternatives.rows.length + 1);
-    expect(section.match(/class="alt-mark"/g)).toHaveLength(data.alternatives.rows.length * 4);
-    for (const word of section.matchAll(/class="alt-mark" data-mark="\w+">(\w+)</g))
+    // Four marks per row, and the key's three.
+    expect(section.match(/class="alt-mark"/g)).toHaveLength(data.alternatives.rows.length * 4 + 3);
+    for (const word of section.matchAll(
+      /class="alt-mark" data-mark="\w+" title="(\w+)">[\s\S]*?<span class="ui-sr-only">(\w+)<\/span>/g,
+    )) {
       expect(['Yes', 'Partial', 'No']).toContain(word[1]);
+      expect(word[2]).toBe(word[1]);
+    }
     expect(section).toContain('href="/features/#compared"');
   });
 

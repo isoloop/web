@@ -406,8 +406,10 @@ export const featuresPage = {
  * and sources are content/alternatives.json.
  */
 export const compared = {
+  /** Each mark's name, read by screen readers and shown as the icon's tooltip. */
   marks: { yes: 'Yes', partial: 'Partial', no: 'No' },
-  source: 'Source',
+  /** Under each name on /features/#compared: "Docs, checked 24 November 2026". */
+  docs: 'Docs',
   checked: 'checked',
   home: {
     heading: 'Compared with the alternatives',
@@ -425,10 +427,10 @@ export const compared = {
     itemId: 'alternatives',
     heading: 'Isoloop and the alternatives',
     text: [
-      'Six other ways to move work off the main thread or contain it, next to Isoloop. Each mark comes from that project’s own docs, linked in its cell, with the date it was checked.',
+      'Six other ways to move work off the main thread or contain it, next to Isoloop. Each mark comes from that project’s own docs, linked under its name with the date they were checked.',
       'There are no benchmarks here: these tools do different jobs, so the table compares what each one does.',
     ],
-    caption: 'What each one provides, with the source of each mark and the date it was checked.',
+    caption: 'What each one provides, from its own docs.',
     betterHeading: 'Where an alternative is the better choice',
   },
 };

@@ -2272,15 +2272,37 @@
   }
 }
 
-/* Isoloop and the alternatives (src/pages/alternatives.tsx). A mark is a word, so it
-   never rests on colour; the weight sets "Yes" apart at a glance. */
+/* Isoloop and the alternatives (src/pages/alternatives.tsx). A mark is an icon whose
+   shape says it (tick, half circle, cross), so it never rests on colour; the colour
+   sets "yes" apart at a glance. */
 .alt-mark {
-  font-weight: 650;
-  font-stretch: 87%;
+  /* Holds its screen-reader label (.ui-sr-only, absolute), so the label stays
+     inside the table's scrolling wrap instead of widening the page on a phone. */
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  color: var(--ui-text);
+}
+.alt-mark[data-mark='yes'] {
+  color: var(--ui-accent);
 }
 .alt-mark[data-mark='no'] {
-  font-weight: 400;
   color: var(--ui-text-muted);
+}
+.alt-key {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-xs);
+}
+.alt-key li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 .alt-full .ui-table {
   min-width: 60rem;
