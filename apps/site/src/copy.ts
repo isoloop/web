@@ -373,6 +373,8 @@ export const featuresPage = {
     ] as [string, string][],
   },
   cost: {
+    /** ADR 0005, amended 2026-11-24: the cost panel links to /benchmarks/. */
+    benchmarks: 'Every figure as a chart, on the benchmarks page',
     more: 'Every recorded run, per device and build',
   },
 };
@@ -816,6 +818,173 @@ export const examplesPage = {
     after: ' covers a real deployment.',
   },
   support: 'They need Safari 16.4 or later, or a recent Chrome, Edge or Firefox.',
+};
+
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+/** `2026-11-13` as "13 November 2026". */
+export function longDate(iso: string): string {
+  const [y = '', m = '1', d = '1'] = iso.split('-');
+  return `${Number(d)} ${MONTHS[Number(m) - 1] ?? m} ${y}`;
+}
+
+/**
+ * /benchmarks/ (ADR 0002 and 0005, amended 2026-11-24). Every figure on the page
+ * comes from the runs in content/benchmarks.json (build/benchmarks.ts); the
+ * sentences here are templates around them, so a new run changes no copy.
+ */
+export const benchmarksPage = {
+  title: 'Benchmarks',
+  /** <title> and the link preview only. */
+  searchTitle: 'Benchmarks: Isoloop measured against native',
+  description:
+    'Isoloop measured against native builds of the same dashboard: main-thread time, typing, start-up, recovery, CPU and memory, on one machine, in interleaved rounds.',
+  heading: 'Benchmarks',
+  lede: 'The plant dashboard, built natively and with Isoloop, measured on one machine in interleaved rounds. Isoloop takes the widgets off the main thread, and it costs CPU, memory and start-up time. The figures below show both.',
+  /** The label on every figure: what it was measured on. `date` is YYYY-MM-DD, shown as "13 November 2026". */
+  measuredOn: (run: {
+    name: string;
+    version: string;
+    date: string;
+    cores: number;
+    clock: string;
+  }) =>
+    `Measured on ${run.name} at \`@isoloop/*@${run.version}\`, ${longDate(run.date)}, on ${run.cores} cores fixed at ${run.clock}.`,
+  nav: 'On this page',
+  sections: {
+    found: 'What we found',
+    figures: 'The figures',
+    history: 'Across versions',
+    method: 'How it’s measured',
+    features: 'Feature benchmarks',
+    raw: 'Raw results',
+  },
+  /** The builds, as the runs name them. */
+  builds: {
+    native: 'Native',
+    'native-workers': 'Native + workers',
+    'isoloop:one': 'Isoloop one',
+    'isoloop:matched': 'Isoloop matched',
+  } as Record<string, string>,
+  /** A pair's heading: "Isoloop matched against native + workers". */
+  pair: (b: string, a: string) => `${b} against ${a.toLowerCase()}`,
+  /** After the pair's heading, for the default placement. */
+  defaultPlacement: 'the default placement',
+  engines: { chromium: 'Chromium', firefox: 'Firefox', webkit: 'WebKit' } as Record<string, string>,
+  rate: (khz: number) => `${khz} kHz`,
+  figures: {
+    mainThreadCpuPct: 'Main thread busy',
+    rendererCpuPct: 'CPU, all threads',
+    typingMedianMs: 'Typing, median',
+    firstDataMs: 'First data',
+    allWidgetsMs: 'All 72 widgets with data',
+    recoveryMs: 'Recovery after a 3 s block',
+    rendererPssGcMb: 'Memory after GC',
+  },
+  found: {
+    intro: (engine: string, rate: string) =>
+      `${engine} at ${rate}, the heavier load. Each difference is the Isoloop build against the native build shaped like it, round by round.`,
+    better: 'Better',
+    worse: 'Worse',
+    within: 'Within the spread',
+    /** The figures' names inside a sentence. */
+    figures: {
+      mainThreadCpuPct: 'main thread busy',
+      rendererCpuPct: 'CPU across all threads',
+      typingMedianMs: 'typing',
+      firstDataMs: 'first data',
+      allWidgetsMs: 'all 72 widgets with data',
+      recoveryMs: 'recovery after a 3 s block',
+      rendererPssGcMb: 'memory after GC',
+    },
+    /** One figure in a finding: "typing, 28 ms lower". */
+    item: (figure: string, delta: string) => `${figure}, ${delta}`,
+    /** A figure whose rounds disagree: "all 72 widgets with data (the rounds ranged from −793 ms to +1.0 s)". */
+    range: (figure: string, lo: string, hi: string) =>
+      `${figure} (the rounds ranged from ${lo} to ${hi})`,
+  },
+  figuresNote:
+    'Lower is better for every figure. Each chart shows the median of the rounds for the native build in grey and for Isoloop in colour, and the difference in words.',
+  /** The fold under each engine's charts. */
+  table: {
+    summary: 'The table, with each difference’s spread',
+    figure: 'Figure',
+    load: 'Load',
+    delta: 'Δ (B − A)',
+    spread: 'Lowest to highest round',
+    caption: (b: string, a: string) => `${b} (B) against ${a.toLowerCase()} (A). Lower is better.`,
+  },
+  /** Under the charts of an engine other than Chromium. */
+  timingsOnly: (engine: string) =>
+    `${engine} reports the timings only: typing, first data, all widgets and recovery.`,
+  history: {
+    lede: (engine: string, rate: string) =>
+      `Each figure’s difference at each version, ${engine} at ${rate}. A change beyond both runs’ spreads is marked.`,
+    changed: 'changed beyond the spread',
+    version: 'Version',
+  },
+  method: {
+    machine: 'Machine',
+    /** Names the architecture only, never the CPU's brand or model (environment.json keeps it). */
+    machineText: (m: {
+      arch: 'x64' | 'arm64' | undefined;
+      cores: number;
+      cpus: string;
+      clock: string;
+      memoryGb: number;
+      os: string;
+      node: string;
+      image: string;
+    }) =>
+      `${m.arch ? `An ${m.arch} CPU` : 'A CPU'}, ${m.cores} cores fixed at ${m.clock} (CPUs ${m.cpus.split(',').join(', ')}), ${m.memoryGb} GB, ${m.os}, Node ${m.node}${m.image ? `, in \`${m.image}\`` : ''}. The machine does nothing else during a run.`,
+    versions: 'Versions',
+    versionsText: (v: { version: string; react: string; playwright: string; browsers: string }) =>
+      `\`@isoloop/*@${v.version}\`, React ${v.react}, Playwright ${v.playwright}. Browsers: ${v.browsers}.`,
+    rounds: 'Rounds',
+    roundsText: (n: number) =>
+      `${n} interleaved rounds. Each round runs every build once, one page at a time, so drift on the machine falls on both sides of a pair.`,
+    delta: 'The difference',
+    deltaText:
+      'Δ is the Isoloop build minus its native build within each round, and its median over the rounds, so it can differ from the difference of the two medians. Its spread is the lowest and the highest round. When the rounds disagree on its sign, the chart says “within the spread” and colours it neither better nor worse.',
+    page: 'Each page',
+    /** The steps on each page, in order. */
+    pageSteps: [
+      'Load the page and warm up for 6 s.',
+      'A 10 s window with no input: main thread busy and all-thread CPU, each as a share of one core.',
+      '5 keystrokes into a widget’s filter: typing.',
+      'A forced garbage collection in the page and every worker, then its memory (Chromium on Linux).',
+      'A 3 s block of one machine’s gauges. Recovery is the time until every affected widget shows data from after the block.',
+    ],
+    when: 'When',
+    whenText:
+      'Each minor and major release is measured on plant-bench, a copy of the plant dashboard whose code changes only at a new generation (1.0, 2.0), so the dashboard is the same from one version to the next.',
+  },
+  features: {
+    lede: 'Single features and the other examples, each measured on its own run. Their findings are with each example on ',
+    examples: 'the examples page',
+    tag: (tag: string) => `measured at ${tag}`,
+    results: 'results',
+  },
+  raw: {
+    lede: 'Each run’s summary, its raw figures per page, and the machine and versions it ran on.',
+    run: (name: string, version: string, date: string) => `${name} at ${version}, ${date}:`,
+    summary: 'the summary',
+    results: 'the raw results',
+    environment: 'the machine and versions',
+    bench: 'plant-bench, the build each release is measured on',
+  },
 };
 
 export const changelogPage = {

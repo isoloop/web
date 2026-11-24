@@ -304,6 +304,9 @@ function Features({ samples, features, examples, alternatives }: SiteData): VNod
           level={3}
         />
         <p>
+          <a href="/benchmarks/">{f.cost.benchmarks}</a>
+        </p>
+        <p>
           <a href={PLANT_RESULTS}>{f.cost.more}</a>
         </p>
       </>

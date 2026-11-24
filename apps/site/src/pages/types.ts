@@ -1,5 +1,6 @@
 import type { VNode } from 'preact';
 import type { Alternatives } from '../../build/alternatives.ts';
+import type { Benchmarks } from '../../build/benchmarks.ts';
 import type { Changelog } from '../../build/changelog.ts';
 import type { Diagram } from '../../build/diagrams.ts';
 import type { Doc, NavSection } from '../../build/docs/pages.ts';
@@ -28,6 +29,8 @@ export interface SiteData {
   docsNav: NavSection[];
   /** The `@isoloop/*` version at the pin, which the docs describe. */
   libraryVersion: string;
+  /** /benchmarks/: the runs in content/benchmarks.json (build/benchmarks.ts). */
+  benchmarks: Benchmarks;
 }
 
 export interface Page {

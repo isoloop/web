@@ -1,13 +1,13 @@
 # Site
 
-isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the landing page, the features, how it works, the examples hub, the changelog, and the docs (`/docs/` and `/docs/<slug>/`, one page per library guide). The examples themselves are built on their own and put next to these pages by [`scripts/assemble-site.sh`](../../scripts/assemble-site.sh).
+isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the landing page, the features, how it works, the examples hub, the benchmarks, the changelog, and the docs (`/docs/` and `/docs/<slug>/`, one page per library guide). The examples themselves are built on their own and put next to these pages by [`scripts/assemble-site.sh`](../../scripts/assemble-site.sh).
 
 - **Pages are Preact components**, rendered to static HTML at build time through `ui/render` ([ADR 0003](../../docs/adr/0003-design-system.md)). No framework code reaches the browser; the only script on a page is ui's theme script, plus a page's own enhancement modules (the live demos, the rail, the docs' Copy button and contents).
 - **Every page carries** `<meta http-equiv="Content-Security-Policy" content="default-src 'self'">`, and every request is same-origin. The meta is left out in dev, where Vite injects inline styles.
 
 | Path | What it is |
 | --- | --- |
-| `index.html`, `features/index.html`, `how-it-works/index.html`, `examples/index.html`, `changelog/index.html`, `404.html` | One-line stubs (`<!-- page:home -->`) that `build/plugin.ts` turns into whole documents |
+| `index.html`, `features/index.html`, `how-it-works/index.html`, `examples/index.html`, `benchmarks/index.html`, `changelog/index.html`, `404.html` | One-line stubs (`<!-- page:home -->`) that `build/plugin.ts` turns into whole documents |
 | `src/pages/` | The pages, by name (`src/pages/index.ts`) |
 | `src/copy.ts` | **The page-level text,** with the source of each figure in a comment above it (ADR 0002, decision 10) |
 | `content/features/` | One entry per feature on `/features/` and the landing strip: its name, line, section text, its tab (which also sets its sticky note) ([ADR 0005](../../docs/adr/0005-page-navigation-and-status-marks.md)), `experimental` for the pill, `since`, and `proof` links to the code or tests behind it ([ADR 0004](../../docs/adr/0004-publishing-and-governance.md), decision 5) |
@@ -16,6 +16,7 @@ isoloop.dev's own pages ([ADR 0002](../../docs/adr/0002-site-build.md)): the lan
 | `build/crawl.ts` | `robots.txt` (every crawler allowed, the sitemap named) and `sitemap.xml`: the site's pages and every deployed example's indexable pages, from the lists the build renders, so none is left out. `e2e/search.spec.ts` checks them in the assembled site: each is served without a redirect, with its canonical, and every page outside the sitemap says `noindex` |
 | `build/examples.ts` | Reads and validates every app's `example.json` (a zod schema); a bad one fails the build, naming the file and the field |
 | `build/features.ts` | Validates the feature entries (zod) and checks every proof: the path, and the export or test title it names, at the library pin or in this checkout; a broken one fails the build, naming the entry and the path |
+| `content/benchmarks.json`, `build/benchmarks.ts` | `/benchmarks/`'s runs, oldest first: each names a `summary.json` in plant-bench's `Summary` shape (`apps/bench/plant/summary.ts`) and links to its summary and raw results. The last is the latest, drawn as charts (ui's `PairedBars`, with each row's paired Δ) over folded tables; the history shows once there are two. A Δ whose rounds disagree on its sign reads "within the spread", and a change between runs beyond both spreads is marked. Swapping the figures to a new plant-bench run is a change to this file only |
 | `build/changelog.ts` | Builds `/changelog/` from each public library package's `CHANGELOG.md` at the pin: one section per package, previews folded, dependency-only entries and internal packages left out |
 | `build/diagrams.ts` | Rewrites the library's Archify pages to run under the site's policy |
 | `build/docs/render.ts` | `renderMarkdown()`: a docs page's Markdown to HTML, with its title, description, headings and links, and the only file that imports `markdown-it` (M4c). `render.test.ts` is the conformance suite any engine put behind it has to pass. `build/docs/highlight.ts` runs fences through the site's tokenizer |

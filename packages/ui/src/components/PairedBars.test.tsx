@@ -116,6 +116,15 @@ describe('PairedBars', () => {
 });
 
 describe('ChartLegend', () => {
+  it('explains the within-the-spread colour when asked', () => {
+    const html = render(
+      <ChartLegend base="Native" value="Isoloop one" verdicts={['better', 'worse', 'same']} />,
+    );
+    expect(html).toContain(
+      '<li data-series="value" data-verdict="same">Isoloop one, within the spread</li>',
+    );
+  });
+
   it('names the baseline and both of Isoloop’s colours', () => {
     expect(render(<ChartLegend base="Native + workers" value="Isoloop matched" />)).toBe(
       '<ul class="ui-chart-legend" aria-label="How to read the charts"><li data-series="base">Native + workers</li><li data-series="value" data-verdict="better">Isoloop matched, better</li><li data-series="value" data-verdict="worse">Isoloop matched, worse</li></ul>',

@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { ui } from 'ui/vite';
 import { defineConfig } from 'vite';
 import { loadAlternatives } from './build/alternatives.ts';
+import { loadBenchmarks } from './build/benchmarks.ts';
 import { loadChangelog } from './build/changelog.ts';
 import { readDiagrams } from './build/diagrams.ts';
 import { loadExamples } from './build/examples.ts';
@@ -23,7 +24,7 @@ import { docInputs, site } from './build/plugin.ts';
 import { PAGES } from './src/pages/index.ts';
 
 // isoloop.dev's own pages (ADR 0002, as amended): the landing page, the
-// features, how it works, the examples hub, the changelog, the docs pages and the 404. Each index.html is a one-line stub that the `site`
+// features, how it works, the examples hub, the benchmarks, the changelog, the docs pages and the 404. Each index.html is a one-line stub that the `site`
 // plugin renders from a Preact page; `ui` adds the header, footer, tokens and
 // theme script (ADR 0003). The dashboards and basic are built on their own and
 // put next to this build by scripts/assemble-site.sh.
@@ -82,6 +83,7 @@ export default defineConfig({
         docs,
         docsNav: nav,
         libraryVersion: libraryVersion(library),
+        benchmarks: loadBenchmarks(here('content/benchmarks.json'), here('../..')),
       },
     }),
     ui({
@@ -99,6 +101,7 @@ export default defineConfig({
         features: here('features/index.html'),
         'how-it-works': here('how-it-works/index.html'),
         examples: here('examples/index.html'),
+        benchmarks: here('benchmarks/index.html'),
         changelog: here('changelog/index.html'),
         docs: here('docs/index.html'),
         'not-found': here('404.html'),

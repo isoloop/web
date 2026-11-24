@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { DIAGRAM_ORDER } from './diagrams.ts';
 import { loadAlternatives } from './alternatives.ts';
+import { loadBenchmarks } from './benchmarks.ts';
 import { loadFeatures } from './features.ts';
 import type { Doc } from './docs/pages.ts';
 import { CSP, docInputs, renderDocument, site } from './plugin.ts';
@@ -31,6 +32,10 @@ const data: SiteData = {
   ),
   alternatives: loadAlternatives(
     fileURLToPath(new URL('../content/alternatives.json', import.meta.url)),
+  ),
+  benchmarks: loadBenchmarks(
+    fileURLToPath(new URL('../content/benchmarks.json', import.meta.url)),
+    fileURLToPath(new URL('../../..', import.meta.url)),
   ),
   examples: [
     {

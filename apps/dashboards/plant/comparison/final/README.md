@@ -77,3 +77,7 @@ Renderer CPU, Isoloop minus native, ms/s, with `matched-v2/` in brackets:
 - **The renderer gap fell in three of four pairs:** by 19–68 ms/s. The `one` pair at 1 kHz is within its noise.
 - **Messaging is unchanged,** and it is now the largest share of what remains: 59–76 ms/s, plus Isoloop's own messaging code. [ADR 0016](https://github.com/isoloop/isoloop/blob/main/docs/adr/0016-fewer-messages-per-record.md) explains why the rest is the cost of the bus hop.
 - **Canvas raster in `matched` at 5 kHz** read 389–408 ms/s in rounds 1–4. The two extra rounds read 457–473 ms/s; they ran as a second probe call right after the first. That's the same kind of split as in [`../cpu-baseline/`](../cpu-baseline/README.md), and its cause is still unknown. It moves the renderer total, not the messaging or app buckets.
+
+## For the site
+
+`summary.json` is this run's responsiveness figures in plant-bench's `Summary` shape (`apps/bench/plant/summary.ts`), built from `responsiveness/<engine>/*.json` with plant-bench's own `collect()` and the machine and versions in `environment.json` (from [How it was measured](#how-it-was-measured) and [`../matched/`](../matched/README.md#how-it-was-measured)). `/benchmarks/` reads it until plant-bench's first run (`apps/site/content/benchmarks.json`). It adds no figure: every value is the summary's above.

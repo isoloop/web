@@ -11,7 +11,15 @@ const GUIDES = readManifest(
   fileURLToPath(new URL('../content/docs.json', import.meta.url)),
 ).sections.flatMap((s) => s.guides.flatMap((g) => ('slug' in g ? [`/docs/${g.slug}/`] : [])));
 const DOCS = ['/docs/', ...GUIDES];
-const SITE = ['/', '/features/', '/how-it-works/', '/examples/', '/changelog/', ...DOCS];
+const SITE = [
+  '/',
+  '/features/',
+  '/how-it-works/',
+  '/examples/',
+  '/benchmarks/',
+  '/changelog/',
+  ...DOCS,
+];
 
 const WIDTHS = [
   { name: 'a desktop', width: 1440, height: 900 },
@@ -56,7 +64,14 @@ for (const path of SITE) {
   }) => {
     await page.goto(path);
     const links = page.getByRole('navigation', { name: 'Site' }).getByRole('link');
-    await expect(links).toHaveText(['Home', 'Docs', 'Features', 'How it works', 'Examples']);
+    await expect(links).toHaveText([
+      'Home',
+      'Docs',
+      'Features',
+      'How it works',
+      'Examples',
+      'Benchmarks',
+    ]);
     const docs = links.nth(1);
     if (path.startsWith('/docs/')) await expect(docs).toHaveAttribute('aria-current', 'page');
     else await expect(docs).not.toHaveAttribute('aria-current', 'page');
