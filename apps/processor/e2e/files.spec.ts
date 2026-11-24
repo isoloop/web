@@ -43,11 +43,23 @@ test('no processor is quarantined or measured at start', async ({ page }) => {
   await expect(page.locator('section[data-pool="balancer-1"] li.card')).toHaveCount(8, {
     timeout: 10_000,
   });
-  for (const _ of [0, 1, 2, 3]) {
-    await expect(page.locator('section.column[data-kind="quarantine"]')).toHaveCount(0);
-    await expect(page.locator('section.column[data-kind="measuring"]')).toHaveCount(0);
-    await page.waitForTimeout(1_000);
-  }
+  // Sampled in the page, so a quarantine that flickered between checks would show.
+  const seen = await page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let n = 0;
+        const t = setInterval(() => {
+          n += document.querySelectorAll(
+            'section.column[data-kind="quarantine"], section.column[data-kind="measuring"]',
+          ).length;
+        }, 100);
+        setTimeout(() => {
+          clearInterval(t);
+          resolve(n);
+        }, 4_000);
+      }),
+  );
+  expect(seen).toBe(0);
   await expect(page.locator('.log li[data-kind="measured"]')).toHaveCount(0);
   await drained(page);
 });
