@@ -218,7 +218,7 @@ On four cores at 2.0 GHz, at 50 files a second:
 
 ### The machine
 
-- **The same bench server as M3h:** an AMD Ryzen 7 5825U, every core fixed at 2.0 GHz, other containers paused, the container pinned with `--cpuset-cpus=2,4,6,8` to four physical cores.
+- **Bench machine 1, as in M3h:** an AMD Ryzen 7 5825U, every core fixed at 2.0 GHz, other containers paused, the container pinned with `--cpuset-cpus=2,4,6,8` to four physical cores.
 - **The code:** `isoloop/web` at `0a1f9b9`, with `@isoloop/*@0.0.0-next.800569e` (isoloop#206, #208, #209 and the M3i balancer, #214). That version doesn't have the #211 fix (isoloop#224) or the stop-then-spawn fix (isoloop#219), which came in `0.1.0-next.0`; the processor ran with its #211 workarounds.
 
 ### To run it again

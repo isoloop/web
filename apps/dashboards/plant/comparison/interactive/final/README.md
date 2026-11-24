@@ -1,6 +1,6 @@
 # Plant interactive page, native against Isoloop
 
-M3e's head-to-head (decision 22), run on the bench server on 2026-11-16: plant's interactive page at 5 kHz, where a drawer creates widgets and adds them to the dashboard, built two ways.
+M3e's head-to-head (decision 22), run on bench machine 1 on 2026-11-16: plant's interactive page at 5 kHz, where a drawer creates widgets and adds them to the dashboard, built two ways.
 
 - **Native** (`/interactive/native/`): the dashboard's widgets, the drawer and its preview all on the main thread.
 - **Isoloop** (`/interactive/isoloop/`): each widget a visual isolate. The drawer's form and its preview each have a worker of their own, never pooled.
@@ -81,7 +81,7 @@ On four cores at 2.0 GHz, at 5 kHz:
 <details>
 <summary>The run</summary>
 
-- **Where:** the bench server, 4 cores fixed at 2.0 GHz, Docker `--cpuset-cpus=2,4,6,8`, the `plant-compare` image at Playwright 1.65.
+- **Where:** bench machine 1, 4 cores fixed at 2.0 GHz, Docker `--cpuset-cpus=2,4,6,8`, the `plant-compare` image at Playwright 1.65.
 - **What:** `a5562f0` with `@isoloop/*@0.0.0-next.g3322248`, seed 7, at 5 kHz.
 - **How:** Chromium and Firefox, 5 rounds of native then Isoloop, one page at a time, a 6 s warm-up and a 10 s window. 20 runs, none stopped.
 - **The command** and what each step of a run does are in [the comparison README](../../README.md#the-interactive-page-interactivets).

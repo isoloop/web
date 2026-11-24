@@ -4,7 +4,7 @@ name: Bench smoke
 # check.yml already builds it with every app; this runs one short round on
 # Chromium, every configuration once at 1 kHz, and fails if a page stops.
 # Nothing is measured or asserted about the figures: real runs are manual, on
-# the bench server, at each minor and major release.
+# bench machine 1, at each minor and major release.
 on:
   pull_request:
     paths:

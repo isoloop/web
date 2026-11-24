@@ -252,7 +252,7 @@ On four cores at 2.0 GHz, at 50 files a second:
 
 ### The machine
 
-- **The same bench server as M3h and M3i:** an AMD Ryzen 7 5825U, every core fixed at 2.0 GHz, other containers paused, the container pinned with `--cpuset-cpus=2,4,6,8` to four physical cores.
+- **Bench machine 1, as in M3h and M3i:** an AMD Ryzen 7 5825U, every core fixed at 2.0 GHz, other containers paused, the container pinned with `--cpuset-cpus=2,4,6,8` to four physical cores.
 - **The code:** `isoloop/web` at `718f2c0`, with `@isoloop/*@0.1.0-next.6`.
 - **When:** 2026-11-19. Faults from 17:38 to 18:27 UTC, faults then calm from 18:27 to 20:24 UTC, and normal from 20:27 to 20:57 UTC.
 

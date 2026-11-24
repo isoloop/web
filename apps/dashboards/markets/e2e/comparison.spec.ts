@@ -45,7 +45,7 @@ import { cpuDelta, cpuOf, jsLoaded, memory, pageMetrics, processes, pssMb } from
 //     (none if not within 10 s, as on the native builds, which have no restart).
 //
 // CPU throttling is not used: CDP throttling slows the main thread but not
-// workers, so it would not be a like-for-like slowdown. The bench server pins
+// workers, so it would not be a like-for-like slowdown. Bench machine 1 pins
 // the run to fixed cores instead (comparison/final/README.md).
 const OUT = process.env['COMPARE_OUT'] ?? 'comparison-results';
 const SIZES = (process.env['COMPARE_SIZES'] ?? 'normal').split(',');

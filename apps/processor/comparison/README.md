@@ -1,6 +1,6 @@
 # File processor, placements compared
 
-The processor's File processor run three ways on the bench server (M3h, decision 23): the same 8 headless processors on a worker each (`own`), all in one pool (`one`), and placed by `@isoloop/balancer`. The question is placement, so there's no native build. The runs are in [`final/results/`](final/results/), with [`summary.md`](final/results/summary.md).
+The processor's File processor run three ways on bench machine 1 (M3h, decision 23): the same 8 headless processors on a worker each (`own`), all in one pool (`one`), and placed by `@isoloop/balancer`. The question is placement, so there's no native build. The runs are in [`final/results/`](final/results/), with [`summary.md`](final/results/summary.md).
 
 These runs are of earlier builds: the page now gives each processor a declared load, so the balancer places it at once and the quarantine measuring step they describe no longer happens at start.
 
@@ -153,7 +153,7 @@ On four cores at 2.0 GHz, at 50 files a second:
 
 ### The machine
 
-- **The bench server**, doing nothing else: an AMD Ryzen 7 5825U (8 cores, 16 threads), 30 GB, Ubuntu 24.04.3. The other containers were paused, and every core was fixed at 2.0 GHz.
+- **Bench machine 1**, doing nothing else: an AMD Ryzen 7 5825U (8 cores, 16 threads), 30 GB, Ubuntu 24.04.3. The other containers were paused, and every core was fixed at 2.0 GHz.
 - **The container:** Playwright's `v1.65.0-noble` image with Node 26 and pnpm 12.16.1 ([the plant's Dockerfile](../../dashboards/plant/comparison/Dockerfile)), pinned with `--cpuset-cpus=2,4,6,8` to four physical cores.
   - The balancer's allowance follows `navigator.hardwareConcurrency`, which the cpuset doesn't limit. It used at most 8 pools here.
 - **The code:** `isoloop/web` at `8b57f23`, with `@isoloop/*@0.0.0-next.g3322248`.

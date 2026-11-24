@@ -312,7 +312,7 @@ From the site plan for 0.1.1 (`docs/plans/0.1.1-site.md`, decisions 9–13, gril
 5. links to the raw results.
 
 **Where the figures come from (decision 7):**
-- **plant-bench** (`apps/bench/plant/`), a frozen copy of the plant example, runs at every minor and major release on the bench server. Its results under `apps/bench/plant/results/<version>/` are what the site shows.
+- **plant-bench** (`apps/bench/plant/`), a frozen copy of the plant example, runs at every minor and major release on bench machine 1. Its results under `apps/bench/plant/results/<version>/` are what the site shows.
 - **Each figure is labelled with what it was measured on:** the build, the `@isoloop/*` version, the date and the machine. Until the first plant-bench run, the pages show the current plant figures, labelled "plant at `@isoloop/*@0.0.0-next.b8ffdcf`, 2026-11-13, 4 cores fixed at 2.0 GHz".
 - **Charts are our own static SVG**, from a component in `packages/ui` rendered at build time from the results JSON ([ADR 0003](0003-design-system.md)). No chart library and no script in the page, so `default-src 'self'` holds. Paired bars: grey for the baseline, one colour for better and one for worse, and the sign also in words, so colour is never the only signal.
 - Decision 7's rules stay: figures are copied, labelled and linked, a labelled copy never changes, and every row stays, in both directions.
