@@ -113,6 +113,23 @@ describe('ensureLibrary', () => {
     expect(() => ensureLibrary(site(lib.sha), lib.url)).toThrow();
   });
 
+  it('takes a pin on a release/* branch, where a patch is versioned and never merged back', () => {
+    const lib = library({
+      'docs/diagrams/a.json': '{}',
+      'docs/guide/hosting.md': '# Hosting\n',
+      'docs/api/host.md': '# @isoloop/host\n',
+    });
+    git(lib.url, 'checkout', '--quiet', '-b', 'release/0.1');
+    write(lib.url, 'docs/guide/patch.md', '# Patch\n');
+    git(lib.url, 'add', '-A');
+    git(lib.url, 'commit', '--quiet', '-m', 'version 0.1.1');
+    const patch = git(lib.url, 'rev-parse', 'HEAD');
+    git(lib.url, 'checkout', '--quiet', 'main');
+    const s = site(patch);
+    ensureLibrary(s, lib.url);
+    expect(existsSync(join(guidesDir(s), 'patch.md'))).toBe(true);
+  });
+
   it("fails a pin that isn't on main", () => {
     const lib = library({ 'docs/diagrams/a.json': '{}', 'docs/guide/x.md': '# X\n' });
     git(lib.url, 'checkout', '--quiet', '-b', 'side');
@@ -121,6 +138,8 @@ describe('ensureLibrary', () => {
     git(lib.url, 'commit', '--quiet', '-m', 'side');
     const side = git(lib.url, 'rev-parse', 'HEAD');
     git(lib.url, 'checkout', '--quiet', 'main');
-    expect(() => ensureLibrary(site(side), lib.url)).toThrow("isn't on isoloop/isoloop's main");
+    expect(() => ensureLibrary(site(side), lib.url)).toThrow(
+      "isn't on isoloop/isoloop's main or a release/* branch",
+    );
   });
 });
