@@ -211,12 +211,13 @@ export const home = {
     // Sources: isoloop/isoloop docs/diagrams (runtime topology, restarts),
     // ADR 0015 (pools), docs/guide/pools.md (start positions, isoloop#186),
     // docs/guide/supervision.md (supervisor.maxRestarts and withinMs, 3 and
-    // 60 000 by default; old restarts age out of the window), docs/guide/bus.md
+    // 60 000 by default; from 0.1.1 a fourth crash fails the isolate unless it
+    // ran for withinMs before one of them, isoloop#390), docs/guide/bus.md
     // (`from`, persistent topics), the how-it-works rendering step (the compositor).
     text: [
       'Your app’s host runs on the page’s main thread. Each isolate runs in a worker, either one of its own or a pool it shares with others. A visual isolate renders with React, Preact or plain DOM in its worker, and the host applies its DOM changes to the page once per frame and sends input back.',
       'Isolates don’t call each other. They publish records to topics and subscribe to them, through a message bus that runs in a worker of its own and keeps each topic’s records for as long as its retention says. A persistent topic is also written to disk, so it survives a reload.',
-      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. It restarts a crashed isolate up to a set number of times within a time window, 3 in 60 s by default, and fails it on the next crash in that window; one that crashes now and then keeps being restarted. A restarted isolate reads each topic from where its subscription says: only new records, everything retained, or after its last commit.',
+      'A supervisor watches every worker’s heartbeat. When an isolate’s own code fails, it alone is restarted. When a worker stops responding, or fails in a way no single isolate can be blamed for, the worker is replaced with every isolate in it. It restarts a crashed isolate up to a set number of times, 3 by default, and fails it on the next crash unless it ran for a set time before one of them, 60 s by default; one that runs that long between crashes keeps being restarted. A restarted isolate reads each topic from where its subscription says: only new records, everything retained, or after its last commit.',
     ],
     link: 'How it works, part by part',
   },
@@ -389,7 +390,7 @@ export const featuresPage = {
       ],
       [
         'No inline scripts',
-        "The workers are same-origin module files, so a page can run Isoloop under `script-src 'self'`. A page that shows a surface needs `style-src 'self' 'unsafe-inline'`: the `style` attributes isolates render count as inline styles.",
+        "The workers are same-origin module files, so a page can run Isoloop under `script-src 'self'`. The host writes the `style` an isolate renders through the element’s `style` object, which CSP doesn’t govern, so a page that shows a surface needs only `style-src 'self'` too.",
       ],
     ] as [string, string][],
   },

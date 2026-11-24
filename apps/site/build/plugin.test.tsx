@@ -220,7 +220,8 @@ describe('the pages', () => {
     const from = html.indexOf('<dt>No inline scripts</dt>');
     expect(from).toBeGreaterThan(-1);
     const card = html.slice(from, html.indexOf('</dd>', from));
-    expect(card).toContain("<code>style-src 'self' 'unsafe-inline'</code>");
+    expect(card).toContain("needs only <code>style-src 'self'</code>");
+    expect(card).not.toContain('unsafe-inline');
     expect(card).toContain('href="/docs/hosting/"');
   });
 

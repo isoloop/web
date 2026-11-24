@@ -1,8 +1,10 @@
 // The library's diagrams and guides, fetched at the sha pinned in library.lock
 // (ADR 0002, decision 6; ADR 0006). One mechanism for CI and for local builds:
-// a blob-less clone of isoloop/isoloop's main in apps/site/.library/, then only
-// LIBRARY_PATHS at the pin. The pin must be reachable from main, so only
-// diagrams that passed the drift test there reach the site; that it is also a
+// a blob-less clone of isoloop/isoloop's main and its `release/*` branches in
+// apps/site/.library/, then only LIBRARY_PATHS at the pin. The pin must be
+// reachable from main or from a `release/0.N` branch (a patch is versioned there
+// and never merged back), so only diagrams that passed the drift test on a
+// protected branch reach the site; that it is also a
 // published version is checked apart, in CI (build/pin.ts). Once a pin has been
 // fetched and checked, a stamp file lets later builds (and offline ones) reuse
 // it.
@@ -64,10 +66,24 @@ export function isAncestor(repo: string, sha: string, ref: string): boolean {
   }
 }
 
+/** The clone's main and `release/*` branches, the refs a pin may be on. */
+function protectedRefs(repo: string): string[] {
+  const out = git(
+    [
+      'for-each-ref',
+      '--format=%(refname)',
+      'refs/remotes/origin/main',
+      'refs/remotes/origin/release/',
+    ],
+    repo,
+  );
+  return out.split('\n').filter(Boolean);
+}
+
 /**
  * Makes sure the pinned LIBRARY_PATHS are on disk and returns the diagrams'
  * folder (the guides are at `guidesDir`). Throws if the pin isn't on the
- * library's main, or if one of the paths is missing at the pin.
+ * library's main or a `release/*` branch, or if one of the paths is missing at the pin.
  */
 export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): string {
   const pin = readPin(siteDir);
@@ -81,12 +97,7 @@ export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): 
 
   mkdirSync(cache, { recursive: true });
   const repo = join(cache, 'repo');
-  if (existsSync(join(repo, '.git'))) {
-    git(
-      ['fetch', '--quiet', '--filter=blob:none', 'origin', 'main:refs/remotes/origin/main'],
-      repo,
-    );
-  } else {
+  if (!existsSync(join(repo, '.git'))) {
     rmSync(repo, { recursive: true, force: true });
     git([
       'clone',
@@ -100,9 +111,20 @@ export function ensureLibrary(siteDir: string, repoUrl: string = LIBRARY_REPO): 
       repo,
     ]);
   }
-  if (!isAncestor(repo, pin, 'refs/remotes/origin/main')) {
+  git(
+    [
+      'fetch',
+      '--quiet',
+      '--filter=blob:none',
+      'origin',
+      '+refs/heads/main:refs/remotes/origin/main',
+      '+refs/heads/release/*:refs/remotes/origin/release/*',
+    ],
+    repo,
+  );
+  if (!protectedRefs(repo).some((ref) => isAncestor(repo, pin, ref))) {
     throw new Error(
-      `library.lock pins ${pin}, which isn't on isoloop/isoloop's main. ` +
+      `library.lock pins ${pin}, which isn't on isoloop/isoloop's main or a release/* branch. ` +
         'Pin a commit that has merged, so its diagrams passed the drift test (ADR 0002, decision 6).',
     );
   }
