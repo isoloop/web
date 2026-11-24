@@ -31,6 +31,9 @@ const RATE_WINDOW_MS = 5_000;
 /** Latency percentiles over the last this many results. */
 const LATENCY_KEEP = 500;
 const RECENT_KEEP = 200;
+/** A processor's load, in % of one core, until the balancer has measured it. */
+const DECLARED_LOAD = 5;
+
 const LIVE = new Set(['loading', 'running', 'blocked', 'crashed', 'restarting']);
 /** How often the page tells the balancer each group's backlog and each processor's busy time (stale after 10 s). */
 const REPORT_MS = 1_000;
@@ -205,6 +208,7 @@ export class FileProcessor {
   readonly #moved = new Map<string, { reason: string; from: string; at: number }>();
   /** Who has offended, so the measuring step isn't shown as a quarantine stay. */
   readonly #offences = new Offences();
+  readonly #loads: Map<string, number> | undefined;
   readonly #log: LogEntry[] = [];
   readonly #movesAt: number[] = [];
   readonly #moves: Move[] = [];
@@ -229,6 +233,8 @@ export class FileProcessor {
     /** Where the processors start: the balancer, a worker each, or one pool. */
     mode?: Mode;
     dials?: Partial<Omit<Dials, 'run'>>;
+    /** The balancer's load store: a processor with no entry gets `DECLARED_LOAD`, so it's placed at once. */
+    loads?: Map<string, number>;
     processorSrc: string;
     generatorSrc: string;
     maxWorkers: number;
@@ -238,6 +244,7 @@ export class FileProcessor {
     this.#restartLimit = opts.restartLimit ?? DEFAULT_LIMIT;
     this.#mode = opts.mode ?? (opts.balancer ? 'balancer' : 'one');
     this.#dials = { ...this.#dials, ...opts.dials };
+    this.#loads = opts.loads;
     this.#src = opts.processorSrc;
     this.#generatorSrc = opts.generatorSrc;
     this.#maxWorkers = opts.maxWorkers;
@@ -654,8 +661,12 @@ export class FileProcessor {
         subscribe: [TOPICS[kind].name],
       },
     };
-    if (this.#mode === 'balancer' && this.#balancer) this.#balancer.spawn(manifest);
-    else if (this.#mode === 'one') this.#k.spawn({ ...manifest, pool: ONE });
+    if (this.#mode === 'balancer' && this.#balancer) {
+      // A declared load until the balancer has measured one, so the processor
+      // is placed at once and never waits in the quarantine (isoloop#346).
+      if (this.#loads && !this.#loads.has(id)) this.#loads.set(id, DECLARED_LOAD);
+      this.#balancer.spawn(manifest);
+    } else if (this.#mode === 'one') this.#k.spawn({ ...manifest, pool: ONE });
     else this.#k.spawn(manifest);
   }
 

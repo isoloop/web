@@ -51,7 +51,10 @@ const maxWorkers = num('maxWorkers') ?? Math.max(2, (navigator.hardwareConcurren
 // worker wait for Start (shared/manual-start.ts); without it, they start now.
 /** The kernel's restart limit, from `?restarts=` (the Restarts control); the host's defaults without it. */
 const restarts = restartsFrom(location.search);
+/** Loads the balancer reads and writes for the page's life; the model declares each processor's. */
+const loads = new Map<string, number>();
 const model = new FileProcessor({
+  loads,
   processorSrc,
   generatorSrc,
   maxWorkers,
@@ -78,7 +81,13 @@ const kernel = createKernel({
   routing: false,
   ...(restarts.supervisor ? { supervisor: restarts.supervisor } : {}),
 });
-const balancer = placement === 'one-off' ? undefined : createBalancer(kernel, { maxWorkers });
+const balancer =
+  placement === 'one-off'
+    ? undefined
+    : createBalancer(kernel, {
+        maxWorkers,
+        loads: { get: (id) => loads.get(id), set: (id, pct) => void loads.set(id, pct) },
+      });
 model.attach(kernel, balancer);
 // Started from the examples hub (?start=manual), its Start is the run's too:
 // the generator starts with the kernel, as the page's own Start would.

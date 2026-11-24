@@ -33,7 +33,7 @@
       "devtools": true,
       "intro": [
         "A generator makes synthetic files at the rate you set: CSV to parse and sum, images to scale and blur, archives to compress, and data to hash with SHA-256, each more work the bigger it is. Each kind goes to its own topic, read by a consumer group of two processors, all headless isolates that share the work. A processor commits a file only once its result is out, so when the balancer moves it, what it hadn't finished goes to the group again. Poison files block a processor for 2 s, heavy ones are ten times the work, corrupt ones crash it.",
-        "With the balancer, new processors start in a Measuring pool for about 3 s, while it measures their load, then it places them."
+        "With the balancer, new processors are placed at once from a declared load, and the balancer then keeps its own measurements."
       ]
     }
   ],

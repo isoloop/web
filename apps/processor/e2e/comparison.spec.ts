@@ -12,8 +12,8 @@ import { cpuDelta, cpuOf, memory, pageMetrics, pssMb, processes } from 'compare/
 // variables below and writes summary.md. What each figure covers:
 //
 // - Warm-up (`COMPARE_WARM_MS`): the generator runs from navigation; the
-//   balancer measures every processor in its quarantine first (about 3 s),
-//   then places it, and the files that waited meanwhile drain; 20 s covers
+//   balancer places every processor from a declared load,
+//   and the files that waited meanwhile drain; 20 s covers
 //   that, so the window shows the placement settled.
 // - Window (`COMPARE_WINDOW_MS`): files done per second, and the latency of
 //   each file from being made to its result (p50, p95); the most workers seen
