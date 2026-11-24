@@ -1,0 +1,292 @@
+{
+  "$comment": "Isoloop and the alternatives, for the home page's table and the Compared tab on /features/ (docs/plans/0.1.1-site.md, decision 11). Every cell is sourced from that project's own docs, with the date it was checked. Validated by build/alternatives.ts. Marks: yes, partial or no. No benchmarks against the alternatives.",
+  "columns": {
+    "ui": "UI in a worker",
+    "supervision": "Supervision and restart",
+    "bus": "A durable bus with replay",
+    "security": "A security boundary",
+    "browsers": "Browser support",
+    "cost": "The main cost"
+  },
+  "rows": [
+    {
+      "id": "isoloop",
+      "name": "Isoloop",
+      "url": "/docs/",
+      "ui": {
+        "mark": "yes",
+        "note": "Each isolate renders in a worker, and the page applies its DOM changes. Layout reads and focus are asynchronous.",
+        "source": "/docs/limits/#layout-focus-and-scrolling-are-asynchronous",
+        "checked": "2026-11-24"
+      },
+      "supervision": {
+        "mark": "yes",
+        "note": "Heartbeats, restarts with backoff, a fallback after repeated crashes, and catch-up from the bus.",
+        "source": "/docs/supervision/",
+        "checked": "2026-11-24"
+      },
+      "bus": {
+        "mark": "yes",
+        "note": "Topics with retention, replay and consumer groups, and an optional copy on disk.",
+        "source": "/docs/bus/#durability",
+        "checked": "2026-11-24"
+      },
+      "security": {
+        "mark": "no",
+        "note": "It contains crashes and hangs from code you trust. Isolates run on the page's origin, so hostile code belongs in a cross-origin iframe.",
+        "source": "/docs/limits/#not-a-security-boundary",
+        "checked": "2026-11-24"
+      },
+      "browsers": {
+        "note": "Chrome 108, Firefox 114 and Safari 16.4 or later.",
+        "source": "/docs/limits/#browsers-and-the-first-paint",
+        "checked": "2026-11-24"
+      },
+      "cost": {
+        "note": "More CPU across threads, more memory and a slower start than native code with workers. The main thread still applies every DOM change.",
+        "source": "/docs/limits/#what-it-costs",
+        "checked": "2026-11-24"
+      }
+    },
+    {
+      "id": "remote-dom",
+      "name": "Remote DOM",
+      "url": "https://github.com/Shopify/remote-dom",
+      "betterFor": "Rendering untrusted extension UI from a set of elements the host defines, with the remote code in a sandboxed iframe.",
+      "ui": {
+        "mark": "yes",
+        "note": "Renders from a hidden iframe or, with its DOM polyfill, from a worker. The host page mirrors the elements.",
+        "source": "https://github.com/Shopify/remote-dom#readme",
+        "checked": "2026-11-24"
+      },
+      "supervision": {
+        "mark": "no",
+        "note": "Its docs describe no restart for a remote side that crashes or hangs.",
+        "source": "https://github.com/Shopify/remote-dom/blob/main/packages/core/README.md",
+        "checked": "2026-11-24"
+      },
+      "bus": {
+        "mark": "no",
+        "note": "It sends DOM changes from the remote side to the host. There's no log to replay.",
+        "source": "https://github.com/Shopify/remote-dom/blob/main/packages/core/README.md",
+        "checked": "2026-11-24"
+      },
+      "security": {
+        "mark": "partial",
+        "note": "The boundary is the sandbox you run the remote side in. The host can limit which elements it creates.",
+        "source": "https://github.com/Shopify/remote-dom/blob/main/packages/core/README.md#host-owned-element-policy",
+        "checked": "2026-11-24"
+      },
+      "browsers": {
+        "note": "Not stated. The remote side needs custom elements and MutationObserver, or the DOM polyfill in a worker.",
+        "source": "https://github.com/Shopify/remote-dom/blob/main/packages/core/README.md",
+        "checked": "2026-11-24"
+      },
+      "cost": {
+        "note": "You build the host, the sandbox and the channel between them, and decide which elements the remote side may render.",
+        "source": "https://github.com/Shopify/remote-dom#readme",
+        "checked": "2026-11-24"
+      }
+    },
+    {
+      "id": "partytown",
+      "name": "Partytown",
+      "url": "https://partytown.qwik.dev/",
+      "betterFor": "Moving third-party scripts such as tag managers and analytics off the main thread without changing them.",
+      "ui": {
+        "mark": "partial",
+        "note": "Runs third-party scripts in a worker against a proxied DOM. Its docs say scripts that build UI aren't a good fit.",
+        "source": "https://partytown.qwik.dev/trade-offs",
+        "checked": "2026-11-24"
+      },
+      "supervision": {
+        "mark": "no",
+        "note": "Its docs describe no restart for a script that crashes or hangs.",
+        "source": "https://partytown.qwik.dev/how-does-partytown-work",
+        "checked": "2026-11-24"
+      },
+      "bus": {
+        "mark": "no",
+        "note": "Scripts reach the page through a proxy. There's no log to replay.",
+        "source": "https://partytown.qwik.dev/how-does-partytown-work",
+        "checked": "2026-11-24"
+      },
+      "security": {
+        "mark": "partial",
+        "note": "You can allow or deny each script access to main-thread APIs, cookies and storage.",
+        "source": "https://partytown.qwik.dev/sandboxing",
+        "checked": "2026-11-24"
+      },
+      "browsers": {
+        "note": "Every browser. Without service workers or Atomics, scripts run on the main thread as before.",
+        "source": "https://partytown.qwik.dev/browser-support",
+        "checked": "2026-11-24"
+      },
+      "cost": {
+        "note": "Each DOM call from the worker is a blocking round trip, throttled on purpose, and `preventDefault()` has no effect. It needs a service worker, or extra response headers for Atomics.",
+        "source": "https://partytown.qwik.dev/trade-offs",
+        "checked": "2026-11-24"
+      }
+    },
+    {
+      "id": "worker-dom",
+      "name": "worker-dom",
+      "url": "https://github.com/ampproject/worker-dom",
+      "betterFor": "AMP pages, where it runs `amp-script`.",
+      "ui": {
+        "mark": "yes",
+        "note": "A DOM in a worker, which sends its changes to the main thread.",
+        "source": "https://github.com/ampproject/worker-dom#readme",
+        "checked": "2026-11-24"
+      },
+      "supervision": {
+        "mark": "no",
+        "note": "Its docs describe no restart for a worker that crashes or hangs.",
+        "source": "https://github.com/ampproject/worker-dom#readme",
+        "checked": "2026-11-24"
+      },
+      "bus": {
+        "mark": "no",
+        "note": "It sends DOM changes to the main thread. There's no log to replay.",
+        "source": "https://github.com/ampproject/worker-dom#readme",
+        "checked": "2026-11-24"
+      },
+      "security": {
+        "mark": "partial",
+        "note": "Its AMP build adds hooks for safety features such as HTML sanitization.",
+        "source": "https://github.com/ampproject/worker-dom#amp-distribution-for-amp-script",
+        "checked": "2026-11-24"
+      },
+      "browsers": {
+        "note": "The latest two versions of the major browsers, on desktop and mobile.",
+        "source": "https://github.com/ampproject/worker-dom#which-browsers-are-supported",
+        "checked": "2026-11-24"
+      },
+      "cost": {
+        "note": "Its docs call it an in-progress DOM: `querySelector` works in part, and APIs such as History aren't there yet.",
+        "source": "https://github.com/ampproject/worker-dom#which-javascript-apis-can-i-use",
+        "checked": "2026-11-24"
+      }
+    },
+    {
+      "id": "comlink",
+      "name": "Comlink + workers",
+      "url": "https://github.com/GoogleChromeLabs/comlink",
+      "betterFor": "Moving computation, not UI, off the main thread with a 1.1 kB library.",
+      "ui": {
+        "mark": "no",
+        "note": "Workers have no DOM. Comlink turns calls to a worker into promises.",
+        "source": "https://github.com/GoogleChromeLabs/comlink#readme",
+        "checked": "2026-11-24"
+      },
+      "supervision": {
+        "mark": "no",
+        "note": "Errors are thrown again on the calling side. Nothing restarts a worker.",
+        "source": "https://github.com/GoogleChromeLabs/comlink#readme",
+        "checked": "2026-11-24"
+      },
+      "bus": {
+        "mark": "no",
+        "note": "Remote calls over `postMessage`. There's no log to replay.",
+        "source": "https://github.com/GoogleChromeLabs/comlink#readme",
+        "checked": "2026-11-24"
+      },
+      "security": {
+        "mark": "no",
+        "note": "It adds no boundary of its own.",
+        "source": "https://github.com/GoogleChromeLabs/comlink#readme",
+        "checked": "2026-11-24"
+      },
+      "browsers": {
+        "note": "Chrome 56, Firefox 52 and Safari 10.1 or later.",
+        "source": "https://github.com/GoogleChromeLabs/comlink#browsers-support--bundle-size",
+        "checked": "2026-11-24"
+      },
+      "cost": {
+        "note": "Every call is asynchronous, and you split the app between the page and its workers yourself.",
+        "source": "https://github.com/GoogleChromeLabs/comlink#readme",
+        "checked": "2026-11-24"
+      }
+    },
+    {
+      "id": "iframes",
+      "name": "Cross-origin iframes",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe",
+      "betterFor": "Code you don't trust at all: the browser keeps another origin out of the page.",
+      "ui": {
+        "mark": "no",
+        "note": "A frame is a separate document, not a worker.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe",
+        "checked": "2026-11-24"
+      },
+      "supervision": {
+        "mark": "no",
+        "note": "Nothing restarts a frame that crashes or hangs.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe",
+        "checked": "2026-11-24"
+      },
+      "bus": {
+        "mark": "no",
+        "note": "The page and its frames talk through `postMessage`. There's no log to replay.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage",
+        "checked": "2026-11-24"
+      },
+      "security": {
+        "mark": "yes",
+        "note": "The same-origin policy keeps the frame out of the page's DOM, cookies and storage, and `sandbox` restricts it further.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy",
+        "checked": "2026-11-24"
+      },
+      "browsers": {
+        "note": "Every browser.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe#browser_compatibility",
+        "checked": "2026-11-24"
+      },
+      "cost": {
+        "note": "Each frame is a complete document with its own memory and compute, and it shares nothing with the page but messages.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe",
+        "checked": "2026-11-24"
+      }
+    },
+    {
+      "id": "scheduler-yield",
+      "name": "`scheduler.yield()`",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield",
+      "betterFor": "Long tasks that must stay on the main thread and can be split: no workers and no new architecture.",
+      "ui": {
+        "mark": "no",
+        "note": "Work stays on the main thread, which it hands back between pieces.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield",
+        "checked": "2026-11-24"
+      },
+      "supervision": {
+        "mark": "no",
+        "note": "A browser API for scheduling, with nothing to restart.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield",
+        "checked": "2026-11-24"
+      },
+      "bus": {
+        "mark": "no",
+        "note": "It schedules work and carries no messages.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield",
+        "checked": "2026-11-24"
+      },
+      "security": {
+        "mark": "no",
+        "note": "Everything runs in the page.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield",
+        "checked": "2026-11-24"
+      },
+      "browsers": {
+        "note": "Chrome and Edge 129 and Firefox 142 or later. Not in Safari.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield#browser_compatibility",
+        "checked": "2026-11-24"
+      },
+      "cost": {
+        "note": "You split each long task by hand, and the main thread still runs all of it.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield",
+        "checked": "2026-11-24"
+      }
+    }
+  ]
+}
