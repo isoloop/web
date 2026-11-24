@@ -1,0 +1,8 @@
+.home/
+*.log
+results/**/trace/
+# Quick and local runs stay out; real runs go to results/<version>/base/.
+results/**/*-quick/
+results/*-local*/
+# The CI smoke (bench.yml) writes here.
+results-smoke/

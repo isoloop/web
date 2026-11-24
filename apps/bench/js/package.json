@@ -1,0 +1,33 @@
+{
+  "name": "js-bench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Plain JavaScript work (no components, no DOM) on the main thread, in plain Workers and in Isoloop's placements, as operations per second. Run before every Isoloop release on bench machine 1. Never deployed.",
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview --port 4317 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "calibrate": "node runner/calibrate.ts",
+    "bench": "node runner/run.ts",
+    "bench:smoke": "node runner/run.ts --quick --workloads map-get-set,sort-objects-2k,sort-typed-1m --n 4 --warm 1 --window 2 --balancer-warm 5 --profile smoke --out results-smoke",
+    "summary": "node runner/summary.ts",
+    "compare": "node runner/compare.ts",
+    "set-isoloop": "node runner/set-isoloop.ts"
+  },
+  "dependencies": {
+    "@isoloop/balancer": "0.1.0",
+    "@isoloop/bus": "0.1.0",
+    "@isoloop/host": "0.1.0",
+    "@isoloop/runtime": "0.1.0"
+  },
+  "devDependencies": {
+    "@isoloop/vite": "0.1.0",
+    "@types/node": "26.6.6",
+    "playwright": "1.65.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.0.5"
+  }
+}

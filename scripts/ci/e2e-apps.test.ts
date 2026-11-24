@@ -6,6 +6,7 @@ import { workspace } from './e2e-apps.ts';
 // The workspace as it is today (checked against the real one below).
 const PKGS: Pkg[] = [
   { dir: 'apps/basic', name: 'basic', deps: ['ui'], e2e: true },
+  { dir: 'apps/bench/js', name: 'js-bench', deps: [], e2e: false },
   { dir: 'apps/bench/plant', name: 'plant-bench', deps: [], e2e: false },
   { dir: 'apps/processor', name: 'processor', deps: ['compare', 'ui'], e2e: true },
   { dir: 'apps/samples', name: 'samples', deps: [], e2e: false },
