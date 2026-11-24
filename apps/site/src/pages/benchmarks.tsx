@@ -28,7 +28,7 @@ const engine = (e: string): string => c.engines[e] ?? e;
 const rank = (list: string[], x: string): number =>
   list.includes(x) ? list.indexOf(x) : list.length;
 
-/** The section ids, in the page's order; the history only once there are two runs. */
+/** The section ids, in the page's order; the history only once there are two runs of the latest's build. */
 function sections(runs: number): [string, string][] {
   return [
     ['found', c.sections.found],
@@ -451,10 +451,12 @@ export function Benchmarks({
   examples,
 }: Pick<SiteData, 'benchmarks' | 'examples'>): VNode {
   const { runs, latest } = benchmarks;
+  // Only runs of the same build compare: an older build's run stays under Raw results.
+  const comparable = runs.filter((r) => r.name === latest.name);
   const body: Record<string, VNode> = {
     found: <Findings run={latest} />,
     figures: <Figures run={latest} />,
-    history: <History runs={runs} />,
+    history: <History runs={comparable} />,
     method: <Method run={latest} />,
     features: <FeatureBenchmarks examples={examples} />,
     raw: <Raw runs={runs} />,
@@ -462,7 +464,7 @@ export function Benchmarks({
   return (
     <div class="docs-layout docs-layout-index">
       <div class="docs-only-wide">
-        <SideNav runs={runs.length} />
+        <SideNav runs={comparable.length} />
       </div>
       <main class="docs-article bench">
         <h1>{c.heading}</h1>
@@ -470,9 +472,9 @@ export function Benchmarks({
         <p class="bench-measured">{inline(measuredOn(latest))}</p>
         <details class="docs-fold docs-only-narrow">
           <summary>{c.nav}</summary>
-          <SideNav runs={runs.length} />
+          <SideNav runs={comparable.length} />
         </details>
-        {sections(runs.length).map(([id, text]) => (
+        {sections(comparable.length).map(([id, text]) => (
           <section key={id} id={id} class="bench-section" aria-labelledby={`${id}-h`}>
             <h2 id={`${id}-h`}>{text}</h2>
             {body[id]}
