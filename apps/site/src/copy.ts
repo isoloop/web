@@ -787,6 +787,26 @@ export const examplesPage = {
   support: 'They need Safari 16.4 or later, or a recent Chrome, Edge or Firefox.',
 };
 
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+/** `2026-11-13` as "13 November 2026". */
+export function longDate(iso: string): string {
+  const [y = '', m = '1', d = '1'] = iso.split('-');
+  return `${Number(d)} ${MONTHS[Number(m) - 1] ?? m} ${y}`;
+}
+
 /**
  * /benchmarks/ (ADR 0002 and 0005, amended 2026-11-24). Every figure on the page
  * comes from the runs in content/benchmarks.json (build/benchmarks.ts); the
@@ -800,7 +820,7 @@ export const benchmarksPage = {
     'Isoloop measured against native builds of the same dashboard: main-thread time, typing, start-up, recovery, CPU and memory, on one machine, in interleaved rounds.',
   heading: 'Benchmarks',
   lede: 'The plant dashboard, built natively and with Isoloop, measured on one machine in interleaved rounds. Isoloop takes the widgets off the main thread, and it costs CPU, memory and start-up time. The figures below show both.',
-  /** The label on every figure: what it was measured on. */
+  /** The label on every figure: what it was measured on. `date` is YYYY-MM-DD, shown as "13 November 2026". */
   measuredOn: (run: {
     name: string;
     version: string;
@@ -808,7 +828,7 @@ export const benchmarksPage = {
     cores: number;
     clock: string;
   }) =>
-    `Measured on ${run.name} at \`@isoloop/*@${run.version}\`, ${run.date}, ${run.cores} cores fixed at ${run.clock}.`,
+    `Measured on ${run.name} at \`@isoloop/*@${run.version}\`, ${longDate(run.date)}, on ${run.cores} cores fixed at ${run.clock}.`,
   nav: 'On this page',
   sections: {
     found: 'What we found',
@@ -832,7 +852,7 @@ export const benchmarksPage = {
   engines: { chromium: 'Chromium', firefox: 'Firefox', webkit: 'WebKit' } as Record<string, string>,
   rate: (khz: number) => `${khz} kHz`,
   figures: {
-    mainThreadCpuPct: 'Main-thread busy',
+    mainThreadCpuPct: 'Main thread busy',
     rendererCpuPct: 'CPU, all threads',
     typingMedianMs: 'Typing, median',
     firstDataMs: 'First data',
@@ -848,7 +868,7 @@ export const benchmarksPage = {
     within: 'Within the spread',
     /** The figures' names inside a sentence. */
     figures: {
-      mainThreadCpuPct: 'main-thread busy',
+      mainThreadCpuPct: 'main thread busy',
       rendererCpuPct: 'CPU across all threads',
       typingMedianMs: 'typing',
       firstDataMs: 'first data',
@@ -895,7 +915,7 @@ export const benchmarksPage = {
       node: string;
       image: string;
     }) =>
-      `${m.arch ? `An ${m.arch} CPU` : 'A CPU'}, ${m.cores} cores capped at ${m.clock} (CPUs ${m.cpus.split(',').join(', ')}), ${m.memoryGb} GB, ${m.os}, Node ${m.node}${m.image ? `, in \`${m.image}\`` : ''}. The machine does nothing else during a run.`,
+      `${m.arch ? `An ${m.arch} CPU` : 'A CPU'}, ${m.cores} cores fixed at ${m.clock} (CPUs ${m.cpus.split(',').join(', ')}), ${m.memoryGb} GB, ${m.os}, Node ${m.node}${m.image ? `, in \`${m.image}\`` : ''}. The machine does nothing else during a run.`,
     versions: 'Versions',
     versionsText: (v: { version: string; react: string; playwright: string; browsers: string }) =>
       `\`@isoloop/*@${v.version}\`, React ${v.react}, Playwright ${v.playwright}. Browsers: ${v.browsers}.`,
@@ -909,7 +929,7 @@ export const benchmarksPage = {
     /** The steps on each page, in order. */
     pageSteps: [
       'Load the page and warm up for 6 s.',
-      'A 10 s window with no input: main-thread busy and all-thread CPU, each as a share of one core.',
+      'A 10 s window with no input: main thread busy and all-thread CPU, each as a share of one core.',
       '5 keystrokes into a widget’s filter: typing.',
       'A forced garbage collection in the page and every worker, then its memory (Chromium on Linux).',
       'A 3 s block of one machine’s gauges. Recovery is the time until every affected widget shows data from after the block.',

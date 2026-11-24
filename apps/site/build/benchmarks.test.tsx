@@ -112,14 +112,14 @@ describe('/benchmarks/', () => {
 
   it('labels the figures with what they were measured on', () => {
     expect(page(b)).toContain(
-      'Measured on plant at <code>@isoloop/*@0.0.0-next.b8ffdcf</code>, 2026-11-13, 4 cores fixed at 2.0 GHz.',
+      'Measured on plant at <code>@isoloop/*@0.0.0-next.b8ffdcf</code>, 13 November 2026, on 4 cores fixed at 2.0 GHz.',
     );
   });
 
   it('describes the machine generically, the model only in the raw environment.json', () => {
     const html = page(b);
     expect(html).toContain(
-      'An x64 CPU, 4 cores capped at 2.0 GHz (CPUs 2, 4, 6, 8), 30 GB, Ubuntu 24.04.3, Node 26.13.0, in <code>mcr.microsoft.com/playwright:v1.64.1-noble</code>. The machine does nothing else during a run.',
+      'An x64 CPU, 4 cores fixed at 2.0 GHz (CPUs 2, 4, 6, 8), 30 GB, Ubuntu 24.04.3, Node 26.13.0, in <code>mcr.microsoft.com/playwright:v1.64.1-noble</code>. The machine does nothing else during a run.',
     );
     expect(html).not.toContain(b.latest.environment.machine.cpu);
     expect(html).not.toMatch(/\b(AMD|Intel)\b/);
@@ -132,6 +132,9 @@ describe('/benchmarks/', () => {
     const html = page(b);
     expect(html.indexOf('id="found"')).toBeLessThan(html.indexOf('id="figures"'));
     expect(html).toContain('typing, 28 ms lower');
+    expect(html).toContain('main thread busy, 53 points lower');
+    expect(html).toContain('Main thread busy');
+    expect(html).not.toContain('Main-thread busy');
     expect(html).toContain('28 ms lower, better');
     expect(html).not.toContain('21 ms lower');
     // All 72 widgets: the rounds disagree, so neither better nor worse.
