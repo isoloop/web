@@ -666,8 +666,7 @@ export class FileProcessor {
       // is placed at once and never waits in the quarantine (isoloop#346).
       if (this.#loads && !this.#loads.has(id)) this.#loads.set(id, DECLARED_LOAD);
       this.#balancer.spawn(manifest);
-    }
-    else if (this.#mode === 'one') this.#k.spawn({ ...manifest, pool: ONE });
+    } else if (this.#mode === 'one') this.#k.spawn({ ...manifest, pool: ONE });
     else this.#k.spawn(manifest);
   }
 
