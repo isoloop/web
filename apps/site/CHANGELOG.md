@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- 013c3ec: The figures come from plant-bench on `@isoloop/*@0.1.0` (24 November 2026): the landing charts, `/benchmarks/` (now with its history across versions) and plant's desktop measurements.
+- 013c3ec: The figures come from plant-bench on `@isoloop/*@0.1.0` (24 November 2026): the landing charts, `/benchmarks/` and plant's desktop measurements.
 - 96489ce: `/benchmarks/` has a new section, "Plain JavaScript work": js-bench at `@isoloop/*@0.1.0` on bench machine 1, Chromium only. It shows sorts, Maps, Sets, JSON and `structuredClone` as operations per second, on the main thread, in plain Workers and in Isoloop's placements. It has a chart per workload at four copies, tables for one copy and for all five placements, how late the page's timer fires, and the balancer scenario. One open cost, `structuredClone` of 5 MB being slower in an Isoloop worker, links its issue.
 - f8583e3: The site follows Isoloop 0.1.1: its guides and API pages come from the 0.1.1 release, and the copy says a page with surfaces runs under `style-src 'self'`, and that a fourth crash fails an isolate unless it ran for a minute or more before one of them.
 
