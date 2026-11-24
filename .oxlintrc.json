@@ -40,6 +40,26 @@
   // never import Isoloop, so /native is an idiomatic app with none of it.
   "overrides": [
     {
+      // js-bench's measured code (apps/bench/js/src) stays as it ran for the
+      // 0.1.0 baseline: it changes only at a generation, and a change means
+      // running the last release again (docs/plans/js-bench.md, decision 3).
+      // The sorts sort a copy inside the timed op on purpose. The runner
+      // (apps/bench/js/runner) follows every rule.
+      "files": ["apps/bench/js/src/**"],
+      "rules": {
+        "no-await-in-loop": "off",
+        "no-shadow": "off",
+        "no-underscore-dangle": "off",
+        "unicorn/no-array-sort": "off",
+        "unicorn/consistent-function-scoping": "off",
+        "unicorn/prefer-add-event-listener": "off",
+        "typescript/no-unsafe-type-assertion": "off",
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/unbound-method": "off"
+      }
+    },
+    {
       // Content goes through Preact's escaping (ADR 0003, decision 2): no raw
       // HTML in the design system or the site. M4's docs rendering will add
       // one allow-listed file here.

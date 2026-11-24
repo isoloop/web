@@ -47,6 +47,8 @@ Each page: load, 6 s of warm-up, a 10 s window with no input (frames, CPU), 5 ke
 
 ### On bench machine 1
 
+The machine, its cores and its clock: [`../machines.md`](../machines.md).
+
 From a clone used only for this, with the server in bench mode and the lock held. Build the image first; rebuild it whenever the Dockerfile changes.
 
 ```bash
