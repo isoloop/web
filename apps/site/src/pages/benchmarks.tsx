@@ -12,9 +12,11 @@ import {
   FIGURE_KEYS,
   withinSpread,
   type BenchRun,
+  type JsRun,
   type PairFigure,
 } from '../../build/benchmarks.ts';
 import { benchmarksPage as c } from '../copy.ts';
+import { JsBench } from './benchmarks-js.tsx';
 import { inline } from './inline.tsx';
 import type { Page, SiteData } from './types.ts';
 
@@ -28,14 +30,15 @@ const engine = (e: string): string => c.engines[e] ?? e;
 const rank = (list: string[], x: string): number =>
   list.includes(x) ? list.indexOf(x) : list.length;
 
-/** The section ids, in the page's order; the history only once there are two runs of the latest's build. */
-function sections(runs: number): [string, string][] {
+/** The section ids, in the page's order; the history only once there are two runs of the latest's build, js-bench's when listed. */
+function sections(runs: number, js: boolean): [string, string][] {
   return [
     ['found', c.sections.found],
     ['figures', c.sections.figures],
     ...(runs > 1 ? ([['history', c.sections.history]] as [string, string][]) : []),
     ['method', c.sections.method],
     ['features', c.sections.features],
+    ...(js ? ([['js', c.sections.js]] as [string, string][]) : []),
     ['raw', c.sections.raw],
   ];
 }
@@ -94,10 +97,9 @@ const verdictsOf = (rows: PairFigure[]): Verdict[] => {
 
 /** "28 ms lower", without the verdict, for the findings. */
 const deltaWords = (p: PairFigure & { delta: number }): string =>
-  formatDelta(p.aMedian ?? 0, p.bMedian ?? 0, p.unit, { delta: p.delta }).text.replace(
-    /, (better|worse)$/,
-    '',
-  );
+  formatDelta(p.aMedian ?? 0, p.bMedian ?? 0, p.unit, {
+    delta: p.delta,
+  }).text.replace(/, (better|worse)$/, '');
 
 const label = (p: PairFigure): string => c.found.figures[p.figure];
 
@@ -408,7 +410,7 @@ function FeatureBenchmarks({ examples }: Pick<SiteData, 'examples'>): VNode {
   );
 }
 
-function Raw({ runs }: { runs: BenchRun[] }): VNode {
+function Raw({ runs, js }: { runs: BenchRun[]; js: JsRun | undefined }): VNode {
   return (
     <>
       <p>{c.raw.lede}</p>
@@ -420,21 +422,34 @@ function Raw({ runs }: { runs: BenchRun[] }): VNode {
             <a href={r.links.environment}>{c.raw.environment}</a>
           </li>
         ))}
+        {js && (
+          <li>
+            {c.raw.run('js-bench', js.summary.version, js.summary.date)}{' '}
+            <a href={js.links.summary}>{c.raw.summary}</a>,{' '}
+            <a href={js.links.results}>{c.raw.results}</a>,{' '}
+            <a href={js.links.machine}>{c.raw.machine}</a>
+          </li>
+        )}
         <li>
           <a href={BENCH_README}>{c.raw.bench}</a>
         </li>
+        {js && (
+          <li>
+            <a href={js.links.bench}>{c.raw.jsBench}</a>
+          </li>
+        )}
       </ul>
     </>
   );
 }
 
-function SideNav({ runs }: { runs: number }): VNode {
+function SideNav({ runs, js }: { runs: number; js: boolean }): VNode {
   return (
     <nav class="docs-side bench-nav" aria-label={c.nav}>
       <div>
         <h2>{c.nav}</h2>
         <ul>
-          {sections(runs).map(([id, text]) => (
+          {sections(runs, js).map(([id, text]) => (
             <li key={id}>
               <a href={`#${id}`}>{text}</a>
             </li>
@@ -450,7 +465,7 @@ export function Benchmarks({
   benchmarks,
   examples,
 }: Pick<SiteData, 'benchmarks' | 'examples'>): VNode {
-  const { runs, latest } = benchmarks;
+  const { runs, latest, js } = benchmarks;
   // Only runs of the same build compare: an older build's run stays under Raw results.
   const comparable = runs.filter((r) => r.name === latest.name);
   const body: Record<string, VNode> = {
@@ -459,12 +474,13 @@ export function Benchmarks({
     history: <History runs={comparable} />,
     method: <Method run={latest} />,
     features: <FeatureBenchmarks examples={examples} />,
-    raw: <Raw runs={runs} />,
+    ...(js ? { js: <JsBench run={js} /> } : {}),
+    raw: <Raw runs={runs} js={js} />,
   };
   return (
     <div class="docs-layout docs-layout-index">
       <div class="docs-only-wide">
-        <SideNav runs={comparable.length} />
+        <SideNav runs={comparable.length} js={js !== undefined} />
       </div>
       <main class="docs-article bench">
         <h1>{c.heading}</h1>
@@ -472,9 +488,9 @@ export function Benchmarks({
         <p class="bench-measured">{inline(measuredOn(latest))}</p>
         <details class="docs-fold docs-only-narrow">
           <summary>{c.nav}</summary>
-          <SideNav runs={comparable.length} />
+          <SideNav runs={comparable.length} js={js !== undefined} />
         </details>
-        {sections(comparable.length).map(([id, text]) => (
+        {sections(comparable.length, js !== undefined).map(([id, text]) => (
           <section key={id} id={id} class="bench-section" aria-labelledby={`${id}-h`}>
             <h2 id={`${id}-h`}>{text}</h2>
             {body[id]}
@@ -488,7 +504,11 @@ export function Benchmarks({
 export const benchmarksPage: Page = {
   path: '/benchmarks/',
   section: 'benchmarks',
-  head: { title: c.title, searchTitle: c.searchTitle, description: c.description },
+  head: {
+    title: c.title,
+    searchTitle: c.searchTitle,
+    description: c.description,
+  },
   scripts: ['/src/demos/benchmarks.ts'],
   render: (data) => <Benchmarks {...data} />,
 };

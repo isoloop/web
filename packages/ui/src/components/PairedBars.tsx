@@ -14,7 +14,8 @@ import type { ComponentChildren, VNode } from 'preact';
  * - One scale per chart, from zero: every bar in it shares the same axis.
  */
 
-export type ChartUnit = '%' | 'ms' | 's' | 'MB';
+/** `ops/s`: operations per second, higher is better; its differences read as a share of the baseline. */
+export type ChartUnit = '%' | 'ms' | 's' | 'MB' | 'ops/s';
 export type Verdict = 'better' | 'worse' | 'same';
 
 export interface PairedBarsRow {
@@ -78,14 +79,15 @@ const VERDICT_WORDS: Record<Verdict, string> = {
   same: 'within the spread',
 };
 
-/** A value in its unit, as the chart prints it: "27%", "41 ms", "1.2 s", "44 MB". */
+/** A value in its unit, as the chart prints it: "27%", "41 ms", "1.2 s", "44 MB", "2,429,644 ops/s", "20.5 ops/s". */
 export function formatValue(n: number, unit: ChartUnit, decimals?: number): string {
+  if (unit === 'ops/s') return `${opsNumber(n, decimals)} ops/s`;
   if (unit === 'ms' && Math.abs(n) >= 1000) return `${fixed(n / 1000, decimals ?? 1)} s`;
   const d = decimals ?? (unit === 's' ? 1 : 0);
   return unit === '%' ? `${fixed(n, d)}%` : `${fixed(n, d)} ${unit}`;
 }
 
-/** The difference in words: "52 points lower, better", "44 MB higher, worse", "the same". */
+/** The difference in words: "52 points lower, better", "44 MB higher, worse", "19% lower, worse" (ops/s, as a share of the baseline), "the same". */
 export function formatDelta(
   base: number,
   value: number,
@@ -100,13 +102,24 @@ export function formatDelta(
 ): { text: string; verdict: Verdict } {
   const { lowerIsBetter = true, decimals } = options;
   const diff = options.delta ?? value - base;
-  const size = magnitude(Math.abs(diff), unit, decimals);
+  const size =
+    unit === 'ops/s'
+      ? { number: fixed(base > 0 ? (Math.abs(diff) / base) * 100 : 0, decimals ?? 0), unit: '%' }
+      : magnitude(Math.abs(diff), unit, decimals);
   const zero = Number(size.number) === 0;
   const verdict: Verdict =
     options.verdict ?? (zero ? 'same' : diff < 0 === lowerIsBetter ? 'better' : 'worse');
   if (zero) return { text: 'the same', verdict };
   const direction = diff < 0 ? 'lower' : 'higher';
-  return { text: `${size.number} ${size.unit} ${direction}, ${VERDICT_WORDS[verdict]}`, verdict };
+  const amount =
+    size.unit === '%' && unit === 'ops/s' ? `${size.number}%` : `${size.number} ${size.unit}`;
+  return { text: `${amount} ${direction}, ${VERDICT_WORDS[verdict]}`, verdict };
+}
+
+/** Operations per second: grouped and whole from 100 up, else one decimal. */
+export function opsNumber(n: number, decimals?: number): string {
+  const d = decimals ?? (Math.abs(n) >= 100 ? 0 : 1);
+  return fixed(n, d).replace(/^(-?\d+)/, (int) => Number(int).toLocaleString('en'));
 }
 
 function magnitude(

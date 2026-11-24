@@ -14,6 +14,7 @@ export {
   ChartLegend,
   formatDelta,
   formatValue,
+  opsNumber,
   PairedBars,
   type ChartLegendProps,
   type ChartUnit,

@@ -3,6 +3,11 @@
 // `Summary` shape (apps/bench/plant/summary.ts), validated here. The last run is
 // the latest; the history shows once there are two. Swapping the figures to a
 // new run (a plant-bench release) is a change to content/benchmarks.json only.
+//
+// Its `js` entry is js-bench's latest published run (apps/bench/js, the
+// section "Plain JavaScript work"; ADR 0002, amended 2026-11-24): a
+// `summary.json` in js-bench's `Summary` shape (apps/bench/js/runner/summary.ts),
+// validated here too.
 import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { z } from 'zod';
@@ -46,7 +51,99 @@ const manifestSchema = z.strictObject({
       }),
     )
     .min(1),
+  /** js-bench's run the page shows: the latest minor or major release. */
+  js: z
+    .strictObject({
+      summary: z.string().regex(/summary\.json$/, 'a summary.json path'),
+      links: z.strictObject({
+        /** The run's summary.md on GitHub. */
+        summary: https,
+        /** The folder with the raw results on GitHub. */
+        results: https,
+        /** apps/bench/machines.md on GitHub: what the machine id names. */
+        machine: https,
+        /** js-bench's README on GitHub. */
+        bench: https,
+      }),
+    })
+    .optional(),
 });
+
+/** js-bench's placements (apps/bench/js/README.md), in the page's order. */
+export const JS_PLACEMENTS = [
+  'native-main',
+  'native-worker',
+  'isoloop-own',
+  'isoloop-one',
+  'isoloop-balancer',
+] as const;
+export type JsPlacement = (typeof JS_PLACEMENTS)[number];
+export const JS_TIERS = ['cheap', 'regular', 'heavy'] as const;
+
+const opsOrNull = z.number().nonnegative().nullable();
+const byPlacement = z.partialRecord(z.enum(JS_PLACEMENTS), opsOrNull);
+
+const jsSummarySchema = z.object({
+  version: z.string().min(1),
+  date: z.iso.date(),
+  machine: z.string().regex(/^bench-machine-\d+$/, 'a bench machine id'),
+  profile: z.string().min(1),
+  cores: z.number().int().positive().nullable(),
+  clock: z.string().nullable(),
+  rounds: z.number().int().positive(),
+  maxWorkers: z.number().int().positive(),
+  engines: z
+    .array(
+      z.object({
+        engine: z.string().min(1),
+        browser: z.string().min(1),
+        workloads: z
+          .array(
+            z.object({
+              workload: z.string().min(1),
+              tier: z.enum(JS_TIERS),
+              n: z.number().int().positive(),
+              placement: z.enum(JS_PLACEMENTS),
+              rounds: z.number().int().nonnegative(),
+              opsPerSec: opsOrNull,
+              min: opsOrNull,
+              max: opsOrNull,
+              opP50Us: opsOrNull,
+              latenessP95Ms: opsOrNull,
+              moves: z.array(z.number().int().nonnegative()),
+            }),
+          )
+          .min(1),
+        scenario: z
+          .object({
+            placements: z.array(z.enum(JS_PLACEMENTS)),
+            copies: z.array(
+              z.object({
+                id: z.string(),
+                workload: z.string(),
+                opsPerSec: byPlacement,
+              }),
+            ),
+            workers: byPlacement,
+            latenessP95Ms: byPlacement,
+          })
+          .nullable(),
+        checksumMismatches: z.array(z.string()),
+      }),
+    )
+    .min(1),
+  failed: z.number().int().nonnegative(),
+});
+
+export type JsSummary = z.infer<typeof jsSummarySchema>;
+export type JsEngine = JsSummary['engines'][number];
+export type JsFigure = JsEngine['workloads'][number];
+export type JsScenario = NonNullable<JsEngine['scenario']>;
+
+export interface JsRun {
+  summary: JsSummary;
+  links: { summary: string; results: string; machine: string; bench: string };
+}
 
 const summarySchema = z.object({
   version: z.string().min(1),
@@ -106,6 +203,8 @@ export interface Benchmarks {
   /** Oldest first; the last is the latest. */
   runs: BenchRun[];
   latest: BenchRun;
+  /** js-bench's run, when the manifest lists one. */
+  js?: JsRun | undefined;
 }
 
 function parse<T>(schema: z.ZodType<T>, raw: unknown, where: string): T {
@@ -123,7 +222,9 @@ function readJson(file: string, where: string): unknown {
   try {
     return JSON.parse(readFileSync(file, 'utf8'));
   } catch (e) {
-    throw new Error(`${where}: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
+    throw new Error(`${where}: ${e instanceof Error ? e.message : String(e)}`, {
+      cause: e,
+    });
   }
 }
 
@@ -149,7 +250,20 @@ export function loadBenchmarks(manifest: string, repoRoot: string): Benchmarks {
       links: r.links,
     };
   });
-  return { runs, latest: runs.at(-1)! };
+  const js = m.js && {
+    summary: parse(
+      jsSummarySchema,
+      readJson(join(repoRoot, m.js.summary), m.js.summary),
+      m.js.summary,
+    ),
+    links: m.js.links,
+  };
+  if (js && js.summary.failed > 0) {
+    throw new Error(
+      `${m.js!.summary}: ${js.summary.failed} runs stopped; the page shows complete runs only`,
+    );
+  }
+  return { runs, latest: runs.at(-1)!, js };
 }
 
 /**

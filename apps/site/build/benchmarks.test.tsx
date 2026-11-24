@@ -1,5 +1,5 @@
 /** @jsxImportSource preact */
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -202,5 +202,104 @@ describe('/benchmarks/', () => {
       '<td data-changed>+10 ms<span class="ui-verdict"> changed beyond the spread</span></td>',
     );
     expect(html).toContain('Measured on plant-bench at <code>@isoloop/*@0.2.0</code>');
+  });
+});
+
+describe('/benchmarks/, plain JavaScript work', () => {
+  const b = loadBenchmarks(manifest, repo);
+  const js = b.js;
+  if (!js) throw new Error('content/benchmarks.json lists no js-bench run');
+
+  it('reads js-bench 0.1.0 on bench machine 1, complete', () => {
+    expect(js.summary).toMatchObject({
+      version: '0.1.0',
+      date: '2026-11-24',
+      machine: 'bench-machine-1',
+      cores: 4,
+      clock: '2.0 GHz',
+      failed: 0,
+    });
+    const clone = js.summary.engines[0]!.workloads.find(
+      (f) => f.workload === 'structured-clone-5mb' && f.n === 4 && f.placement === 'isoloop-own',
+    );
+    expect(clone?.opsPerSec).toBeCloseTo(20.5, 1);
+  });
+
+  it('comes after the plant sections and before the raw results, in the navigation too', () => {
+    const html = page(b);
+    expect(html.indexOf('id="features"')).toBeLessThan(html.indexOf('id="js"'));
+    expect(html.indexOf('id="js"')).toBeLessThan(html.indexOf('id="raw"'));
+    expect(html).toContain('<a href="#js">Plain JavaScript work</a>');
+    expect(page({ ...b, js: undefined })).not.toContain('id="js"');
+  });
+
+  it('labels it with the bench, version, date, browser and machine, linking the machine', () => {
+    expect(page(b)).toContain(
+      'Measured on js-bench at <code>@isoloop/*@0.1.0</code>, 24 November 2026, Chromium 158, on <a href="https://github.com/isoloop/web/blob/main/apps/bench/machines.md">bench machine 1</a>, 4 cores fixed at 2.0 GHz.',
+    );
+    expect(page(b)).toContain('This run is Chromium only.');
+  });
+
+  it('finds in operations per second, both directions, with the open cost linked', () => {
+    const html = page(b);
+    expect(html).toContain('Within 2% on 16 of 17 workloads');
+    expect(html).toContain('20.5 against 25.1 (19% fewer)');
+    expect(html).toContain('4,654 against 2,806 (66% more)');
+    expect(html).toContain('<a href="https://github.com/isoloop/isoloop/issues/441">');
+  });
+
+  it('charts each workload at four copies, plain Workers against Isoloop, and folds all five placements', () => {
+    const html = page(b);
+    expect(html).toContain('2,430,537 ops/s');
+    expect(html).toContain('19% lower, worse');
+    expect(html).toMatch(/Isoloop balancer<\/th><th scope="col" data-num>Balancer moves/);
+    expect(html).toContain('All copies, summed');
+  });
+
+  it('names no CPU brand or model, and no em dash', () => {
+    const i = page(b).indexOf('id="js"');
+    const section = page(b).slice(i, page(b).indexOf('id="raw"'));
+    expect(section).not.toMatch(/\b(AMD|Intel|Ryzen)\b/);
+    expect(section).not.toContain('—');
+  });
+
+  it('refuses a js-bench run with stopped pages, naming the file', () => {
+    const summary = { ...js.summary, failed: 2 };
+    const [m, dir] = fixture(
+      {
+        runs: [
+          {
+            name: 'plant',
+            summary: 'plant.summary.json',
+            links: {
+              summary: 'https://x.test/s',
+              results: 'https://x.test/r',
+              environment: 'https://x.test/e',
+            },
+          },
+        ],
+        js: {
+          summary: 'js.summary.json',
+          links: {
+            summary: 'https://x.test/s',
+            results: 'https://x.test/r',
+            machine: 'https://x.test/m',
+            bench: 'https://x.test/b',
+          },
+        },
+      },
+      {
+        'plant.summary.json': JSON.parse(
+          readFileSync(join(repo, 'apps/dashboards/plant/comparison/final/summary.json'), 'utf8'),
+        ),
+        'js.summary.json': summary,
+      },
+    );
+    expect(() => loadBenchmarks(m, dir)).toThrow(/js\.summary\.json: 2 runs stopped/);
+    writeFileSync(
+      join(dir, 'js.summary.json'),
+      JSON.stringify({ ...summary, machine: 'hauseserver' }),
+    );
+    expect(() => loadBenchmarks(m, dir)).toThrow(/js\.summary\.json is invalid:\n {2}machine/);
   });
 });
