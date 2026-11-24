@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Result } from './lib/compare/pairs.ts';
 import { isoloopVersion, PAIRS } from './run.ts';
-import { collect, difference, markdown, value, type Environment } from './summary.ts';
+import { collect, cpuClass, difference, markdown, value, type Environment } from './summary.ts';
 
 const ENV: Environment = {
   version: '0.1.0',
@@ -106,6 +106,15 @@ describe('plant-bench summary', () => {
     expect(md).toContain('Chromium 158.0.8127.18, Firefox 146.0');
     expect(md).not.toMatch(/\bpp\b|TL;DR/);
     expect(md).toContain('no result within 180 s');
+  });
+  it('names the CPU by its class, never its model', () => {
+    expect(cpuClass('AMD Ryzen 7 5825U with Radeon Graphics')).toBe('An x64 CPU');
+    expect(cpuClass('Neoverse-N1')).toBe('An arm64 CPU');
+    expect(cpuClass('x86-64 test CPU')).toBe('A CPU');
+    const env = { ...ENV, machine: { ...ENV.machine, cpu: 'Intel Core i7-1185G7' } };
+    const md = markdown(collect(RESULTS, SEL, env), 'bench');
+    expect(md).toContain('- **Machine:** An x64 CPU, CPUs 2,4,6,8 at 2.0 GHz');
+    expect(md).not.toContain('i7');
   });
 });
 
