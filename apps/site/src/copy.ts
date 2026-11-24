@@ -1052,8 +1052,7 @@ export const benchmarksPage = {
     machine: (id: string) => id.replaceAll('-', ' '),
     lede: 'Plain JavaScript work, such as sorts, Maps, Sets, JSON and `structuredClone`, with no components and no DOM. Each workload runs on the main thread, in plain Workers and in three Isoloop placements, and the figure is how many operations it completes per second. Higher is better.',
     /** Under the label when the run has one browser only. */
-    oneBrowser: (browser: string) =>
-      `This run is ${browser} only. Firefox joins at the next minor release.`,
+    oneBrowser: (browser: string) => `This run is ${browser} only.`,
     found: 'What we found',
     /** The placements, as the page names them. */
     placements: {
@@ -1099,16 +1098,16 @@ export const benchmarksPage = {
         `**One copy runs at about the same speed wherever it runs.** On ${same} of ${total} workloads, the main thread, a plain Worker and Isoloop are within 5% of each other.`,
       oneCopyOther: 'The others (main thread, plain Worker, Isoloop)',
       fourOwn: (same: number, total: number, lo: string, hi: string) =>
-        `**Four copies, a worker each: Isoloop does what plain Workers do,** within 2% on ${same} of ${total} workloads. That's ${lo} to ${hi} times the main thread, which runs the copies one at a time.`,
+        `**Four copies, a worker each: Isoloop does what plain Workers do.** Within 2% on ${same} of ${total} workloads. That’s ${lo} to ${hi} times the main thread, which runs the copies one at a time.`,
       fourOwnOther: 'The others (Isoloop against plain Workers)',
       fourOne: (same: number, total: number) =>
-        `**All four copies in one Isoloop worker do about what the main thread does,** since both have one core: within 5% on ${same} of ${total} workloads.`,
+        `**All four copies in one Isoloop worker do about what the main thread does.** Both have one core: within 5% on ${same} of ${total} workloads.`,
       fourOneOther: 'The others (one shared worker against the main thread)',
       balancer: (lo: string, hi: string, same: number, total: number, moves: string) =>
         `**The balancer gets ${lo} to ${hi} of plain Workers on ${same} of ${total} workloads.** It measures every copy first and moves it, and a typical run makes ${moves} moves inside the window.`,
       balancerOther: 'The others (the balancer against plain Workers)',
       timer: (main1: string, main4: string, mainMax: string, off: string) =>
-        `**The page stays responsive while the work is off the main thread.** The page's 100 ms timer fires late by ${off} or less (p95) in plain Workers and in every Isoloop placement. With the work on the main thread, it's about ${main1} late with one copy, ${main4} with four, and up to ${mainMax} with heavy work.`,
+        `**The page stays responsive while the work is off the main thread.** The page’s 100 ms timer fires late by ${off} or less (p95) in plain Workers and in every Isoloop placement. With the work on the main thread, it’s about ${main1} late with one copy, ${main4} with four, and up to ${mainMax} with heavy work.`,
       notMeasured:
         'Not measured here: start-up time, memory per worker and the cost of the bus. These figures are throughput only.',
     },
@@ -1119,7 +1118,7 @@ export const benchmarksPage = {
       workload: 'structured-clone-5mb',
       issue: 'https://github.com/isoloop/isoloop/issues/441',
       text: (one: string, oneBase: string, four: string, fourBase: string) =>
-        `**One open cost: \`structuredClone\` of a 5 MB object is slower in an Isoloop worker.** With one copy, Isoloop does ${one} operations per second against ${oneBase} in a plain Worker; with four, ${four} against ${fourBase}. The cause isn't measured yet.`,
+        `**One open cost: \`structuredClone\` of a 5 MB object is slower in an Isoloop worker.** With one copy, Isoloop does ${one} operations per second against ${oneBase} in a plain Worker; with four, ${four} against ${fourBase}. The cause isn’t measured yet.`,
       link: 'The issue tracks it',
     },
     charts: {
@@ -1174,7 +1173,7 @@ export const benchmarksPage = {
       placementsText: (maxWorkers: number) =>
         `The main thread runs the copies interleaved, slice by slice. Plain Workers are one module Worker per copy, with no Isoloop. Isoloop runs one isolate per copy: each in its own worker (the default), all in one worker, or placed by the balancer with up to ${maxWorkers} workers.`,
       rounds: (n: number) =>
-        `${n} interleaved rounds, each running every workload's placements in an order rotated per round. A figure is the median of the rounds.`,
+        `${n} interleaved rounds, each running every workload’s placements in an order rotated per round. A figure is the median of the rounds.`,
       roundsLabel: 'Rounds',
       when: 'When',
       whenText:

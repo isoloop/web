@@ -242,7 +242,7 @@ describe('/benchmarks/, plain JavaScript work', () => {
 
   it('finds in operations per second, both directions, with the open cost linked', () => {
     const html = page(b);
-    expect(html).toContain('within 2% on 16 of 17 workloads');
+    expect(html).toContain('Within 2% on 16 of 17 workloads');
     expect(html).toContain('20.5 against 25.1 (19% fewer)');
     expect(html).toContain('4,654 against 2,806 (66% more)');
     expect(html).toContain('<a href="https://github.com/isoloop/isoloop/issues/441">');
