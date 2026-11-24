@@ -112,7 +112,7 @@ describe('uiPartials', () => {
     expect(header).not.toContain('<a href="/" aria-current');
   });
 
-  it('has Docs right after Home (ADR 0005, amended 2026-11-20)', () => {
+  it('has Docs right after Home and Benchmarks last (ADR 0005, amended 2026-11-20 and 2026-11-24)', () => {
     const { header } = uiPartials({ header: true }, 'docs');
     expect(header).toContain('<a href="/docs/" aria-current="page">Docs</a>');
     const nav = /<nav class="ui-nav"[^>]*>([\s\S]*?)<\/nav>/.exec(header ?? '')?.[1] ?? '';
@@ -122,6 +122,7 @@ describe('uiPartials', () => {
       'Features',
       'How it works',
       'Examples',
+      'Benchmarks',
     ]);
   });
 

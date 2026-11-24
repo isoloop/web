@@ -45,6 +45,7 @@ const PAGES = [
   '/features/',
   '/how-it-works/',
   '/examples/',
+  '/benchmarks/',
   '/changelog/',
   '/__specimens/',
   '/docs/',
@@ -85,6 +86,52 @@ for (const path of ['/', '/features/']) {
     expect(widest).toBeLessThanOrEqual(0);
   });
 }
+
+// ADR 0005, amended 2026-11-24: six links in the header's nav, Benchmarks last.
+// At 360px they wrap under the logo, and nothing on the page scrolls sideways.
+test('the header fits six links at 360px, with no sideways scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto('/benchmarks/');
+  const nav = page.locator('.ui-nav');
+  await expect(nav.getByRole('link')).toHaveText([
+    'Home',
+    'Docs',
+    'Features',
+    'How it works',
+    'Examples',
+    'Benchmarks',
+  ]);
+  await expect(nav.getByRole('link', { name: 'Benchmarks' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  const edges = await nav
+    .getByRole('link')
+    .evaluateAll((links) =>
+      links.map((l) => [l.getBoundingClientRect().left, l.getBoundingClientRect().right]),
+    );
+  for (const [left = -1, right = 999] of edges) {
+    expect(left).toBeGreaterThanOrEqual(0);
+    expect(right).toBeLessThanOrEqual(360);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+});
+
+// /benchmarks/: the charts are static SVG, the tables fold open, and the
+// figures carry what they were measured on (ADR 0002, amended 2026-11-24).
+test('/benchmarks/ shows its charts, then the tables when unfolded', async ({ page }) => {
+  await page.goto('/benchmarks/');
+  await expect(page.locator('.bench-measured')).toContainText('Measured on plant at');
+  await expect(page.locator('#figures .ui-chart').first()).toBeVisible();
+  const fold = page.locator('#figures details.bench-fold').first();
+  await expect(fold.locator('table').first()).toBeHidden();
+  await fold.locator('summary').click();
+  await expect(fold.locator('table').first()).toBeVisible();
+  await expectAccessible(page, { exclude: ['iframe'] });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/benchmarks/');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
 
 test('the code behind the landing demo folds out of the recording, as tabs', async ({ page }) => {
   await page.goto('/');

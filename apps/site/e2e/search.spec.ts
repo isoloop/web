@@ -85,6 +85,7 @@ const SEARCH_TITLES: Record<string, string> = {
   '/': 'Isoloop: event-loop isolation for JavaScript apps',
   '/features/': 'Features: fault isolation, message bus and replay · Isoloop',
   '/examples/': 'Live examples: dashboards, workers and pools · Isoloop',
+  '/benchmarks/': 'Benchmarks: Isoloop measured against native · Isoloop',
   '/docs/': 'Docs: isolate TypeScript apps in Web Workers · Isoloop',
   '/docs/getting-started/': 'Getting started: isolates in Web Workers · Isoloop',
   '/docs/isolates/': 'Writing isolates in React, Preact or plain DOM · Isoloop',

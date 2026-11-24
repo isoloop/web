@@ -3,7 +3,7 @@ import type { VNode } from 'preact';
 import { ThemeToggle } from './ThemeToggle.tsx';
 
 /** The site's sections, for `aria-current`. */
-export type Current = 'home' | 'features' | 'how-it-works' | 'examples' | 'docs';
+export type Current = 'home' | 'features' | 'how-it-works' | 'examples' | 'benchmarks' | 'docs';
 
 const LINKS: { id: Current; href: string; label: string }[] = [
   { id: 'home', href: '/', label: 'Home' },
@@ -12,6 +12,8 @@ const LINKS: { id: Current; href: string; label: string }[] = [
   { id: 'features', href: '/features/', label: 'Features' },
   { id: 'how-it-works', href: '/how-it-works/', label: 'How it works' },
   { id: 'examples', href: '/examples/', label: 'Examples' },
+  // ADR 0005, amended 2026-11-24: the figures last, after what Isoloop does.
+  { id: 'benchmarks', href: '/benchmarks/', label: 'Benchmarks' },
 ];
 
 const GITHUB = 'https://github.com/isoloop/isoloop';

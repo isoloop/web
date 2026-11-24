@@ -68,8 +68,8 @@ export interface PairedBarsProps {
 export interface ChartLegendProps {
   base: string;
   value: string;
-  /** Which of Isoloop's colours to explain. Default both. */
-  verdicts?: Exclude<Verdict, 'same'>[] | undefined;
+  /** Which of Isoloop's colours to explain. Default better and worse; add `'same'` when a chart has a difference within the spread. */
+  verdicts?: Verdict[] | undefined;
 }
 
 const VERDICT_WORDS: Record<Verdict, string> = {
@@ -169,7 +169,7 @@ function Line(props: {
   );
 }
 
-const BOTH: Exclude<Verdict, 'same'>[] = ['better', 'worse'];
+const BOTH: Verdict[] = ['better', 'worse'];
 
 /** The key to a chart's colours: grey for the baseline, Isoloop's colour when better and when worse. */
 export function ChartLegend({ base, value, verdicts = BOTH }: ChartLegendProps): VNode {
@@ -178,7 +178,7 @@ export function ChartLegend({ base, value, verdicts = BOTH }: ChartLegendProps):
       <li data-series="base">{base}</li>
       {verdicts.map((v) => (
         <li data-series="value" data-verdict={v} key={v}>
-          {value}, {v}
+          {value}, {VERDICT_WORDS[v]}
         </li>
       ))}
     </ul>
@@ -210,7 +210,9 @@ export function PairedBars({
       delta: r.delta,
     }),
   );
-  const used = (['better', 'worse'] as const).filter((v) => deltas.some((d) => d.verdict === v));
+  const used = (['better', 'worse', 'same'] as const).filter((v) =>
+    deltas.some((d) => d.verdict === v),
+  );
   return (
     <figure class="ui-chart" data-compact={compact ? '' : undefined}>
       <figcaption>

@@ -623,6 +623,112 @@
   padding-bottom: var(--ui-space-4);
 }
 
+/* /benchmarks/: the docs' article and sidebar, with the charts in a grid of
+   small multiples, one legend per pair, and the tables folded under them. */
+.bench-measured {
+  margin: 1rem 0 0;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-s);
+}
+.bench-section > h2 {
+  margin: 3.2rem 0 0.9rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--ui-rule);
+  font-size: 1.5rem;
+  font-weight: 750;
+  font-stretch: 80%;
+  line-height: 1.2;
+  scroll-margin-top: calc(var(--ui-bar-h) + 1rem);
+}
+.bench-section > p,
+.bench-finding ul,
+.bench-list {
+  margin: 0.85rem 0;
+  max-width: var(--m-doc, 46rem);
+}
+.bench-finding ul,
+.bench-list {
+  padding-left: 1.2rem;
+}
+.bench-finding li,
+.bench-list li {
+  margin: 0.45rem 0;
+}
+.bench h3,
+.bench h4 {
+  font-weight: 700;
+  font-stretch: 87%;
+}
+.bench h3 {
+  margin: 2rem 0 0.6rem;
+  font-size: 1.15rem;
+}
+.bench-finding h3 {
+  margin-bottom: 0.3rem;
+}
+.bench-note {
+  color: var(--ui-text-muted);
+  max-width: var(--m-doc, 46rem);
+}
+.bench-pair {
+  margin: 1.4rem 0 1.8rem;
+}
+.bench .bench-pair h4 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+.bench-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--ui-space-6) var(--ui-space-6);
+}
+.bench-charts .ui-chart + .ui-chart {
+  margin-top: 0;
+}
+.bench-pair > .ui-chart-legend {
+  margin-top: var(--ui-space-5);
+}
+.bench-fold {
+  margin-top: var(--ui-space-4);
+}
+.bench-fold > .ui-table-wrap {
+  padding: 0 0.9rem 0.9rem;
+}
+.bench .bench-table {
+  display: table;
+  width: 100%;
+  margin: 0;
+}
+.bench .bench-table caption {
+  padding-top: 0.6rem;
+}
+.bench .bench-table td,
+.bench .bench-table th {
+  white-space: nowrap;
+}
+.bench .bench-table tbody th {
+  white-space: normal;
+  width: auto;
+}
+.bench .bench-table td[data-changed] {
+  font-weight: 650;
+}
+.bench-method {
+  margin: 0;
+  max-width: var(--m-doc, 46rem);
+}
+.bench-method > div {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--ui-rule);
+}
+.bench-method dt {
+  font-weight: 650;
+  font-stretch: 87%;
+}
+.bench-method dd {
+  margin: 0.25rem 0 0;
+}
+
 /* "What it's for": the pattern, then its example, muted. */
 .ui-eg {
   color: var(--ui-text-muted);
