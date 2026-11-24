@@ -804,6 +804,8 @@ export const changelogPage = {
 /** /docs/ and each docs page (src/pages/doc.tsx). The guides' own text comes from the library. */
 export const docsPage = {
   title: 'Docs',
+  /** <title> and the link preview only (ADR 0006, as amended). */
+  searchTitle: 'Docs: isolate TypeScript apps in Web Workers',
   description:
     'How to build with Isoloop: getting started, the guides for each part, and the reference.',
   heading: 'Docs',

@@ -77,3 +77,40 @@ test('/features/ has an h2 before its first h3', async ({ page }) => {
     .evaluateAll((all) => all.map((h) => h.tagName));
   expect(levels[0]).toBe('H2');
 });
+
+// The search titles (SEO decisions of 2026-11-22, Q15 and Q16; web#296): each
+// says what its page is for, within 60 characters, and <title>, og:title and
+// twitter:title agree.
+const SEARCH_TITLES: Record<string, string> = {
+  '/': 'Isoloop: event-loop isolation for JavaScript apps',
+  '/features/': 'Features: fault isolation, message bus and replay · Isoloop',
+  '/examples/': 'Live examples: dashboards, workers and pools · Isoloop',
+  '/docs/': 'Docs: isolate TypeScript apps in Web Workers · Isoloop',
+  '/docs/getting-started/': 'Getting started: isolates in Web Workers · Isoloop',
+  '/docs/isolates/': 'Writing isolates in React, Preact or plain DOM · Isoloop',
+  '/docs/bus/': 'The message bus: topics, retention and replay · Isoloop',
+  '/docs/supervision/': 'Supervision: restart blocked or crashed isolates · Isoloop',
+  '/docs/pools/': 'Worker pools: several isolates in one worker · Isoloop',
+  '/docs/hosting/': 'Hosting: worker URLs, headers, CSP and CORS · Isoloop',
+  '/examples/basic/': 'Basic example: block or crash one isolate · Isoloop',
+  '/examples/processor/': 'Balancer playground: automatic worker placement · Isoloop',
+  '/examples/processor/files/': 'File processor example: consumer groups in workers · Isoloop',
+  '/examples/dashboards/plant/isoloop/': 'Plant example: a live telemetry dashboard · Isoloop',
+  '/examples/dashboards/markets/isoloop/':
+    'Markets example: a live trading-data dashboard · Isoloop',
+  '/examples/dashboards/plant/architecture/': 'Plant example: what runs on which thread · Isoloop',
+};
+
+test('the search titles are the decided ones, in <title> and both preview tags', async ({
+  request,
+}) => {
+  await Promise.all(
+    Object.entries(SEARCH_TITLES).map(async ([path, title]) => {
+      const html = await (await request.get(path)).text();
+      expect(/<title>([^<]*)<\/title>/.exec(html)?.[1], `${path} <title>`).toBe(title);
+      expect(title.length, `${path} is over 60 characters`).toBeLessThanOrEqual(60);
+      expect(html, `${path} og:title`).toContain(`property="og:title" content="${title}"`);
+      expect(html, `${path} twitter:title`).toContain(`name="twitter:title" content="${title}"`);
+    }),
+  );
+});
