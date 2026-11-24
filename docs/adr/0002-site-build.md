@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed); 2026-11-22, search metadata (decisions 8 and 9; see [the amendment](#amended-search-metadata-2026-11-22); Proposed); 2026-11-22, when the site job runs (decision 11; see [the amendment](#amended-when-the-site-job-runs-2026-11-22); Proposed); 2026-11-24, benchmarks and alternatives (decisions 2, 3 and 7; see [the amendment](#amended-benchmarks-and-alternatives-2026-11-24); Proposed)
+- **Amended:** 2026-11-14, by ADR 0003 (decision 1) and for the approved design (decisions 2, 3, 4, 7 and 11; see [the amendment](#amended-for-the-approved-design-2026-11-14)); 2026-11-18, the landing page refined (decisions 3 and 7; see [the amendment](#amended-the-landing-page-refined-2026-11-18)); 2026-11-19, by [ADR 0005](0005-page-navigation-and-status-marks.md) (`/features/` in tabs, opened by sticky notes; the step tabs shared by all three long pages; the Experimental pill); 2026-11-20, by [ADR 0006](0006-docs.md) (decision 12: `markdown-it` behind our own interface, highlighting by our own tokenizer; Proposed); 2026-11-21, the examples hub with live examples (decisions 4 and 5; see [the amendment](#amended-the-examples-hub-with-live-examples-2026-11-21); Proposed); 2026-11-21, the security policy on Pages (decision 8; see [the amendment](#amended-the-security-policy-on-pages-2026-11-21); Proposed); 2026-11-22, search metadata (decisions 8 and 9; see [the amendment](#amended-search-metadata-2026-11-22); Proposed); 2026-11-22, when the site job runs (decision 11; see [the amendment](#amended-when-the-site-job-runs-2026-11-22); Proposed); 2026-11-24, benchmarks and alternatives (decisions 2, 3 and 7; see [the amendment](#amended-benchmarks-and-alternatives-2026-11-24); Proposed); 2026-11-24, plain JavaScript work on `/benchmarks/` (decisions 2 and 7; see [the amendment](#amended-plain-javascript-work-on-benchmarks-2026-11-24); Proposed)
 - **Answers:** what `apps/site` is built with, which pages it has, what may run on them, how it shows the examples and the library's diagrams, and what its copy may claim. Where it lives and how it deploys is [ADR 0001](0001-what-this-repo-is.md); its look is [ADR 0003](0003-design-system.md).
 
 ## Context
@@ -336,6 +336,36 @@ From the site plan for 0.1.1 (`docs/plans/0.1.1-site.md`, decisions 9–13, gril
 - The figures live in one place and are measured the same way each release, so a change between versions shows.
 - (Bad) The site's figures wait on a manual server run each minor release.
 - (Bad) The landing page gains a section.
+
+### Amended: plain JavaScript work on `/benchmarks/` (2026-11-24)
+
+From the js-bench plan (`docs/plans/js-bench.md`, grilled Q1–Q22). This changes decisions 2 and 7, as amended earlier today. Where this section and those disagree, this section wins.
+
+**A second benchmark on `/benchmarks/` (decision 2):** a section of its own, **Plain JavaScript work**, after the plant sections and before the raw results, with its own entry in the page's navigation. It holds:
+1. what it was measured on: the bench, the `@isoloop/*` version, the date, the browser and the machine;
+2. what we found, in plain English, in operations per second;
+3. one paired-bar chart per tier at four copies, with plain Workers as the grey baseline and Isoloop (a worker each) as the bar;
+4. a table for one copy: the main thread, a plain Worker, Isoloop;
+5. how late the page's own timer fires, per placement;
+6. any open cost, stated plainly, with a link to its issue;
+7. the method in short, with all five placements and the balancer scenario folded under it as tables.
+
+The plant sections don't change. "Raw results" lists both benchmarks.
+
+**Where its figures come from (decision 7):**
+- **js-bench** (`apps/bench/js/`) measures plain JavaScript work, such as sorts, Maps, Sets, JSON and `structuredClone`, on the main thread, in plain Workers and in three Isoloop placements. Its results under `apps/bench/js/results/<version>/` are what the section shows.
+- **It runs before every release,** patches included, as the release's comparison with the one before. The page updates only at minor and major releases, together with plant-bench, so the page's two benchmarks always come from the same version.
+- **The machine has a name: "bench machine 1"** (`bench-machine-1` in data), described in `apps/bench/machines.md`. A new machine gets the next number, and its first run is the previous release again, as its own baseline. No hostname goes into the repo.
+- Decision 7's rules stay: figures are copied, labelled and linked, a labelled copy never changes, and every row stays, in both directions. A Chromium-only run says so in its label.
+
+**Alternatives considered.**
+- **A page of its own** (`/benchmarks/js/`): it would split the measurements across two pages and add navigation. One page holds both until there are enough benchmarks for tabs.
+- **Keeping the bench private and publishing only its figures:** it breaks decision 7, since nothing could be linked.
+
+**Consequences.**
+- A reader sees what Isoloop costs for plain work as well as for a dashboard, in the same units each release.
+- (Bad) One more manual server run before each release, about nine hours.
+- (Bad) `/benchmarks/` gets longer.
 
 ## Consequences
 
