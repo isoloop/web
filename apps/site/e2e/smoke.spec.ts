@@ -347,6 +347,32 @@ test('/features/ shows one group of features at a time, and a feature link opens
   await expect(page.locator('#containment')).toBeVisible();
 });
 
+for (const width of [1440, 390]) {
+  test(`the home page's alternatives link opens Compared on /features/, accessible at ${String(width)}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const problems = await watch(page);
+    await page.goto('/');
+    await page.locator('#alternatives a[href="/features/#compared"]').click();
+    await expect(page).toHaveURL(/\/features\/#compared$/);
+    await expect(page.locator('#alternatives')).toBeVisible();
+    await expect(page.locator('#containment')).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Isoloop and the alternatives' })).toBeVisible();
+    // The pager runs through it: Cost before, nothing after.
+    const pager = page.locator('#compared .docs-pager');
+    await expect(pager.locator('a[rel="prev"]')).toHaveAttribute('href', '#costs');
+    await expect(pager.locator('a[rel="next"]')).toHaveCount(0);
+    await expectAccessible(page, { exclude: ['iframe'] });
+    // The wide table scrolls in its own region; the page never scrolls sideways.
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+    expect(await problems()).toEqual([]);
+  });
+}
+
 test('the framework tabs work with the keyboard', async ({ page }) => {
   await page.goto('/features/#frameworks');
   const react = page.getByRole('tab', { name: 'React', exact: true });

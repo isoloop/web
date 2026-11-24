@@ -2,7 +2,8 @@
 import type { ComponentChildren, VNode } from 'preact';
 import { Table } from 'ui/components';
 import type { Feature as Entry } from '../../build/features.ts';
-import { featuresPage as f, home } from '../copy.ts';
+import { compared as c, featuresPage as f, home } from '../copy.ts';
+import { AlternativesFull } from './alternatives.tsx';
 import { Recording } from './recording.tsx';
 import { Code, CodeTabs } from './code.tsx';
 import { findBlock, MeasuredBlock } from './measurements.tsx';
@@ -10,7 +11,7 @@ import { rich } from './rich.tsx';
 import { PageIntro } from './intro.tsx';
 import { FeatureNotes, TABS } from './feature-notes.tsx';
 import { Pill } from './pill.tsx';
-import { Pager, RailLayout } from './steps.tsx';
+import { Pager, RailLayout, type RailLink } from './steps.tsx';
 import type { Page, SiteData } from './types.ts';
 
 const PLANT_RESULTS = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant/comparison';
@@ -49,7 +50,7 @@ function Feature({ entry, children }: { entry: Entry; children: ComponentChildre
   );
 }
 
-function Features({ samples, features, examples }: SiteData): VNode {
+function Features({ samples, features, examples, alternatives }: SiteData): VNode {
   const demos: Record<Entry['demo'], VNode> = {
     recording: (
       <>
@@ -308,6 +309,62 @@ function Features({ samples, features, examples }: SiteData): VNode {
       </>
     ),
   };
+  // The six groups of features, then Compared (ADR 0005, amended 2026-11-24):
+  // the alternatives aren't a feature, so they're a panel of their own, last.
+  const panels: {
+    id: string;
+    name: string;
+    part?: string | undefined;
+    items: RailLink[];
+    body: VNode;
+  }[] = [
+    ...TABS.map(([tab, part]) => ({
+      id: f.tabs.ids[tab],
+      name: f.tabs.names[tab],
+      part,
+      items: features
+        .filter((x) => x.tab === tab)
+        .map((x) => ({
+          href: `#${x.id}`,
+          text: x.name.replace(/\.$/, ''),
+          experimental: x.experimental ?? false,
+          item: true,
+        })),
+      body: (
+        <>
+          {features
+            .filter((x) => x.tab === tab)
+            .map((entry) => (
+              <Feature key={entry.id} entry={entry}>
+                {demos[entry.demo]}
+              </Feature>
+            ))}
+        </>
+      ),
+    })),
+    {
+      id: c.features.id,
+      name: c.features.group,
+      items: [{ href: `#${c.features.itemId}`, text: c.features.item, item: true }],
+      body: (
+        <section
+          class="ui-gutter"
+          id={c.features.itemId}
+          aria-labelledby={`${c.features.itemId}-h`}
+        >
+          <h2 class="panel-h" id={`${c.features.itemId}-h`}>
+            {c.features.heading}
+          </h2>
+          <div class="ui-body">
+            {c.features.text.map((t) => (
+              <p key={t}>{rich(t)}</p>
+            ))}
+            <AlternativesFull data={alternatives} />
+          </div>
+        </section>
+      ),
+    },
+  ];
   return (
     <main class="ui-shell">
       <PageIntro title={f.heading} image="features" markTop>
@@ -320,35 +377,20 @@ function Features({ samples, features, examples }: SiteData): VNode {
       <div class="features-tabs">
         <RailLayout
           label={f.tabs.label}
-          groups={TABS.map(([tab, part]) => ({
-            title: { href: `#${f.tabs.ids[tab]}`, text: f.tabs.names[tab], part },
-            items: features
-              .filter((x) => x.tab === tab)
-              .map((x) => ({
-                href: `#${x.id}`,
-                text: x.name.replace(/\.$/, ''),
-                experimental: x.experimental ?? false,
-                item: true,
-              })),
+          groups={panels.map((p) => ({
+            title: { href: `#${p.id}`, text: p.name, part: p.part },
+            items: p.items,
           }))}
         >
-          {TABS.map(([tab], i) => {
-            const prev = TABS[i - 1]?.[0];
-            const nxt = TABS[i + 1]?.[0];
+          {panels.map((p, i) => {
+            const prev = panels[i - 1];
+            const nxt = panels[i + 1];
             return (
-              <div class="features-tab" id={f.tabs.ids[tab]} data-step key={tab}>
-                {features
-                  .filter((x) => x.tab === tab)
-                  .map((entry) => (
-                    <Feature key={entry.id} entry={entry}>
-                      {demos[entry.demo]}
-                    </Feature>
-                  ))}
+              <div class="features-tab" id={p.id} data-step key={p.id}>
+                {p.body}
                 <Pager
-                  prev={
-                    prev ? { href: `#${f.tabs.ids[prev]}`, text: f.tabs.names[prev] } : undefined
-                  }
-                  next={nxt ? { href: `#${f.tabs.ids[nxt]}`, text: f.tabs.names[nxt] } : undefined}
+                  prev={prev ? { href: `#${prev.id}`, text: prev.name } : undefined}
+                  next={nxt ? { href: `#${nxt.id}`, text: nxt.name } : undefined}
                   previous={f.tabs.previous}
                   nextLabel={f.tabs.next}
                   label={f.tabs.pager}

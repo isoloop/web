@@ -377,6 +377,39 @@ export const featuresPage = {
   },
 };
 
+/**
+ * Isoloop and the alternatives (ADR 0002 and ADR 0005, amended 2026-11-24): the
+ * home page's short table and the Compared group on /features/. The marks, notes
+ * and sources are content/alternatives.json.
+ */
+export const compared = {
+  marks: { yes: 'Yes', partial: 'Partial', no: 'No' },
+  source: 'Source',
+  checked: 'checked',
+  home: {
+    heading: 'Compared with the alternatives',
+    intro:
+      'Other tools move work off the main thread or keep one part of a page from breaking another. Each does part of what Isoloop does, and some do one part better. The marks come from each project’s own docs.',
+    caption: 'What each one provides, from its own docs.',
+    rowHead: 'Tool',
+    more: 'Every mark with its source, and where each alternative is the better choice',
+  },
+  features: {
+    /** The rail group, its anchor, and its one item (the section's id differs from the group's). */
+    group: 'Compared',
+    id: 'compared',
+    item: 'Isoloop and the alternatives',
+    itemId: 'alternatives',
+    heading: 'Isoloop and the alternatives',
+    text: [
+      'Six other ways to move work off the main thread or contain it, next to Isoloop. Each mark comes from that project’s own docs, linked in its cell, with the date it was checked.',
+      'There are no benchmarks here: these tools do different jobs, so the table compares what each one does.',
+    ],
+    caption: 'What each one provides, with the source of each mark and the date it was checked.',
+    betterHeading: 'Where an alternative is the better choice',
+  },
+};
+
 // Sources, at the library pin (apps/site/library.lock): DEFAULT_SUPERVISOR_CONFIG
 // and DEFAULT_BACKOFF (packages/host/src/supervisor), KernelConfig and
 // IsolateManifest (packages/host/src/kernel.ts), SubscribeOptions and
