@@ -185,3 +185,24 @@ export function changedBeyondSpread(
   if (!before.spread || !after.spread) return false;
   return before.spread[1] < after.spread[0] || after.spread[1] < before.spread[0];
 }
+
+/** One figure of one pair in a run, or a build error naming what's missing (the home page's charts). */
+export function figure(
+  run: Pick<BenchRun, 'pairs'>,
+  q: Pick<PairFigure, 'engine' | 'rate' | 'a' | 'b' | 'figure'>,
+): PairFigure & { aMedian: number; bMedian: number; delta: number } {
+  const f = run.pairs.find(
+    (p) =>
+      p.engine === q.engine &&
+      p.rate === q.rate &&
+      p.a === q.a &&
+      p.b === q.b &&
+      p.figure === q.figure,
+  );
+  if (!f || f.aMedian === null || f.bMedian === null || f.delta === null) {
+    throw new Error(
+      `the latest benchmark run has no ${q.figure} for ${q.a} against ${q.b}, ${q.engine} at ${q.rate} kHz`,
+    );
+  }
+  return { ...f, aMedian: f.aMedian, bMedian: f.bMedian, delta: f.delta };
+}

@@ -33,4 +33,6 @@ it('reads every sample the pages show', () => {
   expect(samples.preact).not.toContain('@jsxImportSource');
   expect(samples.placement).toContain("pool: 'shared'");
   expect(samples.placement).not.toContain('declare const');
+  // The landing's counter shows 0 before the first click, as basic's does.
+  expect(samples.demoCounter).toContain("big.textContent = '0';");
 });

@@ -9,6 +9,7 @@ export default defineIsolate<HTMLElement>({
   start(ctx) {
     let n = 0;
     const big = document.createElement('div');
+    big.textContent = '0';
     const button = document.createElement('button');
     button.textContent = 'Increment';
     button.addEventListener('click', () => {
