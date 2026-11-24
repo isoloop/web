@@ -128,6 +128,18 @@ function Home({ features, samples, alternatives, benchmarks }: SiteData): VNode 
         </div>
       </section>
 
+      <section class="ui-gutter" id="how" aria-labelledby="how-h">
+        <h2 id="how-h">{home.how.heading}</h2>
+        <div class="ui-body">
+          {home.how.text.map((t) => (
+            <p key={t}>{t}</p>
+          ))}
+          <p>
+            <a href="/how-it-works/">{home.how.link}</a>
+          </p>
+        </div>
+      </section>
+
       <section class="ui-gutter" id="features" aria-labelledby="features-h">
         <h2 id="features-h">{home.strip.heading}</h2>
         <div class="ui-body">
@@ -193,17 +205,6 @@ function Home({ features, samples, alternatives, benchmarks }: SiteData): VNode 
         </div>
       </section>
 
-      <section class="ui-gutter" id="how" aria-labelledby="how-h">
-        <h2 id="how-h">{home.how.heading}</h2>
-        <div class="ui-body">
-          {home.how.text.map((t) => (
-            <p key={t}>{t}</p>
-          ))}
-          <p>
-            <a href="/how-it-works/">{home.how.link}</a>
-          </p>
-        </div>
-      </section>
       <section class="ui-gutter" id="install" aria-labelledby="install-h">
         <h2 id="install-h">{home.install.heading}</h2>
         <div class="ui-body">
