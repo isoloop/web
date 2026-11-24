@@ -2141,3 +2141,49 @@
     display: none;
   }
 }
+
+/* Isoloop and the alternatives (src/pages/alternatives.tsx). A mark is a word, so it
+   never rests on colour; the weight sets "Yes" apart at a glance. */
+.alt-mark {
+  font-weight: 650;
+  font-stretch: 87%;
+}
+.alt-mark[data-mark='no'] {
+  font-weight: 400;
+  color: var(--ui-text-muted);
+}
+.alt-full .ui-table {
+  min-width: 60rem;
+  font-size: 0.9rem;
+}
+.alt-full .ui-table td {
+  min-width: 9rem;
+}
+.alt-note,
+.alt-source {
+  display: block;
+}
+.alt-note {
+  margin-top: 0.2rem;
+}
+.alt-source {
+  margin-top: 0.3rem;
+  color: var(--ui-text-muted);
+  font-size: 0.85rem;
+}
+.alt-better li {
+  margin-bottom: 0.5rem;
+}
+/* Below 760px ui makes a table scroll itself; these scroll in their focusable wrap
+   instead (Table's region), so a keyboard can reach the hidden columns. */
+.alt-summary .ui-table,
+.alt-full .ui-table {
+  display: table;
+}
+.alt-summary .ui-table {
+  min-width: 34rem;
+}
+.alt-full .ui-table tbody th {
+  width: auto;
+  min-width: 7rem;
+}

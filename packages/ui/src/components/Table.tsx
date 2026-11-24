@@ -9,13 +9,15 @@ export interface TableProps {
   rows: [string, ...ComponentChildren[]][];
   /** Mark the last column, Isoloop's, with the pool colour. */
   markLast?: boolean;
+  /** Shown in place of each row's text heading, e.g. a link; the text still keys the row. */
+  rowHeadings?: ComponentChildren[];
 }
 
 /**
  * A data table with a caption and headers on both axes, scrolling sideways on
  * narrow screens instead of the page (ADR 0002, decision 9).
  */
-export function Table({ caption, head, rows, markLast = false }: TableProps): VNode {
+export function Table({ caption, head, rows, markLast = false, rowHeadings }: TableProps): VNode {
   return (
     <div
       class="ui-table-wrap"
@@ -35,12 +37,12 @@ export function Table({ caption, head, rows, markLast = false }: TableProps): VN
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
+          {rows.map((row, i) => (
             <tr key={row[0]}>
               {head.map((col, j) =>
                 j === 0 ? (
                   <th scope="row" key={col}>
-                    {row[j]}
+                    {rowHeadings?.[i] ?? row[j]}
                   </th>
                 ) : (
                   <td key={col}>{row[j]}</td>

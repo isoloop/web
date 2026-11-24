@@ -1,7 +1,8 @@
 /** @jsxImportSource preact */
 import type { VNode } from 'preact';
 import { Table } from 'ui/components';
-import { home, site } from '../copy.ts';
+import { compared, home, site } from '../copy.ts';
+import { AlternativesSummary } from './alternatives.tsx';
 import { Code, CodeTabs } from './code.tsx';
 import { findBlock, MeasuredBlock } from './measurements.tsx';
 import { Recording } from './recording.tsx';
@@ -13,7 +14,7 @@ import type { Page, SiteData } from './types.ts';
 const PLANT_SOURCE = 'https://github.com/isoloop/web/tree/main/apps/dashboards/plant';
 
 /** The landing page, in the order ADR 0002's amendments set. */
-function Home({ features, samples, examples }: SiteData): VNode {
+function Home({ features, samples, examples, alternatives }: SiteData): VNode {
   return (
     <main class="ui-shell">
       <PageIntro title={home.intro.heading} id="intro" image="home">
@@ -121,6 +122,17 @@ function Home({ features, samples, examples }: SiteData): VNode {
           </ul>
           <p>
             <a href="/docs/limits/">{home.limits.more}</a>
+          </p>
+        </div>
+      </section>
+
+      <section class="ui-gutter" id="alternatives" aria-labelledby="alternatives-h">
+        <h2 id="alternatives-h">{compared.home.heading}</h2>
+        <div class="ui-body">
+          <p>{compared.home.intro}</p>
+          <AlternativesSummary data={alternatives} />
+          <p>
+            <a href={`/features/#${compared.features.id}`}>{compared.home.more}</a>
           </p>
         </div>
       </section>

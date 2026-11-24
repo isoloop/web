@@ -230,7 +230,49 @@ describe('the pages', () => {
     const experimental = data.features.filter((x) => x.experimental).length;
     expect(experimental).toBeGreaterThan(0);
     expect(map.split('class="ui-pill"')).toHaveLength(experimental + 1);
-    expect(html.match(/ data-step="true"/g)).toHaveLength(6);
+    // Six groups of features, then Compared (ADR 0005, amended 2026-11-24).
+    expect(html.match(/ data-step="true"/g)).toHaveLength(7);
+    // The notes stay six columns: Compared isn't a feature group.
+    expect(map.match(/class="fnotes-col"/g)).toHaveLength(6);
+  });
+
+  it('put every alternative in the Compared panel, each mark in words with its source and date', () => {
+    const html = renderDocument(named('features'), data, { csp: CSP });
+    const from = html.indexOf('id="compared"');
+    expect(from).toBeGreaterThan(-1);
+    const panel = html.slice(from, html.indexOf('</table>', from));
+    const rail = html.slice(
+      html.indexOf('data-rail'),
+      html.indexOf('</nav>', html.indexOf('data-rail')),
+    );
+    expect(rail).toContain('href="#compared"');
+    expect(rail).toContain('href="#alternatives"');
+    for (const row of data.alternatives.rows) {
+      expect(panel).toContain(`href="${row.url}"`);
+      for (const k of ['ui', 'supervision', 'bus', 'security'] as const) {
+        expect(panel).toContain(`data-mark="${row[k].mark}"`);
+        expect(panel).toContain(`href="${row[k].source}"`);
+      }
+      expect(panel).toContain(`href="${row.browsers.source}"`);
+    }
+    expect(panel).toMatch(/<time datetime="\d{4}-\d{2}-\d{2}">/);
+    const better = html.slice(html.indexOf('class="alt-better"'));
+    expect(better.slice(0, better.indexOf('</ul>')).match(/<li>/g)).toHaveLength(
+      data.alternatives.rows.length - 1,
+    );
+  });
+
+  it('give the landing page every alternative in the short table, its marks in words, then a link', () => {
+    const html = renderDocument(named('home'), data, { csp: CSP });
+    const from = html.indexOf('id="alternatives"');
+    expect(from).toBeGreaterThan(html.indexOf('id="limits"'));
+    expect(from).toBeLessThan(html.indexOf('id="how"'));
+    const section = html.slice(from, html.indexOf('</section>', from));
+    expect(section.match(/<tr>/g)).toHaveLength(data.alternatives.rows.length + 1);
+    expect(section.match(/class="alt-mark"/g)).toHaveLength(data.alternatives.rows.length * 4);
+    for (const word of section.matchAll(/class="alt-mark" data-mark="\w+">(\w+)</g))
+      expect(['Yes', 'Partial', 'No']).toContain(word[1]);
+    expect(section).toContain('href="/features/#compared"');
   });
 
   it('give the landing costs table in both forms, every Δ with its verdict in words', () => {
