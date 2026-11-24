@@ -1,4 +1,5 @@
 import type { VNode } from 'preact';
+import type { Alternatives } from '../../build/alternatives.ts';
 import type { Changelog } from '../../build/changelog.ts';
 import type { Diagram } from '../../build/diagrams.ts';
 import type { Doc, NavSection } from '../../build/docs/pages.ts';
@@ -14,6 +15,8 @@ export interface SiteData {
   changelog: Changelog;
   /** The features on /features/ and the landing strip, in order (content/features/). */
   features: Feature[];
+  /** Isoloop and the alternatives, for the home table and the Compared tab (content/alternatives.json). */
+  alternatives: Alternatives;
   diagrams: Diagram[];
   /** The isoloop/isoloop sha the diagrams come from. */
   pin: string;

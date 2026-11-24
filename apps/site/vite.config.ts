@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { ui } from 'ui/vite';
 import { defineConfig } from 'vite';
+import { loadAlternatives } from './build/alternatives.ts';
 import { loadChangelog } from './build/changelog.ts';
 import { readDiagrams } from './build/diagrams.ts';
 import { loadExamples } from './build/examples.ts';
@@ -73,6 +74,7 @@ export default defineConfig({
       data: {
         examples: loadExamples(here('../..')),
         features: loadFeatures(here('content/features'), library, here('../..')),
+        alternatives: loadAlternatives(here('content/alternatives.json')),
         diagrams: readDiagrams(diagramsDir),
         pin: readPin(siteDir),
         changelog: loadChangelog(library, readPin(siteDir)),
