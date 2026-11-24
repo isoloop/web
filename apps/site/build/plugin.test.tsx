@@ -271,7 +271,10 @@ describe('the pages', () => {
     const html = renderDocument(named('home'), data, { csp: CSP });
     const from = html.indexOf('id="alternatives"');
     expect(from).toBeGreaterThan(html.indexOf('id="limits"'));
-    expect(from).toBeLessThan(html.indexOf('id="how"'));
+    expect(from).toBeLessThan(html.indexOf('id="install"'));
+    // How it works sits between what it's for and the features (ADR 0002, amended 2026-11-24).
+    expect(html.indexOf('id="how"')).toBeGreaterThan(html.indexOf('id="for"'));
+    expect(html.indexOf('id="how"')).toBeLessThan(html.indexOf('id="features"'));
     const section = html.slice(from, html.indexOf('</section>', from));
     expect(section.match(/<tr>/g)).toHaveLength(data.alternatives.rows.length + 1);
     expect(section.match(/class="alt-mark"/g)).toHaveLength(data.alternatives.rows.length * 4);

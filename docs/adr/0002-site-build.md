@@ -318,12 +318,14 @@ From the site plan for 0.1.1 (`docs/plans/0.1.1-site.md`, decisions 9–13, gril
 - Decision 7's rules stay: figures are copied, labelled and linked, a labelled copy never changes, and every row stays, in both directions.
 
 **The landing page (decision 3, as amended 2026-11-18):**
-1. Introduction, the recording, what it's for, features: unchanged.
-2. **What it gives:** unchanged, with its Isoloop column labelled `matched`.
-3. **What it costs, and where it helps:** four small charts in place of the table, each `matched` against native with workers: main-thread busy and typing median, then all-thread CPU and memory after GC. Then a link to `/benchmarks/`. The note on what the native baseline lacks stays.
-4. **Limits:** unchanged.
-5. **Alternatives, new:** a short table of Isoloop and the six alternatives with 3–4 columns of marks, from the same data as `/features/#compared`, then a link there.
-6. How it works, install (now listing `zod` with the packages, since the sample uses it), footer: unchanged.
+1. Introduction, the recording, what it's for: unchanged.
+2. **How it works,** moved up from near the end (the maintainer's review of the local preview): the short explanation and its link, right after what it's for and before the features, so a reader sees how it runs before the list of what it does.
+3. Features: unchanged.
+4. **What it gives:** unchanged, with its Isoloop column labelled `matched`.
+5. **What it costs, and where it helps:** four small charts in place of the table, each `matched` against native with workers: main-thread busy and typing median, then all-thread CPU and memory after GC. Then a link to `/benchmarks/`. The note on what the native baseline lacks stays.
+6. **Limits:** unchanged.
+7. **Alternatives, new:** a short table of Isoloop and the six alternatives with 3–4 columns of marks, from the same data as `/features/#compared`, then a link there.
+8. Install (now listing `zod` with the packages, since the sample uses it), footer: unchanged.
 
 **Alternatives considered.**
 - **Keeping the costs table on the landing page:** its rows of A, B and Δ for two pairs are easy to skim past. Four charts show the two gains and the two costs at a glance; the tables stay one click away.
