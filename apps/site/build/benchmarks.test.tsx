@@ -42,10 +42,11 @@ const shift = (p: PairFigure): PairFigure =>
     : p;
 
 describe('loadBenchmarks', () => {
-  it('reads the runs the site shows today, plant at next.b8ffdcf on the 4-core machine', () => {
+  it('reads the runs the site shows today, plant-bench at 0.1.0 on the 4-core machine, after plant at next.b8ffdcf', () => {
     const b = loadBenchmarks(manifest, repo);
-    expect(b.latest.version).toBe('0.0.0-next.b8ffdcf');
-    expect(b.latest.date).toBe('2026-11-13');
+    expect(b.runs.map((r) => r.version)).toEqual(['0.0.0-next.b8ffdcf', '0.1.0']);
+    expect(b.latest.name).toBe('plant-bench');
+    expect(b.latest.date).toBe('2026-11-24');
     expect(cpuCount(b.latest.environment.machine.cpus)).toBe(4);
     expect(b.latest.environment.machine.clock).toBe('2.0 GHz');
     // matched against native + workers, Chromium at 5 kHz: typing's paired Δ.
@@ -56,7 +57,13 @@ describe('loadBenchmarks', () => {
         p.b === 'isoloop:matched' &&
         p.figure === 'typingMedianMs',
     );
-    expect(typing).toMatchObject({ aMedian: 62, bMedian: 41, delta: -28 });
+    expect(typing).toMatchObject({ aMedian: 58, bMedian: 41, delta: -18 });
+  });
+
+  it('leaves a withheld engine off the site, figures and browser version both', () => {
+    const b = loadBenchmarks(manifest, repo);
+    expect(b.latest.pairs.some((p) => p.engine === 'webkit')).toBe(false);
+    expect(Object.keys(b.latest.environment.browsers)).toEqual(['chromium', 'firefox']);
   });
 
   it('fails naming the file and the field', () => {
@@ -82,7 +89,7 @@ describe('loadBenchmarks', () => {
   });
 });
 
-// The home page's four figures: plant's comparison/final summary.md, Chromium
+// The home page's four figures: plant-bench's results/0.1.0 summary.md, Chromium
 // at 5 kHz, native-workers (A) against isoloop:matched (B).
 describe('figure', () => {
   const { latest } = loadBenchmarks(manifest, repo);
@@ -93,15 +100,15 @@ describe('figure', () => {
   };
 
   it('gives the landing page’s four figures, with the paired Δ', () => {
-    expect(at('mainThreadCpuPct')).toEqual([79, 27, -53]);
-    expect(at('typingMedianMs')).toEqual([62, 41, -28]);
-    expect(at('rendererCpuPct')).toEqual([97, 116, 19]);
-    expect(at('rendererPssGcMb')).toEqual([222, 275, 51]);
+    expect(at('mainThreadCpuPct')).toEqual([78, 24, -54]);
+    expect(at('typingMedianMs')).toEqual([58, 41, -18]);
+    expect(at('rendererCpuPct')).toEqual([97, 112, 19]);
+    expect(at('rendererPssGcMb')).toEqual([227, 272, 46]);
   });
 
   it('names a figure the run doesn’t have', () => {
-    expect(() => figure(latest, { ...q, engine: 'webkit', figure: 'typingMedianMs' })).toThrow(
-      /no typingMedianMs for native-workers against isoloop:matched, webkit at 5 kHz/,
+    expect(() => figure(latest, { ...q, engine: 'firefox', figure: 'mainThreadCpuPct' })).toThrow(
+      /no mainThreadCpuPct for native-workers against isoloop:matched, firefox at 5 kHz/,
     );
   });
 });
@@ -137,45 +144,49 @@ describe('/benchmarks/', () => {
 
   it('labels the figures with what they were measured on', () => {
     expect(page(b)).toContain(
-      'Measured on plant at <code>@isoloop/*@0.0.0-next.b8ffdcf</code>, 13 November 2026, on 4 cores fixed at 2.0 GHz.',
+      'Measured on plant-bench at <code>@isoloop/*@0.1.0</code>, 24 November 2026, on 4 cores fixed at 2.0 GHz.',
     );
   });
 
   it('describes the machine generically, the model only in the raw environment.json', () => {
     const html = page(b);
     expect(html).toContain(
-      'An x64 CPU, 4 cores fixed at 2.0 GHz (CPUs 2, 4, 6, 8), 30 GB, Ubuntu 24.04.3, Node 26.13.0, in <code>mcr.microsoft.com/playwright:v1.64.1-noble</code>. The machine does nothing else during a run.',
+      'An x64 CPU, 4 cores fixed at 2.0 GHz (CPUs 2, 4, 6, 8), 31 GB, Ubuntu 24.04.5 LTS, Node 26.13.0, in <code>mcr.microsoft.com/playwright:v1.65.0-noble, Node 26.13.0, pnpm 12.16.1</code>. The machine does nothing else during a run.',
     );
     expect(html).not.toContain(b.latest.environment.machine.cpu);
     expect(html).not.toMatch(/\b(AMD|Intel)\b/);
     expect(html).toContain(
-      '<a href="https://github.com/isoloop/web/blob/main/apps/dashboards/plant/comparison/final/environment.json">the machine and versions</a>',
+      '<a href="https://github.com/isoloop/web/blob/main/apps/bench/plant/results/0.1.0/environment.json">the machine and versions</a>',
     );
   });
 
   it('opens with what we found, then the charts with the measured paired Δ', () => {
     const html = page(b);
     expect(html.indexOf('id="found"')).toBeLessThan(html.indexOf('id="figures"'));
-    expect(html).toContain('typing, 28 ms lower');
-    expect(html).toContain('main thread busy, 53 points lower');
+    expect(html).toContain('typing, 32 ms lower');
+    expect(html).toContain('main thread busy, 54 points lower');
     expect(html).toContain('Main thread busy');
     expect(html).not.toContain('Main-thread busy');
-    expect(html).toContain('28 ms lower, better');
-    expect(html).not.toContain('21 ms lower');
-    // All 72 widgets: the rounds disagree, so neither better nor worse.
-    expect(html).toContain('719 ms lower, within the spread');
+    expect(html).toContain('32 ms lower, better');
+    expect(html).not.toContain('17 ms lower');
+    // Typing and all 72 widgets for matched: the rounds disagree, so neither better nor worse.
+    expect(html).toContain('18 ms lower, within the spread');
+    expect(html).toContain('787 ms lower, within the spread');
     expect(html).toContain('Isoloop matched, within the spread');
   });
 
   it('folds the full tables under the charts, signed, in seconds from 1000 ms', () => {
     const html = page(b);
     expect(html).toMatch(/<details class="docs-fold bench-fold">/);
-    expect(html).toContain('<td>−28 ms</td><td>−41 ms to −14 ms</td>');
+    expect(html).toContain('<td>−18 ms</td><td>−40 ms to +1 ms</td>');
     expect(html).toContain('<td>2.3 s</td><td>1.5 s</td>');
   });
 
   it('hides the history until there are two runs, then flags a change beyond the spread', () => {
-    expect(page(b)).not.toContain('id="history"');
+    const first = b.runs[0];
+    if (!first) throw new Error('no runs');
+    expect(page({ runs: [first], latest: first })).not.toContain('id="history"');
+    expect(page(b)).toContain('id="history"');
     const next: BenchRun = {
       ...b.latest,
       name: 'plant-bench',
