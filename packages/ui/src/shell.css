@@ -794,7 +794,167 @@
     }
   }
 
+  /* Paired bars (PairedBars.tsx): grey for the baseline, the accent when
+     Isoloop is better, --ui-bad when it's worse; the delta says it in words.
+     Bars are SVG sized by a width attribute, so no inline style is needed. */
+  .ui-chart {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-chart + .ui-chart {
+    margin-top: var(--ui-space-6);
+  }
+  .ui-chart figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.8rem;
+    margin-bottom: 0.7rem;
+  }
+  .ui-chart-title {
+    color: var(--ui-text);
+    font-weight: 650;
+    font-stretch: 87%;
+  }
+  .ui-chart-note {
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+  }
+  .ui-chart-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  /* A row is a grid: the series names in the first column, the tracks and
+     the delta in the second; compact charts drop the names' column. */
+  .ui-chart-row {
+    display: grid;
+    grid-template-columns: minmax(6rem, 11rem) 1fr;
+    align-items: center;
+    gap: 2px 0.75rem;
+    font-size: var(--ui-text-s);
+  }
+  .ui-chart-line {
+    display: contents;
+  }
+  .ui-chart-label {
+    grid-column: 1 / -1;
+    margin: 0 0 0.3rem;
+    color: var(--ui-text);
+    font-stretch: 87%;
+  }
+  .ui-chart-delta {
+    grid-column: 2;
+    margin: 0.3rem 0 0;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+  }
+  .ui-chart[data-compact] .ui-chart-row {
+    grid-template-columns: 1fr;
+  }
+  .ui-chart[data-compact] .ui-chart-delta {
+    grid-column: 1;
+  }
+  .ui-chart[data-compact] .ui-chart-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .ui-chart-name {
+    color: var(--ui-text-muted);
+    font-stretch: 87%;
+  }
+  /* The track keeps room after the longest bar for its value. */
+  .ui-chart-track {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    padding-right: 5.5rem;
+    border-left: 1px solid var(--ui-rule);
+  }
+  .ui-chart-svg {
+    flex: none;
+    display: block;
+  }
+  .ui-chart-value {
+    flex: none;
+    color: var(--ui-text);
+    white-space: nowrap;
+  }
+  .ui-chart-line[data-series='base'] rect {
+    fill: var(--ui-border);
+  }
+  .ui-chart-line[data-verdict='better'] rect {
+    fill: var(--ui-accent);
+  }
+  .ui-chart-line[data-verdict='worse'] rect {
+    fill: var(--ui-bad);
+  }
+  .ui-chart-line[data-verdict='same'] rect {
+    fill: var(--ui-text-muted);
+  }
+  .ui-chart-legend {
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+    font-stretch: 87%;
+  }
+  .ui-chart-legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ui-chart-legend li::before {
+    content: '';
+    flex: none;
+    width: 1.2rem;
+    height: 0.7rem;
+    border-radius: 0 2px 2px 0;
+    background: var(--ui-border);
+  }
+  .ui-chart-legend [data-verdict='better']::before {
+    background: var(--ui-accent);
+  }
+  .ui-chart-legend [data-verdict='worse']::before {
+    background: var(--ui-bad);
+  }
+  @media (max-width: 760px) {
+    .ui-chart-row {
+      grid-template-columns: 1fr;
+    }
+    .ui-chart-name {
+      margin-top: 0.3rem;
+    }
+    .ui-chart-delta {
+      grid-column: 1;
+    }
+  }
+
   @media (forced-colors: active) {
+    .ui-chart-line[data-series='base'] rect {
+      fill: GrayText;
+    }
+    .ui-chart-line[data-series='value'] rect {
+      fill: CanvasText;
+    }
+    .ui-chart-legend li::before {
+      background: GrayText;
+      forced-color-adjust: none;
+    }
+    .ui-chart-legend [data-series='value']::before {
+      background: CanvasText;
+    }
     .ui-header,
     .ui-bar,
     .ui-footer,
