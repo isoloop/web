@@ -13,7 +13,7 @@ type Row = [string, ...string[]];
 
 export const site = {
   description:
-    'Event-loop isolation for JavaScript apps. An open-source TypeScript library that lets you separate your app’s UI from the work behind it: each part runs on its own worker or in a shared pool, shares state over a message bus, and is restarted when it fails.',
+    'Event-loop isolation for JavaScript apps. An open-source TypeScript library that lets you separate your app’s UI from the work behind it: each part runs on its own worker or in a shared pool, can share state over an optional message bus, and is restarted when it fails.',
 };
 
 // The features themselves (their strip line, heading and section text, with
@@ -97,7 +97,7 @@ export const home = {
   title: 'Isoloop: event-loop isolation for JavaScript apps',
   intro: {
     heading: 'Event-loop isolation for JavaScript apps',
-    text: 'An open-source TypeScript library that lets you separate your app’s UI from the work behind it. Each part, UI or headless, runs on its own worker or in a shared pool, shares state through a message bus that keeps its records, and is restarted by a supervisor when it fails. The UI stays responsive, a block or a crash stays in its part, and the rest of the app keeps running. React, Preact or plain DOM.',
+    text: 'An open-source TypeScript library that lets you separate your app’s UI from the work behind it. Each part, UI or headless, runs on its own worker or in a shared pool. Parts can share state through an optional message bus that keeps its records, and a supervisor restarts a part that fails. The UI stays responsive, a block or a crash stays in its part, and the rest of the app keeps running. React, Preact or plain DOM.',
     primary: 'See the features',
     // Basic and the processor run live on /examples/ (in its panels, idle until
     // Start); the plant and markets dashboards open on their own pages.
