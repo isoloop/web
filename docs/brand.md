@@ -8,19 +8,21 @@ An isometric cube (*iso*) with a ribbon woven through it, running in and out of 
 
 ## Messaging
 
-Every text that says what Isoloop is tells the same four things, in this order, in its own words and at the length it has room for. Agreed with the maintainer on 2026-11-19.
+Every text that says what Isoloop is tells the same four things, in this order, in its own words and at the length it has room for. Agreed with the maintainer on 2026-11-19, and amended on 2026-11-25 to tell the separation.
 
 1. **Category:** event-loop isolation for JavaScript apps.
-2. **What:** an open-source TypeScript library. Each part of your app, UI or headless, runs on its own worker or in a shared pool.
-3. **How:** parts talk only through a message bus that keeps its records. A supervisor restarts a part that fails, and it catches up from the bus.
-4. **Outcome:** a block or a crash stays in its part, and the rest of the app keeps running.
+2. **What:** an open-source TypeScript library that lets you separate your app's UI from the work behind it. Each part, UI or headless, runs on its own worker or in a shared pool.
+3. **How:** parts share state through a message bus that keeps its records, and the bus is optional. A supervisor restarts a part that fails, and with the bus it catches up.
+4. **Outcome:** the UI stays responsive, a block or a crash stays in its part, and the work can run where it fits best.
 
 Where there's room, add the frameworks: React, Preact or plain DOM. Short texts, like the org and repo descriptions, carry points 1 to 3 condensed, and point 4 when it fits. Long texts, like the landing intro and the READMEs, carry all four.
 
 **Words:**
 - **Parts and isolates:** say "parts" in short texts. Long texts may say *isolate*, defined as a part on first use.
 - **Placement:** "on its own worker or in a shared pool". Not "in isolated workers": parts in a pool share one worker and one event loop.
-- **No runtime terms:** no "browser", "web app", "front-end" or "Web Worker" in these texts. Isoloop is meant to run in other JavaScript runtimes later. Guides and limits may name what the code uses today.
+- **The split is the developer's call:** texts show patterns, not rules. Never "UI parts only draw" or "headless parts hold the state": a UI part can hold state too.
+- **Direction, in long texts only:** later, the work can run as a WASM component or a native process, where the bus becomes the model the UI and the work share. Say it as a plan and link the roadmap.
+- **Runtime terms:** short texts (the tagline, the descriptions, the card) have no "browser", "web app", "front-end" or "Web Worker": Isoloop is meant to run in other JavaScript runtimes later. Long texts, guides and limits may name what the code uses today, such as the page's main thread.
 - **Erlang/OTP:** "an Erlang/OTP-style kernel" only in long texts, never in the tagline or a description.
 - **No cost line in showcase texts** (the profile, the descriptions, bios). The cost belongs where things are measured: the site's costs table, the library README's limits, the docs and posts.
 
