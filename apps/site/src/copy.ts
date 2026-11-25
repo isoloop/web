@@ -201,6 +201,7 @@ export const home = {
       'Synchronous layout reads (getBoundingClientRect, offsetWidth) and synchronous focus and scroll. An isolate asks the host and gets a promise back.',
       'Third-party code that reaches for window, document.body or localStorage. An isolate gets a DOM subset sized to what Preact and React use.',
       'Drag and drop, text selection and canvas drawing tied to pointer timing. Canvas isolates can draw to an OffscreenCanvas instead.',
+      'Timing every callback. Every worker times the timer, animation-frame, microtask and message callbacks of its isolates, to report how busy it is, with or without automatic placement. An empty callback costs 0.2 to 3.6 µs more, depending on the engine, so a worker that runs 10,000 callbacks a second spends up to about 36 ms of each second on it. Promise continuations aren’t timed. Measured on an x64 CPU with 4 cores capped at 2.0 GHz, in Chromium 159, Firefox 159 and WebKit 27.2, on 2026-11-25 (library commit 9912d5b).',
       'The cost. Every worker, the bus and the kernel take CPU, memory and start-up time, as the charts above show.',
     ],
     /** The docs' page of the same name (/docs/limits/), with the full list. */
