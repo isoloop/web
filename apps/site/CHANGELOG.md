@@ -1,5 +1,11 @@
 # site
 
+## 0.11.1
+
+### Patch Changes
+
+- 7c04df6: The landing recording no longer shows the main thread as stuck in Firefox while nothing blocks it. It now counts the page's own frames, not those of the out-of-view demo frame, which Firefox slows to about one a second.
+
 ## 0.11.0
 
 ### Minor Changes
