@@ -12,8 +12,11 @@
 //   publisher. Work an isolate does on its own timer is a solid bar.
 // - While A is down (from the kernel's isolate:state), C's and D's rows say
 //   "no count from A": they aren't stuck, they have no input.
-// - The main thread: a tick per frame. The page shares this thread with basic,
-//   so when it's blocked nothing draws, and the gap is hatched afterwards.
+// - The main thread: a tick per frame of this page. basic is a same-origin
+//   iframe, so it shares this thread: when it blocks it, nothing draws, and the
+//   gap is hatched afterwards. Frames are counted here, not from basic's
+//   `frames`: browsers may slow requestAnimationFrame in an out-of-view iframe
+//   (Firefox to about 1 a second), which would read as a stuck thread.
 // - Hatching while the kernel says an isolate is `blocked`; a line where it
 //   crashed and was started again (isolate:crash).
 // - A red span while it's `failed`: more than 3 crashes within a minute, and
@@ -72,7 +75,7 @@ export class Recording {
   /** Since when A has been down, while it is. */
   #upDown: number | undefined;
   /** Counts for the smoke test, on the root's dataset. */
-  #counts = { bus: 0, links: 0 };
+  #counts = { bus: 0, links: 0, stuck: 0 };
   #open = new Map<string, Bar>();
   /** Failed isolates, in the order they failed, and their spans. */
   #down = new Map<string, Bar>();
@@ -86,6 +89,7 @@ export class Recording {
   #window = 4000;
   #visible = false;
   #running = false;
+  #counting = false;
   #w = 0;
   #h = 0;
   #blockMainAt: number | undefined;
@@ -121,7 +125,15 @@ export class Recording {
     channel.on((m) => this.#receive(m));
     whileVisible(root, (v) => {
       this.#visible = v;
-      if (v) this.#loop();
+      if (v) {
+        this.#loop();
+        this.#count();
+      }
+    });
+    document.addEventListener('visibilitychange', () => {
+      // A hidden tab has no frames: that's not a stuck thread.
+      this.#lastFrame = undefined;
+      if (!document.hidden && this.#visible) this.#count();
     });
     if (reducedMotion()) {
       // Updates without animating: one still frame a second.
@@ -281,30 +293,6 @@ export class Recording {
             this.#pending.delete(key);
             this.#link(key, waiting.to, waiting.t1);
           }
-        }
-        break;
-      }
-      case 'frames': {
-        const times = Array.isArray(m['times']) ? (m['times'] as unknown[]) : [];
-        for (const at of times) {
-          if (typeof at !== 'number') continue;
-          const t = at - performance.timeOrigin;
-          if (this.#lastFrame !== undefined && t - this.#lastFrame > MAIN_STUCK_MS) {
-            this.#bars.push({
-              track: 'main',
-              row: 0,
-              start: this.#lastFrame,
-              end: t,
-              kind: 'stuck',
-              label: 'Main thread stuck: nothing could paint',
-            });
-            if (this.#blockMainAt !== undefined && t > this.#blockMainAt) {
-              this.#blockMainAt = undefined;
-              this.#say(copy.status.mainFree);
-            }
-          }
-          this.#lastFrame = t;
-          this.#bars.push({ track: 'main', row: 0, start: t, end: t + 2, kind: 'task' });
         }
         break;
       }
@@ -470,6 +458,44 @@ export class Recording {
       requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);
+  }
+
+  /** Counts this page's frames while the recording is in view. */
+  #count(): void {
+    if (this.#counting) return;
+    this.#counting = true;
+    const frame = (now: number): void => {
+      if (!this.#visible || document.hidden) {
+        this.#counting = false;
+        this.#lastFrame = undefined;
+        return;
+      }
+      this.#frame(now);
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  /** A frame at `t`: a tick, and a stuck span if the gap before it was too long. */
+  #frame(t: number): void {
+    if (this.#lastFrame !== undefined && t - this.#lastFrame > MAIN_STUCK_MS) {
+      this.#bars.push({
+        track: 'main',
+        row: 0,
+        start: this.#lastFrame,
+        end: t,
+        kind: 'stuck',
+        label: 'Main thread stuck: nothing could paint',
+      });
+      this.#counts.stuck++;
+      this.#root.dataset['stuck'] = String(this.#counts.stuck);
+      if (this.#blockMainAt !== undefined && t > this.#blockMainAt) {
+        this.#blockMainAt = undefined;
+        this.#say(copy.status.mainFree);
+      }
+    }
+    this.#lastFrame = t;
+    this.#bars.push({ track: 'main', row: 0, start: t, end: t + 2, kind: 'task' });
   }
 
   #hatch(color: string, dense: boolean): CanvasPattern | null {
