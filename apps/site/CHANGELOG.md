@@ -1,5 +1,12 @@
 # site
 
+## 0.11.2
+
+### Patch Changes
+
+- a7af76a: "What Isoloop can't hide" lists the cost of timing every callback in a worker: 0.2 to 3.6 µs per empty callback in the three engines, on or off automatic placement, on an x64 CPU with 4 cores capped at 2.0 GHz.
+- d3b647e: The site's description and the landing intro say that Isoloop lets you separate your app's UI from the work behind it, and that parts share state over the message bus.
+
 ## 0.11.1
 
 ### Patch Changes
