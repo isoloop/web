@@ -262,6 +262,23 @@ test('the landing recording draws what basic reports, and its controls reach bas
   expect((await problems()).filter((e) => !/crash|unresponsive/i.test(e))).toEqual([]);
 });
 
+test('the main-thread track is stuck only when the main thread is blocked', async ({ page }) => {
+  // Frames are counted on this page, not in basic's out-of-view iframe, where
+  // browsers may slow requestAnimationFrame (Firefox to about 1 a second).
+  const problems = await watch(page);
+  await page.goto('/');
+  const rec = page.locator('[data-demo="recording"]');
+  await rec.scrollIntoViewIfNeeded();
+  const status = rec.locator('.ui-status');
+  await expect(status).toHaveText('Recording. Everything is running.', { timeout: 15_000 });
+  await page.waitForTimeout(2_000);
+  await expect(rec).not.toHaveAttribute('data-stuck');
+  await rec.getByRole('button', { name: 'Block the main thread' }).click();
+  await expect(status).toContainText('The main thread is free again', { timeout: 10_000 });
+  await expect(rec).toHaveAttribute('data-stuck', '1');
+  expect((await problems()).filter((e) => !/unresponsive/i.test(e))).toEqual([]);
+});
+
 test('the bus track draws only the app’s records, and reactions link to their sender', async ({
   page,
 }) => {
