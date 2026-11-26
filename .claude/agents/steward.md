@@ -16,6 +16,12 @@ Read the diff, then the code it touches, then the rules: [`AGENTS.md`](../../AGE
 - **Positioning and wording:** the whole package; measurements carry device, build and tag; Isoloop and native compared as measured results.
 - **Site impact:** the line is present and honest. A change to public API, user-visible behaviour, measurements or a documented limitation is not `none`.
 - **Changeset:** present for any change users see, and its text describes the change as shipped. It says nothing about work still to come ("in a later task", "nothing uses it yet", "will come with"): changesets ship together at the next version, and a follow-up that lands first makes such a sentence false. A limit, default or count in it carries the exact figure the guide gives, or is left to the guide. Library: a public `.d.ts` change has at least a minor entry, TSDoc and `docs/guide` updated.
+- **Breaking changes, on library PRs** (the library's ADR 0019, decision 10): a change that breaks a stable API ships with a codemod. Stable is what the API check compares: every published export except `@internal` ones. The changeset check already fails a `breaking:` changeset without before/after fixtures under `packages/cli/src/migrate/<version>/fixtures/`; judge what it can't, each as a must-fix:
+  - an export removed, or changed so that code written for the old one breaks (the API check's log lists every change), or a behaviour change users rely on, whose changeset summary doesn't start with `breaking:`;
+  - fixtures that don't cover the forms the old API could be written in: each one is rewritten, or flagged with a `// isoloop-migrate:` comment when it can't be rewritten safely;
+  - a `breaking:` changelog entry that doesn't link the codemod or the guide's migration section.
+
+  `@experimental` APIs get a codemod when the change is mechanical, and a migration note in the guide otherwise: a missing one is a should-fix.
 - **Docs:** README, guide or TSDoc match the new behaviour. On library PRs, also the docs rules below.
 - **Site build rules:** pages stay within `default-src 'self'` (scripts and styles as same-origin files, every request same-origin); new UI keeps keyboard access, visible focus and AA contrast; links resolve.
 - **Search:** what search engines and link previews read stays true and points at the right URL. See [Search](#search-on-both-repos) below.
