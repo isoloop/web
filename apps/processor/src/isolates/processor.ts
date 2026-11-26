@@ -61,7 +61,7 @@ export default defineIsolate({
     setInterval(() => {
       if (worked === workedSent) return;
       workedSent = worked;
-      void ctx.bus.publish(busyTopic, { key: ctx.id, value: { busyMs: Math.round(worked) } });
+      void ctx.bus.publish(busyTopic, { busyMs: Math.round(worked) }, { key: ctx.id });
     }, BUSY_MS);
 
     // Slices hand back to the loop through a port: no 4 ms timer floor.
@@ -106,32 +106,28 @@ export default defineIsolate({
         }
         sliceDone();
         await ctx.bus.publish(results, {
-          value: {
-            id: job.id,
-            kind,
-            status: 'ok',
-            by: ctx.id,
-            ms: performance.now() - started,
-            created: job.at,
-            done: now(),
-            output: step.value.slice(0, 200),
-          },
+          id: job.id,
+          kind,
+          status: 'ok',
+          by: ctx.id,
+          ms: performance.now() - started,
+          created: job.at,
+          done: now(),
+          output: step.value.slice(0, 200),
         });
         settle(rec);
       } catch (e) {
         if (!(e instanceof CorruptFile)) throw e;
         sliceDone();
         await ctx.bus.publish(results, {
-          value: {
-            id: job.id,
-            kind,
-            status: 'corrupt',
-            by: ctx.id,
-            ms: performance.now() - started,
-            created: job.at,
-            done: now(),
-            output: e.message.slice(0, 200),
-          },
+          id: job.id,
+          kind,
+          status: 'corrupt',
+          by: ctx.id,
+          ms: performance.now() - started,
+          created: job.at,
+          done: now(),
+          output: e.message.slice(0, 200),
         });
         settle(rec);
         // No more files: the ones still queued go back to the group when it crashes.

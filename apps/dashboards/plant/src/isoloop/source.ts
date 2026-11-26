@@ -44,7 +44,7 @@ export function busSource(bus: BusLike): Source {
         { from },
       ),
     publish: (stream, value, key) => {
-      void bus.publish(handle(stream), key === undefined ? { value } : { key, value });
+      void bus.publish(handle(stream), value, key === undefined ? {} : { key });
     },
   };
 }

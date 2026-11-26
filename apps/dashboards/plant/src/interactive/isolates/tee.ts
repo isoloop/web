@@ -19,6 +19,6 @@ function ref(name: string): Ref {
 
 export function teeOf(bus: BusLike, src: Source): Source {
   return teeSource(src, (topic, key, value) => {
-    void bus.publish(ref(topic), { key, value });
+    void bus.publish(ref(topic), value, { key });
   });
 }

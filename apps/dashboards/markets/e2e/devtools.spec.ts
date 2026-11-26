@@ -76,16 +76,14 @@ test('the log shows live records, and keeps going through a bus restart', async 
       window.kernel.publish(
         { name: 'alert-rules.v1', schema },
         {
-          key: 'devtools-e2e',
-          value: {
-            removed: false,
-            id: 'devtools-e2e',
-            symbol: 'ETH-USD',
-            metric: 'price',
-            op: 'above',
-            threshold: 123456789,
-          },
+          removed: false,
+          id: 'devtools-e2e',
+          symbol: 'ETH-USD',
+          metric: 'price',
+          op: 'above',
+          threshold: 123456789,
         },
+        { key: 'devtools-e2e' },
       ),
     any,
   );

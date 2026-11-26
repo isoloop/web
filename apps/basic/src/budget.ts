@@ -66,8 +66,6 @@ export class Budget {
   }
 
   #tell(id: string): void {
-    void this.#kernel
-      .publish(budget, { key: id, value: { used: this.used(id) } })
-      .catch(() => undefined);
+    void this.#kernel.publish(budget, { used: this.used(id) }, { key: id }).catch(() => undefined);
   }
 }
