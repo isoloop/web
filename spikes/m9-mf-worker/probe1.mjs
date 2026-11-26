@@ -1,0 +1,11 @@
+import { chromium, firefox, webkit } from '@playwright/test';
+const [eng, remote, mode] = process.argv.slice(2);
+const b = await { chromium, firefox, webkit }[eng].launch();
+const p = await b.newPage();
+p.on('console', (m) => console.log('console', m.type(), m.text().slice(0, 400)));
+p.on('requestfinished', async (r) => { const s = await r.sizes().catch(() => null); console.log('req', r.url(), s?.responseBodySize); });
+p.on('requestfailed', (r) => console.log('FAILED', r.url(), r.failure()?.errorText));
+await p.goto(`http://localhost:5180/?mode=${mode}&remote=${remote}`);
+await p.waitForTimeout(4000);
+console.log('STATUS', await p.textContent('#status'));
+await b.close();
