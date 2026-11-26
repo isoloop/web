@@ -27,8 +27,8 @@ export const REASONS: Record<string, string> = {
   crash: 'crashed',
   bisect: 'bisect',
   steady: 'steady again',
-  /** A new isolate's way out of the quarantine once measured (measuring.ts, isoloop/isoloop#346). */
-  measured: 'measured',
+  /** Out of the quarantine after being measured there, not for an offence (isoloop/isoloop#346). */
+  measured: 'measured, placed',
   restart: 'restarted',
   /** Its reported backlog kept rising (M3i). */
   backlog: 'falling behind',

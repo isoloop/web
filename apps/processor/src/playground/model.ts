@@ -4,7 +4,7 @@
 import type { Balancer, MoveReason, Placement } from '@isoloop/balancer';
 import type { Kernel } from '@isoloop/host';
 import { busy as busyTopic, control, done as doneTopic, tasks } from '../contracts';
-import { Offences } from '../measuring';
+import { isMeasuring, quarantineKind } from '../measuring';
 
 export type Mode = 'balancer' | 'own' | 'one';
 
@@ -56,8 +56,8 @@ export type TaskView = {
   state: string;
   placement: Placement | undefined;
   /** Why it last moved, while that's recent. */
-  moved: { reason: MoveReason | 'restart' | 'measured'; from: string } | undefined;
-  /** In the quarantine to be measured, not for an offence (measuring.ts). */
+  moved: { reason: MoveReason | 'restart'; from: string } | undefined;
+  /** In quarantine only to be measured: the balancer's `measuring` state. */
   measuring: boolean;
 };
 
@@ -75,7 +75,7 @@ export type ColumnView = {
 export type LogEntry = {
   at: number;
   text: string;
-  kind: MoveReason | 'measured' | 'crash' | 'mode' | 'noted' | 'behind' | 'failed';
+  kind: MoveReason | 'crash' | 'mode' | 'noted' | 'behind' | 'failed';
   /** A move's cost, once the moved task has beaten in its new place (`arrived`). */
   costMs?: number;
   id?: string;
@@ -115,12 +115,7 @@ export class Playground {
   readonly #busy = new Map<string, number>();
   readonly #beats = new Map<string, { last: number; beats: Beat[] }>();
   readonly #lags = new Map<string, { last: number; lags: number[] }>();
-  readonly #moved = new Map<
-    string,
-    { reason: MoveReason | 'restart' | 'measured'; from: string; at: number }
-  >();
-  /** Who has offended, so the measuring step isn't shown as a quarantine stay. */
-  readonly #offences = new Offences();
+  readonly #moved = new Map<string, { reason: MoveReason | 'restart'; from: string; at: number }>();
   readonly #log: LogEntry[] = [];
   #mode: Mode = 'balancer';
   #chunkMs = 10;
@@ -162,21 +157,15 @@ export class Playground {
     this.#kernel = kernel;
     this.#balancer = balancer;
     this.#b.on('move', (e) => {
-      const kind = this.#offences.move(e);
-      this.#moved.set(e.id, { reason: kind, from: e.from, at: performance.now() });
-      this.#entry(kind, `${e.id}: ${e.from} → ${e.to}`, e.id);
+      this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
+      this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`, e.id);
     });
     // What each move cost the task: stopped until its first beat in the new place.
     this.#b.on('arrived', (e) => {
-      const entry = this.#log.findLast(
-        (l) =>
-          l.id === e.id &&
-          (l.kind === e.reason || (e.reason === 'steady' && l.kind === 'measured')),
-      );
+      const entry = this.#log.findLast((l) => l.id === e.id && l.kind === e.reason);
       if (entry && entry.costMs === undefined) entry.costMs = e.costMs;
     });
     this.#b.on('spike', (e) => {
-      this.#offences.spike(e);
       if (e.action === 'noted')
         this.#entry('noted', `${e.id}: one long task (${Math.round(e.lagMs)} ms), noted`, e.id);
     });
@@ -241,7 +230,6 @@ export class Playground {
     });
     this.#k.on('isolate:crash', (e) => {
       if (!this.#dials.has(e.id)) return;
-      this.#offences.crash(e.id);
       this.#entry('crash', `${e.id} crashed (${e.reason})`);
     });
   }
@@ -268,7 +256,6 @@ export class Playground {
     this.#done.delete(id);
     this.#busy.delete(id);
     this.#moved.delete(id);
-    this.#offences.forget(id);
     await (this.#mode === 'balancer' ? this.#b.stop(id) : this.#k.stop(id));
   }
 
@@ -341,7 +328,6 @@ export class Playground {
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
-    this.#offences.clear();
     this.#busy.clear();
     this.#entry('mode', `placement: ${mode}`);
     for (const id of ids) if (this.#dials.has(id)) this.#spawn(id);
@@ -397,13 +383,14 @@ export class Playground {
           moved && now - moved.at < BADGE_MS
             ? { reason: moved.reason, from: moved.from }
             : undefined,
-        measuring: this.#mode === 'balancer' && this.#offences.measuring(id, where),
+        measuring: this.#mode === 'balancer' && isMeasuring(placement?.state),
       });
     }
     // A quarantine holding only tasks being measured is the measuring step, not a quarantine.
     for (const c of columns.values()) {
-      if (c.kind === 'quarantine' && c.tasks.every((t) => t.measuring)) {
-        c.kind = 'measuring';
+      if (c.kind === 'quarantine') {
+        c.kind = quarantineKind(c.tasks);
+        if (c.kind === 'quarantine') continue;
         c.label = `Measuring · ${c.key}`;
       }
     }
