@@ -14,7 +14,7 @@ import {
   imageJobs,
   results as resultsTopic,
 } from '../contracts';
-import { Offences } from '../measuring';
+import { isMeasuring, quarantineKind } from '../measuring';
 import { DEFAULT_LIMIT, gaveUpText } from '../restarts';
 import type { LogEntry } from '../ui';
 import { KINDS, type Kind } from './kinds';
@@ -110,7 +110,7 @@ export type ProcessorView = {
   /** Files it finished this run. */
   done: number;
   moved: { reason: string; from: string } | undefined;
-  /** In the quarantine to be measured, not for an offence (measuring.ts). */
+  /** In quarantine only to be measured: the balancer's `measuring` state. */
   measuring: boolean;
   /** Why the kernel gave up on it, while it stays down (restarts.ts). */
   gaveUp: string | undefined;
@@ -206,8 +206,6 @@ export class FileProcessor {
   readonly #beats = new Map<string, { last: number; beats: Beat[] }>();
   readonly #lags = new Map<string, { last: number; lags: number[] }>();
   readonly #moved = new Map<string, { reason: string; from: string; at: number }>();
-  /** Who has offended, so the measuring step isn't shown as a quarantine stay. */
-  readonly #offences = new Offences();
   readonly #loads: Map<string, number> | undefined;
   readonly #log: LogEntry[] = [];
   readonly #movesAt: number[] = [];
@@ -340,25 +338,21 @@ export class FileProcessor {
       this.#lags.set(key, l);
     });
     this.#balancer?.on('move', (e) => {
-      const kind = this.#offences.move(e);
-      this.#moved.set(e.id, { reason: kind, from: e.from, at: performance.now() });
+      this.#moved.set(e.id, { reason: e.reason, from: e.from, at: performance.now() });
       this.#movesAt.push(performance.now());
       this.#moves.push({ at: performance.now(), ...e });
-      this.#entry(kind, `${e.id}: ${e.from} → ${e.to}`);
+      this.#entry(e.reason, `${e.id}: ${e.from} → ${e.to}`);
     });
     // What each move cost: from the stop to the first beat in its new place.
     this.#balancer?.on('arrived', (e) => {
       const m = this.#moves.findLast((x) => x.id === e.id && x.costMs === undefined);
       if (m) m.costMs = e.costMs;
       const entry = this.#log.findLast(
-        (l) =>
-          l.text.startsWith(`${e.id}: `) &&
-          (l.kind === e.reason || (e.reason === 'steady' && l.kind === 'measured')),
+        (l) => l.text.startsWith(`${e.id}: `) && l.kind === e.reason,
       );
       if (entry && entry.costMs === undefined) entry.costMs = e.costMs;
     });
     this.#balancer?.on('spike', (e) => {
-      this.#offences.spike(e);
       if (e.action !== 'noted') return;
       this.#noted++;
       this.#entry('noted', `${e.id}: one long task (${Math.round(e.lagMs)} ms), noted`);
@@ -397,7 +391,6 @@ export class FileProcessor {
     }, REPORT_MS);
     this.#k.on('isolate:crash', (e) => {
       if (!this.#ids.includes(e.id)) return;
-      this.#offences.crash(e.id);
       this.#crashes.push({
         at: performance.now(),
         id: e.id,
@@ -467,7 +460,6 @@ export class FileProcessor {
     this.#beats.clear();
     this.#lags.clear();
     this.#moved.clear();
-    this.#offences.clear();
     this.#busy.clear();
     this.#entry('mode', `placement: ${mode}`);
     for (const id of this.#ids) this.#spawn(id);
@@ -585,7 +577,7 @@ export class FileProcessor {
         done: this.#doneBy.get(id) ?? 0,
         moved:
           moved && now - moved.at < 6_000 ? { reason: moved.reason, from: moved.from } : undefined,
-        measuring: this.#mode === 'balancer' && this.#offences.measuring(id, where),
+        measuring: this.#mode === 'balancer' && isMeasuring(placement?.state),
         gaveUp:
           snap?.state === 'failed'
             ? gaveUpText(
@@ -597,8 +589,9 @@ export class FileProcessor {
     }
     // A quarantine holding only isolates being measured is the measuring step, not a quarantine.
     for (const w of workers.values()) {
-      if (w.kind === 'quarantine' && w.processors.every((p) => p.measuring)) {
-        w.kind = 'measuring';
+      if (w.kind === 'quarantine') {
+        w.kind = quarantineKind(w.processors);
+        if (w.kind === 'quarantine') continue;
         w.label = `Measuring · ${w.key}`;
       }
     }

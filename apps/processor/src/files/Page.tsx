@@ -243,7 +243,7 @@ function Processor({ p, model }: { p: ProcessorView; model: FileProcessor }): Re
           <span
             className="badge"
             data-reason="measuring"
-            title="New here: the balancer measures its load before placing it"
+            title="In quarantine only to be measured, not for an offence; it leaves once measured"
           >
             measuring
           </span>

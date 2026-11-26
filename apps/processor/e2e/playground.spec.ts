@@ -56,6 +56,8 @@ test('a task that blocks once stays; blocking again within 60 s sends it to quar
   // The kernel's beat names the culprit, so nothing else moves (no bisect).
   await expect(page.locator('.log li[data-kind="bisect"]')).toHaveCount(0);
   await expect(page.locator('.log li').first()).toContainText(heavy);
+  // An offender is quarantined, not measuring (isoloop/isoloop#346).
+  await expect(card(page, heavy).locator('.badge[data-reason="measuring"]')).toHaveCount(0);
 });
 
 test('a blocked task leaves quarantine once it has been steady for 30 s', async ({
