@@ -32,7 +32,8 @@ export interface BalancerLike {
  * Why the balancer moved a widget (ADR 0017): one long task (`spike`), the
  * pool's lag stayed high (`sustained`), its members' busy time reached 80 %
  * of a core (`full`), a crash, a search for an unnamed culprit (`bisect`),
- * back out of quarantine (`steady`), a backlog that kept rising (`backlog`),
+ * back out of quarantine (`steady`), out of the quarantine once measured
+ * (`measured`, isoloop/isoloop#346), a backlog that kept rising (`backlog`),
  * joining another pool to free a worker (`pack`), or a second quarantine
  * folding into the first so a widget falling behind gets its worker (`room`).
  */
@@ -43,6 +44,7 @@ export type MoveReason =
   | 'crash'
   | 'bisect'
   | 'steady'
+  | 'measured'
   | 'backlog'
   | 'pack'
   | 'room';
@@ -85,6 +87,7 @@ export function moveText(m: Pick<AutoMove, 'from' | 'to' | 'reason'>): string {
     crash: `moved to ${m.to}: it crashed ${m.from}`,
     bisect: `moved to ${m.to}: finding what blocked ${m.from}`,
     steady: `back in ${m.to}: steady`,
+    measured: `in ${m.to}: measured, placed`,
     backlog: `moved: falling behind in ${m.from}`,
     pack: `packed into ${m.to}: quiet`,
     room: `moved to ${m.to}: making room for a widget falling behind`,
@@ -157,6 +160,7 @@ export function autoPlacer(
 /** What an `auto` widget's header says: "Auto 2", "Quarantine · kept apart: repeated blocking". */
 export function autoWhere(p: AutoPlacement | undefined): string {
   if (!p) return 'Automatic';
+  if (p.state === 'measuring') return `${p.label} · measuring`;
   if (p.state === 'kept-apart') return `${p.label} · kept apart: repeated blocking`;
   if (p.state === 'failed') return `${p.label} · stopped: crashed too often`;
   if (p.atCap) return `${p.label} · over budget, at worker cap`;

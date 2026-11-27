@@ -46,7 +46,7 @@ export const DRAWER_GRANTS = {
 export function hostBus(kernel: Pick<Kernel, 'publish' | 'subscribe'>): HostBus {
   return {
     subscribe: (topic, fn) => kernel.subscribe(ref(topic), (r) => fn(r), { from: 'earliest' }),
-    publish: (topic, key, value) => kernel.publish(ref(topic), { key, value }),
+    publish: (topic, key, value) => kernel.publish(ref(topic), value, { key }),
   };
 }
 

@@ -29,7 +29,7 @@ const autoPlacement = z.strictObject({
   id: z.string().max(64),
   pool: z.string().max(64),
   label: z.string().max(64),
-  state: z.enum(['placed', 'quarantined', 'kept-apart', 'moving']),
+  state: z.enum(['placed', 'quarantined', 'measuring', 'kept-apart', 'moving']),
   atCap: z.boolean().optional(),
 });
 

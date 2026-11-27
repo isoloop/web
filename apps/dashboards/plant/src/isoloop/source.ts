@@ -14,7 +14,8 @@ export interface BusLike {
   ): () => void;
   publish(
     topic: TopicRef<unknown, unknown, unknown, unknown>,
-    r: { key?: string; value: unknown },
+    value: unknown,
+    opts?: { key?: string },
   ): Promise<unknown>;
 }
 

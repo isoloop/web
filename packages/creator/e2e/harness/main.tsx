@@ -37,7 +37,7 @@ setInterval(() => {
   const ts = Date.now();
   for (const name of [SOURCE.name, OTHER.name]) {
     for (const key of ['m1', 'm2']) {
-      void kernel.publish(ref(name), { key, value: { ts, temp: key === 'm1' ? n % 50 : 100 } });
+      void kernel.publish(ref(name), { ts, temp: key === 'm1' ? n % 50 : 100 }, { key });
     }
   }
 }, 50);
@@ -48,10 +48,10 @@ const mainBus = isolateBus(kernel);
 const harness = {
   publish(spec: WidgetSpec, mode: WidgetMode = 'spec', key = spec.id): Promise<void> {
     const topic = mode === 'spec' ? 'creator.specs.v1' : 'creator.draft.v1';
-    return kernel.publish(ref(topic), { key, value: specRecord(spec) });
+    return kernel.publish(ref(topic), specRecord(spec), { key });
   },
   tombstone(id: string): Promise<void> {
-    return kernel.publish(ref('creator.specs.v1'), { key: id, value: TOMBSTONE });
+    return kernel.publish(ref('creator.specs.v1'), TOMBSTONE, { key: id });
   },
   spawn(spec: WidgetSpec, mode: WidgetMode = 'spec'): string {
     const surface = document.createElement('div');
@@ -92,9 +92,8 @@ const boardApi = {
   publishSpecs(specs: WidgetSpec[]): Promise<void> {
     return Promise.all(
       specs.map((s, i) =>
-        kernel.publish(ref('creator.specs.v1'), {
+        kernel.publish(ref('creator.specs.v1'), specRecord(s, Date.now() + 1000 + i), {
           key: s.id,
-          value: specRecord(s, Date.now() + 1000 + i),
         }),
       ),
     ).then(() => {});
@@ -105,9 +104,7 @@ const boardApi = {
    * so the ack of a probe publish follows them.
    */
   flushSpecs: (): Promise<void> =>
-    kernel
-      .publish(ref('creator.specs.v1'), { key: '$sync', value: { sync: 'flushed' } })
-      .then(() => {}),
+    kernel.publish(ref('creator.specs.v1'), { sync: 'flushed' }, { key: '$sync' }).then(() => {}),
   restart: (id: string) => kernel.restart(id),
   crashBus: () => kernel.debug.crashBus(),
   isolates: harness.isolates,
