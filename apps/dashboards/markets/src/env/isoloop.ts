@@ -1,10 +1,10 @@
 // The widgets' environment inside an isolate: streams are bus topics, and a
 // chart's canvas is handed over by the host as an OffscreenCanvas
 // (`requestCanvas`), drawn on from the worker.
-import { useHost, useIsolate } from '@isoloop/react';
+import { useHost, useIsolate, useWatch } from '@isoloop/react';
 import { useEffect, useMemo, useState, type RefObject } from 'react';
-import type { Source } from '../core/streams';
-import { busSource } from '../isoloop/source';
+import type { Source, StreamName, Streams } from '../core/streams';
+import { busSource, TOPICS } from '../isoloop/source';
 import type { Build, CanvasState } from './canvas';
 import { createHooks } from './hooks';
 
@@ -13,7 +13,24 @@ function useSource(): Source {
   return useMemo(() => busSource(bus), [bus]);
 }
 
-export const { useLatest, useKeyed, useRecent, usePublish } = createHooks(useSource);
+export const { useLatest, useRecent, usePublish } = createHooks(useSource);
+
+/**
+ * A stream's current value per key, read with a watcher (`useWatch`) instead
+ * of a subscription: the bus sends only the newest value per key, at most one
+ * view per committed render, so records the widget would never draw don't
+ * cross to its isolate. Records with no key are under `''`, as in the native
+ * build's `useKeyed`.
+ */
+export function useKeyed<S extends StreamName>(stream: S): ReadonlyMap<string, Streams[S]> {
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the bus validated each value against the stream's schema
+  const view = useWatch(TOPICS[stream]) as ReadonlyMap<string | null, Streams[S]>;
+  return useMemo(() => {
+    const out = new Map<string, Streams[S]>();
+    for (const [k, v] of view) out.set(k ?? '', v);
+    return out;
+  }, [view]);
+}
 
 /** The build these hooks run in, for the metrics panel. */
 export const BUILD: Build = 'isoloop';

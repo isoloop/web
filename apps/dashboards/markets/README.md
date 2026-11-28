@@ -7,6 +7,8 @@ A backend-less markets dashboard. Public exchange feeds, or a seeded replay of t
 - **native + workers, React and Preact** (`/native-mixed/`): native + workers, with the filters and the alerts panel as Preact parts built and shipped apart (`vite build --mode native-mixed-parts`) and loaded at run time with `import()` from their own `parts/parts-manifest.json`. Each part exports `mount(el, host)`, where `host` is the page's store; nothing else is shared (`src/parts/contract.ts`). The native counterpart of `/mixed`.
 - **Isoloop:** in React, in Preact, or both mixed.
 
+In the Isoloop builds, the widgets that show the current value per key read it with a watcher ([`useWatch`](https://github.com/isoloop/isoloop/blob/main/docs/guide/watchers.md)): the price tables and the alerts panel's rules. The bus sends them only the newest value per key. The charts, sparklines, trades tables and alert lists subscribe, since they draw every record. The native builds fold every record in both cases (`src/env/hooks.ts`).
+
 The Isoloop builds place their isolates with `?placement=`:
 
 - `own`: a worker per isolate, the default.
@@ -61,6 +63,6 @@ In a browser with WebMCP, the Isoloop build also lists both tools to the browser
 
 ## Devtools
 
-`?devtools=1` on the Isoloop builds and the interactive Isoloop page, set by the **Devtools** switch on their bar (`shared/devtools-switch.ts`), adds the [devtools panel](https://github.com/isoloop/isoloop/blob/main/docs/guide/devtools.md) in the bottom-right corner: the isolates with their controls, the bus, the kernel’s own events and a live record log (Messages), drawn by its own isolate. Its button is ringed by twelve arcs that show the kernel’s health. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it. `e2e/devtools.spec.ts` checks the panel on the built page, through a bus restart; `e2e/devtools-dev.spec.ts` checks it under the dev server.
+`?devtools=1` on the Isoloop builds and the interactive Isoloop page, set by the **Devtools** switch on their bar (`shared/devtools-switch.ts`), adds the [devtools panel](https://github.com/isoloop/isoloop/blob/main/docs/guide/devtools.md) in the bottom-right corner: the isolates with their controls, the bus, the kernel’s own events and a live record log (Messages), drawn by its own isolate. Under the bus view's Topics, the watched-topics table shows the price tables' and the alerts panel's watchers. Its button is ringed by twelve arcs that show the kernel’s health. Open it with its button or Alt+Shift+D. Without the flag the page runs no panel and loads none of its code, and the measured runs never set it. `e2e/devtools.spec.ts` checks the panel on the built page, through a bus restart; `e2e/devtools-dev.spec.ts` checks it under the dev server.
 
 The head-to-head runner is `compare:pairs`: [`comparison/final/`](comparison/final/README.md#how-it-was-measured) has the command that produced the shipped figures.

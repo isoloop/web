@@ -4,7 +4,8 @@ import type { TopicRef } from '@isoloop/protocol';
 import type { Source, StreamName } from '../core/streams';
 import * as T from './topics';
 
-const TOPICS: Record<StreamName, TopicRef<unknown, unknown, unknown, unknown>> = {
+/** Each stream's topic. */
+export const TOPICS: Record<StreamName, TopicRef<unknown, unknown, unknown, unknown>> = {
   trades: T.trades,
   book: T.book,
   prices: T.prices,
