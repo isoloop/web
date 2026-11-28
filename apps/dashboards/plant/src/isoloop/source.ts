@@ -20,7 +20,8 @@ export interface BusLike {
 }
 
 const handles = new Map<StreamName, TopicRef<unknown, unknown, unknown, unknown>>();
-function handle(s: StreamName): TopicRef<unknown, unknown, unknown, unknown> {
+/** The topic handle for a stream, for the hooks that take one (`useWatch`). */
+export function handle(s: StreamName): TopicRef<unknown, unknown, unknown, unknown> {
   let h = handles.get(s);
   if (!h) {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the bus client reads only `name`
