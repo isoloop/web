@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
+- **Amended:** 2026-11-28, by [ADR 0007](0007-site-preview.md) (decisions 4 and 5: a second site at `next.isoloop.dev` for the library's previews, served from `isoloop/next`, deployed by hand; see [the amendment](#amended-the-site-preview-2026-11-28)); Proposed
 - **Answers:** where Isoloop's website, examples and design system live, at which address, how they deploy, and which toolchain rules apply. Grilled 2026-11-14 from the website idea written after `plant-v0.1.0`.
 
 ## Context
@@ -99,6 +100,14 @@ The differences:
 - **`web/docs/adr/`, numbered from 0001,** holds the decisions about the site, the examples and the design system. The library's ADRs don't cover them.
 - **`web/docs/plans/`** holds the plans. A plan may list tasks in the library repo, with the repo marked.
 - **The library repo's plans README** has one row linking here.
+
+### Amended: the site preview (2026-11-28)
+
+By [ADR 0007](0007-site-preview.md), Proposed. This changes decisions 4 and 5:
+
+- **Sections are still paths, not subdomains.** The site, the hub, the examples and the docs stay under `isoloop.dev`.
+- **A preview is not a section.** It's a whole second copy of the site and the examples, built from the `next` branch on the library's latest preview. It's served at `next.isoloop.dev` from a small repo, `isoloop/next`, since one Pages site has one domain.
+- **A fourth trigger, in that repo:** a manual run, with a web ref that defaults to `next`. It calls this repo's `deploy.yml`, so both sites share one build. It has no tag.
 
 ## Consequences
 
