@@ -1,6 +1,6 @@
 # ADR 0007: The site preview at `next.isoloop.dev`
 
-- **Status:** Proposed
+- **Status:** Accepted 2026-11-28 (web#347). Amended 2026-11-28 (accepted the same day): how the preview build is switched on, the dashboards' marker, canonical links and the first deploy's check (decisions 8 to 10), from building it (web#350), grilled Q1–Q5, yes to all.
 - **Date:** 2026-11-28
 - **Answers:** where the site and the examples on a library preview (`x.y.z-next.N`) can be seen before the release, and how that preview is built, deployed and kept apart from the stable site. Grilled 2026-11-28, Q1–Q12, yes to all. Amends [ADR 0001](0001-what-this-repo-is.md) (decisions 4 and 5).
 
@@ -24,12 +24,13 @@
    - **At the release, `next` merges into `main`** as one PR, with the docs pin bump. The apps, the docs and the site then move to the release together.
 6. **`next.isoloop.dev` is served by a small public repo, `isoloop/next`,** with its own Pages and that custom domain. It holds one workflow of about 10 lines, which calls web's deploy workflow. It holds no source.
 7. **The preview deploy is run by hand** in `isoloop/next`, with one input: a web ref, by default the `next` branch. It runs on the maintainer's word, like the other deploys. It has no tag and no GitHub Release, and the deployment records the commit it built.
-8. **One pipeline for both sites.** web's `deploy.yml` gains two inputs: `ref`, the web commit to build, and `preview`, true for `next.isoloop.dev`. A called workflow deploys to its caller's Pages, so the preview gets the same build, assembly and smoke tests, with the smoke tests pointed at `next.isoloop.dev` when `preview` is true.
+8. **One pipeline for both sites.** web's `deploy.yml` gains two inputs: `ref`, the web commit to build, and `preview`, true for `next.isoloop.dev`. A called workflow deploys to its caller's Pages, so the preview gets the same build, assembly and smoke tests, with the smoke tests pointed at `next.isoloop.dev` when `preview` is true. *(Amended 2026-11-28: with `preview` true, `deploy.yml` sets one environment variable, `ISOLOOP_PREVIEW=1`, and the `ui` build plugin reads it, so no app's config changes and a new app gets the banner without any change of its own. Called with no `ref` for a preview, it builds web's `next` branch, not a commit of the caller's. No CI job builds the preview until `isoloop/next` calls it, so a preview deploy is done only when its smoke tests pass on `next.isoloop.dev`.)*
 9. **The banner and the link:**
    - **On every preview page,** a banner says "Preview of 0.2 (0.2.0-next.0). For the current release, see isoloop.dev →", linking to the same page on `isoloop.dev`. The version comes from the docs pin.
    - **On the stable site,** a "Preview" link in the header goes to the same page on `next.isoloop.dev`. It's always there, since there's always a preview (decision 4).
    - **Both are built** from the `preview` input and the pin, with no live check at build time.
-10. **The preview stays out of search.** On `next.isoloop.dev`, `robots.txt` is `Disallow: /`, every page is `noindex`, and there's no `sitemap.xml`. The stable site's sitemap and canonical links don't change.
+   - *(Amended 2026-11-28:)* **The dashboards** (markets, plant) fill the window, so a banner would move their layout and what the comparison pages show. They get a short marker in their own top bar instead: "Preview of 0.2. Current release →".
+10. **The preview stays out of search.** On `next.isoloop.dev`, `robots.txt` is `Disallow: /`, every page is `noindex`, and there's no `sitemap.xml`. The stable site's sitemap and canonical links don't change. *(Amended 2026-11-28: a preview page has no canonical link at all, since a page that asks to stay out of search shouldn't also point search engines somewhere. A last pass over the assembled site removes the canonical from the pages copied in without the build too: the plant's architecture page, the diagram pages and the redirects.)*
 11. **The preview's docs pin** in `next`'s `apps/site/library.lock` is the latest published preview's commit, `681347f` for `0.2.0-next.0`. The existing pin check applies: a commit on the library's `main` or a `release/*` branch, published with provenance naming it. A new preview means a pin-bump PR on `next`, as a release means one on `main`.
 12. **Who does what.** The maintainer creates `isoloop/next` (public), sets its Pages source to GitHub Actions with the custom domain `next.isoloop.dev`, and adds a DNS `CNAME` from `next` to `isoloop.github.io`, since repo settings, Pages and DNS stay with the maintainer ([ADR 0004](0004-publishing-and-governance.md), decision 6). The rest is PRs in `isoloop/web` and `isoloop/next`. The order:
     1. this ADR;
