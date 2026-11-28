@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "The isoloop/web commit, branch or tag to build (empty: this run's commit)"
+        description: "The isoloop/web commit, branch or tag to build (empty: next for a preview, else this run's commit)"
         type: string
         default: ''
       preview:
@@ -31,7 +31,7 @@ on:
   workflow_call:
     inputs:
       ref:
-        description: "The isoloop/web commit, branch or tag to build (empty: the caller's commit, for calls from isoloop/web)"
+        description: "The isoloop/web commit, branch or tag to build (empty: next for a preview, else the caller's commit)"
         type: string
         default: ''
       preview:
@@ -56,7 +56,7 @@ jobs:
         with:
           # Named, so a call from isoloop/next builds this repo, not the caller.
           repository: isoloop/web
-          ref: ${{ inputs.ref || github.sha }}
+          ref: ${{ inputs.ref || (inputs.preview && 'next') || github.sha }}
           # The tags, so assemble-site.sh can tell whether a site-v* tag is
           # reachable and the site goes in.
           fetch-depth: 0
@@ -104,7 +104,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: isoloop/web
-          ref: ${{ inputs.ref || github.sha }}
+          ref: ${{ inputs.ref || (inputs.preview && 'next') || github.sha }}
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
