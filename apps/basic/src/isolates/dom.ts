@@ -103,6 +103,6 @@ export function reporter(
     task();
     if (!on) return;
     const ms = Math.round((performance.now() - t) * 100) / 100;
-    void ctx.bus.publish(activity, { value: { ms, ...extra } }).catch(() => undefined);
+    void ctx.bus.publish(activity, { ms, ...extra }).catch(() => undefined);
   };
 }

@@ -39,16 +39,14 @@ test('a rule published to alert-rules.v1 fires into alerts.v1', async ({ page })
     await window.kernel.publish(
       { name: 'alert-rules.v1', schema },
       {
-        key: 'e2e',
-        value: {
-          removed: false,
-          id: 'e2e',
-          symbol: 'ETH-USD',
-          metric: 'price',
-          op: 'above',
-          threshold: 1,
-        },
+        removed: false,
+        id: 'e2e',
+        symbol: 'ETH-USD',
+        metric: 'price',
+        op: 'above',
+        threshold: 1,
       },
+      { key: 'e2e' },
     );
     return fired;
   }, any);

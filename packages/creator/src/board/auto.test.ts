@@ -130,6 +130,9 @@ describe('balancer labels and badges', () => {
     expect(moveText({ from: 'Quarantine', to: 'Auto 1', reason: 'steady' })).toBe(
       'back in Auto 1: steady',
     );
+    expect(moveText({ from: 'Quarantine', to: 'Auto 1', reason: 'measured' })).toBe(
+      'in Auto 1: measured, placed',
+    );
     expect(moveText({ from: 'Quarantine 2', to: 'Quarantine', reason: 'room' })).toBe(
       'moved to Quarantine: making room for a widget falling behind',
     );
@@ -137,7 +140,7 @@ describe('balancer labels and badges', () => {
 });
 
 describe('autoWhere', () => {
-  it('says where an automatic widget is, and why when it is kept apart, over budget or stopped', () => {
+  it('says where an automatic widget is, and why when it is measured, kept apart, over budget or stopped', () => {
     const p = { id: 'w1', pool: 'balancer-2', label: 'Auto 2', state: 'placed' } as const;
     expect(autoWhere(undefined)).toBe('Automatic');
     expect(autoWhere(p)).toBe('Auto 2');
@@ -146,6 +149,10 @@ describe('autoWhere', () => {
       'Quarantine · kept apart: repeated blocking',
     );
     expect(autoWhere({ ...p, state: 'failed' })).toBe('Auto 2 · stopped: crashed too often');
+    // In the quarantine only to be measured, not as an offender (isoloop/isoloop#346).
+    expect(autoWhere({ ...p, label: 'Quarantine', state: 'measuring' })).toBe(
+      'Quarantine · measuring',
+    );
   });
 });
 

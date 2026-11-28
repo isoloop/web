@@ -14,7 +14,8 @@ export interface BusLike {
   ): () => void;
   publish(
     topic: TopicRef<unknown, unknown, unknown, unknown>,
-    r: { key?: string; value: unknown },
+    value: unknown,
+    opts?: { key?: string },
   ): Promise<unknown>;
 }
 
@@ -44,7 +45,7 @@ export function busSource(bus: BusLike): Source {
         { from },
       ),
     publish: (stream, value, key) => {
-      void bus.publish(handle(stream), key === undefined ? { value } : { key, value });
+      void bus.publish(handle(stream), value, key === undefined ? {} : { key });
     },
   };
 }

@@ -323,11 +323,11 @@ export class Playground {
   }
 
   block(id: string, ms = 2_000): void {
-    void this.#k.publish(control, { value: { to: id, act: 'block', ms } });
+    void this.#k.publish(control, { to: id, act: 'block', ms });
   }
 
   crash(id: string): void {
-    void this.#k.publish(control, { value: { to: id, act: 'crash' } });
+    void this.#k.publish(control, { to: id, act: 'crash' });
   }
 
   async setMode(mode: Mode): Promise<void> {
@@ -443,9 +443,9 @@ export class Playground {
   #publish(id: string): void {
     const d = this.#dials.get(id);
     if (!d) return;
-    void this.#k.publish(tasks, {
-      key: id,
-      value: {
+    void this.#k.publish(
+      tasks,
+      {
         load: d.load,
         chunkMs: this.#chunkMs,
         rate: d.rate,
@@ -453,7 +453,8 @@ export class Playground {
         since: d.since,
         hidden: d.hidden,
       },
-    });
+      { key: id },
+    );
   }
 
   #entry(kind: LogEntry['kind'], text: string, id?: string): void {

@@ -26,7 +26,7 @@ function DrawerIsolate({ config }: { config: unknown }) {
           from: 'earliest',
           ...(opts?.onReset ? { onReset: opts.onReset } : {}),
         }),
-      publish: (topic, key, value) => ctx.bus.publish(ref(topic), { key, value }),
+      publish: (topic, key, value) => ctx.bus.publish(ref(topic), value, { key }),
     }),
     [ctx],
   );

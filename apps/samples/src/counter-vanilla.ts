@@ -8,7 +8,7 @@ export default defineIsolate<HTMLElement>({
     const show = () => {
       button.textContent = `Count: ${n}`;
     };
-    button.addEventListener('click', () => void ctx.bus.publish(count, { value: n + 1 }));
+    button.addEventListener('click', () => void ctx.bus.publish(count, n + 1));
     ctx.bus.subscribe(
       count,
       (r) => {

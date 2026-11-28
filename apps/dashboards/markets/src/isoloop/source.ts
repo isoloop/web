@@ -29,7 +29,7 @@ export function busSource(bus: BusClient): Source {
         { from },
       ),
     publish: (stream, value, key) => {
-      void bus.publish(TOPICS[stream], key === undefined ? { value } : { key, value });
+      void bus.publish(TOPICS[stream], value, key === undefined ? {} : { key });
     },
   };
 }

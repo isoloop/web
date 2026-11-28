@@ -9,6 +9,7 @@ const kernel = createKernel({
   supervisor: {
     maxRestarts: 3,
     withinMs: 60_000,
+    healthyAfterMs: 60_000,
     backoff: { initialMs: 250, factor: 2, maxMs: 4_000 },
   },
 });

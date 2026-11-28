@@ -34,7 +34,7 @@ export default defineIsolate<HTMLElement>({
         const ms = Math.round(performance.now() - t);
         const below = limit === N ? '10 million' : limit.toLocaleString('en');
         result.textContent = `${found.toLocaleString('en')} primes below ${below}, in ${ms} ms`;
-        void ctx.bus.publish(primesTopic, { value: { count: found, ms } });
+        void ctx.bus.publish(primesTopic, { count: found, ms });
       });
     };
     run.addEventListener('click', () => count10m(N));

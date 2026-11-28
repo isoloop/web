@@ -193,13 +193,11 @@ async function publishEvents(page: Page, from: number, n: number): Promise<void>
           window.kernel.publish(
             { name: 'plant.events', schema },
             {
-              value: {
-                id: `test-${i}`,
-                machine: 'T1',
-                kind: 'start',
-                text: `test event ${i}`,
-                ts: Date.now(),
-              },
+              id: `test-${i}`,
+              machine: 'T1',
+              kind: 'start',
+              text: `test event ${i}`,
+              ts: Date.now(),
             },
           ),
         );

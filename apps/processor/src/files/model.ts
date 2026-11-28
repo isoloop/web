@@ -672,7 +672,7 @@ export class FileProcessor {
 
   #publishDials(): void {
     if (!this.#kernel) return;
-    void this.#kernel.publish(dialsTopic, { key: 'dials', value: this.#dials });
+    void this.#kernel.publish(dialsTopic, this.#dials, { key: 'dials' });
   }
 
   #entry(kind: string, text: string): void {

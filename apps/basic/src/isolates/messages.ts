@@ -67,7 +67,7 @@ export default defineIsolate<HTMLElement>({
     const sendButton = el('button', { class: 'primary' }, 'Send');
     const publishNote = async (text: string): Promise<void> => {
       try {
-        await ctx.bus.publish(note, { value: text });
+        await ctx.bus.publish(note, text);
       } catch (e) {
         push(`note rejected: ${e instanceof Error ? e.message : String(e)}`);
         report(() => undefined, { kind: 'rejected', topic: 'note.v1' });

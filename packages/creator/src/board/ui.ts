@@ -31,8 +31,12 @@ export type AutoPlacement = {
   readonly pool: string;
   /** "Auto 2", "Quarantine". */
   readonly label: string;
-  /** `failed`: the kernel gave up restarting it (ADR 0017, M3j); no move revives it. */
-  readonly state: 'placed' | 'quarantined' | 'kept-apart' | 'moving' | 'failed';
+  /**
+   * `failed`: the kernel gave up restarting it (ADR 0017, M3j); no move revives it.
+   * `measuring`: in the quarantine only to be measured, not for an offence
+   * (isoloop/isoloop#346).
+   */
+  readonly state: 'placed' | 'quarantined' | 'measuring' | 'kept-apart' | 'moving' | 'failed';
   /** Over budget, with nowhere to go: the worker cap is reached. */
   readonly atCap?: boolean;
 };

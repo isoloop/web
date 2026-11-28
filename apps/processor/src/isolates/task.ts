@@ -55,7 +55,7 @@ export default defineIsolate({
     setInterval(() => {
       if (worked === workedSent) return;
       workedSent = worked;
-      void ctx.bus.publish(busyTopic, { key: ctx.id, value: { busyMs: Math.round(worked) } });
+      void ctx.bus.publish(busyTopic, { busyMs: Math.round(worked) }, { key: ctx.id });
     }, BUSY_MS);
 
     ctx.bus.subscribe(
@@ -93,7 +93,7 @@ export default defineIsolate({
       if (done === published || (!force && now - publishedAt < PUBLISH_MS)) return;
       published = done;
       publishedAt = now;
-      void ctx.bus.publish(doneTopic, { key: ctx.id, value: { done } });
+      void ctx.bus.publish(doneTopic, { done }, { key: ctx.id });
     };
 
     // The loop turns through a message port (no 4 ms timer floor). A rest

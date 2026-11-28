@@ -182,7 +182,8 @@ for (const kind of KINDS) {
           window.kernel.publish(
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the kernel reads only `name`; the broker validates
             { name: 'creator.specs.v1', schema: { '~standard': {} } } as never,
-            { key: '$sync', value: { sync: 'flushed' } },
+            { sync: 'flushed' },
+            { key: '$sync' },
           ),
         );
       }
@@ -263,7 +264,8 @@ test.describe('isoloop', () => {
             window.kernel.publish(
               // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the kernel reads only `name`; the broker validates
               { name: 'creator.specs.v1', schema: { '~standard': {} } } as never,
-              { key: spec.id, value: { spec, added: Date.now() + 1_000 + i } },
+              { spec, added: Date.now() + 1_000 + i },
+              { key: spec.id },
             ),
           ),
         ),

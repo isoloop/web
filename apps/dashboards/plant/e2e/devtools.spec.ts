@@ -76,13 +76,11 @@ test('the log shows live records, and keeps going through a bus restart', async 
       window.kernel.publish(
         { name: 'plant.events', schema },
         {
-          value: {
-            id: 'devtools-e2e',
-            machine: 'T1',
-            kind: 'start',
-            text: 'after the bus restart',
-            ts: Date.now(),
-          },
+          id: 'devtools-e2e',
+          machine: 'T1',
+          kind: 'start',
+          text: 'after the bus restart',
+          ts: Date.now(),
         },
       ),
     any,

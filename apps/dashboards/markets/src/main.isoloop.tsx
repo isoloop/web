@@ -42,7 +42,7 @@ if (params.get('source') === 'live') {
 }
 // Filters from the URL (after a switch), and back into it as they change.
 const initial = filtersFrom(params);
-if (initial) void kernel.publish(filtersTopic, { key: 'current', value: initial });
+if (initial) void kernel.publish(filtersTopic, initial, { key: 'current' });
 kernel.subscribe(
   filtersTopic,
   (r) => {

@@ -126,7 +126,7 @@ export default contracts(...dashboardTopics, ...creatorTopics());
 import { spawnWidget, specRecord, applyKind } from 'creator/widget';
 import widgetSrc from 'creator/widget-isolate?isolate';
 
-await kernel.publish(specsTopic, { key: spec.id, value: specRecord(spec) });
+await kernel.publish(specsTopic, specRecord(spec), { key: spec.id });
 const handle = spawnWidget(kernel, spec, { src: widgetSrc, surface, topic: topicOf(catalog, spec.source.topic)! });
 // Later, on an edit: publish the new spec, and if applyKind(old, next) is 'respawn', stop and spawn again.
 ```

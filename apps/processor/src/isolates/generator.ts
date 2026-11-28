@@ -76,7 +76,7 @@ export default defineIsolate({
       while (due >= 1) {
         due -= 1;
         const job = make(d);
-        void ctx.bus.publish(TOPICS[job.kind], { value: job });
+        void ctx.bus.publish(TOPICS[job.kind], job);
       }
     }, TICK_MS);
   },

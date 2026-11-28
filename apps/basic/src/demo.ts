@@ -140,6 +140,6 @@ export function startDemo(
     }
     const to = act === 'block-c' ? 'C' : act === 'crash-a' ? 'A' : 'D';
     const what = act === 'block-c' ? 'block' : 'crash';
-    void kernel.publish(control, { value: { to, act: what } }).catch(() => undefined);
+    void kernel.publish(control, { to, act: what }).catch(() => undefined);
   });
 }

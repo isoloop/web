@@ -6,7 +6,7 @@ export default defineIsolate({
   async start(ctx) {
     // #region show
     // Resolves once the bus has appended the record; rejects with a BusError.
-    await ctx.bus.publish(count, { value: 1 });
+    await ctx.bus.publish(count, 1);
 
     // Every record the topic retains, then each new one, in order.
     const stop = ctx.bus.subscribe(
