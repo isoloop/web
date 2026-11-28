@@ -93,3 +93,7 @@ for dir in "$markets"/*/; do
   [ -f "$dir/index.html" ] || continue
   redirect "markets/$build" "../../dashboards/markets/$build/"
 done
+
+# The preview (next.isoloop.dev, ADR 0007): every page, built or copied, says
+# noindex and has no canonical.
+if [ "${ISOLOOP_PREVIEW:-}" = 1 ]; then node scripts/unindex-site.ts "$site"; fi

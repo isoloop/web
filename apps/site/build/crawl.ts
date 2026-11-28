@@ -12,6 +12,9 @@ export function robots(origin = ORIGIN): string {
   return `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`;
 }
 
+/** The preview's robots.txt (ADR 0007, decision 10): no crawler reads any page, and there's no sitemap. */
+export const PREVIEW_ROBOTS = 'User-agent: *\nDisallow: /\n';
+
 /**
  * sitemap.xml: the site's pages (their own paths, the 404 left out), then each
  * deployed example's page, the pages it runs in the hub and its architecture

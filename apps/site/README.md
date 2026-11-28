@@ -51,6 +51,15 @@ pnpm --filter site smoke                 # Chromium smoke test against site/
 
 Without `SITE=1`, `assemble-site.sh` includes the site only once a `site-v*` tag is reachable from `HEAD`, so the deployed root stays the placeholder until the first site tag.
 
+## The preview build
+
+`next.isoloop.dev` is the same build with `ISOLOOP_PREVIEW=1` ([ADR 0007](../../docs/adr/0007-site-preview.md)). `isoloop/next` runs `deploy.yml` with `preview: true` and a web ref, the `next` branch by default. With the flag:
+
+- every full-header page starts with a banner naming the preview (from the docs pin, or the app's `@isoloop/host` version), linking to the same page on `isoloop.dev`; the dashboards' bar says the same in one line;
+- `robots.txt` is `Disallow: /`, there's no `sitemap.xml`, and `scripts/unindex-site.ts` makes every assembled page say `noindex` with no canonical, the copied pages included.
+
+Without the flag, the header links each page to the same page on `next.isoloop.dev` ("Preview"). To see the preview locally, run the build and the assembly above with `ISOLOOP_PREVIEW=1` in front of both.
+
 ## The library's diagrams
 
 `library.lock` pins an `isoloop/isoloop` commit. The build clones that repo without blobs into `.library/` (git-ignored), checks the pin is on its `main` (so the diagrams passed the drift test there), and takes only `docs/diagrams` and `docs/guide`. A fetched pin is reused, offline too.

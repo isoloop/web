@@ -59,7 +59,7 @@ for (const path of DOCS) {
 }
 
 for (const path of SITE) {
-  test(`${path} has Docs right after Home, and the version pill before GitHub`, async ({
+  test(`${path} has Docs right after Home, and the Preview link and the version pill before GitHub`, async ({
     page,
   }) => {
     await page.goto(path);
@@ -75,7 +75,11 @@ for (const path of SITE) {
     const docs = links.nth(1);
     if (path.startsWith('/docs/')) await expect(docs).toHaveAttribute('aria-current', 'page');
     else await expect(docs).not.toHaveAttribute('aria-current', 'page');
-    const version = page.locator('.ui-header-end > a').first();
+    const end = page.locator('.ui-header-end > a');
+    // ADR 0007: the same page on the preview site, then the version.
+    await expect(end.first()).toHaveClass('ui-preview-link');
+    await expect(end.first()).toHaveAttribute('href', `https://next.isoloop.dev${path}`);
+    const version = end.nth(1);
     await expect(version).toHaveClass('ui-version');
     await expect(version).toHaveAttribute('href', '/changelog/');
     await expect(version).toHaveText(/^\d+\.\d+\.\d+/);

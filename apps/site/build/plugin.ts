@@ -22,7 +22,8 @@ import type { Plugin, ViteDevServer } from 'vite';
 import { buildDiagramFiles, DIAGRAMS_PATH, type EmittedFile } from './diagrams.ts';
 import { imagesOf } from './examples.ts';
 import type { Page, SiteData } from '../src/pages/index.ts';
-import { robots, sitemap } from './crawl.ts';
+import { isPreview } from 'ui/preview';
+import { PREVIEW_ROBOTS, robots, sitemap } from './crawl.ts';
 import type { LlmsFile } from './docs/llms.ts';
 import type { Doc } from './docs/pages.ts';
 import { docPage } from '../src/pages/doc.tsx';
@@ -223,19 +224,24 @@ export function site(opts: SiteOptions): Plugin {
       },
     },
     generateBundle() {
-      // For search engines (build/crawl.ts).
-      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robots() });
-      this.emitFile({
-        type: 'asset',
-        fileName: 'sitemap.xml',
-        source: sitemap(
-          [
-            ...Object.values(opts.pages).map((p) => p.path),
-            ...[...docs.values()].map((d) => d.path),
-          ],
-          opts.data.examples,
-        ),
-      });
+      // For search engines (build/crawl.ts). The preview (ADR 0007) keeps
+      // every crawler out and lists nothing.
+      if (isPreview()) {
+        this.emitFile({ type: 'asset', fileName: 'robots.txt', source: PREVIEW_ROBOTS });
+      } else {
+        this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robots() });
+        this.emitFile({
+          type: 'asset',
+          fileName: 'sitemap.xml',
+          source: sitemap(
+            [
+              ...Object.values(opts.pages).map((p) => p.path),
+              ...[...docs.values()].map((d) => d.path),
+            ],
+            opts.data.examples,
+          ),
+        });
+      }
       if (existsSync(previewFile()))
         this.emitFile({
           type: 'asset',

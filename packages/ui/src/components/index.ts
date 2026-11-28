@@ -10,6 +10,7 @@ export { Frame, type FrameProps } from './Frame.tsx';
 export { Head, type HeadProps } from './Head.tsx';
 export { Header, type Current } from './Header.tsx';
 export { PageMeta, type PageMetaProps } from './PageMeta.tsx';
+export { PreviewBanner, type PreviewOf } from './PreviewBanner.tsx';
 export {
   ChartLegend,
   formatDelta,

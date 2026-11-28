@@ -34,11 +34,14 @@ export function Header({
   current,
   mark,
   version,
+  preview,
 }: {
   current?: Current;
   mark?: { light: string; dark: string };
   /** The library version the site is built from, as a pill before GitHub, linking to its changelog; a release (no `-next.N`) has a green outline. */
   version?: { label: string; href: string };
+  /** On the stable site, the same page on the preview site (ADR 0007, decision 9): a small "Preview" link before the version. */
+  preview?: string;
 }): VNode {
   return (
     <header class="ui-header">
@@ -59,6 +62,11 @@ export function Header({
         ))}
       </nav>
       <div class="ui-header-end">
+        {preview ? (
+          <a class="ui-preview-link" href={preview}>
+            Preview
+          </a>
+        ) : null}
         {version ? (
           <a
             class="ui-version"

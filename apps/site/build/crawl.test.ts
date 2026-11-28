@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { robots, sitemap } from './crawl.ts';
+import { PREVIEW_ROBOTS, robots, sitemap } from './crawl.ts';
 
 const live = (path: string, extra: object = {}) => ({
   links: { live: path, source: 'https://github.com/x', ...extra },
 });
 
 describe('robots', () => {
+  it('keeps every crawler off the preview (ADR 0007)', () => {
+    expect(PREVIEW_ROBOTS).toBe('User-agent: *\nDisallow: /\n');
+  });
+
   it('lets every crawler in and points at the sitemap', () => {
     expect(robots()).toBe('User-agent: *\nAllow: /\n\nSitemap: https://isoloop.dev/sitemap.xml\n');
   });

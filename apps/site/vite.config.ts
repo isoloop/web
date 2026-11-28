@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import { isPreview } from 'ui/preview';
 import { ui } from 'ui/vite';
 import { defineConfig } from 'vite';
 import { loadAlternatives } from './build/alternatives.ts';
@@ -89,6 +90,8 @@ export default defineConfig({
     ui({
       header: { version: { label: libraryVersion(library), href: '/changelog/' } },
       footer: true,
+      // On next.isoloop.dev, the banner names the preview from the docs pin (ADR 0007).
+      ...(isPreview() ? { preview: { version: libraryVersion(library) } } : {}),
     }),
   ],
   base: '/',
