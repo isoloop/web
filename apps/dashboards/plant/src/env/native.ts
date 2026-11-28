@@ -1,7 +1,7 @@
 // The widgets' environment in both native builds: streams come from the
 // page's store, and a chart draws on its own <canvas> on the main thread.
 import { useEffect, useState, type RefObject } from 'react';
-import type { Source } from '../core/streams';
+import type { Source, StreamName, ValueOf } from '../core/streams';
 import { store } from '../native/store';
 import type { Build, CanvasState } from './canvas';
 import { createHooks } from './hooks';
@@ -9,6 +9,11 @@ import { createHooks } from './hooks';
 const useSource = (): Source => store;
 
 export const { useLatest, useKeyed, useRecent, useRecords, usePublish } = createHooks(useSource);
+
+/** The stream's latest value: the native builds have no watcher, so it's `useLatest`. */
+export function useCurrent<S extends StreamName>(stream: S): ValueOf<S> | undefined {
+  return useLatest(stream);
+}
 
 /** The build these hooks run in, for the metrics panel. */
 export const BUILD: Build = 'native';

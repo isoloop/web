@@ -2,7 +2,7 @@
 // alarms, the event log with its filter, and the sensor table. The same
 // components render on the main thread (native) or in the widget's worker
 // (Isoloop), where the page applies their DOM changes.
-import { useLatest, useRecent } from '#env';
+import { useCurrent, useLatest, useRecent } from '#env';
 import { useMemo, useState } from 'react';
 import { SCALARS, SENSOR, type ScalarName } from '../core/machines';
 import type { Alarm, PlantEvent } from '../core/schemas';
@@ -69,7 +69,7 @@ export function Gauges({ config }: { config?: unknown }) {
 
 export function HealthScore({ config }: { config?: unknown }) {
   const m = machineOf(config);
-  const h = useLatest(of(m, 'health'));
+  const h = useCurrent(of(m, 'health'));
   if (!h) return <div className="waiting">waiting for data…</div>;
   return (
     <div className="health" data-status={h.status}>

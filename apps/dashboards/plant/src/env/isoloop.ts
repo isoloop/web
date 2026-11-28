@@ -1,10 +1,10 @@
 // The widgets' environment inside an isolate: streams are bus topics, and a
 // chart's canvas is handed over by the host as an OffscreenCanvas
 // (`requestCanvas`), drawn on from the worker.
-import { useHost, useIsolate } from '@isoloop/react';
+import { useHost, useIsolate, useWatch } from '@isoloop/react';
 import { useEffect, useMemo, useState, type RefObject } from 'react';
-import type { Source } from '../core/streams';
-import { busSource } from '../isoloop/source';
+import type { Source, StreamName, ValueOf } from '../core/streams';
+import { busSource, handle } from '../isoloop/source';
 import type { Build, CanvasState } from './canvas';
 import { createHooks } from './hooks';
 
@@ -14,6 +14,16 @@ function useSource(): Source {
 }
 
 export const { useLatest, useKeyed, useRecent, useRecords, usePublish } = createHooks(useSource);
+
+/**
+ * The stream's current value, through a watcher: the bus sends the newest
+ * value and skips the ones in between. For a widget that shows only the
+ * latest value of an unkeyed stream (the health score, M8 Watchers task 10).
+ */
+export function useCurrent<S extends StreamName>(stream: S): ValueOf<S> | undefined {
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the bus validated the record against the stream's schema
+  return useWatch(handle(stream), { key: null }) as ValueOf<S> | undefined;
+}
 
 /** The build these hooks run in, for the metrics panel. */
 export const BUILD: Build = 'isoloop';
