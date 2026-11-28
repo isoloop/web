@@ -12,9 +12,32 @@ name: Deploy
 #
 # GitHub Pages can't set COOP/COEP headers, so the metrics panel's memory figure
 # shows "unavailable" there; everything else works.
+#
+# The same workflow deploys the preview, next.isoloop.dev (ADR 0007): isoloop/next
+# calls it with `preview: true` and a web ref (the `next` branch by default).
+# A called workflow deploys to its caller's Pages, so the preview gets this
+# build, assembly and smoke tests, against its own URL.
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "The isoloop/web commit, branch or tag to build (empty: next for a preview, else this run's commit)"
+        type: string
+        default: ''
+      preview:
+        description: 'Build the preview site (next.isoloop.dev, ADR 0007)'
+        type: boolean
+        default: false
   workflow_call:
+    inputs:
+      ref:
+        description: "The isoloop/web commit, branch or tag to build (empty: next for a preview, else the caller's commit)"
+        type: string
+        default: ''
+      preview:
+        description: 'Build the preview site (next.isoloop.dev, ADR 0007)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -22,9 +45,18 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Read by ui/vite and the site's build: banner, noindex, no sitemap.
+      ISOLOOP_PREVIEW: ${{ inputs.preview && '1' || '' }}
+      # The preview always has the site, whether or not a site-v* tag is
+      # reachable from the ref (scripts/assemble-site.sh).
+      SITE: ${{ inputs.preview && '1' || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # Named, so a call from isoloop/next builds this repo, not the caller.
+          repository: isoloop/web
+          ref: ${{ inputs.ref || (inputs.preview && 'next') || github.sha }}
           # The tags, so assemble-site.sh can tell whether a site-v* tag is
           # reachable and the site goes in.
           fetch-depth: 0
@@ -70,6 +102,9 @@ jobs:
         app: [dashboards/markets, dashboards/plant, basic, processor]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: isoloop/web
+          ref: ${{ inputs.ref || (inputs.preview && 'next') || github.sha }}
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -79,6 +114,7 @@ jobs:
       - uses: ./.github/actions/install-browsers
         with:
           browsers: chromium
+      # Against the caller's Pages: isoloop.dev, or next.isoloop.dev for the preview.
       - run: pnpm --filter ./apps/${{ matrix.app }} e2e --project=live
         env:
           LIVE_URL: ${{ needs.deploy.outputs.url }}examples/${{ matrix.app }}/

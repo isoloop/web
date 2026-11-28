@@ -28,9 +28,12 @@ import {
   Footer,
   Header,
   PageMeta,
+  PreviewBanner,
   type Current,
   type PageMetaProps,
+  type PreviewOf,
 } from './components/index.ts';
+import { PREVIEW_ORIGIN, STABLE_ORIGIN, isPreview, minorOf, sitePath, unindex } from './preview.ts';
 import { render } from './render.ts';
 
 export interface UiOptions {
@@ -45,6 +48,12 @@ export interface UiOptions {
    * Such a page writes no <title> of its own.
    */
   meta?: (pagePath: string) => PageMetaProps;
+  /**
+   * The preview build (ADR 0007): `version` is the preview's library version,
+   * from the docs pin where the build has it. Left out, the page is the
+   * stable site's, with a "Preview" link in its full header.
+   */
+  preview?: { version?: string };
 }
 
 export interface Asset {
@@ -140,25 +149,59 @@ export function uiAssets(opts: UiOptions): {
   return { css, theme, font: font?.asset, brand, all };
 }
 
-/** The partials, rendered. `current` (from a page's marker) wins over the option's. */
+/** The `@isoloop/host` version an app is built against, if it uses one: the preview a page runs. */
+export function isoloopVersion(root: string): string | undefined {
+  try {
+    // The package's own folder, which pnpm links into the app's node_modules;
+    // its exports don't name package.json.
+    const pkg: unknown = JSON.parse(
+      readFileSync(`${root}/node_modules/@isoloop/host/package.json`, 'utf8'),
+    );
+    return typeof pkg === 'object' &&
+      pkg !== null &&
+      'version' in pkg &&
+      typeof pkg.version === 'string'
+      ? pkg.version
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The partials, rendered. `current` (from a page's marker) wins over the
+ * option's. `path` is the page's path on the site (`/docs/bus/`), for the
+ * links between the stable and the preview site.
+ */
 export function uiPartials(
   opts: UiOptions,
   section?: Current,
   mark?: { light: string; dark: string },
+  path = '/examples/',
 ): Record<'header' | 'bar' | 'footer', string | null> {
   const current = section ?? (typeof opts.header === 'object' ? opts.header.current : undefined);
   const version = typeof opts.header === 'object' ? opts.header.version : undefined;
+  const previewVersion = opts.preview?.version ?? version?.label;
+  const preview: PreviewOf | undefined = opts.preview
+    ? {
+        minor: minorOf(previewVersion ?? ''),
+        ...(previewVersion ? { version: previewVersion } : {}),
+        stable: STABLE_ORIGIN + path,
+      }
+    : undefined;
+  const header = opts.header
+    ? render(
+        h(Header, {
+          ...(current ? { current } : {}),
+          ...(mark ? { mark } : {}),
+          ...(version ? { version } : {}),
+          ...(opts.preview ? {} : { preview: PREVIEW_ORIGIN + path }),
+        }),
+      )
+    : null;
   return {
-    header: opts.header
-      ? render(
-          h(Header, {
-            ...(current ? { current } : {}),
-            ...(mark ? { mark } : {}),
-            ...(version ? { version } : {}),
-          }),
-        )
-      : null,
-    bar: opts.bar ? render(h(Bar, {})) : null,
+    header: header && preview ? render(h(PreviewBanner, preview)) + header : header,
+    bar: opts.bar ? render(h(Bar, preview ? { preview } : {})) : null,
     footer: opts.footer ? render(h(Footer, {})) : null,
   };
 }
@@ -226,17 +269,36 @@ export function placeMeta(html: string, meta: PageMetaProps): string {
   return `${html.slice(0, end)}${render(h(PageMeta, meta))}\n${html.slice(end)}`;
 }
 
-export function ui(opts: UiOptions = {}): Plugin {
+/** A page as built: on the preview, it says noindex (ADR 0007). */
+const placed = (opts: UiOptions, html: string): string => (opts.preview ? unindex(html) : html);
+
+export function ui(options: UiOptions = {}): Plugin {
   let base = '/';
+  // ISOLOOP_PREVIEW=1 (deploy.yml, for next.isoloop.dev) makes every app's
+  // pages the preview's, without each app passing the option.
+  let opts: UiOptions =
+    options.preview === undefined && isPreview() ? { ...options, preview: {} } : options;
   return {
     name: 'ui',
     configResolved(config) {
       base = config.base;
+      if (opts.preview && opts.preview.version === undefined) {
+        const version = isoloopVersion(config.root);
+        if (version) opts = { ...opts, preview: { version } };
+      }
     },
     transformIndexHtml(html, ctx) {
       const { css, theme, font, brand } = uiAssets(opts);
       const prefix = assetPrefix(base, ctx.path);
-      const page = pageCurrent(opts.meta ? placeMeta(html, opts.meta(ctx.path)) : html);
+      const meta = opts.meta?.(ctx.path);
+      const page = pageCurrent(meta ? placeMeta(html, meta) : html);
+      // The page's path on the site: its own under an absolute base (the
+      // site), else the one its meta names (an example's live page).
+      const path = base.startsWith('/')
+        ? sitePath(ctx.path)
+        : meta && meta.robots === undefined
+          ? meta.path
+          : undefined;
       const mark = brand.mark
         ? { light: prefix + brand.mark.light.fileName, dark: prefix + brand.mark.dark.fileName }
         : undefined;
@@ -251,7 +313,10 @@ export function ui(opts: UiOptions = {}): Plugin {
             ]
           : [];
       return {
-        html: placePartials(page.html, uiPartials(opts, page.current, mark)),
+        html: placed(
+          opts,
+          placePartials(page.html, uiPartials(opts, page.current, mark, sitePath(path))),
+        ),
         tags: [
           ...(theme
             ? [

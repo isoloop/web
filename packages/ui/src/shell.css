@@ -121,6 +121,36 @@
     color: var(--ui-text);
     border-color: var(--ui-text);
   }
+  /* On the stable site, the way to the same page on the preview site (ADR 0007). */
+  .ui-preview-link {
+    color: var(--ui-text-muted);
+    font-size: 0.85rem;
+    font-stretch: 87%;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .ui-preview-link:hover {
+    color: var(--ui-text);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+  /* On the preview site, above the header: which preview, and the way back. */
+  .ui-preview-banner {
+    margin: 0;
+    padding: var(--ui-space-1) var(--ui-space-5);
+    background: var(--ui-surface);
+    color: var(--ui-text);
+    border-bottom: 1px solid var(--ui-rule);
+    font-size: var(--ui-text-s);
+    text-align: center;
+  }
+  .ui-preview-banner a {
+    color: var(--ui-text);
+    font-weight: 600;
+  }
+  .ui-bar-preview {
+    color: var(--ui-text-muted);
+  }
   .ui-github {
     display: inline-flex;
     align-items: center;

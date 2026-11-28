@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { isPreview, minorOf, sitePath, unindex } from './preview.ts';
 import {
   assetPrefix,
   pageCurrent,
@@ -132,7 +133,7 @@ describe('uiPartials', () => {
     });
     const end = /<div class="ui-header-end">([\s\S]*)<\/div>/.exec(header ?? '')?.[1] ?? '';
     expect(end).toMatch(
-      /^<a class="ui-version" href="\/changelog\/"[^>]*>0\.1\.0-next\.8<\/a><a class="ui-github"/,
+      /^<a class="ui-preview-link"[^>]*>Preview<\/a><a class="ui-version" href="\/changelog\/"[^>]*>0\.1\.0-next\.8<\/a><a class="ui-github"/,
     );
     expect(end).toContain('data-release="preview"');
     expect(uiPartials({ header: true }).header).not.toContain('ui-version');
@@ -194,5 +195,81 @@ describe('pageCurrent', () => {
 
   it('refuses an unknown section', () => {
     expect(() => pageCurrent('<!-- ui:header:blog -->')).toThrow(/unknown header section/);
+  });
+});
+
+describe('the site preview (ADR 0007)', () => {
+  it('links the stable header to the same page on next.isoloop.dev', () => {
+    const { header } = uiPartials({ header: true }, undefined, undefined, '/docs/bus/');
+    expect(header).toContain(
+      '<a class="ui-preview-link" href="https://next.isoloop.dev/docs/bus/">Preview</a>',
+    );
+    expect(header).not.toContain('ui-preview-banner');
+  });
+
+  it('puts the banner above the preview header, back to the same page on isoloop.dev', () => {
+    const { header } = uiPartials(
+      {
+        header: { version: { label: '0.2.0-next.0', href: '/changelog/' } },
+        preview: {},
+      },
+      undefined,
+      undefined,
+      '/features/',
+    );
+    expect(header).toMatch(/^<p class="ui-preview-banner" role="note">/);
+    expect(header).toContain(
+      'Preview of 0.2 (0.2.0-next.0). For the current release, see <a href="https://isoloop.dev/features/">isoloop.dev →</a>',
+    );
+    expect(header).not.toContain('ui-preview-link');
+  });
+
+  it("takes the preview's own version over the header's, and leaves it out when unknown", () => {
+    const named = uiPartials({ header: true, preview: { version: '0.3.0-next.1' } }).header;
+    expect(named).toContain('Preview of 0.3 (0.3.0-next.1).');
+    expect(uiPartials({ header: true, preview: {} }).header).toContain(
+      '<p class="ui-preview-banner" role="note">Preview. For the current release',
+    );
+  });
+
+  it("marks the dashboards' bar as the preview, with the way back", () => {
+    const { bar } = uiPartials(
+      { bar: true, preview: { version: '0.2.0-next.0' } },
+      undefined,
+      undefined,
+      '/examples/dashboards/plant/',
+    );
+    expect(bar).toContain(
+      '<span class="ui-bar-preview">Preview of 0.2. <a href="https://isoloop.dev/examples/dashboards/plant/">Current release →</a></span>',
+    );
+    expect(uiPartials({ bar: true }).bar).not.toContain('ui-bar-preview');
+  });
+
+  it('says noindex on every page and drops the canonical', () => {
+    const html =
+      '<html><head><title>T</title><link rel="canonical" href="https://isoloop.dev/x/"><meta name="robots" content="noindex, indexifembedded"></head><body></body></html>';
+    const out = unindex(html);
+    expect(out).not.toContain('canonical');
+    expect(out.match(/<meta name="robots"[^>]*>/g)).toEqual([
+      '<meta name="robots" content="noindex">',
+    ]);
+    expect(unindex('<head></head>')).toBe('<head><meta name="robots" content="noindex">\n</head>');
+    // A page that leaves <head> implicit, like the plant's architecture page.
+    expect(
+      unindex(
+        '<!doctype html><html><meta charset="utf-8" />\n<link rel="canonical" href="https://isoloop.dev/a/" />',
+      ),
+    ).toBe('<!doctype html><html><meta charset="utf-8" />\n<meta name="robots" content="noindex">');
+  });
+
+  it('reads the flag, the minor and the path', () => {
+    expect(isPreview({ ISOLOOP_PREVIEW: '1' })).toBe(true);
+    expect(isPreview({})).toBe(false);
+    expect(minorOf('0.2.0-next.0')).toBe('0.2');
+    expect(minorOf('main')).toBe('main');
+    expect(sitePath('/docs/bus/index.html')).toBe('/docs/bus/');
+    expect(sitePath('/404.html')).toBe('/');
+    expect(sitePath('/examples/basic/')).toBe('/examples/basic/');
+    expect(sitePath(undefined)).toBe('/examples/');
   });
 });

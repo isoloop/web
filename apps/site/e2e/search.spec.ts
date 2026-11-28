@@ -115,3 +115,17 @@ test('the search titles are the decided ones, in <title> and both preview tags',
     }),
   );
 });
+
+test('the header links each page to the same page on the preview site (ADR 0007)', async ({
+  request,
+}) => {
+  await Promise.all(
+    ['/', '/docs/', '/features/', '/examples/basic/'].map(async (path) => {
+      const html = await (await request.get(path)).text();
+      expect(html, path).toContain(
+        `<a class="ui-preview-link" href="https://next.isoloop.dev${path}">Preview</a>`,
+      );
+      expect(html, `${path} has a preview banner`).not.toContain('ui-preview-banner');
+    }),
+  );
+});
