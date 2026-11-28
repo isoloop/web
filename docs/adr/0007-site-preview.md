@@ -9,7 +9,7 @@
 - **The examples must match the docs next to them.** A visitor reads the docs for the release on `isoloop.dev`, opens an example, and reads its source. If the example runs a preview with a changed API (0.2's `publish(topic, value, { key? })` against 0.1's `publish(topic, { value, key? })`), the example contradicts the page that links it. So the apps on web's `main` stay pinned to the release the live docs describe, and the 0.1 practice of putting a preview live (`site-v0.7.1` on `0.1.0-next.12`) stops.
 - **Preview work still needs a place to be seen.** Moving the apps to a preview, the examples that use a new feature, and the measurements taken on them all happen before the release. Kept only as stacked draft branches, none of it can be opened in a browser by the people testing the preview, and each draft is rebased by hand as `main` moves.
 - **GitHub Pages serves one site, at one custom domain, per repo.** The web repo's Pages is `isoloop.dev`.
-- **The site and the examples link with root-absolute paths.** About 71 links in `apps/site` and `packages/ui`, plus the examples' `example.json` paths, start with `/`. `Frame` and the examples' build check require it. A preview under a sub-path would have to change all of them.
+- **The site and the examples link with root-absolute paths.** Dozens of links in `apps/site` and `packages/ui`, plus the examples' `example.json` paths, start with `/`. `Frame` and the examples' build check require it. A preview under a sub-path would have to change all of them.
 - **npm's `next` dist-tag falls behind after a release.** Once `0.2.0` is `latest`, `next` still points at `0.2.0-next.N`, which is older.
 
 ## Decision
@@ -59,7 +59,7 @@
 ## Alternatives considered
 
 - **A cookie switch on `isoloop.dev`.** Pages is static, so the switch would be client-side script that reads the cookie and then swaps or redirects: a flash on every page, more script under the CSP, and a shared link that shows different pages to different people. Not taken.
-- **A sub-path, `isoloop.dev/next/`, in the same Pages artifact.** One repo and one host, but the ~71 root-absolute links and the examples' paths would move to a base-aware helper, with a check against raw `/` links. Not taken; the subdomain needs no path changes.
+- **A sub-path, `isoloop.dev/next/`, in the same Pages artifact.** One repo and one host, but the root-absolute links and the examples' paths would move to a base-aware helper, with a check against raw `/` links. Not taken; the subdomain needs no path changes.
 - **An external host** (Cloudflare Pages, Netlify) on `isoloop/web`, deploying the `next` branch. No second repo and no refactor, but a new third-party service and account in the release path. Not taken.
 - **The subdomain from Pages in `isoloop/web`.** Not possible: one custom domain per repo.
 - **Stacked draft branches and no preview site.** No new setup, but nothing to open in a browser, and each draft rebased by hand. Not taken.

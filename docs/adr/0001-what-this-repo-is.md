@@ -66,7 +66,7 @@ The rename keeps the history, shas, tags, PRs and the `github-pages` environment
 
 ### 5. Deploys
 
-- **Every deploy is one Pages build of every app,** at the tagged commit, as `deploy.yml` does today.
+- **Every deploy is one Pages build of every app,** at the tagged commit, as `deploy.yml` does today (except the preview's, see [the amendment](#amended-the-site-preview-2026-11-28)).
 - **Triggers:**
   - an app tag: `markets-v*`, `plant-v*`, `basic-v*`, which first runs that app's full E2E
   - `site-v*`, for site content
@@ -107,7 +107,7 @@ By [ADR 0007](0007-site-preview.md), Proposed. This changes decisions 4 and 5:
 
 - **Sections are still paths, not subdomains.** The site, the hub, the examples and the docs stay under `isoloop.dev`.
 - **A preview is not a section.** It's a whole second copy of the site and the examples, built from the `next` branch on the library's latest preview. It's served at `next.isoloop.dev` from a small repo, `isoloop/next`, since one Pages site has one domain.
-- **A fourth trigger, in that repo:** a manual run, with a web ref that defaults to `next`. It calls this repo's `deploy.yml`, so both sites share one build. It has no tag.
+- **The preview's deploy is a manual run in that repo,** with a web ref that defaults to `next`, not a tagged commit. It calls this repo's `deploy.yml`, so both sites share one build. It has no tag.
 
 ## Consequences
 
