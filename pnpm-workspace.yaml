@@ -10,11 +10,11 @@ packages:
 # Every version lives here, pinned exactly, as in isoloop/isoloop (ADR 0009,
 # rule 8). Apps reference them with "catalog:".
 catalog:
-  '@playwright/test': 1.65.0
-  '@types/node': 26.6.6
-  oxfmt: 0.78.0
-  oxlint: 1.93.0
-  oxlint-tsgolint: 7.0.2007
+  '@playwright/test': 1.65.1
+  '@types/node': 26.6.10
+  oxfmt: 0.80.0
+  oxlint: 1.95.0
+  oxlint-tsgolint: 7.0.2008
   typescript: 7.0.2
   vite: 8.3.8
   vitest: 5.0.5
@@ -22,7 +22,7 @@ catalog:
   # packages/ui renders Preact components to static HTML at build time (ADR 0003).
   preact-render-to-string: 6.8.3
   # The site's smoke test checks accessibility with axe, behind expectAccessible() (ADR 0002, decision 9).
-  '@axe-core/playwright': 4.14.0
+  '@axe-core/playwright': 4.14.1
   # The docs' Markdown, at build time only, behind apps/site/build/docs/render.ts (M4c, ADR 0006). Ships its own types.
   markdown-it: 15.0.3
   # Changelogs and app versions (ADR 0004): dev tooling only, never shipped.
@@ -51,7 +51,7 @@ catalogs:
   react:
     react: 19.3.1
     react-dom: 19.3.1
-    '@types/react': 19.3.0
+    '@types/react': 19.3.1
     '@types/react-dom': 19.3.0
   # The Preact builds (M3b task 16b): the same widgets through preact/compat.
   preact:
